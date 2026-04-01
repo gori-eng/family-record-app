@@ -1,0 +1,172 @@
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { Stack } from 'expo-router';
+
+const CATEGORIES = [
+  { label: '전체', active: true },
+  { label: '식비' }, { label: '교통' }, { label: '주거' },
+  { label: '교육' }, { label: '의료' }, { label: '여가' },
+];
+
+const TRANSACTIONS = [
+  { date: '4월 1일', items: [
+    { type: 'expense', category: '식비', icon: 'cutlery', desc: '이마트 장보기', amount: 87400, color: '#FFB6C1' },
+    { type: 'expense', category: '교통', icon: 'car', desc: '주유소', amount: 65000, color: '#B8D4E6' },
+    { type: 'income', category: '수입', icon: 'won', desc: '월급', amount: 4200000, color: '#B8E6C8' },
+  ]},
+  { date: '3월 31일', items: [
+    { type: 'expense', category: '교육', icon: 'graduation-cap', desc: '서준이 학원비', amount: 350000, color: '#E6D4B8' },
+    { type: 'expense', category: '식비', icon: 'cutlery', desc: '배달의민족', amount: 32500, color: '#FFB6C1' },
+    { type: 'expense', category: '여가', icon: 'film', desc: '가족 영화 관람', amount: 48000, color: '#D4B8E6' },
+  ]},
+  { date: '3월 30일', items: [
+    { type: 'expense', category: '의료', icon: 'medkit', desc: '지우 소아과', amount: 15000, color: '#FFB8B8' },
+    { type: 'expense', category: '주거', icon: 'home', desc: '관리비', amount: 185000, color: '#FFDAB9' },
+  ]},
+];
+
+function formatAmount(amount: number, type: string) {
+  const formatted = amount.toLocaleString('ko-KR');
+  return type === 'income' ? `+${formatted}원` : `-${formatted}원`;
+}
+
+export default function FinanceScreen() {
+  return (
+    <>
+      <Stack.Screen options={{ title: '가계부' }} />
+      <View style={styles.container}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Monthly Summary */}
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryMonth}>2026년 4월</Text>
+            <View style={styles.summaryRow}>
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>수입</Text>
+                <Text style={[styles.summaryAmount, { color: '#4AA86B' }]}>+4,200,000원</Text>
+              </View>
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>지출</Text>
+                <Text style={[styles.summaryAmount, { color: '#C85A4A' }]}>-782,900원</Text>
+              </View>
+            </View>
+            <View style={styles.balanceRow}>
+              <Text style={styles.balanceLabel}>잔액</Text>
+              <Text style={styles.balanceAmount}>3,417,100원</Text>
+            </View>
+
+            {/* Simple bar chart */}
+            <View style={styles.chartContainer}>
+              {[
+                { label: '식비', pct: 35, color: '#FFB6C1' },
+                { label: '교육', pct: 25, color: '#E6D4B8' },
+                { label: '주거', pct: 18, color: '#FFDAB9' },
+                { label: '교통', pct: 12, color: '#B8D4E6' },
+                { label: '기타', pct: 10, color: '#D4B8E6' },
+              ].map((cat, i) => (
+                <View key={i} style={styles.chartRow}>
+                  <Text style={styles.chartLabel}>{cat.label}</Text>
+                  <View style={styles.chartBarBg}>
+                    <View style={[styles.chartBar, { width: `${cat.pct}%`, backgroundColor: cat.color }]} />
+                  </View>
+                  <Text style={styles.chartPct}>{cat.pct}%</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Category Filter */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll} contentContainerStyle={styles.filterContainer}>
+            {CATEGORIES.map((cat, i) => (
+              <TouchableOpacity key={i} style={[styles.filterChip, cat.active && styles.filterChipActive]}>
+                <Text style={[styles.filterText, cat.active && styles.filterTextActive]}>{cat.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Transaction List */}
+          {TRANSACTIONS.map((group, gi) => (
+            <View key={gi} style={styles.transGroup}>
+              <Text style={styles.transDate}>{group.date}</Text>
+              {group.items.map((item, ii) => (
+                <TouchableOpacity key={ii} style={styles.transItem}>
+                  <View style={[styles.transIcon, { backgroundColor: item.color }]}>
+                    <FontAwesome name={item.icon as any} size={14} color="#5C4A32" />
+                  </View>
+                  <View style={styles.transInfo}>
+                    <Text style={styles.transDesc}>{item.desc}</Text>
+                    <Text style={styles.transCat}>{item.category}</Text>
+                  </View>
+                  <Text style={[styles.transAmount, { color: item.type === 'income' ? '#4AA86B' : '#C85A4A' }]}>
+                    {formatAmount(item.amount, item.type)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ))}
+
+          <View style={{ height: 80 }} />
+        </ScrollView>
+
+        {/* FAB */}
+        <TouchableOpacity style={styles.fab}>
+          <FontAwesome name="plus" size={22} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  summaryCard: {
+    margin: 20, backgroundColor: '#FFFFFF', borderRadius: 20,
+    padding: 20, borderWidth: 1, borderColor: '#F0E8D8',
+  },
+  summaryMonth: { fontSize: 16, fontWeight: '700', color: '#2D2D2D', marginBottom: 16, textAlign: 'center' },
+  summaryRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
+  summaryItem: { flex: 1, alignItems: 'center' },
+  summaryLabel: { fontSize: 12, color: '#BFAE99', marginBottom: 4 },
+  summaryAmount: { fontSize: 18, fontWeight: '700' },
+  summaryDivider: { width: 1, height: 40, backgroundColor: '#F0E8D8' },
+  balanceRow: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    backgroundColor: '#FFF8F0', borderRadius: 12, padding: 14, marginBottom: 16,
+  },
+  balanceLabel: { fontSize: 14, fontWeight: '600', color: '#5C4A32' },
+  balanceAmount: { fontSize: 18, fontWeight: '700', color: '#2D2D2D' },
+  chartContainer: { gap: 8 },
+  chartRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  chartLabel: { width: 32, fontSize: 11, color: '#8B7355' },
+  chartBarBg: { flex: 1, height: 8, backgroundColor: '#F5F0E5', borderRadius: 4 },
+  chartBar: { height: 8, borderRadius: 4 },
+  chartPct: { width: 32, fontSize: 11, color: '#BFAE99', textAlign: 'right' },
+  filterScroll: { marginBottom: 8 },
+  filterContainer: { paddingHorizontal: 20, gap: 8 },
+  filterChip: {
+    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
+    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#F0E8D8',
+  },
+  filterChipActive: { backgroundColor: '#C85A4A', borderColor: '#C85A4A' },
+  filterText: { fontSize: 13, fontWeight: '600', color: '#8B7355' },
+  filterTextActive: { color: '#FFFFFF' },
+  transGroup: { paddingHorizontal: 20, marginTop: 16 },
+  transDate: { fontSize: 13, fontWeight: '700', color: '#BFAE99', marginBottom: 8 },
+  transItem: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: '#FFFFFF', borderRadius: 12, padding: 14, marginBottom: 6,
+    borderWidth: 1, borderColor: '#F0E8D8',
+  },
+  transIcon: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  transInfo: { flex: 1 },
+  transDesc: { fontSize: 14, fontWeight: '600', color: '#2D2D2D' },
+  transCat: { fontSize: 11, color: '#BFAE99', marginTop: 2 },
+  transAmount: { fontSize: 14, fontWeight: '700' },
+  fab: {
+    position: 'absolute', bottom: 24, right: 24,
+    width: 56, height: 56, borderRadius: 28,
+    backgroundColor: '#C85A4A', justifyContent: 'center', alignItems: 'center',
+    shadowColor: '#C85A4A', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 8,
+  },
+});

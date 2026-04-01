@@ -26,6 +26,16 @@ coverage
 out/
 build
 dist
+web-build/
+
+# Expo
+.expo/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
 
 
 # Debug

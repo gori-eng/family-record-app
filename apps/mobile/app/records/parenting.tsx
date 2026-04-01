@@ -1,0 +1,176 @@
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { Stack } from 'expo-router';
+
+const ENTRIES = [
+  {
+    date: '2026년 4월 1일', child: '지우',
+    title: '첫 자전거 타기 성공!',
+    content: '드디어 보조바퀴 없이 자전거를 탔어요. 처음엔 무서워서 울다가, 아빠가 잡아주면서 연습했더니 혼자서도 잘 타요!',
+    milestones: ['첫 자전거'],
+    mood: 'smile-o',
+  },
+  {
+    date: '2026년 3월 28일', child: '서준',
+    title: '구구단 마스터',
+    content: '서준이가 드디어 구구단을 전부 외웠어요! 7단이 제일 어려웠는데 노래로 외우니까 금방 했어요.',
+    milestones: ['학습 성취'],
+    mood: 'star',
+  },
+  {
+    date: '2026년 3월 25일', child: '지우',
+    title: '유치원 입학식',
+    content: '지우가 유치원에 처음 간 날. 엄마 손을 꼭 잡고 들어가다가, 친구들 보자마자 활짝 웃으면서 뛰어갔어요. 사실 엄마가 더 울뻔...',
+    milestones: ['유치원 입학', '첫 등원'],
+    mood: 'heart',
+  },
+  {
+    date: '2026년 3월 20일', child: '서준',
+    title: '생일 파티',
+    content: '서준이 8번째 생일! 친구들 다섯 명 초대해서 케이크 자르고 보물찾기 놀이했어요. "최고의 생일이었어!" 라고 하네요.',
+    milestones: ['생일'],
+    mood: 'birthday-cake',
+  },
+  {
+    date: '2026년 3월 15일', child: '지우',
+    title: '키 90cm 돌파!',
+    content: '정기 소아과 검진에서 키 91.2cm, 몸무게 13.5kg. 또래 평균보다 조금 큰 편이래요. 건강하게 잘 자라줘서 고마워~',
+    milestones: ['성장 기록'],
+    mood: 'line-chart',
+  },
+];
+
+const CHILD_FILTERS = [
+  { name: '전체', active: true },
+  { name: '지우', color: '#FFB6C1' },
+  { name: '서준', color: '#B8D4E6' },
+];
+
+export default function ParentingScreen() {
+  return (
+    <>
+      <Stack.Screen options={{ title: '육아 일기' }} />
+      <View style={styles.container}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Stats */}
+          <View style={styles.statsRow}>
+            <View style={styles.statCard}>
+              <FontAwesome name="book" size={18} color="#C85A4A" />
+              <Text style={styles.statNumber}>47</Text>
+              <Text style={styles.statLabel}>총 기록</Text>
+            </View>
+            <View style={styles.statCard}>
+              <FontAwesome name="trophy" size={18} color="#E6A817" />
+              <Text style={styles.statNumber}>12</Text>
+              <Text style={styles.statLabel}>마일스톤</Text>
+            </View>
+            <View style={styles.statCard}>
+              <FontAwesome name="camera" size={18} color="#4A90C8" />
+              <Text style={styles.statNumber}>156</Text>
+              <Text style={styles.statLabel}>사진</Text>
+            </View>
+          </View>
+
+          {/* Child Filter */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterContainer}>
+            {CHILD_FILTERS.map((child, i) => (
+              <TouchableOpacity key={i} style={[styles.filterChip, child.active && styles.filterChipActive]}>
+                {child.color && <View style={[styles.filterDot, { backgroundColor: child.color }]} />}
+                <Text style={[styles.filterText, child.active && styles.filterTextActive]}>{child.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Timeline */}
+          <View style={styles.timeline}>
+            {ENTRIES.map((entry, i) => (
+              <TouchableOpacity key={i} style={styles.entryCard}>
+                <View style={styles.timelineLine}>
+                  <View style={[styles.timelineDot, { backgroundColor: entry.child === '지우' ? '#FFB6C1' : '#B8D4E6' }]} />
+                  {i < ENTRIES.length - 1 && <View style={styles.timelineConnector} />}
+                </View>
+                <View style={styles.entryContent}>
+                  <View style={styles.entryHeader}>
+                    <Text style={styles.entryDate}>{entry.date}</Text>
+                    <View style={[styles.childBadge, { backgroundColor: entry.child === '지우' ? '#FFB6C1' : '#B8D4E6' }]}>
+                      <Text style={styles.childBadgeText}>{entry.child}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.entryTitle}>{entry.title}</Text>
+                  <Text style={styles.entryText} numberOfLines={2}>{entry.content}</Text>
+                  <View style={styles.entryFooter}>
+                    {entry.milestones.map((ms, mi) => (
+                      <View key={mi} style={styles.milestoneBadge}>
+                        <FontAwesome name="star" size={10} color="#E6A817" />
+                        <Text style={styles.milestoneText}>{ms}</Text>
+                      </View>
+                    ))}
+                    <View style={{ flex: 1 }} />
+                    <FontAwesome name={entry.mood as any} size={16} color="#BFAE99" />
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={{ height: 80 }} />
+        </ScrollView>
+
+        {/* FAB */}
+        <TouchableOpacity style={styles.fab}>
+          <FontAwesome name="pencil" size={20} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
+  statCard: {
+    flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,
+    alignItems: 'center', borderWidth: 1, borderColor: '#F0E8D8',
+  },
+  statNumber: { fontSize: 22, fontWeight: '700', color: '#2D2D2D', marginTop: 6 },
+  statLabel: { fontSize: 11, color: '#BFAE99', marginTop: 2 },
+  filterContainer: { paddingHorizontal: 20, gap: 8, marginBottom: 20 },
+  filterChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
+    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#F0E8D8',
+  },
+  filterChipActive: { backgroundColor: '#C85A4A', borderColor: '#C85A4A' },
+  filterDot: { width: 8, height: 8, borderRadius: 4 },
+  filterText: { fontSize: 13, fontWeight: '600', color: '#8B7355' },
+  filterTextActive: { color: '#FFFFFF' },
+  timeline: { paddingHorizontal: 20 },
+  entryCard: { flexDirection: 'row', marginBottom: 4 },
+  timelineLine: { width: 24, alignItems: 'center', paddingTop: 6 },
+  timelineDot: { width: 12, height: 12, borderRadius: 6, zIndex: 1 },
+  timelineConnector: { width: 2, flex: 1, backgroundColor: '#F0E8D8', marginTop: -2 },
+  entryContent: {
+    flex: 1, marginLeft: 12, marginBottom: 12,
+    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16,
+    borderWidth: 1, borderColor: '#F0E8D8',
+  },
+  entryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  entryDate: { fontSize: 12, color: '#BFAE99' },
+  childBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
+  childBadgeText: { fontSize: 11, fontWeight: '600', color: '#5C4A32' },
+  entryTitle: { fontSize: 16, fontWeight: '700', color: '#2D2D2D', marginBottom: 6 },
+  entryText: { fontSize: 13, color: '#8B7355', lineHeight: 20, marginBottom: 10 },
+  entryFooter: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  milestoneBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: '#FFF8E8', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10,
+  },
+  milestoneText: { fontSize: 10, fontWeight: '600', color: '#8B6914' },
+  fab: {
+    position: 'absolute', bottom: 24, right: 24,
+    width: 56, height: 56, borderRadius: 28,
+    backgroundColor: '#C85A4A', justifyContent: 'center', alignItems: 'center',
+    shadowColor: '#C85A4A', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 8,
+  },
+});
