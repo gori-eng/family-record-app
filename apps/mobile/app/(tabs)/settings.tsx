@@ -1,6 +1,8 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert, Share } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { signOut } from '@core/supabase';
+
+const INVITE_CODE = 'ABC12345';
 
 export default function SettingsScreen() {
   const handleSignOut = () => {
@@ -10,27 +12,49 @@ export default function SettingsScreen() {
     ]);
   };
 
+  const handleShareInviteCode = async () => {
+    try {
+      await Share.share({
+        message: `우리 가족 앱에 초대합니다! 초대 코드: ${INVITE_CODE}`,
+      });
+    } catch {
+      Alert.alert('초대 코드', INVITE_CODE);
+    }
+  };
+
+  const handleMenuPress = (label: string) => {
+    const messages: Record<string, string> = {
+      '가족 구성원': '가족 구성원 관리 기능이 곧 추가됩니다.',
+      '프로필 수정': '프로필 수정 기능이 곧 추가됩니다.',
+      '알림 설정': '알림 설정 기능이 곧 추가됩니다.',
+      '개인정보 보호': '개인정보 보호 설정이 곧 추가됩니다.',
+      '데이터 내보내기 (PDF/JSON)': '데이터 내보내기 기능이 곧 추가됩니다.',
+      '백업 관리': '백업 관리 기능이 곧 추가됩니다.',
+    };
+    Alert.alert('준비 중', messages[label] || '이 기능은 곧 추가됩니다.');
+  };
+
   const sections = [
     {
       title: '가족 관리',
       items: [
-        { icon: 'users', label: '가족 구성원', subtitle: '4명' },
-        { icon: 'qrcode', label: '초대 코드', subtitle: 'ABC12345' },
+        { icon: 'users', label: '가족 구성원', subtitle: '4명', action: () => handleMenuPress('가족 구성원') },
+        { icon: 'qrcode', label: '초대 코드', subtitle: INVITE_CODE, action: handleShareInviteCode },
       ],
     },
     {
       title: '내 정보',
       items: [
-        { icon: 'user', label: '프로필 수정' },
-        { icon: 'bell', label: '알림 설정' },
-        { icon: 'lock', label: '개인정보 보호' },
+        { icon: 'user', label: '프로필 수정', action: () => handleMenuPress('프로필 수정') },
+        { icon: 'bell', label: '알림 설정', action: () => handleMenuPress('알림 설정') },
+        { icon: 'lock', label: '개인정보 보호', action: () => handleMenuPress('개인정보 보호') },
       ],
     },
     {
       title: '데이터',
       items: [
-        { icon: 'download', label: '데이터 내보내기 (PDF/JSON)' },
-        { icon: 'cloud-upload', label: '백업 관리' },
+        { icon: 'download', label: '데이터 내보내기 (PDF/JSON)', action: () => handleMenuPress('데이터 내보내기 (PDF/JSON)') },
+        { icon: 'cloud-upload', label: '백업 관리', action: () => handleMenuPress('백업 관리') },
       ],
     },
   ];
@@ -42,19 +66,32 @@ export default function SettingsScreen() {
         <View style={styles.avatar}>
           <FontAwesome name="user" size={28} color="#C85A4A" />
         </View>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.profileName}>김지수</Text>
           <Text style={styles.profileRole}>관리자 (부모)</Text>
         </View>
+        <TouchableOpacity
+          style={styles.editProfileButton}
+          onPress={() => handleMenuPress('프로필 수정')}
+        >
+          <FontAwesome name="pencil" size={14} color="#C85A4A" />
+        </TouchableOpacity>
       </View>
 
       {sections.map((section, si) => (
         <View key={si} style={styles.section}>
           <Text style={styles.sectionTitle}>{section.title}</Text>
           {section.items.map((item, ii) => (
-            <TouchableOpacity key={ii} style={styles.menuItem}>
+            <TouchableOpacity
+              key={ii}
+              style={styles.menuItem}
+              onPress={item.action}
+              activeOpacity={0.6}
+            >
               <View style={styles.menuLeft}>
-                <FontAwesome name={item.icon as any} size={18} color="#5C4A32" />
+                <View style={styles.menuIconCircle}>
+                  <FontAwesome name={item.icon as any} size={16} color="#5C4A32" />
+                </View>
                 <Text style={styles.menuLabel}>{item.label}</Text>
               </View>
               <View style={styles.menuRight}>
@@ -66,7 +103,7 @@ export default function SettingsScreen() {
         </View>
       ))}
 
-      <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+      <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut} activeOpacity={0.6}>
         <FontAwesome name="sign-out" size={18} color="#C85A4A" />
         <Text style={styles.signOutText}>로그아웃</Text>
       </TouchableOpacity>
@@ -89,14 +126,22 @@ const styles = StyleSheet.create({
   },
   profileName: { fontSize: 18, fontWeight: '700', color: '#2D2D2D' },
   profileRole: { fontSize: 13, color: '#8B7355', marginTop: 2 },
+  editProfileButton: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: '#FFF0ED', justifyContent: 'center', alignItems: 'center',
+  },
   section: { marginBottom: 20 },
   sectionTitle: { fontSize: 14, fontWeight: '700', color: '#BFAE99', marginBottom: 8, textTransform: 'uppercase' },
   menuItem: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    backgroundColor: '#FFFFFF', borderRadius: 12, padding: 16, marginBottom: 6,
+    backgroundColor: '#FFFFFF', borderRadius: 12, padding: 14, marginBottom: 6,
     borderWidth: 1, borderColor: '#F0E8D8',
   },
   menuLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  menuIconCircle: {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: '#FFF8F0', justifyContent: 'center', alignItems: 'center',
+  },
   menuLabel: { fontSize: 15, color: '#2D2D2D' },
   menuRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   menuSubtitle: { fontSize: 13, color: '#BFAE99' },

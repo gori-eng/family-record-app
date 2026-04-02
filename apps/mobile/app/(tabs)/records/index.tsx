@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -22,7 +23,8 @@ export default function RecordsScreen() {
   const router = useRouter();
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+    <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
       <Text style={styles.title}>소중한 순간들</Text>
       <Text style={styles.subtitle}>
         우리 가족만의 특별한 이야기와 성장 기록
@@ -52,11 +54,13 @@ export default function RecordsScreen() {
 
       <View style={{ height: 20 }} />
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDF0', padding: 20 },
+  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  scrollView: { flex: 1, padding: 20 },
   title: { fontSize: 24, fontWeight: '700', color: '#2D2D2D', marginBottom: 4 },
   subtitle: { fontSize: 14, color: '#8B7355', marginBottom: 16 },
   searchBar: {

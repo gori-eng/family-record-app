@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -32,7 +32,7 @@ export default function HomeScreen() {
             </View>
             <Text style={styles.familyName}>우리 가족</Text>
           </View>
-          <TouchableOpacity style={styles.notifBadge}>
+          <TouchableOpacity style={styles.notifBadge} onPress={() => Alert.alert('알림', '새로운 알림 3개\n\n- 서준이가 독서 기록을 추가했어요\n- 내일 학교 발표회가 있어요\n- AI 비서의 오늘의 질문이 도착했어요')}>
             <FontAwesome name="bell-o" size={22} color="#5C4A32" />
             <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
           </TouchableOpacity>
@@ -57,7 +57,7 @@ export default function HomeScreen() {
               <Text style={styles.memberRole}>{member.role}</Text>
             </TouchableOpacity>
           ))}
-          <TouchableOpacity style={styles.memberChip}>
+          <TouchableOpacity style={styles.memberChip} onPress={() => Alert.alert('가족 초대', '초대 코드: ABC12345\n\n이 코드를 가족에게 공유하세요!')}>
             <View style={[styles.memberAvatar, { backgroundColor: '#F0E8D8' }]}>
               <FontAwesome name="plus" size={16} color="#BFAE99" />
             </View>
@@ -75,7 +75,7 @@ export default function HomeScreen() {
             "오늘 가장 감사했던 순간은?"
           </Text>
           <View style={styles.questionFooter}>
-            <TouchableOpacity style={styles.answerButton}>
+            <TouchableOpacity style={styles.answerButton} onPress={() => router.push('/(tabs)/ai')}>
               <Text style={styles.answerButtonText}>답변하기</Text>
               <FontAwesome name="arrow-right" size={12} color="#C85A4A" />
             </TouchableOpacity>
@@ -116,7 +116,7 @@ export default function HomeScreen() {
             { time: '14:00', title: '학교 발표회', location: '서현초등학교', color: '#4A90C8' },
             { time: '18:00', title: '가족 저녁 식사', location: '정자동 한강갈비', color: '#C85A4A' },
           ].map((event, i) => (
-            <View key={i} style={styles.eventItem}>
+            <TouchableOpacity key={i} style={styles.eventItem} onPress={() => router.push('/(tabs)/calendar')} activeOpacity={0.7}>
               <View style={styles.eventTimeBox}>
                 <Text style={[styles.eventTimeText, { color: event.color }]}>{event.time}</Text>
               </View>
@@ -127,7 +127,7 @@ export default function HomeScreen() {
                   <Text style={styles.eventLocation}>{event.location}</Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
 
