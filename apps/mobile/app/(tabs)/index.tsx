@@ -28,6 +28,9 @@ export default function HomeScreen() {
     setTimeout(() => setRefreshing(false), 1000);
   }, []);
 
+  const hour = today.getHours();
+  const greetingTime = hour < 6 ? '좋은 새벽이에요' : hour < 12 ? '좋은 아침이에요' : hour < 18 ? '좋은 오후에요' : '좋은 저녁이에요';
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -38,12 +41,12 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.headerLeft}>
+          <TouchableOpacity style={styles.headerLeft} activeOpacity={0.7} onPress={() => router.push('/(tabs)/settings')}>
             <View style={styles.familyAvatar}>
               <FontAwesome name="users" size={20} color="#C85A4A" />
             </View>
             <Text style={styles.familyName}>우리 가족</Text>
-          </View>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.notifBadge} onPress={() => Alert.alert('알림', '새로운 알림 3개\n\n- 서준이가 독서 기록을 추가했어요\n- 내일 학교 발표회가 있어요\n- AI 비서의 오늘의 질문이 도착했어요')}>
             <FontAwesome name="bell-o" size={22} color="#5C4A32" />
             <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
@@ -54,7 +57,7 @@ export default function HomeScreen() {
         <View style={styles.greeting}>
           <Text style={styles.dateText}>{dateStr}</Text>
           <Text style={styles.greetingText}>
-            김지수님,{'\n'}오늘 하루도 행복하세요!
+            김지수님, {greetingTime}!{'\n'}오늘 하루도 행복하세요
           </Text>
         </View>
 
@@ -111,6 +114,7 @@ export default function HomeScreen() {
             <TouchableOpacity
               key={index}
               style={styles.quickActionItem}
+              activeOpacity={0.7}
               onPress={() => router.push(item.route as any)}
             >
               <View style={[styles.quickActionIcon, { backgroundColor: item.color }]}>

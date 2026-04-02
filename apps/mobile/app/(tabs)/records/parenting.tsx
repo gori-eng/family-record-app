@@ -93,7 +93,11 @@ export default function ParentingScreen() {
           {/* Timeline */}
           <View style={styles.timeline}>
             {filteredEntries.map((entry, i) => (
-              <TouchableOpacity key={i} style={styles.entryCard} activeOpacity={0.7}>
+              <TouchableOpacity
+                key={i}
+                style={styles.entryCard}
+                activeOpacity={0.7}
+                onPress={() => Alert.alert(entry.title, `${entry.date} · ${entry.child}\n\n${entry.content}`)}>
                 <View style={styles.timelineLine}>
                   <View style={[styles.timelineDot, { backgroundColor: entry.child === '지우' ? '#FFB6C1' : '#B8D4E6' }]} />
                   {i < filteredEntries.length - 1 && <View style={styles.timelineConnector} />}

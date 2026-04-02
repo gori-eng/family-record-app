@@ -72,7 +72,12 @@ export default function ReadingScreen() {
           {/* Book List */}
           <View style={styles.bookList}>
             {filteredBooks.map((book, i) => (
-              <TouchableOpacity key={i} style={styles.bookCard} activeOpacity={0.7}>
+              <TouchableOpacity
+                key={i}
+                style={styles.bookCard}
+                activeOpacity={0.7}
+                onPress={() => Alert.alert(book.title, `저자: ${book.author}\n읽는 이: ${book.reader}\n상태: ${book.status}${book.notes ? `\n\n${book.notes}` : ''}`)}
+              >
                 <View style={[styles.bookCover, { backgroundColor: book.color }]}>
                   <FontAwesome name="book" size={24} color="#5C4A32" />
                 </View>
@@ -129,7 +134,6 @@ const styles = StyleSheet.create({
     flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,
     alignItems: 'center', borderWidth: 1, borderColor: '#F0E8D8',
   },
-  statIcon: { marginBottom: 2 },
   statNumber: { fontSize: 22, fontWeight: '700', color: '#2D2D2D', marginTop: 4 },
   statLabel: { fontSize: 11, color: '#BFAE99', marginTop: 2 },
   filterContainer: { paddingHorizontal: 20, gap: 8, marginBottom: 16 },

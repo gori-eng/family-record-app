@@ -111,7 +111,12 @@ export default function FinanceScreen() {
               <View key={gi} style={styles.transGroup}>
                 <Text style={styles.transDate}>{group.date}</Text>
                 {group.items.map((item, ii) => (
-                  <TouchableOpacity key={ii} style={styles.transItem} activeOpacity={0.7}>
+                  <TouchableOpacity
+                    key={ii}
+                    style={styles.transItem}
+                    activeOpacity={0.7}
+                    onPress={() => Alert.alert(item.desc, `카테고리: ${item.category}\n금액: ${formatAmount(item.amount, item.type)}\n\n거래 상세 보기 기능이 곧 추가됩니다.`)}
+                  >
                     <View style={[styles.transIcon, { backgroundColor: item.color }]}>
                       <FontAwesome name={item.icon as any} size={14} color="#5C4A32" />
                     </View>

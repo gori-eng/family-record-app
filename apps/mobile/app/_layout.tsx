@@ -7,6 +7,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, createContext, useContext } from 'react';
 import { onAuthStateChange, getSession } from '@core/supabase';
 import type { Session } from '@supabase/supabase-js';
+import { StatusBar } from 'react-native';
 import 'react-native-reanimated';
 
 export { ErrorBoundary } from 'expo-router';
@@ -110,10 +111,13 @@ function RootLayoutNav() {
   // }, [session, segments]);
 
   return (
-    <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="onboarding" options={{ presentation: 'modal' }} />
-    </Stack>
+    <>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFDF0" />
+      <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="onboarding" options={{ presentation: 'modal' }} />
+      </Stack>
+    </>
   );
 }

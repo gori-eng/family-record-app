@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert, Share } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { signOut } from '@core/supabase';
 

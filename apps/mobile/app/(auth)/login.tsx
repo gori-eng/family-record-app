@@ -88,6 +88,9 @@ export default function LoginScreen() {
             style={[styles.loginButton, loading && styles.loginButtonDisabled]}
             onPress={handleLogin}
             disabled={loading}
+            accessibilityLabel="로그인"
+            accessibilityRole="button"
+            activeOpacity={0.8}
           >
             <Text style={styles.loginButtonText}>
               {loading ? '로그인 중...' : '로그인'}

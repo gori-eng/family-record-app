@@ -92,13 +92,16 @@ export default function AIScreen() {
       {/* Input */}
       <View style={styles.inputBar}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, message.length > 40 && styles.inputMultiline]}
           placeholder={selectedRole !== null ? ROLES[selectedRole].hint : 'AI 비서에게 물어보세요...'}
           placeholderTextColor="#BFAE99"
           value={message}
           onChangeText={setMessage}
           onSubmitEditing={handleSend}
           returnKeyType="send"
+          multiline
+          maxLength={500}
+          numberOfLines={3}
         />
         <TouchableOpacity
           style={[styles.sendButton, !message.trim() && styles.sendButtonDisabled]}
@@ -156,6 +159,9 @@ const styles = StyleSheet.create({
   input: {
     flex: 1, backgroundColor: '#F8F4E8', borderRadius: 24,
     paddingHorizontal: 18, paddingVertical: 12, fontSize: 15, color: '#2D2D2D',
+  },
+  inputMultiline: {
+    maxHeight: 80,
   },
   sendButton: {
     width: 44, height: 44, borderRadius: 22,

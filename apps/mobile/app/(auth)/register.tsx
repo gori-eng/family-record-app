@@ -111,6 +111,9 @@ export default function RegisterScreen() {
             style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleRegister}
             disabled={loading}
+            accessibilityLabel="가입하기"
+            accessibilityRole="button"
+            activeOpacity={0.8}
           >
             <Text style={styles.buttonText}>
               {loading ? '가입 중...' : '가입하기'}

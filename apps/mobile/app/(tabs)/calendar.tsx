@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useState } from 'react';
 
@@ -48,23 +48,21 @@ export default function CalendarScreen() {
   const selectedEvents = getEventsForDay(selectedDay);
 
   const goToPrevMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentYear(currentYear - 1);
-      setCurrentMonth(11);
-    } else {
-      setCurrentMonth(currentMonth - 1);
-    }
-    setSelectedDay(1);
+    const newMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const newYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+    const maxDay = new Date(newYear, newMonth + 1, 0).getDate();
+    setCurrentYear(newYear);
+    setCurrentMonth(newMonth);
+    setSelectedDay(Math.min(selectedDay, maxDay));
   };
 
   const goToNextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentYear(currentYear + 1);
-      setCurrentMonth(0);
-    } else {
-      setCurrentMonth(currentMonth + 1);
-    }
-    setSelectedDay(1);
+    const newMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+    const newYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+    const maxDay = new Date(newYear, newMonth + 1, 0).getDate();
+    setCurrentYear(newYear);
+    setCurrentMonth(newMonth);
+    setSelectedDay(Math.min(selectedDay, maxDay));
   };
 
   const goToToday = () => {
@@ -156,7 +154,15 @@ export default function CalendarScreen() {
             </View>
           ) : (
             selectedEvents.map((event, i) => (
-              <TouchableOpacity key={i} style={styles.eventCard} activeOpacity={0.7}>
+              <TouchableOpacity
+                key={i}
+                style={styles.eventCard}
+                activeOpacity={0.7}
+                onPress={() => Alert.alert(
+                  event.title,
+                  `시간: ${event.time}${event.location ? `\n장소: ${event.location}` : ''}\n\n일정 상세 보기 기능이 곧 추가됩니다.`
+                )}
+              >
                 <View style={[styles.eventColorBar, { backgroundColor: event.color }]} />
                 <View style={styles.eventContent}>
                   <Text style={styles.eventTime}>{event.time}</Text>
@@ -178,7 +184,11 @@ export default function CalendarScreen() {
       </ScrollView>
 
       {/* FAB */}
-      <TouchableOpacity style={styles.fab} activeOpacity={0.8}>
+      <TouchableOpacity
+        style={styles.fab}
+        activeOpacity={0.8}
+        onPress={() => Alert.alert('일정 추가', '새 일정 등록 기능이 곧 추가됩니다.')}
+      >
         <FontAwesome name="plus" size={22} color="#FFFFFF" />
       </TouchableOpacity>
     </View>

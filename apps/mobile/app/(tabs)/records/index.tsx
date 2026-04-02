@@ -1,7 +1,8 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 
 const CATEGORIES = [
   { icon: 'child', label: '육아 일기', color: '#FFB6C1', count: 24, route: '/(tabs)/records/parenting' },
@@ -21,26 +22,38 @@ const CATEGORIES = [
 
 export default function RecordsScreen() {
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredCategories = searchQuery
+    ? CATEGORIES.filter(cat => cat.label.includes(searchQuery))
+    : CATEGORIES;
+
+  const totalRecords = CATEGORIES.reduce((sum, cat) => sum + cat.count, 0);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
     <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
       <Text style={styles.title}>소중한 순간들</Text>
       <Text style={styles.subtitle}>
-        우리 가족만의 특별한 이야기와 성장 기록
+        우리 가족만의 특별한 이야기와 성장 기록 · 총 {totalRecords}개
       </Text>
 
       {/* Search */}
-      <TouchableOpacity style={styles.searchBar}>
+      <TouchableOpacity
+        style={styles.searchBar}
+        activeOpacity={0.7}
+        onPress={() => Alert.alert('기록 검색', '검색 기능이 곧 추가됩니다.\n\n카테고리를 탭하여 기록을 확인하세요.')}
+      >
         <FontAwesome name="search" size={14} color="#BFAE99" />
         <Text style={styles.searchText}>기록 검색하기</Text>
       </TouchableOpacity>
 
       <View style={styles.grid}>
-        {CATEGORIES.map((cat, index) => (
+        {filteredCategories.map((cat, index) => (
           <TouchableOpacity
             key={index}
             style={styles.card}
+            activeOpacity={0.7}
             onPress={() => router.push(cat.route as any)}
           >
             <View style={[styles.iconCircle, { backgroundColor: cat.color }]}>
