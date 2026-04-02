@@ -11,9 +11,9 @@ const FAMILY_MEMBERS = [
 ];
 
 const RECENT_RECORDS = [
-  { type: '육아 일기', icon: 'child', color: '#FFB6C1', title: '지우의 첫 자전거 타기', date: '오늘', preview: '드디어 보조바퀴 없이 자전거를 탔어요!' },
-  { type: '독서 목록', icon: 'book', color: '#B8E6C8', title: '어린 왕자', date: '어제', preview: '서준이가 처음으로 혼자 다 읽었어요' },
-  { type: '가계부', icon: 'money', color: '#FFE4C4', title: '3월 지출 정산', date: '2일 전', preview: '식비 82만원, 교육 45만원' },
+  { type: '육아 일기', icon: 'child', color: '#FFB6C1', title: '지우의 첫 자전거 타기', date: '오늘', preview: '드디어 보조바퀴 없이 자전거를 탔어요!', route: '/(tabs)/records/parenting' },
+  { type: '독서 목록', icon: 'book', color: '#B8E6C8', title: '어린 왕자', date: '어제', preview: '서준이가 처음으로 혼자 다 읽었어요', route: '/(tabs)/records/reading' },
+  { type: '가계부', icon: 'money', color: '#FFE4C4', title: '3월 지출 정산', date: '2일 전', preview: '식비 82만원, 교육 45만원', route: '/(tabs)/records/finance' },
 ];
 
 export default function HomeScreen() {
@@ -87,9 +87,9 @@ export default function HomeScreen() {
         <View style={styles.quickActions}>
           {[
             { icon: 'calendar', label: '일정 관리', route: '/(tabs)/calendar', color: '#FFDAB9' },
-            { icon: 'money', label: '가계부', route: '/records/finance', color: '#FFE4C4' },
-            { icon: 'child', label: '육아 일기', route: '/records/parenting', color: '#FFB6C1' },
-            { icon: 'book', label: '독서 목록', route: '/records/reading', color: '#B8E6C8' },
+            { icon: 'money', label: '가계부', route: '/(tabs)/records/finance', color: '#FFE4C4' },
+            { icon: 'child', label: '육아 일기', route: '/(tabs)/records/parenting', color: '#FFB6C1' },
+            { icon: 'book', label: '독서 목록', route: '/(tabs)/records/reading', color: '#B8E6C8' },
           ].map((item, index) => (
             <TouchableOpacity
               key={index}
@@ -140,7 +140,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           {RECENT_RECORDS.map((record, i) => (
-            <TouchableOpacity key={i} style={styles.recordItem}>
+            <TouchableOpacity key={i} style={styles.recordItem} onPress={() => router.push(record.route as any)}>
               <View style={[styles.recordIcon, { backgroundColor: record.color }]}>
                 <FontAwesome name={record.icon as any} size={16} color="#5C4A32" />
               </View>

@@ -8,7 +8,10 @@ export default function RecordsLayout() {
         headerTintColor: '#2D2D2D',
         headerShadowVisible: false,
         headerBackTitle: '뒤로',
+        animation: 'slide_from_right',
       }}
-    />
+    >
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+    </Stack>
   );
 }

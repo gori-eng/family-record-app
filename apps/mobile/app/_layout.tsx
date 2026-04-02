@@ -110,7 +110,7 @@ function RootLayoutNav() {
   // }, [session, segments]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="onboarding" options={{ presentation: 'modal' }} />

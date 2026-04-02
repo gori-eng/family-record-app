@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
 
@@ -18,18 +19,25 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopColor: '#F0E8D8',
-          paddingBottom: 4,
-          height: 60,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 4,
+          height: Platform.OS === 'ios' ? 80 : 60,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 8,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
         },
+        tabBarHideOnKeyboard: true,
         headerStyle: {
           backgroundColor: '#FFFDF0',
         },
         headerTintColor: '#2D2D2D',
         headerShadowVisible: false,
+        animation: 'shift',
       }}
     >
       <Tabs.Screen
@@ -51,6 +59,7 @@ export default function TabLayout() {
         name="records"
         options={{
           title: '기록',
+          headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="book" color={color} />,
         }}
       />

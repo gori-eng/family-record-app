@@ -3,19 +3,19 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 const CATEGORIES = [
-  { icon: 'child', label: '육아 일기', color: '#FFB6C1', count: 24, route: '/records/parenting' },
-  { icon: 'book', label: '독서 목록', color: '#B8E6C8', count: 12, route: '/records/reading' },
-  { icon: 'money', label: '가계부', color: '#FFE4C4', count: 18, route: '/records/finance' },
-  { icon: 'film', label: '영화 관람', color: '#B8D4E6', count: 8, route: '/records/movies' },
-  { icon: 'plane', label: '여행 위시', color: '#FFE4C4', count: 5, route: '/records/travel' },
-  { icon: 'cutlery', label: '레시피', color: '#FFDAB9', count: 15, route: '/records/recipes' },
-  { icon: 'microphone', label: '음성/영상', color: '#D4B8E6', count: 3, route: '/records/media' },
-  { icon: 'trophy', label: '가족 목표', color: '#E6D4B8', count: 7, route: '/records/goals' },
-  { icon: 'heartbeat', label: '건강 기록', color: '#FFB8B8', count: 6, route: '/records/health' },
-  { icon: 'sitemap', label: '가계도', color: '#C4E6B8', count: 1, route: '/records/family-tree' },
-  { icon: 'clock-o', label: '타임캡슐', color: '#E6E4B8', count: 2, route: '/records/time-capsule' },
-  { icon: 'id-card', label: 'MBTI 기록', color: '#B8C4E6', count: 4, route: '/records/identity' },
-  { icon: 'lock', label: '디지털 유산', color: '#E6B8D4', count: 0, route: '/records/legacy' },
+  { icon: 'child', label: '육아 일기', color: '#FFB6C1', count: 24, route: '/(tabs)/records/parenting' },
+  { icon: 'book', label: '독서 목록', color: '#B8E6C8', count: 12, route: '/(tabs)/records/reading' },
+  { icon: 'money', label: '가계부', color: '#FFE4C4', count: 18, route: '/(tabs)/records/finance' },
+  { icon: 'film', label: '영화 관람', color: '#B8D4E6', count: 8, route: '/(tabs)/records/movies' },
+  { icon: 'plane', label: '여행 위시', color: '#FFE4C4', count: 5, route: '/(tabs)/records/travel' },
+  { icon: 'cutlery', label: '레시피', color: '#FFDAB9', count: 15, route: '/(tabs)/records/recipes' },
+  { icon: 'microphone', label: '음성/영상', color: '#D4B8E6', count: 3, route: '/(tabs)/records/media' },
+  { icon: 'trophy', label: '가족 목표', color: '#E6D4B8', count: 7, route: '/(tabs)/records/goals' },
+  { icon: 'heartbeat', label: '건강 기록', color: '#FFB8B8', count: 6, route: '/(tabs)/records/health' },
+  { icon: 'sitemap', label: '가계도', color: '#C4E6B8', count: 1, route: '/(tabs)/records/family-tree' },
+  { icon: 'clock-o', label: '타임캡슐', color: '#E6E4B8', count: 2, route: '/(tabs)/records/time-capsule' },
+  { icon: 'id-card', label: 'MBTI 기록', color: '#B8C4E6', count: 4, route: '/(tabs)/records/identity' },
+  { icon: 'lock', label: '디지털 유산', color: '#E6B8D4', count: 0, route: '/(tabs)/records/legacy' },
 ];
 
 export default function RecordsScreen() {
