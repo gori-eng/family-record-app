@@ -1,12 +1,9 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
+import { useState } from 'react';
 
-const CATEGORIES = [
-  { label: '전체', active: true },
-  { label: '식비' }, { label: '교통' }, { label: '주거' },
-  { label: '교육' }, { label: '의료' }, { label: '여가' },
-];
+const ALL_CATEGORIES = ['전체', '식비', '교통', '주거', '교육', '의료', '여가'];
 
 const TRANSACTIONS = [
   { date: '4월 1일', items: [
@@ -31,6 +28,15 @@ function formatAmount(amount: number, type: string) {
 }
 
 export default function FinanceScreen() {
+  const [activeCategory, setActiveCategory] = useState('전체');
+
+  const filteredTransactions = TRANSACTIONS.map(group => ({
+    ...group,
+    items: activeCategory === '전체'
+      ? group.items
+      : group.items.filter(item => item.category === activeCategory),
+  })).filter(group => group.items.length > 0);
+
   return (
     <>
       <Stack.Screen options={{ title: '가계부' }} />
@@ -64,52 +70,73 @@ export default function FinanceScreen() {
                 { label: '교통', pct: 12, color: '#B8D4E6' },
                 { label: '기타', pct: 10, color: '#D4B8E6' },
               ].map((cat, i) => (
-                <View key={i} style={styles.chartRow}>
-                  <Text style={styles.chartLabel}>{cat.label}</Text>
+                <TouchableOpacity
+                  key={i}
+                  style={styles.chartRow}
+                  onPress={() => setActiveCategory(cat.label === '기타' ? '전체' : cat.label)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.chartLabel, activeCategory === cat.label && styles.chartLabelActive]}>{cat.label}</Text>
                   <View style={styles.chartBarBg}>
                     <View style={[styles.chartBar, { width: `${cat.pct}%`, backgroundColor: cat.color }]} />
                   </View>
                   <Text style={styles.chartPct}>{cat.pct}%</Text>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           </View>
 
           {/* Category Filter */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll} contentContainerStyle={styles.filterContainer}>
-            {CATEGORIES.map((cat, i) => (
-              <TouchableOpacity key={i} style={[styles.filterChip, cat.active && styles.filterChipActive]}>
-                <Text style={[styles.filterText, cat.active && styles.filterTextActive]}>{cat.label}</Text>
+            {ALL_CATEGORIES.map((cat, i) => (
+              <TouchableOpacity
+                key={i}
+                style={[styles.filterChip, activeCategory === cat && styles.filterChipActive]}
+                onPress={() => setActiveCategory(cat)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.filterText, activeCategory === cat && styles.filterTextActive]}>{cat}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
 
           {/* Transaction List */}
-          {TRANSACTIONS.map((group, gi) => (
-            <View key={gi} style={styles.transGroup}>
-              <Text style={styles.transDate}>{group.date}</Text>
-              {group.items.map((item, ii) => (
-                <TouchableOpacity key={ii} style={styles.transItem}>
-                  <View style={[styles.transIcon, { backgroundColor: item.color }]}>
-                    <FontAwesome name={item.icon as any} size={14} color="#5C4A32" />
-                  </View>
-                  <View style={styles.transInfo}>
-                    <Text style={styles.transDesc}>{item.desc}</Text>
-                    <Text style={styles.transCat}>{item.category}</Text>
-                  </View>
-                  <Text style={[styles.transAmount, { color: item.type === 'income' ? '#4AA86B' : '#C85A4A' }]}>
-                    {formatAmount(item.amount, item.type)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          {filteredTransactions.length === 0 ? (
+            <View style={styles.emptyState}>
+              <FontAwesome name="inbox" size={36} color="#E0D8C8" />
+              <Text style={styles.emptyText}>해당 카테고리의 거래가 없어요</Text>
             </View>
-          ))}
+          ) : (
+            filteredTransactions.map((group, gi) => (
+              <View key={gi} style={styles.transGroup}>
+                <Text style={styles.transDate}>{group.date}</Text>
+                {group.items.map((item, ii) => (
+                  <TouchableOpacity key={ii} style={styles.transItem} activeOpacity={0.7}>
+                    <View style={[styles.transIcon, { backgroundColor: item.color }]}>
+                      <FontAwesome name={item.icon as any} size={14} color="#5C4A32" />
+                    </View>
+                    <View style={styles.transInfo}>
+                      <Text style={styles.transDesc}>{item.desc}</Text>
+                      <Text style={styles.transCat}>{item.category}</Text>
+                    </View>
+                    <Text style={[styles.transAmount, { color: item.type === 'income' ? '#4AA86B' : '#C85A4A' }]}>
+                      {formatAmount(item.amount, item.type)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ))
+          )}
 
           <View style={{ height: 80 }} />
         </ScrollView>
 
         {/* FAB */}
-        <TouchableOpacity style={styles.fab}>
+        <TouchableOpacity
+          style={styles.fab}
+          activeOpacity={0.8}
+          onPress={() => Alert.alert('거래 추가', '수입/지출 기록 기능이 곧 추가됩니다.')}
+        >
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
@@ -137,7 +164,10 @@ const styles = StyleSheet.create({
   balanceAmount: { fontSize: 18, fontWeight: '700', color: '#2D2D2D' },
   chartContainer: { gap: 8 },
   chartRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  chartLabel: { width: 32, fontSize: 11, color: '#8B7355' },
+  chartLabel: { width: 32, fontSize: 11, color: '#8B7355' } as any,
+  chartLabelActive: { color: '#C85A4A', fontWeight: '700' },
+  emptyState: { alignItems: 'center' as const, paddingVertical: 40 },
+  emptyText: { fontSize: 15, color: '#BFAE99', marginTop: 12 },
   chartBarBg: { flex: 1, height: 8, backgroundColor: '#F5F0E5', borderRadius: 4 },
   chartBar: { height: 8, borderRadius: 4 },
   chartPct: { width: 32, fontSize: 11, color: '#BFAE99', textAlign: 'right' },

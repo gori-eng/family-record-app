@@ -19,6 +19,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleRegister = async () => {
@@ -77,24 +78,34 @@ export default function RegisterScreen() {
           />
 
           <Text style={styles.label}>비밀번호</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="6자 이상 입력하세요"
-            placeholderTextColor="#BFAE99"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+          <View style={styles.passwordRow}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="6자 이상 입력하세요"
+              placeholderTextColor="#BFAE99"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity
+              style={styles.eyeButton}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <FontAwesome name={showPassword ? 'eye' : 'eye-slash'} size={18} color="#BFAE99" />
+            </TouchableOpacity>
+          </View>
 
           <Text style={styles.label}>비밀번호 확인</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="비밀번호를 다시 입력하세요"
-            placeholderTextColor="#BFAE99"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-          />
+          <View style={styles.passwordRow}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="비밀번호를 다시 입력하세요"
+              placeholderTextColor="#BFAE99"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showPassword}
+            />
+          </View>
 
           <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
@@ -144,6 +155,26 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#F0E8D8', borderRadius: 12,
     paddingHorizontal: 16, paddingVertical: 14,
     fontSize: 16, color: '#2D2D2D', marginBottom: 16,
+  },
+  passwordRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#F0E8D8',
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: '#2D2D2D',
+  },
+  eyeButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 14,
   },
   button: {
     backgroundColor: '#C85A4A', borderRadius: 12,

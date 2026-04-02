@@ -18,6 +18,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -66,14 +67,22 @@ export default function LoginScreen() {
           />
 
           <Text style={styles.label}>비밀번호</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="비밀번호를 입력하세요"
-            placeholderTextColor="#BFAE99"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+          <View style={styles.passwordRow}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="비밀번호를 입력하세요"
+              placeholderTextColor="#BFAE99"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity
+              style={styles.eyeButton}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <FontAwesome name={showPassword ? 'eye' : 'eye-slash'} size={18} color="#BFAE99" />
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
             style={[styles.loginButton, loading && styles.loginButtonDisabled]}
@@ -94,11 +103,19 @@ export default function LoginScreen() {
 
           {/* Social Login */}
           <View style={styles.socialRow}>
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={() => Alert.alert('준비 중', 'Google 로그인은 곧 지원될 예정이에요.')}
+              activeOpacity={0.7}
+            >
               <FontAwesome name="google" size={20} color="#4285F4" />
               <Text style={styles.socialText}>Google</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.socialButton, styles.appleButton]}>
+            <TouchableOpacity
+              style={[styles.socialButton, styles.appleButton]}
+              onPress={() => Alert.alert('준비 중', 'Apple 로그인은 곧 지원될 예정이에요.')}
+              activeOpacity={0.7}
+            >
               <FontAwesome name="apple" size={20} color="#FFFFFF" />
               <Text style={styles.appleText}>Apple</Text>
             </TouchableOpacity>
@@ -172,6 +189,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#2D2D2D',
     marginBottom: 16,
+  },
+  passwordRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#F0E8D8',
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: '#2D2D2D',
+  },
+  eyeButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 14,
   },
   loginButton: {
     backgroundColor: '#C85A4A',

@@ -1,11 +1,9 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
+import { useState } from 'react';
 
-const STATUS_FILTERS = [
-  { label: '전체', active: true },
-  { label: '읽는 중' }, { label: '완독' }, { label: '읽고 싶은' },
-];
+const STATUS_OPTIONS = ['전체', '읽는 중', '완독', '읽고 싶은'];
 
 const BOOKS = [
   { title: '어린 왕자', author: '생텍쥐페리', reader: '서준', status: '완독', rating: 5, color: '#B8E6C8', notes: '혼자서 처음 완독! "어른들은 참 이상해" 가 인상적이었대요' },
@@ -27,6 +25,12 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function ReadingScreen() {
+  const [activeStatus, setActiveStatus] = useState('전체');
+
+  const filteredBooks = activeStatus === '전체'
+    ? BOOKS
+    : BOOKS.filter(b => b.status === activeStatus);
+
   return (
     <>
       <Stack.Screen options={{ title: '독서 목록' }} />
@@ -34,36 +38,41 @@ export default function ReadingScreen() {
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Stats */}
           <View style={styles.statsRow}>
-            <View style={styles.statCard}>
-              <Text style={styles.statEmoji}>📚</Text>
+            <TouchableOpacity style={styles.statCard} onPress={() => setActiveStatus('전체')} activeOpacity={0.7}>
+              <FontAwesome name="book" size={18} color="#C85A4A" />
               <Text style={styles.statNumber}>12</Text>
               <Text style={styles.statLabel}>총 도서</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statEmoji}>✅</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.statCard} onPress={() => setActiveStatus('완독')} activeOpacity={0.7}>
+              <FontAwesome name="check-circle" size={18} color="#4AA86B" />
               <Text style={styles.statNumber}>7</Text>
               <Text style={styles.statLabel}>완독</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statEmoji}>📖</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.statCard} onPress={() => setActiveStatus('읽는 중')} activeOpacity={0.7}>
+              <FontAwesome name="bookmark" size={18} color="#E6A817" />
               <Text style={styles.statNumber}>3</Text>
               <Text style={styles.statLabel}>읽는 중</Text>
-            </View>
+            </TouchableOpacity>
           </View>
 
           {/* Filter */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterContainer}>
-            {STATUS_FILTERS.map((f, i) => (
-              <TouchableOpacity key={i} style={[styles.filterChip, f.active && styles.filterChipActive]}>
-                <Text style={[styles.filterText, f.active && styles.filterTextActive]}>{f.label}</Text>
+            {STATUS_OPTIONS.map((label, i) => (
+              <TouchableOpacity
+                key={i}
+                style={[styles.filterChip, activeStatus === label && styles.filterChipActive]}
+                onPress={() => setActiveStatus(label)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.filterText, activeStatus === label && styles.filterTextActive]}>{label}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
 
           {/* Book List */}
           <View style={styles.bookList}>
-            {BOOKS.map((book, i) => (
-              <TouchableOpacity key={i} style={styles.bookCard}>
+            {filteredBooks.map((book, i) => (
+              <TouchableOpacity key={i} style={styles.bookCard} activeOpacity={0.7}>
                 <View style={[styles.bookCover, { backgroundColor: book.color }]}>
                   <FontAwesome name="book" size={24} color="#5C4A32" />
                 </View>
@@ -101,7 +110,11 @@ export default function ReadingScreen() {
           <View style={{ height: 80 }} />
         </ScrollView>
 
-        <TouchableOpacity style={styles.fab}>
+        <TouchableOpacity
+          style={styles.fab}
+          activeOpacity={0.8}
+          onPress={() => Alert.alert('도서 추가', '새 도서 등록 기능이 곧 추가됩니다.')}
+        >
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
@@ -116,7 +129,7 @@ const styles = StyleSheet.create({
     flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,
     alignItems: 'center', borderWidth: 1, borderColor: '#F0E8D8',
   },
-  statEmoji: { fontSize: 20 },
+  statIcon: { marginBottom: 2 },
   statNumber: { fontSize: 22, fontWeight: '700', color: '#2D2D2D', marginTop: 4 },
   statLabel: { fontSize: 11, color: '#BFAE99', marginTop: 2 },
   filterContainer: { paddingHorizontal: 20, gap: 8, marginBottom: 16 },

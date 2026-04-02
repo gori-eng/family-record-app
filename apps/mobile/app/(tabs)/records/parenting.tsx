@@ -1,6 +1,7 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
+import { useState } from 'react';
 
 const ENTRIES = [
   {
@@ -40,13 +41,16 @@ const ENTRIES = [
   },
 ];
 
-const CHILD_FILTERS = [
-  { name: '전체', active: true },
-  { name: '지우', color: '#FFB6C1' },
-  { name: '서준', color: '#B8D4E6' },
-];
+const CHILD_NAMES = ['전체', '지우', '서준'];
+const CHILD_COLORS: Record<string, string> = { '지우': '#FFB6C1', '서준': '#B8D4E6' };
 
 export default function ParentingScreen() {
+  const [activeChild, setActiveChild] = useState('전체');
+
+  const filteredEntries = activeChild === '전체'
+    ? ENTRIES
+    : ENTRIES.filter(e => e.child === activeChild);
+
   return (
     <>
       <Stack.Screen options={{ title: '육아 일기' }} />
@@ -73,21 +77,26 @@ export default function ParentingScreen() {
 
           {/* Child Filter */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterContainer}>
-            {CHILD_FILTERS.map((child, i) => (
-              <TouchableOpacity key={i} style={[styles.filterChip, child.active && styles.filterChipActive]}>
-                {child.color && <View style={[styles.filterDot, { backgroundColor: child.color }]} />}
-                <Text style={[styles.filterText, child.active && styles.filterTextActive]}>{child.name}</Text>
+            {CHILD_NAMES.map((name, i) => (
+              <TouchableOpacity
+                key={i}
+                style={[styles.filterChip, activeChild === name && styles.filterChipActive]}
+                onPress={() => setActiveChild(name)}
+                activeOpacity={0.7}
+              >
+                {CHILD_COLORS[name] && <View style={[styles.filterDot, { backgroundColor: CHILD_COLORS[name] }]} />}
+                <Text style={[styles.filterText, activeChild === name && styles.filterTextActive]}>{name}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
 
           {/* Timeline */}
           <View style={styles.timeline}>
-            {ENTRIES.map((entry, i) => (
-              <TouchableOpacity key={i} style={styles.entryCard}>
+            {filteredEntries.map((entry, i) => (
+              <TouchableOpacity key={i} style={styles.entryCard} activeOpacity={0.7}>
                 <View style={styles.timelineLine}>
                   <View style={[styles.timelineDot, { backgroundColor: entry.child === '지우' ? '#FFB6C1' : '#B8D4E6' }]} />
-                  {i < ENTRIES.length - 1 && <View style={styles.timelineConnector} />}
+                  {i < filteredEntries.length - 1 && <View style={styles.timelineConnector} />}
                 </View>
                 <View style={styles.entryContent}>
                   <View style={styles.entryHeader}>
@@ -117,7 +126,11 @@ export default function ParentingScreen() {
         </ScrollView>
 
         {/* FAB */}
-        <TouchableOpacity style={styles.fab}>
+        <TouchableOpacity
+          style={styles.fab}
+          activeOpacity={0.8}
+          onPress={() => Alert.alert('육아 일기 작성', '새 육아 일기 작성 기능이 곧 추가됩니다.')}
+        >
           <FontAwesome name="pencil" size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </View>

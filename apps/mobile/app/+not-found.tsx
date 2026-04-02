@@ -1,18 +1,24 @@
-import { Link, Stack } from 'expo-router';
-import { StyleSheet } from 'react-native';
-
-import { Text, View } from '@/components/Themed';
+import { Stack, useRouter } from 'expo-router';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
 
 export default function NotFoundScreen() {
+  const router = useRouter();
+
   return (
     <>
-      <Stack.Screen options={{ title: 'Oops!' }} />
+      <Stack.Screen options={{ title: '', headerShown: false }} />
       <View style={styles.container}>
-        <Text style={styles.title}>This screen doesn't exist.</Text>
+        <View style={styles.iconCircle}>
+          <FontAwesome name="map-signs" size={40} color="#C85A4A" />
+        </View>
+        <Text style={styles.title}>페이지를 찾을 수 없어요</Text>
+        <Text style={styles.subtitle}>요청하신 페이지가 존재하지 않거나{'\n'}이동되었을 수 있어요.</Text>
 
-        <Link href="/" style={styles.link}>
-          <Text style={styles.linkText}>Go to home screen!</Text>
-        </Link>
+        <TouchableOpacity style={styles.button} onPress={() => router.replace('/')}>
+          <FontAwesome name="home" size={16} color="#FFFFFF" />
+          <Text style={styles.buttonText}>홈으로 돌아가기</Text>
+        </TouchableOpacity>
       </View>
     </>
   );
@@ -20,21 +26,19 @@ export default function NotFoundScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
+    flex: 1, backgroundColor: '#FFFDF0',
+    alignItems: 'center', justifyContent: 'center', padding: 40,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  iconCircle: {
+    width: 80, height: 80, borderRadius: 40,
+    backgroundColor: '#FFF0ED', justifyContent: 'center', alignItems: 'center',
+    marginBottom: 24,
   },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
+  title: { fontSize: 22, fontWeight: '700', color: '#2D2D2D', marginBottom: 8 },
+  subtitle: { fontSize: 15, color: '#8B7355', textAlign: 'center', lineHeight: 22, marginBottom: 32 },
+  button: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: '#C85A4A', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 12,
   },
-  linkText: {
-    fontSize: 14,
-    color: '#2e78b7',
-  },
+  buttonText: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
 });

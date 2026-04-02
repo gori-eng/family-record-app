@@ -1,7 +1,8 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useState, useCallback } from 'react';
 
 const FAMILY_MEMBERS = [
   { name: '지수', role: '엄마', color: '#FFDAB9' },
@@ -18,12 +19,23 @@ const RECENT_RECORDS = [
 
 export default function HomeScreen() {
   const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
   const today = new Date();
   const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 1000);
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#C85A4A" colors={['#C85A4A']} />
+        }
+      >
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
@@ -49,7 +61,12 @@ export default function HomeScreen() {
         {/* Family Members Row */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.membersScroll} contentContainerStyle={styles.membersContainer}>
           {FAMILY_MEMBERS.map((member, i) => (
-            <TouchableOpacity key={i} style={styles.memberChip}>
+            <TouchableOpacity
+              key={i}
+              style={styles.memberChip}
+              activeOpacity={0.7}
+              onPress={() => Alert.alert(member.name, `역할: ${member.role}\n\n프로필 상세 보기 기능이 곧 추가됩니다.`)}
+            >
               <View style={[styles.memberAvatar, { backgroundColor: member.color }]}>
                 <Text style={styles.memberInitial}>{member.name[0]}</Text>
               </View>
