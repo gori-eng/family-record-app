@@ -47,7 +47,7 @@ export default function HomeScreen() {
             </View>
             <Text style={styles.familyName}>우리 가족</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.notifBadge} onPress={() => Alert.alert('알림', '새로운 알림 3개\n\n- 서준이가 독서 기록을 추가했어요\n- 내일 학교 발표회가 있어요\n- AI 비서의 오늘의 질문이 도착했어요')}>
+          <TouchableOpacity style={styles.notifBadge} activeOpacity={0.7} onPress={() => Alert.alert('알림', '새로운 알림 3개\n\n- 서준이가 독서 기록을 추가했어요\n- 내일 학교 발표회가 있어요\n- AI 비서의 오늘의 질문이 도착했어요')}>
             <FontAwesome name="bell-o" size={22} color="#5C4A32" />
             <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
           </TouchableOpacity>
@@ -77,7 +77,7 @@ export default function HomeScreen() {
               <Text style={styles.memberRole}>{member.role}</Text>
             </TouchableOpacity>
           ))}
-          <TouchableOpacity style={styles.memberChip} onPress={() => Alert.alert('가족 초대', '초대 코드: ABC12345\n\n이 코드를 가족에게 공유하세요!')}>
+          <TouchableOpacity style={styles.memberChip} activeOpacity={0.7} onPress={() => Alert.alert('가족 초대', '초대 코드: ABC12345\n\n이 코드를 가족에게 공유하세요!')}>
             <View style={[styles.memberAvatar, { backgroundColor: '#F0E8D8' }]}>
               <FontAwesome name="plus" size={16} color="#BFAE99" />
             </View>
@@ -86,7 +86,7 @@ export default function HomeScreen() {
         </ScrollView>
 
         {/* AI Daily Question */}
-        <View style={styles.questionCard}>
+        <TouchableOpacity style={styles.questionCard} activeOpacity={0.85} onPress={() => router.push('/(tabs)/ai')}>
           <View style={styles.questionHeader}>
             <FontAwesome name="magic" size={14} color="#C85A4A" />
             <Text style={styles.questionLabel}>AI 비서의 오늘의 질문</Text>
@@ -95,13 +95,13 @@ export default function HomeScreen() {
             "오늘 가장 감사했던 순간은?"
           </Text>
           <View style={styles.questionFooter}>
-            <TouchableOpacity style={styles.answerButton} onPress={() => router.push('/(tabs)/ai')}>
+            <TouchableOpacity style={styles.answerButton} activeOpacity={0.7} onPress={() => router.push('/(tabs)/ai')}>
               <Text style={styles.answerButtonText}>답변하기</Text>
               <FontAwesome name="arrow-right" size={12} color="#C85A4A" />
             </TouchableOpacity>
             <Text style={styles.answerCount}>2/4명 답변</Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* Quick Actions */}
         <View style={styles.quickActions}>
@@ -129,7 +129,7 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>오늘의 일정</Text>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/calendar')}>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')}>
               <Text style={styles.seeAll}>모두 보기</Text>
             </TouchableOpacity>
           </View>
@@ -156,12 +156,12 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>최근 기록</Text>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/records')}>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/records')}>
               <Text style={styles.seeAll}>모두 보기</Text>
             </TouchableOpacity>
           </View>
           {RECENT_RECORDS.map((record, i) => (
-            <TouchableOpacity key={i} style={styles.recordItem} onPress={() => router.push(record.route as any)}>
+            <TouchableOpacity key={i} style={styles.recordItem} activeOpacity={0.7} onPress={() => router.push(record.route as any)}>
               <View style={[styles.recordIcon, { backgroundColor: record.color }]}>
                 <FontAwesome name={record.icon as any} size={16} color="#5C4A32" />
               </View>

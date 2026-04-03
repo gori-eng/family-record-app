@@ -58,21 +58,21 @@ export default function ParentingScreen() {
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Stats */}
           <View style={styles.statsRow}>
-            <View style={styles.statCard}>
+            <TouchableOpacity style={styles.statCard} onPress={() => setActiveChild('전체')} activeOpacity={0.7}>
               <FontAwesome name="book" size={18} color="#C85A4A" />
               <Text style={styles.statNumber}>47</Text>
               <Text style={styles.statLabel}>총 기록</Text>
-            </View>
-            <View style={styles.statCard}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.statCard} onPress={() => Alert.alert('마일스톤', '지우: 7개\n서준: 5개\n\n마일스톤 관리 기능이 곧 추가됩니다.')} activeOpacity={0.7}>
               <FontAwesome name="trophy" size={18} color="#E6A817" />
               <Text style={styles.statNumber}>12</Text>
               <Text style={styles.statLabel}>마일스톤</Text>
-            </View>
-            <View style={styles.statCard}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.statCard} onPress={() => Alert.alert('사진 앨범', '저장된 사진 156장\n\n사진 앨범 기능이 곧 추가됩니다.')} activeOpacity={0.7}>
               <FontAwesome name="camera" size={18} color="#4A90C8" />
               <Text style={styles.statNumber}>156</Text>
               <Text style={styles.statLabel}>사진</Text>
-            </View>
+            </TouchableOpacity>
           </View>
 
           {/* Child Filter */}
@@ -113,13 +113,15 @@ export default function ParentingScreen() {
                   <Text style={styles.entryText} numberOfLines={2}>{entry.content}</Text>
                   <View style={styles.entryFooter}>
                     {entry.milestones.map((ms, mi) => (
-                      <View key={mi} style={styles.milestoneBadge}>
+                      <TouchableOpacity key={mi} style={styles.milestoneBadge} activeOpacity={0.7} onPress={() => Alert.alert('마일스톤', `"${ms}" 마일스톤이에요!\n\n관련 기록을 모아보는 기능이 곧 추가됩니다.`)}>
                         <FontAwesome name="star" size={10} color="#E6A817" />
                         <Text style={styles.milestoneText}>{ms}</Text>
-                      </View>
+                      </TouchableOpacity>
                     ))}
                     <View style={{ flex: 1 }} />
-                    <FontAwesome name={entry.mood as any} size={16} color="#BFAE99" />
+                    <TouchableOpacity onPress={() => Alert.alert('기분', `이 날의 기분 기록이에요.\n\n기분 변경 기능이 곧 추가됩니다.`)}>
+                      <FontAwesome name={entry.mood as any} size={16} color="#BFAE99" />
+                    </TouchableOpacity>
                   </View>
                 </View>
               </TouchableOpacity>

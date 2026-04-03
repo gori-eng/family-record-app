@@ -14,13 +14,17 @@ const BOOKS = [
   { title: '해리포터 시리즈', author: 'J.K. 롤링', reader: '지우', status: '읽고 싶은', color: '#FFB6C1', notes: '' },
 ];
 
-function StarRating({ rating }: { rating: number }) {
+function StarRating({ rating, title }: { rating: number; title: string }) {
   return (
-    <View style={{ flexDirection: 'row', gap: 2 }}>
+    <TouchableOpacity
+      style={{ flexDirection: 'row', gap: 2 }}
+      activeOpacity={0.7}
+      onPress={() => Alert.alert('평점', `"${title}" 평점: ${rating}/5\n\n평점 수정 기능이 곧 추가됩니다.`)}
+    >
       {[1, 2, 3, 4, 5].map(i => (
         <FontAwesome key={i} name={i <= rating ? 'star' : 'star-o'} size={12} color="#E6A817" />
       ))}
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -96,7 +100,7 @@ export default function ReadingScreen() {
                   <View style={styles.bookMeta}>
                     <View style={[styles.readerDot, { backgroundColor: book.color }]} />
                     <Text style={styles.readerName}>{book.reader}</Text>
-                    {book.rating && <StarRating rating={book.rating} />}
+                    {book.rating && <StarRating rating={book.rating} title={book.title} />}
                     {book.progress && (
                       <View style={styles.progressRow}>
                         <View style={styles.progressBarBg}>

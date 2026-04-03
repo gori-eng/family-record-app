@@ -147,11 +147,15 @@ export default function CalendarScreen() {
           </Text>
 
           {selectedEvents.length === 0 ? (
-            <View style={styles.emptyState}>
+            <TouchableOpacity
+              style={styles.emptyState}
+              activeOpacity={0.7}
+              onPress={() => Alert.alert('일정 추가', '새 일정 등록 기능이 곧 추가됩니다.')}
+            >
               <FontAwesome name="calendar-o" size={32} color="#E0D8C8" />
               <Text style={styles.emptyText}>등록된 일정이 없어요</Text>
-              <Text style={styles.emptySubtext}>아래 버튼으로 일정을 추가해보세요</Text>
-            </View>
+              <Text style={styles.emptySubtext}>탭하여 일정을 추가해보세요</Text>
+            </TouchableOpacity>
           ) : (
             selectedEvents.map((event, i) => (
               <TouchableOpacity

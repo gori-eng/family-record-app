@@ -56,10 +56,10 @@ export default function FinanceScreen() {
                 <Text style={[styles.summaryAmount, { color: '#C85A4A' }]}>-782,900원</Text>
               </View>
             </View>
-            <View style={styles.balanceRow}>
+            <TouchableOpacity style={styles.balanceRow} activeOpacity={0.7} onPress={() => Alert.alert('잔액 상세', '수입: +4,200,000원\n지출: -782,900원\n\n잔액: 3,417,100원\n\n상세 분석 기능이 곧 추가됩니다.')}>
               <Text style={styles.balanceLabel}>잔액</Text>
               <Text style={styles.balanceAmount}>3,417,100원</Text>
-            </View>
+            </TouchableOpacity>
 
             {/* Simple bar chart */}
             <View style={styles.chartContainer}>
@@ -102,10 +102,11 @@ export default function FinanceScreen() {
 
           {/* Transaction List */}
           {filteredTransactions.length === 0 ? (
-            <View style={styles.emptyState}>
+            <TouchableOpacity style={styles.emptyState} activeOpacity={0.7} onPress={() => setActiveCategory('전체')}>
               <FontAwesome name="inbox" size={36} color="#E0D8C8" />
               <Text style={styles.emptyText}>해당 카테고리의 거래가 없어요</Text>
-            </View>
+              <Text style={styles.emptySubtext}>탭하여 전체 보기로 돌아가기</Text>
+            </TouchableOpacity>
           ) : (
             filteredTransactions.map((group, gi) => (
               <View key={gi} style={styles.transGroup}>
@@ -173,6 +174,7 @@ const styles = StyleSheet.create({
   chartLabelActive: { color: '#C85A4A', fontWeight: '700' },
   emptyState: { alignItems: 'center' as const, paddingVertical: 40 },
   emptyText: { fontSize: 15, color: '#BFAE99', marginTop: 12 },
+  emptySubtext: { fontSize: 13, color: '#D4C8B0', marginTop: 4 },
   chartBarBg: { flex: 1, height: 8, backgroundColor: '#F5F0E5', borderRadius: 4 },
   chartBar: { height: 8, borderRadius: 4 },
   chartPct: { width: 32, fontSize: 11, color: '#BFAE99', textAlign: 'right' },

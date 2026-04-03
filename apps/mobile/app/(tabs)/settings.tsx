@@ -109,7 +109,9 @@ export default function SettingsScreen() {
         <Text style={styles.signOutText}>로그아웃</Text>
       </TouchableOpacity>
 
-      <Text style={styles.version}>우리 가족 v1.0.0</Text>
+      <TouchableOpacity onPress={() => Alert.alert('우리 가족', '버전: v1.0.0\n빌드: 2026.04.03\n\nMade with love for families.')} activeOpacity={0.7}>
+        <Text style={styles.version}>우리 가족 v1.0.0</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }

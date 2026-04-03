@@ -15,7 +15,7 @@ export default function NotFoundScreen() {
         <Text style={styles.title}>페이지를 찾을 수 없어요</Text>
         <Text style={styles.subtitle}>요청하신 페이지가 존재하지 않거나{'\n'}이동되었을 수 있어요.</Text>
 
-        <TouchableOpacity style={styles.button} onPress={() => router.replace('/(tabs)')}>
+        <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={() => router.replace('/(tabs)')}>
           <FontAwesome name="home" size={16} color="#FFFFFF" />
           <Text style={styles.buttonText}>홈으로 돌아가기</Text>
         </TouchableOpacity>

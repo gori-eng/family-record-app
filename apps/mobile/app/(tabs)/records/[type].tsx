@@ -44,7 +44,7 @@ export default function PlaceholderRecordScreen() {
           조금만 기다려주세요!{'\n'}더 좋은 모습으로 찾아올게요.
         </Text>
 
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} activeOpacity={0.8} onPress={() => router.back()}>
           <FontAwesome name="arrow-left" size={14} color="#FFFFFF" />
           <Text style={styles.backButtonText}>기록 목록으로 돌아가기</Text>
         </TouchableOpacity>
