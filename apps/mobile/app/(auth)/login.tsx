@@ -79,6 +79,7 @@ export default function LoginScreen() {
             <TouchableOpacity
               style={styles.eyeButton}
               onPress={() => setShowPassword(!showPassword)}
+              activeOpacity={0.7}
             >
               <FontAwesome name={showPassword ? 'eye' : 'eye-slash'} size={18} color="#BFAE99" />
             </TouchableOpacity>

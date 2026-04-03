@@ -2,7 +2,6 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 
 const CATEGORIES = [
   { icon: 'child', label: '육아 일기', color: '#FFB6C1', count: 24, route: '/(tabs)/records/parenting' },
@@ -22,12 +21,6 @@ const CATEGORIES = [
 
 export default function RecordsScreen() {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredCategories = searchQuery
-    ? CATEGORIES.filter(cat => cat.label.includes(searchQuery))
-    : CATEGORIES;
-
   const totalRecords = CATEGORIES.reduce((sum, cat) => sum + cat.count, 0);
 
   return (
@@ -49,7 +42,7 @@ export default function RecordsScreen() {
       </TouchableOpacity>
 
       <View style={styles.grid}>
-        {filteredCategories.map((cat, index) => (
+        {CATEGORIES.map((cat, index) => (
           <TouchableOpacity
             key={index}
             style={styles.card}

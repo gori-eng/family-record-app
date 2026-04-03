@@ -78,21 +78,21 @@ export default function CalendarScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Month Navigation */}
         <View style={styles.monthNav}>
-          <TouchableOpacity onPress={goToPrevMonth} style={styles.navButton}>
+          <TouchableOpacity onPress={goToPrevMonth} style={styles.navButton} activeOpacity={0.7}>
             <FontAwesome name="chevron-left" size={16} color="#5C4A32" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={goToToday}>
+          <TouchableOpacity onPress={goToToday} activeOpacity={0.7}>
             <Text style={styles.monthTitle}>
               {currentYear}년 {currentMonth + 1}월
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={goToNextMonth} style={styles.navButton}>
+          <TouchableOpacity onPress={goToNextMonth} style={styles.navButton} activeOpacity={0.7}>
             <FontAwesome name="chevron-right" size={16} color="#5C4A32" />
           </TouchableOpacity>
         </View>
 
         {!isCurrentMonth && (
-          <TouchableOpacity style={styles.todayChip} onPress={goToToday}>
+          <TouchableOpacity style={styles.todayChip} onPress={goToToday} activeOpacity={0.7}>
             <FontAwesome name="calendar-check-o" size={12} color="#C85A4A" />
             <Text style={styles.todayChipText}>오늘로 이동</Text>
           </TouchableOpacity>

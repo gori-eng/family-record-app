@@ -46,15 +46,15 @@ export default function FinanceScreen() {
           <View style={styles.summaryCard}>
             <Text style={styles.summaryMonth}>2026년 4월</Text>
             <View style={styles.summaryRow}>
-              <View style={styles.summaryItem}>
+              <TouchableOpacity style={styles.summaryItem} activeOpacity={0.7} onPress={() => { setActiveCategory('전체'); Alert.alert('수입 내역', '월급: +4,200,000원\n\n수입 상세 보기 기능이 곧 추가됩니다.'); }}>
                 <Text style={styles.summaryLabel}>수입</Text>
                 <Text style={[styles.summaryAmount, { color: '#4AA86B' }]}>+4,200,000원</Text>
-              </View>
+              </TouchableOpacity>
               <View style={styles.summaryDivider} />
-              <View style={styles.summaryItem}>
+              <TouchableOpacity style={styles.summaryItem} activeOpacity={0.7} onPress={() => { setActiveCategory('전체'); Alert.alert('지출 내역', '식비: -119,900원\n교통: -65,000원\n교육: -350,000원\n여가: -48,000원\n의료: -15,000원\n주거: -185,000원\n\n지출 상세 보기 기능이 곧 추가됩니다.'); }}>
                 <Text style={styles.summaryLabel}>지출</Text>
                 <Text style={[styles.summaryAmount, { color: '#C85A4A' }]}>-782,900원</Text>
-              </View>
+              </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.balanceRow} activeOpacity={0.7} onPress={() => Alert.alert('잔액 상세', '수입: +4,200,000원\n지출: -782,900원\n\n잔액: 3,417,100원\n\n상세 분석 기능이 곧 추가됩니다.')}>
               <Text style={styles.balanceLabel}>잔액</Text>

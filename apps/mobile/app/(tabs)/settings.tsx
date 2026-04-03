@@ -61,9 +61,10 @@ export default function SettingsScreen() {
   ];
 
   return (
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Profile Card */}
-      <View style={styles.profileCard}>
+      <TouchableOpacity style={styles.profileCard} activeOpacity={0.7} onPress={() => handleMenuPress('프로필 수정')}>
         <View style={styles.avatar}>
           <FontAwesome name="user" size={28} color="#C85A4A" />
         </View>
@@ -71,13 +72,10 @@ export default function SettingsScreen() {
           <Text style={styles.profileName}>김지수</Text>
           <Text style={styles.profileRole}>관리자 (부모)</Text>
         </View>
-        <TouchableOpacity
-          style={styles.editProfileButton}
-          onPress={() => handleMenuPress('프로필 수정')}
-        >
+        <View style={styles.editProfileButton}>
           <FontAwesome name="pencil" size={14} color="#C85A4A" />
-        </TouchableOpacity>
-      </View>
+        </View>
+      </TouchableOpacity>
 
       {sections.map((section, si) => (
         <View key={si} style={styles.section}>
@@ -113,10 +111,12 @@ export default function SettingsScreen() {
         <Text style={styles.version}>우리 가족 v1.0.0</Text>
       </TouchableOpacity>
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: '#FFFDF0' },
   container: { flex: 1, backgroundColor: '#FFFDF0', padding: 20 },
   profileCard: {
     flexDirection: 'row', alignItems: 'center', gap: 16,

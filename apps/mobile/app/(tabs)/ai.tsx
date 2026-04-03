@@ -83,7 +83,7 @@ export default function AIScreen() {
         <View style={styles.selectedIndicator}>
           <FontAwesome name={ROLES[selectedRole].icon as any} size={12} color="#C85A4A" />
           <Text style={styles.selectedIndicatorText}>{ROLES[selectedRole].label} 모드</Text>
-          <TouchableOpacity onPress={() => setSelectedRole(null)}>
+          <TouchableOpacity onPress={() => setSelectedRole(null)} activeOpacity={0.7}>
             <FontAwesome name="times" size={14} color="#BFAE99" />
           </TouchableOpacity>
         </View>
