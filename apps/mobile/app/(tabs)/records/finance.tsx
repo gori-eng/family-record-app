@@ -86,6 +86,12 @@ export default function FinanceScreen() {
             </View>
           </View>
 
+          {/* AI 보조 힌트 */}
+          <TouchableOpacity style={styles.aiHint} activeOpacity={0.7}>
+            <FontAwesome name="magic" size={12} color="#C85A4A" />
+            <Text style={styles.aiHintText}>이번 달 식비가 전월 대비 12% 증가했어요. 외식 빈도를 줄이면 약 8만원 절약할 수 있어요.</Text>
+          </TouchableOpacity>
+
           {/* Category Filter */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll} contentContainerStyle={styles.filterContainer}>
             {ALL_CATEGORIES.map((cat, i) => (
@@ -199,6 +205,13 @@ const styles = StyleSheet.create({
   transDesc: { fontSize: 14, fontWeight: '600', color: '#2D2D2D' },
   transCat: { fontSize: 11, color: '#9C8B75', marginTop: 3 },
   transAmount: { fontSize: 14, fontWeight: '700' },
+  aiHint: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 8,
+    marginHorizontal: 20, marginBottom: 16,
+    backgroundColor: '#FFF0ED', borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: '#F5D5C0',
+  },
+  aiHintText: { flex: 1, fontSize: 12, color: '#C85A4A', lineHeight: 18 },
   fab: {
     position: 'absolute', bottom: 24, right: 24,
     width: 56, height: 56, borderRadius: 28,

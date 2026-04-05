@@ -64,19 +64,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="ai"
-        options={{
-          title: 'AI 비서',
-          tabBarIcon: ({ color }) => <TabBarIcon name="magic" color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="settings"
         options={{
           title: '설정',
           tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
         }}
       />
+      {/* AI 비서 탭 숨김 - 각 기능 내부에 보조 역할로 통합 */}
+      <Tabs.Screen name="ai" options={{ href: null }} />
     </Tabs>
   );
 }
