@@ -203,25 +203,29 @@ const styles = StyleSheet.create({
   },
   badgeText: { color: '#FFF', fontSize: 10, fontWeight: '700' },
   greeting: { paddingHorizontal: 20, marginBottom: 16 },
-  dateText: { fontSize: 14, color: '#8B7355', marginBottom: 4 },
+  dateText: { fontSize: 13, color: '#9C8B75', marginBottom: 6, letterSpacing: 0.3 },
   greetingText: { fontSize: 22, fontWeight: '700', color: '#2D2D2D', lineHeight: 32 },
 
   // Family members
   membersScroll: { marginBottom: 20 },
   membersContainer: { paddingHorizontal: 20, gap: 12 },
-  memberChip: { alignItems: 'center', width: 60 },
+  memberChip: { alignItems: 'center', width: 68 },
   memberAvatar: {
-    width: 48, height: 48, borderRadius: 24,
-    justifyContent: 'center', alignItems: 'center', marginBottom: 4,
+    width: 52, height: 52, borderRadius: 26,
+    justifyContent: 'center', alignItems: 'center', marginBottom: 6,
+    borderWidth: 2, borderColor: '#FFFFFF',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08, shadowRadius: 4, elevation: 2,
   },
   memberInitial: { fontSize: 18, fontWeight: '700', color: '#5C4A32' },
   memberName: { fontSize: 12, fontWeight: '600', color: '#2D2D2D' },
-  memberRole: { fontSize: 10, color: '#BFAE99' },
+  memberRole: { fontSize: 10, color: '#9C8B75' },
 
   // Question card
   questionCard: {
-    marginHorizontal: 20, backgroundColor: '#FFDAB9',
-    borderRadius: 16, padding: 20, marginBottom: 24,
+    marginHorizontal: 20, backgroundColor: '#FFF0E8',
+    borderRadius: 20, padding: 20, marginBottom: 24,
+    borderWidth: 1, borderColor: '#F5D5C0',
   },
   questionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
   questionLabel: { fontSize: 12, color: '#C85A4A', fontWeight: '600' },
@@ -232,7 +236,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFDF0', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20,
   },
   answerButtonText: { fontSize: 14, fontWeight: '600', color: '#C85A4A' },
-  answerCount: { fontSize: 12, color: '#8B6914', fontWeight: '500' },
+  answerCount: { fontSize: 12, color: '#7A6030', fontWeight: '600' },
 
   // Quick actions
   quickActions: {
@@ -241,8 +245,10 @@ const styles = StyleSheet.create({
   },
   quickActionItem: {
     width: '47%', backgroundColor: '#FFFFFF',
-    borderRadius: 16, padding: 16, alignItems: 'center',
+    borderRadius: 16, padding: 18, alignItems: 'center',
     borderWidth: 1, borderColor: '#F0E8D8',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
   },
   quickActionIcon: {
     width: 48, height: 48, borderRadius: 24,
@@ -273,7 +279,7 @@ const styles = StyleSheet.create({
   eventInfo: { flex: 1 },
   eventTitle: { fontSize: 15, fontWeight: '600', color: '#2D2D2D', marginBottom: 4 },
   eventLocationRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  eventLocation: { fontSize: 12, color: '#BFAE99' },
+  eventLocation: { fontSize: 12, color: '#9C8B75' },
 
   // Recent records
   recordItem: {
@@ -290,5 +296,5 @@ const styles = StyleSheet.create({
   recordType: { fontSize: 11, color: '#C85A4A', fontWeight: '600' },
   recordDate: { fontSize: 11, color: '#BFAE99' },
   recordTitle: { fontSize: 14, fontWeight: '600', color: '#2D2D2D', marginBottom: 2 },
-  recordPreview: { fontSize: 12, color: '#8B7355' },
+  recordPreview: { fontSize: 12, color: '#7A6B55', lineHeight: 18 },
 });

@@ -77,10 +77,10 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 15,
-    color: '#8B7355',
+    color: '#5C4A32',
     textAlign: 'center',
     marginBottom: 32,
-    lineHeight: 22,
+    lineHeight: 24,
   },
   badge: {
     flexDirection: 'row',
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   },
   subtext: {
     fontSize: 14,
-    color: '#BFAE99',
+    color: '#9C8B75',
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 40,

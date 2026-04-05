@@ -128,13 +128,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFDAB9', justifyContent: 'center', alignItems: 'center',
   },
   profileName: { fontSize: 18, fontWeight: '700', color: '#2D2D2D' },
-  profileRole: { fontSize: 13, color: '#8B7355', marginTop: 2 },
+  profileRole: { fontSize: 13, color: '#7A6B55', marginTop: 2 },
   editProfileButton: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: '#FFF0ED', justifyContent: 'center', alignItems: 'center',
   },
   section: { marginBottom: 20 },
-  sectionTitle: { fontSize: 14, fontWeight: '700', color: '#BFAE99', marginBottom: 8, textTransform: 'uppercase' },
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#9C8B75', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
   menuItem: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     backgroundColor: '#FFFFFF', borderRadius: 12, padding: 14, marginBottom: 6,
@@ -147,11 +147,11 @@ const styles = StyleSheet.create({
   },
   menuLabel: { fontSize: 15, color: '#2D2D2D' },
   menuRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  menuSubtitle: { fontSize: 13, color: '#BFAE99' },
+  menuSubtitle: { fontSize: 13, color: '#9C8B75' },
   signOutButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 16, marginTop: 8,
   },
   signOutText: { fontSize: 15, fontWeight: '600', color: '#C85A4A' },
-  version: { textAlign: 'center', color: '#BFAE99', fontSize: 12, marginTop: 16, marginBottom: 32 },
+  version: { textAlign: 'center', color: '#9C8B75', fontSize: 12, marginTop: 16, marginBottom: 32 },
 });
