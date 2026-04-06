@@ -12,6 +12,10 @@ export default function RecordsLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="parenting" options={{ title: '육아 일기' }} />
+      <Stack.Screen name="reading" options={{ title: '독서 목록' }} />
+      <Stack.Screen name="finance" options={{ title: '가계부' }} />
+      <Stack.Screen name="[type]" />
     </Stack>
   );
 }

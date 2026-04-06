@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
   milestoneText: { fontSize: 11, fontWeight: '600', color: '#7A5C10' },
   fab: {
-    position: 'absolute', bottom: 24, right: 24,
+    position: 'absolute', bottom: 16, right: 20, zIndex: 10,
     width: 56, height: 56, borderRadius: 28,
     backgroundColor: '#C85A4A', justifyContent: 'center', alignItems: 'center',
     shadowColor: '#C85A4A', shadowOffset: { width: 0, height: 4 },

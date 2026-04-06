@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   progressText: { fontSize: 11, color: '#7A6B55', fontWeight: '500' },
   bookNotes: { fontSize: 12, color: '#5C4A32', fontStyle: 'italic', lineHeight: 18 },
   fab: {
-    position: 'absolute', bottom: 24, right: 24,
+    position: 'absolute', bottom: 16, right: 20, zIndex: 10,
     width: 56, height: 56, borderRadius: 28,
     backgroundColor: '#C85A4A', justifyContent: 'center', alignItems: 'center',
     shadowColor: '#C85A4A', shadowOffset: { width: 0, height: 4 },

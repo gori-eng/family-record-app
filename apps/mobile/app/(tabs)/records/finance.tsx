@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   },
   aiHintText: { flex: 1, fontSize: 12, color: '#C85A4A', lineHeight: 18 },
   fab: {
-    position: 'absolute', bottom: 24, right: 24,
+    position: 'absolute', bottom: 16, right: 20, zIndex: 10,
     width: 56, height: 56, borderRadius: 28,
     backgroundColor: '#C85A4A', justifyContent: 'center', alignItems: 'center',
     shadowColor: '#C85A4A', shadowOffset: { width: 0, height: 4 },
