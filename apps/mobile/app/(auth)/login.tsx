@@ -39,8 +39,7 @@ export default function LoginScreen() {
               <FontAwesome name="leaf" size={14} color="#3D7A5A" />
             </View>
           </View>
-          <Text style={s.logo}>Familog</Text>
-          <Text style={s.tagline}>가족의 기록, 세대를 넘어</Text>
+          <Text style={s.logo}>패밀로그</Text>
         </View>
 
         {/* Form */}
@@ -134,12 +133,9 @@ const s = StyleSheet.create({
     borderWidth: 2, borderColor: '#FFFFFF',
   },
   logo: {
-    fontSize: 36, fontWeight: '700', color: '#1F1F1F',
-    fontFamily: 'PretendardBold', letterSpacing: -1.5,
-  },
-  tagline: {
-    fontSize: 14, color: '#A0A0A0', marginTop: 4,
-    fontFamily: 'Pretendard', letterSpacing: -0.3,
+    fontSize: 38, color: '#2D5A3F',
+    fontFamily: 'Cafe24Ssurround', letterSpacing: -0.5,
+    transform: [{ rotate: '-1deg' }],
   },
 
   // Form
