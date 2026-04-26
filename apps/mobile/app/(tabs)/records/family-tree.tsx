@@ -34,7 +34,7 @@ export default function FamilyTreeScreen() {
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.intro}>
             <FontAwesome name="sitemap" size={18} color="#C05A4E" />
-            <Text style={s.introText}>우리 가족의 뿌리를 기록하세요. 각 인물을 탭하면 인생 요약, 독서 리스트, 건강 기록을 볼 수 있습니다.</Text>
+            <Text style={s.introText}>가족의 뿌리를 기록하세요. 각 인물을 탭하면 인생 요약, 독서 리스트, 건강 기록을 볼 수 있습니다.</Text>
           </View>
 
           {GENERATIONS.map((gen, gi) => (

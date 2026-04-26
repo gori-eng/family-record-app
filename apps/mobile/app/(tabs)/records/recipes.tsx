@@ -6,7 +6,7 @@ import { useState, useRef } from 'react';
 const RECIPES = [
   { name: '엄마 김치찌개', origin: '할머니로부터 전수', author: '지수', difficulty: '쉬움', time: '30분', ingredients: 6, color: '#FF8A65', icon: 'fire' },
   { name: '할머니 갈비찜', origin: '명절 특별 레시피', author: '지수', difficulty: '보통', time: '2시간', ingredients: 12, color: '#A1887F', icon: 'cutlery' },
-  { name: '서준이 좋아하는 계란말이', origin: '우리 가족 오리지널', author: '민준', difficulty: '쉬움', time: '15분', ingredients: 4, color: '#FFD54F', icon: 'sun-o' },
+  { name: '서준이 좋아하는 계란말이', origin: '가족 오리지널', author: '민준', difficulty: '쉬움', time: '15분', ingredients: 4, color: '#FFD54F', icon: 'sun-o' },
   { name: '지우 이유식 - 단호박죽', origin: '소아과 추천', author: '지수', difficulty: '쉬움', time: '40분', ingredients: 3, color: '#FFB74D', icon: 'leaf' },
   { name: '크리스마스 케이크', origin: '가족 연례 행사', author: '전체', difficulty: '어려움', time: '3시간', ingredients: 15, color: '#E57373', icon: 'birthday-cake' },
   { name: '아빠표 볶음밥', origin: '주말 아침 단골 메뉴', author: '민준', difficulty: '쉬움', time: '20분', ingredients: 7, color: '#81C784', icon: 'spoon' },
@@ -127,7 +127,7 @@ export default function RecipesScreen() {
 
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.header}>
-            <Text style={s.subtitle}>우리 가족만의 손맛을 기록하세요</Text>
+            <Text style={s.subtitle}>가족만의 손맛을 기록하세요</Text>
             <View style={s.statsRow}>
               <View style={s.stat}><Text style={s.statNum}>{RECIPES.length}</Text><Text style={s.statLabel}>총 레시피</Text></View>
               <View style={s.stat}><Text style={s.statNum}>3</Text><Text style={s.statLabel}>세대 전수</Text></View>

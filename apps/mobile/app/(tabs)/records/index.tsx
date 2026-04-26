@@ -28,7 +28,7 @@ export default function RecordsScreen() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>소중한 순간들</Text>
         <Text style={styles.subtitle}>
-          우리 가족만의 특별한 이야기와 성장 기록 · 총 {totalRecords}개
+          가족만의 특별한 이야기와 기록 · 총 {totalRecords}개
         </Text>
 
         <View style={styles.grid}>

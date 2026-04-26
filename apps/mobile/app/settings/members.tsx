@@ -14,7 +14,7 @@ export default function MembersScreen() {
     <>
       <Stack.Screen options={{ title: '가족 구성원' }} />
       <ScrollView style={s.container}>
-        <Text style={s.subtitle}>우리 가족 구성원 {MEMBERS.length}명</Text>
+        <Text style={s.subtitle}>가족 구성원 {MEMBERS.length}명</Text>
         {MEMBERS.map((m, i) => (
           <TouchableOpacity key={i} style={s.card} activeOpacity={0.7}
             onPress={() => Alert.alert(m.name, `역할: ${m.role}\n이메일: ${m.email || '미등록'}\n\n역할 변경 및 프로필 수정 기능이 곧 추가됩니다.`)}>

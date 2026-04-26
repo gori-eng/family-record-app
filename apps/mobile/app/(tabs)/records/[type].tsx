@@ -5,11 +5,11 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 const CATEGORY_INFO: Record<string, { icon: string; label: string; color: string; description: string }> = {
   movies: { icon: 'film', label: '영화 관람', color: '#B8D4E6', description: '가족이 함께 본 영화를 기록하세요' },
   travel: { icon: 'plane', label: '여행 위시', color: '#FFE4C4', description: '가족 여행 위시리스트를 관리하세요' },
-  recipes: { icon: 'cutlery', label: '레시피', color: '#FFDAB9', description: '우리 가족만의 특별한 레시피를 모아보세요' },
+  recipes: { icon: 'cutlery', label: '레시피', color: '#FFDAB9', description: '가족만의 특별한 레시피를 모아보세요' },
   media: { icon: 'microphone', label: '음성/영상', color: '#D4B8E6', description: '소중한 음성과 영상을 기록하세요' },
   goals: { icon: 'trophy', label: '가족 목표', color: '#E6D4B8', description: '가족이 함께 이루는 목표를 세워보세요' },
   health: { icon: 'heartbeat', label: '건강 기록', color: '#FFB8B8', description: '가족 건강 정보를 안전하게 관리하세요' },
-  'family-tree': { icon: 'sitemap', label: '가계도', color: '#C4E6B8', description: '우리 가족의 뿌리를 기록하세요' },
+  'family-tree': { icon: 'sitemap', label: '가계도', color: '#C4E6B8', description: '가족의 뿌리를 기록하세요' },
   'time-capsule': { icon: 'clock-o', label: '타임캡슐', color: '#E6E4B8', description: '미래의 가족에게 메시지를 남기세요' },
   identity: { icon: 'id-card', label: 'MBTI 기록', color: '#B8C4E6', description: '가족 구성원의 성격 유형을 알아보세요' },
   legacy: { icon: 'lock', label: '디지털 유산', color: '#E6B8D4', description: '중요한 디지털 자산을 안전하게 보관하세요' },

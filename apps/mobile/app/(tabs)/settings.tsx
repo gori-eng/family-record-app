@@ -18,7 +18,7 @@ export default function SettingsScreen() {
 
   const handleShareInviteCode = async () => {
     try {
-      await Share.share({ message: `우리 가족 앱에 초대합니다! 초대 코드: ${INVITE_CODE}` });
+      await Share.share({ message: `Familog에 초대합니다! 초대 코드: ${INVITE_CODE}` });
     } catch {
       Alert.alert('초대 코드', INVITE_CODE);
     }
@@ -93,7 +93,7 @@ export default function SettingsScreen() {
         <Text style={styles.signOutText}>로그아웃</Text>
       </TouchableOpacity>
 
-      <Text style={styles.version}>우리 가족 v1.0.0</Text>
+      <Text style={styles.version}>Familog v1.0.0</Text>
     </ScrollView>
     </SafeAreaView>
   );

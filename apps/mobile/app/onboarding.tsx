@@ -13,7 +13,7 @@ export default function OnboardingScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcome}>우리 가족에 오신 것을 환영해요!</Text>
+      <Text style={styles.welcome}>Familog에 오신 것을 환영해요!</Text>
 
       <View style={styles.stepsContainer}>
         {STEPS.map((step, i) => (

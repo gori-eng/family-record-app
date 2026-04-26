@@ -43,7 +43,7 @@ export default function AIScreen() {
           </View>
           <View style={styles.aiMessageBubble}>
             <Text style={styles.aiMessageText}>
-              안녕하세요! 저는 우리 가족 AI 비서입니다. {'\n\n'}
+              안녕하세요! 저는 Familog AI 비서입니다. {'\n\n'}
               아래에서 역할을 선택하고 질문해보세요:{'\n'}
               - 건강 비서: "아빠 건강검진 결과 분석해줘"{'\n'}
               - 재무 컨설턴트: "이번 달 지출 패턴 분석해줘"{'\n'}
