@@ -232,13 +232,13 @@ const s = StyleSheet.create({
   badgeText: { color: '#FFF', fontSize: 9, fontWeight: '700' },
 
   // 1. Hero — 한 줄
-  hero: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 24 },
+  hero: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 28 },
   greetingLine: { fontSize: 26, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.5 },
   dateText: { fontSize: 13, color: '#A0A0A0', marginTop: 4, fontFamily: 'Pretendard' },
 
   // Section
-  section: { paddingHorizontal: 20, marginBottom: 24 },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 14 },
+  section: { paddingHorizontal: 20, marginBottom: 32 },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 16 },
   sectionTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   sectionSub: { fontSize: 12, color: '#A0A0A0', marginTop: 2 },
   seeAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 4 },
@@ -264,7 +264,7 @@ const s = StyleSheet.create({
   timelineMember: { fontSize: 10, fontWeight: '600', color: '#888' },
 
   // 6. Quick Record — 일정과 기록 사이
-  quickSection: { paddingLeft: 20, marginBottom: 24 },
+  quickSection: { paddingLeft: 20, marginBottom: 32 },
   quickTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3, marginBottom: 10 },
   quickScroll: { gap: 8 },
   quickChip: {

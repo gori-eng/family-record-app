@@ -199,8 +199,7 @@ export default function CalendarScreen() {
               <TouchableOpacity key={day}
                 style={[styles.dayCell, isToday(day)&&styles.todayCell, selectedDay===day&&!isToday(day)&&styles.selectedCell]}
                 onPress={() => setSelectedDay(day)} activeOpacity={0.6}>
-                <Text style={[styles.dayText, isToday(day)&&styles.todayText, selectedDay===day&&!isToday(day)&&styles.selectedText,
-                  dow===0&&styles.sundayColor, dow===6&&styles.saturdayColor]}>{day}</Text>
+                <Text style={[styles.dayText, !isToday(day)&&dow===0&&styles.sundayColor, !isToday(day)&&dow===6&&styles.saturdayColor, isToday(day)&&styles.todayText, selectedDay===day&&!isToday(day)&&styles.selectedText]}>{day}</Text>
                 {hasEvents(day) && <View style={[styles.eventIndicator, isToday(day)&&styles.eventIndicatorToday]}/>}
               </TouchableOpacity>
             );
@@ -268,13 +267,13 @@ const styles = StyleSheet.create({
   sundayColor: { color:'#C05A4E' },
   saturdayColor: { color:'#4A90C8' },
   calendarGrid: { flexDirection:'row', flexWrap:'wrap', paddingHorizontal:12, marginBottom:16 },
-  dayCell: { width:`${100/7}%`, aspectRatio:1, justifyContent:'center', alignItems:'center' },
-  todayCell: { backgroundColor:'#C05A4E', borderRadius:22, minWidth:44, minHeight:44, justifyContent:'center', alignItems:'center' },
+  dayCell: { width:`${100/7}%`, aspectRatio:1, justifyContent:'center', alignItems:'center', position:'relative' as const },
+  todayCell: { backgroundColor:'#C05A4E', borderRadius:20 },
   selectedCell: { backgroundColor:'#FFF0ED', borderRadius:20 },
   dayText: { fontSize:15, color:'#1F1F1F', fontFamily:'Pretendard' },
   todayText: { color:'#FFFFFF', fontWeight:'700', fontFamily:'PretendardBold' },
   selectedText: { color:'#C05A4E', fontWeight:'700' },
-  eventIndicator: { width:6, height:6, borderRadius:3, backgroundColor:'#C05A4E', marginTop:3 },
+  eventIndicator: { width:5, height:5, borderRadius:3, backgroundColor:'#C05A4E', position:'absolute' as const, bottom:'15%' },
   eventIndicatorToday: { backgroundColor:'#FFFFFF' },
 
   aiCalHint: { flexDirection:'row', alignItems:'flex-start', gap:8, marginHorizontal:20, marginBottom:16, backgroundColor:'#FFF8F0', borderRadius:12, padding:12, borderWidth:1, borderColor:'#F5E8D8' },
