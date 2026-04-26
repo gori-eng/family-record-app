@@ -50,7 +50,7 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     Pretendard: require('../assets/fonts/Pretendard-Regular.otf'),
     PretendardBold: require('../assets/fonts/Pretendard-Bold.otf'),
-    Cafe24Ssurround: require('../assets/fonts/Cafe24Ssurround.ttf'),
+    GaeguBold: require('../assets/fonts/GaeguBold.ttf'),
     ...FontAwesome.font,
   });
   const [session, setSession] = useState<Session | null>(null);

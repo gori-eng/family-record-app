@@ -134,7 +134,7 @@ const s = StyleSheet.create({
   },
   logo: {
     fontSize: 38, color: '#2D5A3F',
-    fontFamily: 'Cafe24Ssurround', letterSpacing: -0.5,
+    fontFamily: 'GaeguBold', letterSpacing: -0.5,
     transform: [{ rotate: '-1deg' }],
   },
 

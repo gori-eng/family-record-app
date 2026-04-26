@@ -88,7 +88,7 @@ const s = StyleSheet.create({
   logoMark: { position: 'relative', marginBottom: 16 },
   logoBook: { width: 64, height: 64, borderRadius: 20, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 12, elevation: 6 },
   logoLeaf: { position: 'absolute', top: -6, right: -6, width: 28, height: 28, borderRadius: 14, backgroundColor: '#EFF6F1', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#FFFFFF' },
-  logo: { fontSize: 38, color: '#2D5A3F', fontFamily: 'Cafe24Ssurround', letterSpacing: -0.5, transform: [{ rotate: '-1deg' }] },
+  logo: { fontSize: 38, color: '#2D5A3F', fontFamily: 'GaeguBold', letterSpacing: -0.5, transform: [{ rotate: '-1deg' }] },
   form: { marginBottom: 32 },
   label: { fontSize: 13, fontWeight: '600', color: '#666', marginBottom: 6, fontFamily: 'Pretendard' },
   input: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 15, fontSize: 16, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
