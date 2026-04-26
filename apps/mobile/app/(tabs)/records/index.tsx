@@ -60,21 +60,22 @@ export default function RecordsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
-  scrollView: { flex: 1, padding: 20 },
-  title: { fontSize: 24, fontWeight: '700', color: '#1F1F1F', marginBottom: 4 },
-  subtitle: { fontSize: 14, color: '#7A6B55', marginBottom: 20 },
+  scrollView: { flex: 1, paddingHorizontal: 20 },
+  title: { fontSize: 26, fontWeight: '700', color: '#1F1F1F', marginBottom: 6, fontFamily: 'PretendardBold', letterSpacing: -0.5, marginTop: 16 },
+  subtitle: { fontSize: 13, color: '#A0A0A0', marginBottom: 28, fontFamily: 'Pretendard', lineHeight: 18 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
   card: {
     width: '47%', backgroundColor: '#FFFFFF',
-    borderRadius: 16, paddingVertical: 20, paddingHorizontal: 14, alignItems: 'center',
+    borderRadius: 16, paddingVertical: 22, paddingHorizontal: 14, alignItems: 'center',
     borderWidth: 1, borderColor: '#EAEAEA',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03, shadowRadius: 3, elevation: 1,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
+    marginBottom: 2,
   },
   iconCircle: {
-    width: 50, height: 50, borderRadius: 25,
-    justifyContent: 'center', alignItems: 'center', marginBottom: 10,
+    width: 52, height: 52, borderRadius: 26,
+    justifyContent: 'center', alignItems: 'center', marginBottom: 12,
   },
-  cardLabel: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', marginBottom: 4 },
-  cardCount: { fontSize: 12, color: '#9C8B75', fontWeight: '500' },
+  cardLabel: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', marginBottom: 4, fontFamily: 'Pretendard' },
+  cardCount: { fontSize: 12, color: '#A0A0A0', fontWeight: '500', fontFamily: 'Pretendard' },
 });

@@ -112,18 +112,12 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#C05A4E" colors={['#C05A4E']} />}
       >
-        {/* Header: 알림 + 프로필 (2. 프로필 우측) */}
+        {/* Header — 알림만 */}
         <View style={s.header}>
           <View style={{ flex: 1 }} />
           <TouchableOpacity activeOpacity={0.7} onPress={openNotif} style={s.headerIcon}>
             <FontAwesome name="bell-o" size={20} color="#1F1F1F" />
             {unreadCount > 0 && <View style={s.badge}><Text style={s.badgeText}>{unreadCount}</Text></View>}
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/settings')}>
-            <View style={s.profilePill}>
-              <View style={s.profileDot} />
-              <Text style={s.profileName}>김지수</Text>
-            </View>
           </TouchableOpacity>
         </View>
 
@@ -169,8 +163,9 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* 6. 빠른 기록 — 일정과 최근 기록 사이 */}
+        {/* 빠른 기록 */}
         <View style={s.quickSection}>
+          <Text style={s.quickTitle}>빠른 기록</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.quickScroll}>
             {[
               { icon: 'pencil', label: '일기', route: '/(tabs)/records/parenting' },
@@ -233,13 +228,6 @@ const s = StyleSheet.create({
   // Header — 2. 프로필 우측
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 4, paddingBottom: 4, gap: 10 },
   headerIcon: { padding: 8 },
-  profilePill: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#FFFFFF', paddingHorizontal: 14, paddingVertical: 8,
-    borderRadius: 24, borderWidth: 1, borderColor: '#EAEAEA',
-  },
-  profileDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#3D9A5F' },
-  profileName: { fontSize: 13, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
   badge: { position: 'absolute', top: 2, right: 2, backgroundColor: '#C05A4E', borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4 },
   badgeText: { color: '#FFF', fontSize: 9, fontWeight: '700' },
 
@@ -277,6 +265,7 @@ const s = StyleSheet.create({
 
   // 6. Quick Record — 일정과 기록 사이
   quickSection: { paddingLeft: 20, marginBottom: 24 },
+  quickTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3, marginBottom: 10 },
   quickScroll: { gap: 8 },
   quickChip: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
