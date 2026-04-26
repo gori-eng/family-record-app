@@ -1,17 +1,29 @@
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
+import { TouchableOpacity } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+
+function BackToIndex() {
+  const router = useRouter();
+  return (
+    <TouchableOpacity onPress={() => router.replace('/(tabs)/records')} activeOpacity={0.7} style={{ paddingRight: 8 }}>
+      <FontAwesome name="chevron-left" size={16} color="#1F1F1F" />
+    </TouchableOpacity>
+  );
+}
 
 export default function RecordsLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: '#FFFDF0' },
-        headerTintColor: '#2D2D2D',
+        headerStyle: { backgroundColor: '#F9F8F5' },
+        headerTintColor: '#1F1F1F',
         headerShadowVisible: false,
         headerBackTitle: '뒤로',
+        headerLeft: () => <BackToIndex />,
         animation: 'slide_from_right',
       }}
     >
-      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="index" options={{ headerShown: false, headerLeft: undefined }} />
       <Stack.Screen name="parenting" options={{ title: '육아 일기' }} />
       <Stack.Screen name="reading" options={{ title: '독서 목록' }} />
       <Stack.Screen name="finance" options={{ title: '가계부' }} />
