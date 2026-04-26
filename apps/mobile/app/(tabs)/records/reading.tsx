@@ -6,12 +6,12 @@ import { useState } from 'react';
 const STATUS_OPTIONS = ['전체', '읽는 중', '완독', '읽고 싶은'];
 
 const BOOKS = [
-  { title: '어린 왕자', author: '생텍쥐페리', reader: '서준', status: '완독', rating: 5, color: '#B8E6C8', notes: '혼자서 처음 완독! "어른들은 참 이상해" 가 인상적이었대요' },
-  { title: '아몬드', author: '손원평', reader: '지수', status: '읽는 중', progress: 65, color: '#FFB6C1', notes: '감정을 느끼지 못하는 소년의 이야기. 챕터 12까지 읽음' },
-  { title: '나미야 잡화점의 기적', author: '히가시노 게이고', reader: '민준', status: '완독', rating: 4, color: '#B8D4E6', notes: '시간여행과 편지의 조합이 따뜻했음' },
-  { title: '코스모스', author: '칼 세이건', reader: '민준', status: '읽는 중', progress: 30, color: '#B8D4E6', notes: '우주의 광대함을 느끼는 중' },
-  { title: '모모', author: '미하엘 엔데', reader: '서준', status: '읽고 싶은', color: '#E6D4B8', notes: '' },
-  { title: '해리포터 시리즈', author: 'J.K. 롤링', reader: '지우', status: '읽고 싶은', color: '#FFB6C1', notes: '' },
+  { title: '어린 왕자', author: '생텍쥐페리', reader: '서준', status: '완독', rating: 5, color: '#B8D8C0', notes: '혼자서 처음 완독! "어른들은 참 이상해" 가 인상적이었대요' },
+  { title: '아몬드', author: '손원평', reader: '지수', status: '읽는 중', progress: 65, color: '#F0B8B8', notes: '감정을 느끼지 못하는 소년의 이야기. 챕터 12까지 읽음' },
+  { title: '나미야 잡화점의 기적', author: '히가시노 게이고', reader: '민준', status: '완독', rating: 4, color: '#B0C8D8', notes: '시간여행과 편지의 조합이 따뜻했음' },
+  { title: '코스모스', author: '칼 세이건', reader: '민준', status: '읽는 중', progress: 30, color: '#B0C8D8', notes: '우주의 광대함을 느끼는 중' },
+  { title: '모모', author: '미하엘 엔데', reader: '서준', status: '읽고 싶은', color: '#D8CDB8', notes: '' },
+  { title: '해리포터 시리즈', author: 'J.K. 롤링', reader: '지우', status: '읽고 싶은', color: '#F0B8B8', notes: '' },
 ];
 
 function StarRating({ rating, title }: { rating: number; title: string }) {
@@ -43,7 +43,7 @@ export default function ReadingScreen() {
           {/* Stats */}
           <View style={styles.statsRow}>
             <TouchableOpacity style={styles.statCard} onPress={() => setActiveStatus('전체')} activeOpacity={0.7}>
-              <FontAwesome name="book" size={18} color="#C85A4A" />
+              <FontAwesome name="book" size={18} color="#C05A4E" />
               <Text style={styles.statNumber}>12</Text>
               <Text style={styles.statLabel}>총 도서</Text>
             </TouchableOpacity>
@@ -132,27 +132,27 @@ export default function ReadingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  container: { flex: 1, backgroundColor: '#F9F8F5' },
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
   statCard: {
     flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,
-    alignItems: 'center', borderWidth: 1, borderColor: '#F0E8D8',
+    alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA',
   },
-  statNumber: { fontSize: 22, fontWeight: '700', color: '#2D2D2D', marginTop: 4 },
+  statNumber: { fontSize: 22, fontWeight: '700', color: '#1F1F1F', marginTop: 4 },
   statLabel: { fontSize: 11, color: '#7A6B55', marginTop: 2 },
   filterContainer: { paddingHorizontal: 20, gap: 8, marginBottom: 16 },
   filterChip: {
     paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
-    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#F0E8D8',
+    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA',
   },
-  filterChipActive: { backgroundColor: '#C85A4A', borderColor: '#C85A4A' },
+  filterChipActive: { backgroundColor: '#C05A4E', borderColor: '#C05A4E' },
   filterText: { fontSize: 13, fontWeight: '600', color: '#8B7355' },
   filterTextActive: { color: '#FFFFFF' },
   bookList: { paddingHorizontal: 20 },
   bookCard: {
     flexDirection: 'row', gap: 14,
     backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10,
-    borderWidth: 1, borderColor: '#F0E8D8',
+    borderWidth: 1, borderColor: '#EAEAEA',
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03, shadowRadius: 3, elevation: 1,
   },
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   },
   bookInfo: { flex: 1 },
   bookTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 2 },
-  bookTitle: { fontSize: 15, fontWeight: '700', color: '#2D2D2D', flex: 1, marginRight: 8 },
+  bookTitle: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', flex: 1, marginRight: 8 },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
   statusText: { fontSize: 11, fontWeight: '700' },
   bookAuthor: { fontSize: 13, color: '#7A6B55', marginBottom: 6 },
@@ -170,15 +170,15 @@ const styles = StyleSheet.create({
   readerDot: { width: 8, height: 8, borderRadius: 4 },
   readerName: { fontSize: 11, color: '#5C4A32', fontWeight: '600' },
   progressRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flex: 1 },
-  progressBarBg: { flex: 1, height: 6, backgroundColor: '#F0E8D8', borderRadius: 3 },
-  progressBar: { height: 6, backgroundColor: '#C85A4A', borderRadius: 3 },
+  progressBarBg: { flex: 1, height: 6, backgroundColor: '#EAEAEA', borderRadius: 3 },
+  progressBar: { height: 6, backgroundColor: '#C05A4E', borderRadius: 3 },
   progressText: { fontSize: 11, color: '#7A6B55', fontWeight: '500' },
   bookNotes: { fontSize: 12, color: '#5C4A32', fontStyle: 'italic', lineHeight: 18 },
   fab: {
     position: 'absolute', bottom: 16, right: 20, zIndex: 10,
     width: 56, height: 56, borderRadius: 28,
-    backgroundColor: '#C85A4A', justifyContent: 'center', alignItems: 'center',
-    shadowColor: '#C85A4A', shadowOffset: { width: 0, height: 4 },
+    backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center',
+    shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3, shadowRadius: 8, elevation: 8,
   },
 });

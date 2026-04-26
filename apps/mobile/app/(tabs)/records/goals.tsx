@@ -26,7 +26,7 @@ export default function GoalsScreen() {
               <Text style={s.summaryLabel}>달성 완료</Text>
             </View>
             <View style={s.summaryCard}>
-              <Text style={[s.summaryNum, { color: '#C85A4A' }]}>4</Text>
+              <Text style={[s.summaryNum, { color: '#C05A4E' }]}>4</Text>
               <Text style={s.summaryLabel}>진행 중</Text>
             </View>
           </View>
@@ -68,23 +68,23 @@ export default function GoalsScreen() {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  container: { flex: 1, backgroundColor: '#F9F8F5' },
   summary: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 20 },
-  summaryCard: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#F0E8D8' },
-  summaryNum: { fontSize: 24, fontWeight: '700', color: '#2D2D2D' },
+  summaryCard: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA' },
+  summaryNum: { fontSize: 24, fontWeight: '700', color: '#1F1F1F' },
   summaryLabel: { fontSize: 11, color: '#7A6B55', marginTop: 2 },
   list: { paddingHorizontal: 20 },
-  card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#F0E8D8' },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#EAEAEA' },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
   goalIcon: { width: 44, height: 44, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   cardInfo: { flex: 1 },
-  goalTitle: { fontSize: 16, fontWeight: '700', color: '#2D2D2D', marginBottom: 2 },
+  goalTitle: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', marginBottom: 2 },
   goalDesc: { fontSize: 12, color: '#7A6B55' },
   progressSection: {},
-  progressBarBg: { height: 8, backgroundColor: '#F0E8D8', borderRadius: 4, marginBottom: 8 },
+  progressBarBg: { height: 8, backgroundColor: '#EAEAEA', borderRadius: 4, marginBottom: 8 },
   progressBar: { height: 8, borderRadius: 4 },
   progressMeta: { flexDirection: 'row', justifyContent: 'space-between' },
-  progressPct: { fontSize: 13, fontWeight: '700', color: '#2D2D2D' },
+  progressPct: { fontSize: 13, fontWeight: '700', color: '#1F1F1F' },
   targetDate: { fontSize: 12, color: '#9C8B75' },
-  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C85A4A', justifyContent: 'center', alignItems: 'center', shadowColor: '#C85A4A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center', shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
 });

@@ -4,7 +4,7 @@ import { Stack } from 'expo-router';
 
 const MEMBERS_MBTI = [
   {
-    name: '지수', mbti: 'ENFJ', color: '#FFDAB9',
+    name: '지수', mbti: 'ENFJ', color: '#E8D0C0',
     history: [
       { year: '2020', mbti: 'ENFP', note: '결혼 전 자유로운 시기' },
       { year: '2023', mbti: 'ENFJ', note: '아이 둘 낳고 리더십 강화' },
@@ -13,7 +13,7 @@ const MEMBERS_MBTI = [
     traits: ['공감 능력 뛰어남', '계획적', '가족 돌봄에 적극적'],
   },
   {
-    name: '민준', mbti: 'INTP', color: '#B8D4E6',
+    name: '민준', mbti: 'INTP', color: '#B0C8D8',
     history: [
       { year: '2019', mbti: 'INTJ', note: '직장 생활 초기' },
       { year: '2023', mbti: 'INTP', note: '육아하면서 유연해짐' },
@@ -22,7 +22,7 @@ const MEMBERS_MBTI = [
     traits: ['논리적 사고', '호기심 왕', '주말 요리사'],
   },
   {
-    name: '서준', mbti: 'ENFP', color: '#B8E6C8',
+    name: '서준', mbti: 'ENFP', color: '#B8D8C0',
     history: [
       { year: '2024', mbti: 'ESFP', note: '활발하고 사교적' },
       { year: '2026', mbti: 'ENFP', note: '상상력 풍부, 새로운 것 좋아함' },
@@ -81,7 +81,7 @@ export default function IdentityScreen() {
 
           {/* AI 분석 */}
           <View style={s.aiCard}>
-            <FontAwesome name="magic" size={14} color="#C85A4A" />
+            <FontAwesome name="magic" size={14} color="#C05A4E" />
             <View style={s.aiContent}>
               <Text style={s.aiTitle}>AI 닮은 점 분석</Text>
               <Text style={s.aiText}>"서준이는 7살 때 아버지가 가졌던 호기심과 90% 일치하는 패턴을 보이고 있어요!"</Text>
@@ -96,17 +96,17 @@ export default function IdentityScreen() {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  container: { flex: 1, backgroundColor: '#F9F8F5' },
   intro: { padding: 20 },
-  introTitle: { fontSize: 20, fontWeight: '700', color: '#2D2D2D', marginBottom: 6 },
+  introTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', marginBottom: 6 },
   introDesc: { fontSize: 13, color: '#7A6B55', lineHeight: 20 },
-  memberCard: { marginHorizontal: 20, marginBottom: 20, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, borderWidth: 1, borderColor: '#F0E8D8' },
+  memberCard: { marginHorizontal: 20, marginBottom: 20, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, borderWidth: 1, borderColor: '#EAEAEA' },
   memberHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
   avatar: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center' },
   avatarText: { fontSize: 20, fontWeight: '700', color: '#5C4A32' },
   memberInfo: { flex: 1 },
-  memberName: { fontSize: 17, fontWeight: '700', color: '#2D2D2D', marginBottom: 4 },
-  mbtiBadge: { backgroundColor: '#C85A4A', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8, alignSelf: 'flex-start' },
+  memberName: { fontSize: 17, fontWeight: '700', color: '#1F1F1F', marginBottom: 4 },
+  mbtiBadge: { backgroundColor: '#C05A4E', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8, alignSelf: 'flex-start' },
   mbtiText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF', letterSpacing: 1 },
   traits: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 14 },
   traitChip: { backgroundColor: '#FFF8F0', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
@@ -114,12 +114,12 @@ const s = StyleSheet.create({
   historyTitle: { fontSize: 13, fontWeight: '700', color: '#9C8B75', marginBottom: 8 },
   historyRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   historyYear: { fontSize: 12, fontWeight: '600', color: '#9C8B75', width: 36 },
-  historyDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#C85A4A' },
+  historyDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#C05A4E' },
   historyContent: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
-  historyMbti: { fontSize: 13, fontWeight: '700', color: '#2D2D2D' },
+  historyMbti: { fontSize: 13, fontWeight: '700', color: '#1F1F1F' },
   historyNote: { fontSize: 12, color: '#7A6B55', flex: 1 },
   aiCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginHorizontal: 20, backgroundColor: '#FFF0ED', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#F5D5C0' },
   aiContent: { flex: 1 },
-  aiTitle: { fontSize: 13, fontWeight: '700', color: '#C85A4A', marginBottom: 4 },
+  aiTitle: { fontSize: 13, fontWeight: '700', color: '#C05A4E', marginBottom: 4 },
   aiText: { fontSize: 13, color: '#5C4A32', lineHeight: 20 },
 });

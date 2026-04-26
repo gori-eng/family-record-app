@@ -16,7 +16,7 @@ export default function TimeCapsuleScreen() {
       <View style={s.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.intro}>
-            <FontAwesome name="clock-o" size={20} color="#C85A4A" />
+            <FontAwesome name="clock-o" size={20} color="#C05A4E" />
             <View style={s.introContent}>
               <Text style={s.introTitle}>미래의 가족에게 메시지를 남기세요</Text>
               <Text style={s.introDesc}>특정 날짜나 조건이 되면 자동으로 공개됩니다</Text>
@@ -40,8 +40,8 @@ export default function TimeCapsuleScreen() {
                   <Text style={s.capsuleTitle}>{c.title}</Text>
                   <Text style={s.capsuleType}>{c.type} · {c.author}</Text>
                   <View style={s.dateRow}>
-                    <FontAwesome name={c.locked ? 'lock' : 'unlock'} size={11} color={c.locked ? '#C85A4A' : '#4AA86B'} />
-                    <Text style={[s.dateText, { color: c.locked ? '#C85A4A' : '#4AA86B' }]}>
+                    <FontAwesome name={c.locked ? 'lock' : 'unlock'} size={11} color={c.locked ? '#C05A4E' : '#4AA86B'} />
+                    <Text style={[s.dateText, { color: c.locked ? '#C05A4E' : '#4AA86B' }]}>
                       {c.locked ? `${c.target} 개봉 예정` : '개봉 완료!'}
                     </Text>
                   </View>
@@ -61,18 +61,18 @@ export default function TimeCapsuleScreen() {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  container: { flex: 1, backgroundColor: '#F9F8F5' },
   intro: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, margin: 20, backgroundColor: '#FFF8F0', borderRadius: 16, padding: 18, borderWidth: 1, borderColor: '#F5E8D8' },
   introContent: { flex: 1 },
-  introTitle: { fontSize: 15, fontWeight: '700', color: '#2D2D2D', marginBottom: 4 },
+  introTitle: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', marginBottom: 4 },
   introDesc: { fontSize: 12, color: '#7A6B55' },
   list: { paddingHorizontal: 20 },
-  card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#F0E8D8' },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EAEAEA' },
   capsuleIcon: { width: 52, height: 52, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
-  capsuleTitle: { fontSize: 15, fontWeight: '700', color: '#2D2D2D', marginBottom: 2 },
+  capsuleTitle: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', marginBottom: 2 },
   capsuleType: { fontSize: 12, color: '#9C8B75', marginBottom: 6 },
   dateRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   dateText: { fontSize: 12, fontWeight: '600' },
-  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C85A4A', justifyContent: 'center', alignItems: 'center', shadowColor: '#C85A4A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center', shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
 });

@@ -5,24 +5,24 @@ import { useRouter } from 'expo-router';
 import { useState, useCallback } from 'react';
 
 const NOTIFICATIONS = [
-  { id: 1, icon: 'book', color: '#B8E6C8', title: '서준이가 독서 기록을 추가했어요', desc: '"어린 왕자" 완독!', time: '10분 전', unread: true },
+  { id: 1, icon: 'book', color: '#B8D8C0', title: '서준이가 독서 기록을 추가했어요', desc: '"어린 왕자" 완독!', time: '10분 전', unread: true },
   { id: 2, icon: 'calendar', color: '#B8D4E6', title: '내일 학교 발표회가 있어요', desc: '서현초등학교 14:00', time: '1시간 전', unread: true },
-  { id: 3, icon: 'child', color: '#FFB6C1', title: '지우의 육아일지에 새 기록', desc: '첫 자전거 타기 성공!', time: '3시간 전', unread: true },
-  { id: 4, icon: 'money', color: '#FFE4C4', title: '이번 달 가계부 정산 알림', desc: '4월 지출 요약이 준비되었어요', time: '어제', unread: false },
+  { id: 3, icon: 'child', color: '#F0B8B8', title: '지우의 육아일지에 새 기록', desc: '첫 자전거 타기 성공!', time: '3시간 전', unread: true },
+  { id: 4, icon: 'money', color: '#E8D8C0', title: '이번 달 가계부 정산 알림', desc: '4월 지출 요약이 준비되었어요', time: '어제', unread: false },
   { id: 5, icon: 'trophy', color: '#E6D4B8', title: '가족 목표 달성률 업데이트', desc: '"주말 가족 운동" 75% 달성', time: '2일 전', unread: false },
 ];
 
 const TODAY_EVENTS = [
   { time: '10:00', title: '서준이 수영 수업', location: '분당 수영장', color: '#4A90C8', member: '서준' },
   { time: '14:00', title: '학교 발표회', location: '서현초등학교', color: '#4AA86B', member: '서준' },
-  { time: '18:00', title: '가족 저녁 식사', location: '정자동 한강갈비', color: '#C85A4A', member: '전체' },
+  { time: '18:00', title: '가족 저녁 식사', location: '정자동 한강갈비', color: '#C05A4E', member: '전체' },
 ];
 
 const RECENT_RECORDS = [
-  { type: '육아 일기', icon: 'child', color: '#FFB6C1', title: '지우의 첫 자전거 타기', date: '오늘', route: '/(tabs)/records/parenting' },
-  { type: '독서 목록', icon: 'book', color: '#B8E6C8', title: '어린 왕자 완독', date: '어제', route: '/(tabs)/records/reading' },
-  { type: '가계부', icon: 'money', color: '#FFE4C4', title: '3월 지출 정산', date: '2일 전', route: '/(tabs)/records/finance' },
-  { type: '레시피', icon: 'cutlery', color: '#FFDAB9', title: '엄마 김치찌개 레시피', date: '3일 전', route: '/(tabs)/records/recipes' },
+  { type: '육아 일기', icon: 'child', color: '#F0B8B8', title: '지우의 첫 자전거 타기', date: '오늘', route: '/(tabs)/records/parenting' },
+  { type: '독서 목록', icon: 'book', color: '#B8D8C0', title: '어린 왕자 완독', date: '어제', route: '/(tabs)/records/reading' },
+  { type: '가계부', icon: 'money', color: '#E8D8C0', title: '3월 지출 정산', date: '2일 전', route: '/(tabs)/records/finance' },
+  { type: '레시피', icon: 'cutlery', color: '#E8D0C0', title: '엄마 김치찌개 레시피', date: '3일 전', route: '/(tabs)/records/recipes' },
 ];
 
 export default function HomeScreen() {
@@ -50,14 +50,14 @@ export default function HomeScreen() {
             <View style={s.notifHeader}>
               <Text style={s.notifTitle}>알림</Text>
               <TouchableOpacity onPress={() => setShowNotif(false)} activeOpacity={0.7}>
-                <FontAwesome name="times" size={20} color="#5C4A32" />
+                <FontAwesome name="times" size={20} color="#4A4A4A" />
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
               {NOTIFICATIONS.map(n => (
                 <TouchableOpacity key={n.id} style={[s.notifItem, n.unread && s.notifItemUnread]} activeOpacity={0.7}>
                   <View style={[s.notifIcon, { backgroundColor: n.color }]}>
-                    <FontAwesome name={n.icon as any} size={14} color="#5C4A32" />
+                    <FontAwesome name={n.icon as any} size={14} color="#4A4A4A" />
                   </View>
                   <View style={s.notifContent}>
                     <Text style={s.notifItemTitle}>{n.title}</Text>
@@ -76,18 +76,18 @@ export default function HomeScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#C85A4A" colors={['#C85A4A']} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#C05A4E" colors={['#C05A4E']} />}
       >
         {/* Header */}
         <View style={s.header}>
           <TouchableOpacity style={s.headerLeft} activeOpacity={0.7} onPress={() => router.push('/(tabs)/settings')}>
             <View style={s.familyAvatar}>
-              <FontAwesome name="users" size={18} color="#C85A4A" />
+              <FontAwesome name="users" size={18} color="#C05A4E" />
             </View>
             <Text style={s.familyName}>우리 가족</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.7} onPress={() => setShowNotif(true)}>
-            <FontAwesome name="bell-o" size={22} color="#5C4A32" />
+            <FontAwesome name="bell-o" size={22} color="#4A4A4A" />
             {unreadCount > 0 && <View style={s.badge}><Text style={s.badgeText}>{unreadCount}</Text></View>}
           </TouchableOpacity>
         </View>
@@ -132,7 +132,7 @@ export default function HomeScreen() {
               <TouchableOpacity key={i} style={s.recentCard} activeOpacity={0.7}
                 onPress={() => router.push(rec.route as any)}>
                 <View style={[s.recentIcon, { backgroundColor: rec.color }]}>
-                  <FontAwesome name={rec.icon as any} size={18} color="#5C4A32" />
+                  <FontAwesome name={rec.icon as any} size={18} color="#4A4A4A" />
                 </View>
                 <Text style={s.recentTitle} numberOfLines={1}>{rec.title}</Text>
                 <Text style={s.recentMeta}>{rec.type} · {rec.date}</Text>
@@ -148,59 +148,59 @@ export default function HomeScreen() {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  container: { flex: 1, backgroundColor: '#F9F8F5' },
   header: {
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8,
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  familyAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#FFDAB9', justifyContent: 'center', alignItems: 'center' },
-  familyName: { fontSize: 18, fontWeight: '700', color: '#C85A4A' },
+  familyAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#E8D0C0', justifyContent: 'center', alignItems: 'center' },
+  familyName: { fontSize: 18, fontWeight: '700', color: '#C05A4E' },
   badge: { position: 'absolute', top: -4, right: -6, backgroundColor: '#E53935', borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4 },
   badgeText: { color: '#FFF', fontSize: 10, fontWeight: '700' },
 
   greeting: { paddingHorizontal: 20, marginBottom: 20 },
-  greetingText: { fontSize: 24, fontWeight: '700', color: '#2D2D2D', marginBottom: 2 },
-  dateText: { fontSize: 13, color: '#9C8B75' },
+  greetingText: { fontSize: 24, fontWeight: '700', color: '#1F1F1F', marginBottom: 2, fontFamily: 'PretendardBold' },
+  dateText: { fontSize: 13, color: '#888888' },
 
   section: { paddingHorizontal: 20, marginBottom: 24 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#2D2D2D' },
-  seeAll: { fontSize: 13, color: '#C85A4A', fontWeight: '600' },
+  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
+  seeAll: { fontSize: 13, color: '#C05A4E', fontWeight: '600' },
 
   eventItem: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8,
-    borderWidth: 1, borderColor: '#F0E8D8',
+    borderWidth: 1, borderColor: '#EAEAEA',
   },
   eventColorBar: { width: 4, height: 40, borderRadius: 2 },
   eventTimeBox: { width: 48, alignItems: 'center' },
   eventTimeText: { fontSize: 14, fontWeight: '700' },
   eventInfo: { flex: 1 },
-  eventTitle: { fontSize: 15, fontWeight: '600', color: '#2D2D2D', marginBottom: 2 },
-  eventLocation: { fontSize: 12, color: '#9C8B75' },
+  eventTitle: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', marginBottom: 2 },
+  eventLocation: { fontSize: 12, color: '#888888' },
 
   recentGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   recentCard: {
     width: '48%', backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16,
-    borderWidth: 1, borderColor: '#F0E8D8',
+    borderWidth: 1, borderColor: '#EAEAEA',
   },
   recentIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
-  recentTitle: { fontSize: 14, fontWeight: '600', color: '#2D2D2D', marginBottom: 4 },
-  recentMeta: { fontSize: 11, color: '#9C8B75' },
+  recentTitle: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', marginBottom: 4 },
+  recentMeta: { fontSize: 11, color: '#888888' },
 
   // Notification Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  notifModal: { backgroundColor: '#FFFDF0', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '75%', padding: 20, paddingBottom: 40 },
-  notifHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#F0E8D8' },
-  notifTitle: { fontSize: 18, fontWeight: '700', color: '#2D2D2D' },
-  notifItem: { flexDirection: 'row', gap: 12, padding: 14, borderRadius: 12, marginBottom: 6, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#F0E8D8' },
+  notifModal: { backgroundColor: '#F9F8F5', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '75%', padding: 20, paddingBottom: 40 },
+  notifHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#EAEAEA' },
+  notifTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F' },
+  notifItem: { flexDirection: 'row', gap: 12, padding: 14, borderRadius: 12, marginBottom: 6, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA' },
   notifItemUnread: { backgroundColor: '#FFF8F0', borderColor: '#F5D5C0' },
   notifIcon: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   notifContent: { flex: 1 },
-  notifItemTitle: { fontSize: 14, fontWeight: '600', color: '#2D2D2D', marginBottom: 2 },
-  notifItemDesc: { fontSize: 12, color: '#7A6B55' },
+  notifItemTitle: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', marginBottom: 2 },
+  notifItemDesc: { fontSize: 12, color: '#666666' },
   notifMeta: { alignItems: 'flex-end', gap: 4 },
-  notifTime: { fontSize: 11, color: '#9C8B75' },
-  notifDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#C85A4A' },
+  notifTime: { fontSize: 11, color: '#888888' },
+  notifDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#C05A4E' },
 });

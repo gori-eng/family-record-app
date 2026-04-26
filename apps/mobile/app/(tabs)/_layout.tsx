@@ -17,11 +17,11 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#C85A4A',
+        tabBarActiveTintColor: '#C05A4E',
         tabBarInactiveTintColor: '#BFAE99',
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
-          borderTopColor: '#F0E8D8',
+          borderTopColor: '#EAEAEA',
           paddingBottom: Platform.OS === 'ios' ? 20 : 4,
           height: Platform.OS === 'ios' ? 80 : 60,
           elevation: 8,
@@ -36,7 +36,7 @@ export default function TabLayout() {
         },
         tabBarHideOnKeyboard: true,
         headerStyle: {
-          backgroundColor: '#FFFDF0',
+          backgroundColor: '#F9F8F5',
         },
         headerTintColor: '#2D2D2D',
         headerShadowVisible: false,

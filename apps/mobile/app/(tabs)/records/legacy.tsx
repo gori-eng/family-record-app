@@ -10,9 +10,9 @@ const SUBSCRIPTIONS = [
 ];
 
 const MESSAGES = [
-  { recipient: '서준에게', trigger: '사후 공개', sealed: '2026.1.1', icon: 'envelope', color: '#B8D4E6' },
-  { recipient: '지우에게', trigger: '성인식', sealed: '2025.6.15', icon: 'heart', color: '#FFB6C1' },
-  { recipient: '가족 전체에게', trigger: '사후 공개', sealed: '2026.3.1', icon: 'users', color: '#FFDAB9' },
+  { recipient: '서준에게', trigger: '사후 공개', sealed: '2026.1.1', icon: 'envelope', color: '#B0C8D8' },
+  { recipient: '지우에게', trigger: '성인식', sealed: '2025.6.15', icon: 'heart', color: '#F0B8B8' },
+  { recipient: '가족 전체에게', trigger: '사후 공개', sealed: '2026.3.1', icon: 'users', color: '#E8D0C0' },
 ];
 
 export default function LegacyScreen() {
@@ -59,7 +59,7 @@ export default function LegacyScreen() {
                   <Text style={s.msgRecipient}>{msg.recipient}</Text>
                   <Text style={s.msgTrigger}>{msg.trigger} · 밀봉: {msg.sealed}</Text>
                 </View>
-                <FontAwesome name="lock" size={14} color="#C85A4A" />
+                <FontAwesome name="lock" size={14} color="#C05A4E" />
               </TouchableOpacity>
             ))}
           </View>
@@ -81,24 +81,24 @@ export default function LegacyScreen() {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  container: { flex: 1, backgroundColor: '#F9F8F5' },
   intro: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, margin: 20, backgroundColor: '#E8F5E9', borderRadius: 16, padding: 18 },
   introContent: { flex: 1 },
   introTitle: { fontSize: 15, fontWeight: '700', color: '#2E7D32', marginBottom: 4 },
   introDesc: { fontSize: 12, color: '#2E7D32', lineHeight: 18 },
   section: { paddingHorizontal: 20, marginBottom: 24 },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#2D2D2D', marginBottom: 2 },
+  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#1F1F1F', marginBottom: 2 },
   sectionSubtitle: { fontSize: 12, color: '#9C8B75', marginBottom: 12 },
-  subCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#F0E8D8' },
+  subCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#EAEAEA' },
   subIcon: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
-  subName: { flex: 1, fontSize: 15, fontWeight: '600', color: '#2D2D2D' },
-  subCost: { fontSize: 13, color: '#C85A4A', fontWeight: '600' },
-  msgCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#F0E8D8' },
+  subName: { flex: 1, fontSize: 15, fontWeight: '600', color: '#1F1F1F' },
+  subCost: { fontSize: 13, color: '#C05A4E', fontWeight: '600' },
+  msgCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#EAEAEA' },
   msgIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
   msgInfo: { flex: 1 },
-  msgRecipient: { fontSize: 15, fontWeight: '600', color: '#2D2D2D', marginBottom: 2 },
+  msgRecipient: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', marginBottom: 2 },
   msgTrigger: { fontSize: 12, color: '#9C8B75' },
   warning: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginHorizontal: 20, backgroundColor: '#F5F0E5', borderRadius: 12, padding: 14 },
   warningText: { flex: 1, fontSize: 12, color: '#7A6B55', lineHeight: 18 },
-  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C85A4A', justifyContent: 'center', alignItems: 'center', shadowColor: '#C85A4A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center', shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
 });

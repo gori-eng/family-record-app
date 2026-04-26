@@ -17,7 +17,7 @@ export default function MediaScreen() {
       <View style={s.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.intro}>
-            <FontAwesome name="headphones" size={20} color="#C85A4A" />
+            <FontAwesome name="headphones" size={20} color="#C05A4E" />
             <Text style={s.introText}>가족의 목소리와 영상을 기록하세요. 텍스트보다 훨씬 더 강력한 기억이 됩니다.</Text>
           </View>
 
@@ -43,7 +43,7 @@ export default function MediaScreen() {
                   </View>
                 </View>
                 <TouchableOpacity style={s.playBtn} activeOpacity={0.7}>
-                  <FontAwesome name="play" size={14} color="#C85A4A" />
+                  <FontAwesome name="play" size={14} color="#C05A4E" />
                 </TouchableOpacity>
               </TouchableOpacity>
             ))}
@@ -59,21 +59,21 @@ export default function MediaScreen() {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  container: { flex: 1, backgroundColor: '#F9F8F5' },
   intro: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, margin: 20, backgroundColor: '#FFF0ED', borderRadius: 14, padding: 16 },
-  introText: { flex: 1, fontSize: 13, color: '#C85A4A', lineHeight: 20 },
+  introText: { flex: 1, fontSize: 13, color: '#C05A4E', lineHeight: 20 },
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginBottom: 16 },
-  stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#F0E8D8' },
-  statNum: { fontSize: 20, fontWeight: '700', color: '#2D2D2D', marginTop: 4 },
+  stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA' },
+  statNum: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', marginTop: 4 },
   statLabel: { fontSize: 11, color: '#7A6B55', marginTop: 2 },
   list: { paddingHorizontal: 20 },
-  card: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#F0E8D8' },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#EAEAEA' },
   mediaIcon: { width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
-  title: { fontSize: 15, fontWeight: '600', color: '#2D2D2D', marginBottom: 2 },
+  title: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', marginBottom: 2 },
   meta: { fontSize: 12, color: '#9C8B75', marginBottom: 4 },
   memberRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   member: { fontSize: 11, color: '#7A6B55' },
   playBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFF0ED', justifyContent: 'center', alignItems: 'center' },
-  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C85A4A', justifyContent: 'center', alignItems: 'center', shadowColor: '#C85A4A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center', shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
 });

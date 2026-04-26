@@ -14,17 +14,17 @@ export { ErrorBoundary } from 'expo-router';
 
 const queryClient = new QueryClient();
 
-// Warm family-friendly theme matching "Nurture & Bloom" design
+// 톤 다운된 팔레트 — 자연스럽고 세련된 따스함
 const FamilyTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: '#C85A4A',
-    background: '#FFFDF0',
+    primary: '#C05A4E',
+    background: '#F9F8F5',
     card: '#FFFFFF',
-    text: '#2D2D2D',
-    border: '#F0E8D8',
-    notification: '#C85A4A',
+    text: '#1F1F1F',
+    border: '#EAEAEA',
+    notification: '#C05A4E',
   },
 };
 
@@ -48,6 +48,8 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    Pretendard: require('../assets/fonts/Pretendard-Regular.otf'),
+    PretendardBold: require('../assets/fonts/Pretendard-Bold.otf'),
     ...FontAwesome.font,
   });
   const [session, setSession] = useState<Session | null>(null);

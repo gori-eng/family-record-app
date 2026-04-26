@@ -5,11 +5,11 @@ import { useState } from 'react';
 const MOCK_EVENTS: Record<string, { time: string; title: string; color: string; location?: string; member?: string }[]> = {
   '2026-4-2': [
     { time: '14:00', title: '학교 발표회', color: '#4A90C8', location: '서현초등학교', member: '서준' },
-    { time: '18:00', title: '가족 저녁 식사', color: '#C85A4A', location: '정자동 한강갈비', member: '전체' },
+    { time: '18:00', title: '가족 저녁 식사', color: '#C05A4E', location: '정자동 한강갈비', member: '전체' },
   ],
   '2026-4-5': [{ time: '10:00', title: '서준이 수영 수업', color: '#4A90C8', member: '서준' }],
   '2026-4-10': [{ time: '09:00', title: '지우 유치원 소풍', color: '#4AA86B', location: '에버랜드', member: '지우' }],
-  '2026-4-15': [{ time: '19:00', title: '부모님 결혼기념일', color: '#C85A4A', member: '전체' }],
+  '2026-4-15': [{ time: '19:00', title: '부모님 결혼기념일', color: '#C05A4E', member: '전체' }],
   '2026-4-22': [
     { time: '11:00', title: '가족 사진 촬영', color: '#9C27B0', location: '분당 중앙공원', member: '전체' },
     { time: '17:00', title: '지우 소아과 정기검진', color: '#E6A817', member: '지우' },
@@ -96,7 +96,7 @@ export default function CalendarScreen() {
                 )}
                 {/* AI 보조 */}
                 <View style={styles.aiHint}>
-                  <FontAwesome name="magic" size={12} color="#C85A4A" />
+                  <FontAwesome name="magic" size={12} color="#C05A4E" />
                   <Text style={styles.aiHintText}>
                     {showDetail.location
                       ? `"${showDetail.location}" 근처 맛집을 추천해드릴까요?`
@@ -105,7 +105,7 @@ export default function CalendarScreen() {
                 </View>
                 <View style={styles.detailActions}>
                   <TouchableOpacity style={styles.detailBtn} activeOpacity={0.7}>
-                    <FontAwesome name="pencil" size={14} color="#C85A4A" />
+                    <FontAwesome name="pencil" size={14} color="#C05A4E" />
                     <Text style={styles.detailBtnText}>수정</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.detailBtn, styles.detailBtnDanger]} activeOpacity={0.7}>
@@ -162,7 +162,7 @@ export default function CalendarScreen() {
 
         {!isCurrentMonth && (
           <TouchableOpacity style={styles.todayChip} onPress={goToToday} activeOpacity={0.7}>
-            <FontAwesome name="calendar-check-o" size={12} color="#C85A4A" />
+            <FontAwesome name="calendar-check-o" size={12} color="#C05A4E" />
             <Text style={styles.todayChipText}>오늘로 이동</Text>
           </TouchableOpacity>
         )}
@@ -191,7 +191,7 @@ export default function CalendarScreen() {
 
         {/* AI 보조 힌트 */}
         <View style={styles.aiCalHint}>
-          <FontAwesome name="magic" size={12} color="#C85A4A" />
+          <FontAwesome name="magic" size={12} color="#C05A4E" />
           <Text style={styles.aiCalHintText}>
             {selectedEvents.length > 0
               ? `오늘 ${selectedEvents.length}개 일정이 있어요. 이동 시간을 고려하면 여유롭게 준비하세요.`
@@ -239,64 +239,64 @@ export default function CalendarScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  container: { flex: 1, backgroundColor: '#F9F8F5' },
   monthNav: { flexDirection:'row', justifyContent:'space-between', alignItems:'center', paddingHorizontal:20, paddingTop:12, paddingBottom:8 },
-  navButton: { width:40, height:40, borderRadius:20, backgroundColor:'#FFFFFF', justifyContent:'center', alignItems:'center', borderWidth:1, borderColor:'#F0E8D8' },
-  monthTitle: { fontSize:20, fontWeight:'700', color:'#2D2D2D' },
+  navButton: { width:40, height:40, borderRadius:20, backgroundColor:'#FFFFFF', justifyContent:'center', alignItems:'center', borderWidth:1, borderColor:'#EAEAEA' },
+  monthTitle: { fontSize:20, fontWeight:'700', color:'#1F1F1F' },
   todayChip: { flexDirection:'row', alignItems:'center', alignSelf:'center', gap:6, backgroundColor:'#FFF0ED', paddingHorizontal:14, paddingVertical:6, borderRadius:16, marginBottom:8 },
-  todayChipText: { fontSize:12, fontWeight:'600', color:'#C85A4A' },
+  todayChipText: { fontSize:12, fontWeight:'600', color:'#C05A4E' },
   weekHeader: { flexDirection:'row', paddingHorizontal:20, marginBottom:4 },
   weekDay: { flex:1, textAlign:'center', fontSize:13, fontWeight:'600', color:'#9C8B75' },
-  sundayColor: { color:'#C85A4A' },
+  sundayColor: { color:'#C05A4E' },
   saturdayColor: { color:'#4A90C8' },
   calendarGrid: { flexDirection:'row', flexWrap:'wrap', paddingHorizontal:12, marginBottom:16 },
   dayCell: { width:`${100/7}%`, aspectRatio:1, justifyContent:'center', alignItems:'center' },
-  todayCell: { backgroundColor:'#C85A4A', borderRadius:20 },
+  todayCell: { backgroundColor:'#C05A4E', borderRadius:20 },
   selectedCell: { backgroundColor:'#FFF0ED', borderRadius:20 },
-  dayText: { fontSize:15, color:'#2D2D2D' },
+  dayText: { fontSize:15, color:'#1F1F1F' },
   todayText: { color:'#FFFFFF', fontWeight:'700' },
-  selectedText: { color:'#C85A4A', fontWeight:'700' },
-  eventIndicator: { width:6, height:6, borderRadius:3, backgroundColor:'#C85A4A', marginTop:3 },
+  selectedText: { color:'#C05A4E', fontWeight:'700' },
+  eventIndicator: { width:6, height:6, borderRadius:3, backgroundColor:'#C05A4E', marginTop:3 },
   eventIndicatorToday: { backgroundColor:'#FFFFFF' },
 
   aiCalHint: { flexDirection:'row', alignItems:'flex-start', gap:8, marginHorizontal:20, marginBottom:16, backgroundColor:'#FFF8F0', borderRadius:12, padding:12, borderWidth:1, borderColor:'#F5E8D8' },
   aiCalHintText: { flex:1, fontSize:12, color:'#7A6B55', lineHeight:18 },
 
   section: { paddingHorizontal:20 },
-  sectionTitle: { fontSize:17, fontWeight:'700', color:'#2D2D2D', marginBottom:12 },
-  emptyState: { alignItems:'center', paddingVertical:32, backgroundColor:'#FFFFFF', borderRadius:14, borderWidth:1, borderColor:'#F0E8D8' },
+  sectionTitle: { fontSize:17, fontWeight:'700', color:'#1F1F1F', marginBottom:12 },
+  emptyState: { alignItems:'center', paddingVertical:32, backgroundColor:'#FFFFFF', borderRadius:14, borderWidth:1, borderColor:'#EAEAEA' },
   emptyText: { fontSize:15, fontWeight:'600', color:'#9C8B75', marginTop:12 },
   emptySubtext: { fontSize:13, color:'#B0A590', marginTop:4 },
-  eventCard: { flexDirection:'row', alignItems:'center', gap:12, backgroundColor:'#FFFFFF', borderRadius:14, padding:14, marginBottom:8, borderWidth:1, borderColor:'#F0E8D8' },
+  eventCard: { flexDirection:'row', alignItems:'center', gap:12, backgroundColor:'#FFFFFF', borderRadius:14, padding:14, marginBottom:8, borderWidth:1, borderColor:'#EAEAEA' },
   eventColorBar: { width:4, height:44, borderRadius:2 },
   eventContent: { flex:1 },
   eventTime: { fontSize:12, color:'#7A6B55', fontWeight:'600', marginBottom:2 },
-  eventName: { fontSize:15, fontWeight:'600', color:'#2D2D2D' },
+  eventName: { fontSize:15, fontWeight:'600', color:'#1F1F1F' },
   eventLocRow: { flexDirection:'row', alignItems:'center', gap:4, marginTop:4 },
   eventLoc: { fontSize:12, color:'#9C8B75' },
-  fab: { position:'absolute', bottom:24, right:24, width:56, height:56, borderRadius:28, backgroundColor:'#C85A4A', justifyContent:'center', alignItems:'center', shadowColor:'#C85A4A', shadowOffset:{width:0,height:4}, shadowOpacity:0.3, shadowRadius:8, elevation:8 },
+  fab: { position:'absolute', bottom:24, right:24, width:56, height:56, borderRadius:28, backgroundColor:'#C05A4E', justifyContent:'center', alignItems:'center', shadowColor:'#C05A4E', shadowOffset:{width:0,height:4}, shadowOpacity:0.3, shadowRadius:8, elevation:8 },
 
   // Modals
   modalOverlay: { flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'flex-end' },
-  detailModal: { backgroundColor:'#FFFDF0', borderTopLeftRadius:24, borderTopRightRadius:24, padding:24, paddingBottom:40 },
+  detailModal: { backgroundColor:'#F9F8F5', borderTopLeftRadius:24, borderTopRightRadius:24, padding:24, paddingBottom:40 },
   detailHeader: { flexDirection:'row', alignItems:'center', gap:10, marginBottom:20 },
   detailColorDot: { width:12, height:12, borderRadius:6 },
-  detailTitle: { flex:1, fontSize:20, fontWeight:'700', color:'#2D2D2D' },
+  detailTitle: { flex:1, fontSize:20, fontWeight:'700', color:'#1F1F1F' },
   detailRow: { flexDirection:'row', alignItems:'center', gap:10, marginBottom:12 },
   detailText: { fontSize:15, color:'#5C4A32' },
   aiHint: { flexDirection:'row', alignItems:'flex-start', gap:8, backgroundColor:'#FFF0ED', borderRadius:12, padding:14, marginVertical:16 },
-  aiHintText: { flex:1, fontSize:13, color:'#C85A4A', lineHeight:20 },
+  aiHintText: { flex:1, fontSize:13, color:'#C05A4E', lineHeight:20 },
   detailActions: { flexDirection:'row', gap:12, marginTop:8 },
   detailBtn: { flex:1, flexDirection:'row', alignItems:'center', justifyContent:'center', gap:6, paddingVertical:14, borderRadius:12, backgroundColor:'#FFF0ED' },
-  detailBtnText: { fontSize:14, fontWeight:'600', color:'#C85A4A' },
+  detailBtnText: { fontSize:14, fontWeight:'600', color:'#C05A4E' },
   detailBtnDanger: { backgroundColor:'#FFF0F0' },
 
-  addModal: { backgroundColor:'#FFFDF0', borderTopLeftRadius:24, borderTopRightRadius:24, padding:24, paddingBottom:40 },
+  addModal: { backgroundColor:'#F9F8F5', borderTopLeftRadius:24, borderTopRightRadius:24, padding:24, paddingBottom:40 },
   addHeader: { flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:8 },
-  addTitle: { fontSize:20, fontWeight:'700', color:'#2D2D2D' },
+  addTitle: { fontSize:20, fontWeight:'700', color:'#1F1F1F' },
   addDate: { fontSize:14, color:'#9C8B75', marginBottom:20 },
   addLabel: { fontSize:13, fontWeight:'600', color:'#5C4A32', marginBottom:6 },
-  addInput: { backgroundColor:'#FFFFFF', borderWidth:1, borderColor:'#F0E8D8', borderRadius:12, paddingHorizontal:14, paddingVertical:12, fontSize:15, color:'#2D2D2D', marginBottom:16 },
-  addSubmit: { backgroundColor:'#C85A4A', borderRadius:12, paddingVertical:16, alignItems:'center', marginTop:8 },
+  addInput: { backgroundColor:'#FFFFFF', borderWidth:1, borderColor:'#EAEAEA', borderRadius:12, paddingHorizontal:14, paddingVertical:12, fontSize:15, color:'#1F1F1F', marginBottom:16 },
+  addSubmit: { backgroundColor:'#C05A4E', borderRadius:12, paddingVertical:16, alignItems:'center', marginTop:8 },
   addSubmitText: { color:'#FFFFFF', fontSize:16, fontWeight:'700' },
 });

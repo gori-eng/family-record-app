@@ -11,7 +11,7 @@ const RECIPES = [
   { name: '아빠표 볶음밥', origin: '주말 아침 단골 메뉴', author: '민준', difficulty: '쉬움', time: '20분', ingredients: 7, color: '#81C784', icon: 'spoon' },
 ];
 
-const DIFF_COLOR: Record<string, string> = { '쉬움': '#4AA86B', '보통': '#E6A817', '어려움': '#C85A4A' };
+const DIFF_COLOR: Record<string, string> = { '쉬움': '#4AA86B', '보통': '#E6A817', '어려움': '#C05A4E' };
 
 export default function RecipesScreen() {
   return (
@@ -61,23 +61,23 @@ export default function RecipesScreen() {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  container: { flex: 1, backgroundColor: '#F9F8F5' },
   header: { padding: 20 },
   subtitle: { fontSize: 14, color: '#7A6B55', marginBottom: 16 },
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 8 },
-  stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#F0E8D8' },
-  statNum: { fontSize: 22, fontWeight: '700', color: '#2D2D2D' },
+  stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA' },
+  statNum: { fontSize: 22, fontWeight: '700', color: '#1F1F1F' },
   statLabel: { fontSize: 11, color: '#7A6B55', marginTop: 2 },
   list: { paddingHorizontal: 20 },
-  card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#F0E8D8' },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EAEAEA' },
   recipeIcon: { width: 52, height: 52, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
-  name: { fontSize: 16, fontWeight: '700', color: '#2D2D2D', marginBottom: 2 },
+  name: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', marginBottom: 2 },
   origin: { fontSize: 12, color: '#9C8B75', marginBottom: 6 },
   meta: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   difficulty: { fontSize: 12, fontWeight: '600' },
   dot: { color: '#D4C8B0' },
   time: { fontSize: 11, color: '#7A6B55' },
   author: { fontSize: 11, color: '#7A6B55' },
-  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C85A4A', justifyContent: 'center', alignItems: 'center', shadowColor: '#C85A4A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center', shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
 });

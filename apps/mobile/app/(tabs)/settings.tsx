@@ -57,14 +57,14 @@ export default function SettingsScreen() {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <TouchableOpacity style={styles.profileCard} activeOpacity={0.7} onPress={() => router.push('/settings/profile')}>
         <View style={styles.avatar}>
-          <FontAwesome name="user" size={28} color="#C85A4A" />
+          <FontAwesome name="user" size={28} color="#C05A4E" />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.profileName}>김지수</Text>
           <Text style={styles.profileRole}>관리자 (부모)</Text>
         </View>
         <View style={styles.editProfileButton}>
-          <FontAwesome name="pencil" size={14} color="#C85A4A" />
+          <FontAwesome name="pencil" size={14} color="#C05A4E" />
         </View>
       </TouchableOpacity>
 
@@ -100,18 +100,18 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#FFFDF0' },
-  container: { flex: 1, backgroundColor: '#FFFDF0', padding: 20 },
+  safeArea: { flex: 1, backgroundColor: '#F9F8F5' },
+  container: { flex: 1, backgroundColor: '#F9F8F5', padding: 20 },
   profileCard: {
     flexDirection: 'row', alignItems: 'center', gap: 16,
     backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20,
-    borderWidth: 1, borderColor: '#F0E8D8', marginBottom: 24,
+    borderWidth: 1, borderColor: '#EAEAEA', marginBottom: 24,
   },
   avatar: {
     width: 56, height: 56, borderRadius: 28,
-    backgroundColor: '#FFDAB9', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: '#E8D0C0', justifyContent: 'center', alignItems: 'center',
   },
-  profileName: { fontSize: 18, fontWeight: '700', color: '#2D2D2D' },
+  profileName: { fontSize: 18, fontWeight: '700', color: '#1F1F1F' },
   profileRole: { fontSize: 13, color: '#7A6B55', marginTop: 2 },
   editProfileButton: {
     width: 36, height: 36, borderRadius: 18,
@@ -122,14 +122,14 @@ const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     backgroundColor: '#FFFFFF', borderRadius: 12, padding: 14, marginBottom: 6,
-    borderWidth: 1, borderColor: '#F0E8D8',
+    borderWidth: 1, borderColor: '#EAEAEA',
   },
   menuLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   menuIconCircle: {
     width: 32, height: 32, borderRadius: 16,
     backgroundColor: '#FFF8F0', justifyContent: 'center', alignItems: 'center',
   },
-  menuLabel: { fontSize: 15, color: '#2D2D2D' },
+  menuLabel: { fontSize: 15, color: '#1F1F1F' },
   menuRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   menuSubtitle: { fontSize: 13, color: '#9C8B75' },
   signOutButton: {

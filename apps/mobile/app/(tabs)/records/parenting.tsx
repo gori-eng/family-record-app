@@ -42,7 +42,7 @@ const ENTRIES = [
 ];
 
 const CHILD_NAMES = ['전체', '지우', '서준'];
-const CHILD_COLORS: Record<string, string> = { '지우': '#FFB6C1', '서준': '#B8D4E6' };
+const CHILD_COLORS: Record<string, string> = { '지우': '#F0B8B8', '서준': '#B0C8D8' };
 
 export default function ParentingScreen() {
   const [activeChild, setActiveChild] = useState('전체');
@@ -59,7 +59,7 @@ export default function ParentingScreen() {
           {/* Stats */}
           <View style={styles.statsRow}>
             <TouchableOpacity style={styles.statCard} onPress={() => setActiveChild('전체')} activeOpacity={0.7}>
-              <FontAwesome name="book" size={18} color="#C85A4A" />
+              <FontAwesome name="book" size={18} color="#C05A4E" />
               <Text style={styles.statNumber}>47</Text>
               <Text style={styles.statLabel}>총 기록</Text>
             </TouchableOpacity>
@@ -99,13 +99,13 @@ export default function ParentingScreen() {
                 activeOpacity={0.7}
                 onPress={() => Alert.alert(entry.title, `${entry.date} · ${entry.child}\n\n${entry.content}`)}>
                 <View style={styles.timelineLine}>
-                  <View style={[styles.timelineDot, { backgroundColor: entry.child === '지우' ? '#FFB6C1' : '#B8D4E6' }]} />
+                  <View style={[styles.timelineDot, { backgroundColor: entry.child === '지우' ? '#F0B8B8' : '#B0C8D8' }]} />
                   {i < filteredEntries.length - 1 && <View style={styles.timelineConnector} />}
                 </View>
                 <View style={styles.entryContent}>
                   <View style={styles.entryHeader}>
                     <Text style={styles.entryDate}>{entry.date}</Text>
-                    <View style={[styles.childBadge, { backgroundColor: entry.child === '지우' ? '#FFB6C1' : '#B8D4E6' }]}>
+                    <View style={[styles.childBadge, { backgroundColor: entry.child === '지우' ? '#F0B8B8' : '#B0C8D8' }]}>
                       <Text style={styles.childBadgeText}>{entry.child}</Text>
                     </View>
                   </View>
@@ -145,21 +145,21 @@ export default function ParentingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  container: { flex: 1, backgroundColor: '#F9F8F5' },
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
   statCard: {
     flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,
-    alignItems: 'center', borderWidth: 1, borderColor: '#F0E8D8',
+    alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA',
   },
-  statNumber: { fontSize: 22, fontWeight: '700', color: '#2D2D2D', marginTop: 6 },
+  statNumber: { fontSize: 22, fontWeight: '700', color: '#1F1F1F', marginTop: 6 },
   statLabel: { fontSize: 11, color: '#7A6B55', marginTop: 2 },
   filterContainer: { paddingHorizontal: 20, gap: 8, marginBottom: 20 },
   filterChip: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
-    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#F0E8D8',
+    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA',
   },
-  filterChipActive: { backgroundColor: '#C85A4A', borderColor: '#C85A4A' },
+  filterChipActive: { backgroundColor: '#C05A4E', borderColor: '#C05A4E' },
   filterDot: { width: 8, height: 8, borderRadius: 4 },
   filterText: { fontSize: 13, fontWeight: '600', color: '#8B7355' },
   filterTextActive: { color: '#FFFFFF' },
@@ -167,11 +167,11 @@ const styles = StyleSheet.create({
   entryCard: { flexDirection: 'row', marginBottom: 4 },
   timelineLine: { width: 24, alignItems: 'center', paddingTop: 6 },
   timelineDot: { width: 12, height: 12, borderRadius: 6, zIndex: 1 },
-  timelineConnector: { width: 2, flex: 1, backgroundColor: '#F0E8D8', marginTop: -2 },
+  timelineConnector: { width: 2, flex: 1, backgroundColor: '#EAEAEA', marginTop: -2 },
   entryContent: {
     flex: 1, marginLeft: 12, marginBottom: 14,
     backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18,
-    borderWidth: 1, borderColor: '#F0E8D8',
+    borderWidth: 1, borderColor: '#EAEAEA',
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
   },
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   entryDate: { fontSize: 12, color: '#9C8B75' },
   childBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
   childBadgeText: { fontSize: 11, fontWeight: '600', color: '#5C4A32' },
-  entryTitle: { fontSize: 16, fontWeight: '700', color: '#2D2D2D', marginBottom: 6 },
+  entryTitle: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', marginBottom: 6 },
   entryText: { fontSize: 13, color: '#5C4A32', lineHeight: 20, marginBottom: 10 },
   entryFooter: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   milestoneBadge: {
@@ -190,8 +190,8 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute', bottom: 16, right: 20, zIndex: 10,
     width: 56, height: 56, borderRadius: 28,
-    backgroundColor: '#C85A4A', justifyContent: 'center', alignItems: 'center',
-    shadowColor: '#C85A4A', shadowOffset: { width: 0, height: 4 },
+    backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center',
+    shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3, shadowRadius: 8, elevation: 8,
   },
 });
