@@ -1,36 +1,49 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, RefreshControl, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, RefreshControl, Modal, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const NOTIFICATIONS = [
   { id: 1, icon: 'book', color: '#B8D8C0', title: '서준이가 독서 기록을 추가했어요', desc: '"어린 왕자" 완독!', time: '10분 전', unread: true },
-  { id: 2, icon: 'calendar', color: '#B8D4E6', title: '내일 학교 발표회가 있어요', desc: '서현초등학교 14:00', time: '1시간 전', unread: true },
+  { id: 2, icon: 'calendar', color: '#B0C8D8', title: '내일 학교 발표회가 있어요', desc: '서현초등학교 14:00', time: '1시간 전', unread: true },
   { id: 3, icon: 'child', color: '#F0B8B8', title: '지우의 육아일지에 새 기록', desc: '첫 자전거 타기 성공!', time: '3시간 전', unread: true },
   { id: 4, icon: 'money', color: '#E8D8C0', title: '이번 달 가계부 정산 알림', desc: '4월 지출 요약이 준비되었어요', time: '어제', unread: false },
-  { id: 5, icon: 'trophy', color: '#E6D4B8', title: '가족 목표 달성률 업데이트', desc: '"주말 가족 운동" 75% 달성', time: '2일 전', unread: false },
+  { id: 5, icon: 'trophy', color: '#D8CDB8', title: '가족 목표 달성률 업데이트', desc: '"주말 가족 운동" 75% 달성', time: '2일 전', unread: false },
 ];
 
 const TODAY_EVENTS = [
-  { time: '10:00', title: '서준이 수영 수업', location: '분당 수영장', color: '#4A90C8', member: '서준' },
-  { time: '14:00', title: '학교 발표회', location: '서현초등학교', color: '#4AA86B', member: '서준' },
-  { time: '18:00', title: '가족 저녁 식사', location: '정자동 한강갈비', color: '#C05A4E', member: '전체' },
+  { time: '10:00', endTime: '11:00', title: '서준이 수영 수업', location: '분당 수영장', color: '#4A8EC8', member: '서준' },
+  { time: '14:00', endTime: '16:00', title: '학교 발표회', location: '서현초등학교', color: '#3D9A5F', member: '서준' },
+  { time: '18:00', endTime: '20:00', title: '가족 저녁 식사', location: '정자동 한강갈비', color: '#C05A4E', member: '전체' },
 ];
 
 const RECENT_RECORDS = [
-  { type: '육아 일기', icon: 'child', color: '#F0B8B8', title: '지우의 첫 자전거 타기', date: '오늘', route: '/(tabs)/records/parenting' },
-  { type: '독서 목록', icon: 'book', color: '#B8D8C0', title: '어린 왕자 완독', date: '어제', route: '/(tabs)/records/reading' },
-  { type: '가계부', icon: 'money', color: '#E8D8C0', title: '3월 지출 정산', date: '2일 전', route: '/(tabs)/records/finance' },
-  { type: '레시피', icon: 'cutlery', color: '#E8D0C0', title: '엄마 김치찌개 레시피', date: '3일 전', route: '/(tabs)/records/recipes' },
+  { type: '육아 일기', icon: 'child', gradient: ['#F0B8B8', '#E8A0A0'], title: '지우의 첫 자전거', date: '오늘', route: '/(tabs)/records/parenting' },
+  { type: '독서 목록', icon: 'book', gradient: ['#B8D8C0', '#A0C8A8'], title: '어린 왕자 완독', date: '어제', route: '/(tabs)/records/reading' },
+  { type: '가계부', icon: 'money', gradient: ['#E8D8C0', '#D8C8B0'], title: '3월 지출 정산', date: '2일 전', route: '/(tabs)/records/finance' },
+  { type: '레시피', icon: 'cutlery', gradient: ['#E8D0C0', '#D8C0B0'], title: '엄마 김치찌개', date: '3일 전', route: '/(tabs)/records/recipes' },
 ];
 
 export default function HomeScreen() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+
   const today = new Date();
-  const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+  const dateStr = `${today.getMonth() + 1}월 ${today.getDate()}일`;
+  const dayNames = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+  const dayName = dayNames[today.getDay()];
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
+    ]).start();
+  }, []);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -38,7 +51,7 @@ export default function HomeScreen() {
   }, []);
 
   const hour = today.getHours();
-  const greeting = hour < 6 ? '좋은 새벽이에요!' : hour < 12 ? '좋은 아침이에요!' : hour < 18 ? '좋은 오후에요!' : '좋은 저녁이에요!';
+  const greeting = hour < 6 ? '새벽이네요' : hour < 12 ? '좋은 아침' : hour < 18 ? '좋은 오후' : '좋은 저녁';
   const unreadCount = NOTIFICATIONS.filter(n => n.unread).length;
 
   return (
@@ -47,10 +60,11 @@ export default function HomeScreen() {
       <Modal visible={showNotif} animationType="slide" transparent>
         <View style={s.modalOverlay}>
           <View style={s.notifModal}>
+            <View style={s.notifHandle} />
             <View style={s.notifHeader}>
               <Text style={s.notifTitle}>알림</Text>
-              <TouchableOpacity onPress={() => setShowNotif(false)} activeOpacity={0.7}>
-                <FontAwesome name="times" size={20} color="#4A4A4A" />
+              <TouchableOpacity onPress={() => setShowNotif(false)} activeOpacity={0.7} style={s.notifClose}>
+                <FontAwesome name="times" size={18} color="#888" />
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -78,67 +92,115 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#C05A4E" colors={['#C05A4E']} />}
       >
-        {/* Header */}
+        {/* Header — minimal */}
         <View style={s.header}>
-          <TouchableOpacity style={s.headerLeft} activeOpacity={0.7} onPress={() => router.push('/(tabs)/settings')}>
-            <View style={s.familyAvatar}>
-              <FontAwesome name="users" size={18} color="#C05A4E" />
+          <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/settings')}>
+            <View style={s.profilePill}>
+              <View style={s.profileDot} />
+              <Text style={s.profileName}>김지수</Text>
             </View>
-            <Text style={s.familyName}>우리 가족</Text>
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => setShowNotif(true)}>
-            <FontAwesome name="bell-o" size={22} color="#4A4A4A" />
+          <TouchableOpacity activeOpacity={0.7} onPress={() => setShowNotif(true)} style={s.bellWrap}>
+            <FontAwesome name="bell-o" size={20} color="#1F1F1F" />
             {unreadCount > 0 && <View style={s.badge}><Text style={s.badgeText}>{unreadCount}</Text></View>}
           </TouchableOpacity>
         </View>
 
-        {/* Greeting */}
-        <View style={s.greeting}>
-          <Text style={s.greetingText}>{greeting}</Text>
-          <Text style={s.dateText}>{dateStr}</Text>
-        </View>
+        {/* Hero Greeting */}
+        <Animated.View style={[s.hero, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+          <Text style={s.greeting}>{greeting},</Text>
+          <Text style={s.greetingBold}>지수님</Text>
+          <Text style={s.dateText}>{dateStr} {dayName}</Text>
+        </Animated.View>
 
-        {/* Today's Schedule — TOP */}
+        {/* Today's Schedule — Timeline style */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
-            <Text style={s.sectionTitle}>오늘의 일정</Text>
-            <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')}>
-              <Text style={s.seeAll}>캘린더</Text>
+            <View>
+              <Text style={s.sectionTitle}>오늘의 일정</Text>
+              <Text style={s.sectionSub}>{TODAY_EVENTS.length}개의 일정</Text>
+            </View>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')} style={s.seeAllBtn}>
+              <Text style={s.seeAllText}>전체</Text>
+              <FontAwesome name="arrow-right" size={11} color="#C05A4E" />
             </TouchableOpacity>
           </View>
-          {TODAY_EVENTS.map((ev, i) => (
-            <TouchableOpacity key={i} style={s.eventItem} activeOpacity={0.7}
-              onPress={() => Alert.alert(ev.title, `시간: ${ev.time}\n장소: ${ev.location}\n참여: ${ev.member}`)}>
-              <View style={[s.eventColorBar, { backgroundColor: ev.color }]} />
-              <View style={s.eventTimeBox}><Text style={[s.eventTimeText, { color: ev.color }]}>{ev.time}</Text></View>
-              <View style={s.eventInfo}>
-                <Text style={s.eventTitle}>{ev.title}</Text>
-                <Text style={s.eventLocation}>{ev.location}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
 
-        {/* Recent Records — 2x2 Grid */}
-        <View style={s.section}>
-          <View style={s.sectionHeader}>
-            <Text style={s.sectionTitle}>최근 기록</Text>
-            <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/records')}>
-              <Text style={s.seeAll}>전체 보기</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={s.recentGrid}>
-            {RECENT_RECORDS.map((rec, i) => (
-              <TouchableOpacity key={i} style={s.recentCard} activeOpacity={0.7}
-                onPress={() => router.push(rec.route as any)}>
-                <View style={[s.recentIcon, { backgroundColor: rec.color }]}>
-                  <FontAwesome name={rec.icon as any} size={18} color="#4A4A4A" />
+          <View style={s.timeline}>
+            {TODAY_EVENTS.map((ev, i) => (
+              <TouchableOpacity key={i} style={s.timelineItem} activeOpacity={0.7}
+                onPress={() => Alert.alert(ev.title, `${ev.time} — ${ev.endTime}\n${ev.location}\n참여: ${ev.member}`)}>
+                <View style={s.timelineLeft}>
+                  <Text style={s.timelineTime}>{ev.time}</Text>
+                  <View style={[s.timelineDot, { backgroundColor: ev.color }]} />
+                  {i < TODAY_EVENTS.length - 1 && <View style={s.timelineLine} />}
                 </View>
-                <Text style={s.recentTitle} numberOfLines={1}>{rec.title}</Text>
-                <Text style={s.recentMeta}>{rec.type} · {rec.date}</Text>
+                <View style={[s.timelineCard, { borderLeftColor: ev.color }]}>
+                  <Text style={s.timelineTitle}>{ev.title}</Text>
+                  <View style={s.timelineRow}>
+                    <FontAwesome name="map-marker" size={10} color="#A0A0A0" />
+                    <Text style={s.timelineLoc}>{ev.location}</Text>
+                  </View>
+                  <View style={s.timelineMemberWrap}>
+                    <Text style={s.timelineMember}>{ev.member}</Text>
+                  </View>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+
+        {/* Recent Records — Gradient cards */}
+        <View style={s.section}>
+          <View style={s.sectionHeader}>
+            <View>
+              <Text style={s.sectionTitle}>최근 기록</Text>
+              <Text style={s.sectionSub}>가족이 남긴 기록들</Text>
+            </View>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/records')} style={s.seeAllBtn}>
+              <Text style={s.seeAllText}>전체</Text>
+              <FontAwesome name="arrow-right" size={11} color="#C05A4E" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={s.recordGrid}>
+            {RECENT_RECORDS.map((rec, i) => (
+              <TouchableOpacity key={i} style={[s.recordCard, i === 0 && s.recordCardLarge]} activeOpacity={0.85}
+                onPress={() => router.push(rec.route as any)}>
+                <View style={[s.recordGradient, { backgroundColor: rec.gradient[0] }]}>
+                  <View style={s.recordIconWrap}>
+                    <FontAwesome name={rec.icon as any} size={i === 0 ? 28 : 20} color="rgba(0,0,0,0.15)" />
+                  </View>
+                  <View style={s.recordBottom}>
+                    <Text style={[s.recordType, { fontSize: i === 0 ? 11 : 10 }]}>{rec.type}</Text>
+                    <Text style={[s.recordTitle, { fontSize: i === 0 ? 17 : 14 }]} numberOfLines={1}>{rec.title}</Text>
+                    <Text style={s.recordDate}>{rec.date}</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Quick Record */}
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>빠른 기록</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.quickScroll}>
+            {[
+              { icon: 'pencil', label: '일기', route: '/(tabs)/records/parenting' },
+              { icon: 'money', label: '가계부', route: '/(tabs)/records/finance' },
+              { icon: 'book', label: '독서', route: '/(tabs)/records/reading' },
+              { icon: 'camera', label: '사진', route: '/(tabs)/records/media' },
+              { icon: 'cutlery', label: '레시피', route: '/(tabs)/records/recipes' },
+              { icon: 'film', label: '영화', route: '/(tabs)/records/movies' },
+            ].map((q, i) => (
+              <TouchableOpacity key={i} style={s.quickChip} activeOpacity={0.7}
+                onPress={() => router.push(q.route as any)}>
+                <FontAwesome name={q.icon as any} size={16} color="#666" />
+                <Text style={s.quickLabel}>{q.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
 
         <View style={{ height: 24 }} />
@@ -149,58 +211,87 @@ export default function HomeScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8,
+
+  // Header
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 4, paddingBottom: 8 },
+  profilePill: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: '#FFFFFF', paddingHorizontal: 14, paddingVertical: 8,
+    borderRadius: 24, borderWidth: 1, borderColor: '#EAEAEA',
   },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  familyAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#E8D0C0', justifyContent: 'center', alignItems: 'center' },
-  familyName: { fontSize: 18, fontWeight: '700', color: '#C05A4E' },
-  badge: { position: 'absolute', top: -4, right: -6, backgroundColor: '#E53935', borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4 },
-  badgeText: { color: '#FFF', fontSize: 10, fontWeight: '700' },
+  profileDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#3D9A5F' },
+  profileName: { fontSize: 13, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
+  bellWrap: { padding: 8 },
+  badge: { position: 'absolute', top: 2, right: 2, backgroundColor: '#C05A4E', borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4 },
+  badgeText: { color: '#FFF', fontSize: 9, fontWeight: '700' },
 
-  greeting: { paddingHorizontal: 20, marginBottom: 20 },
-  greetingText: { fontSize: 24, fontWeight: '700', color: '#1F1F1F', marginBottom: 2, fontFamily: 'PretendardBold' },
-  dateText: { fontSize: 13, color: '#888888' },
+  // Hero
+  hero: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 28 },
+  greeting: { fontSize: 28, fontWeight: '300', color: '#888', fontFamily: 'Pretendard', letterSpacing: -0.5 },
+  greetingBold: { fontSize: 34, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginTop: -4, letterSpacing: -1 },
+  dateText: { fontSize: 13, color: '#A0A0A0', marginTop: 6, fontFamily: 'Pretendard' },
 
-  section: { paddingHorizontal: 20, marginBottom: 24 },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  seeAll: { fontSize: 13, color: '#C05A4E', fontWeight: '600' },
+  // Section
+  section: { paddingHorizontal: 20, marginBottom: 28 },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 14 },
+  sectionTitle: { fontSize: 19, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
+  sectionSub: { fontSize: 12, color: '#A0A0A0', marginTop: 2 },
+  seeAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 4 },
+  seeAllText: { fontSize: 13, color: '#C05A4E', fontWeight: '600' },
 
-  eventItem: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8,
-    borderWidth: 1, borderColor: '#EAEAEA',
+  // Timeline
+  timeline: {},
+  timelineItem: { flexDirection: 'row', marginBottom: 4 },
+  timelineLeft: { width: 56, alignItems: 'center', paddingTop: 2 },
+  timelineTime: { fontSize: 12, fontWeight: '600', color: '#888', marginBottom: 6, fontFamily: 'Pretendard' },
+  timelineDot: { width: 10, height: 10, borderRadius: 5, zIndex: 1 },
+  timelineLine: { width: 1.5, flex: 1, backgroundColor: '#E0E0E0', marginTop: -1 },
+  timelineCard: {
+    flex: 1, marginLeft: 8, marginBottom: 10,
+    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,
+    borderLeftWidth: 3,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
-  eventColorBar: { width: 4, height: 40, borderRadius: 2 },
-  eventTimeBox: { width: 48, alignItems: 'center' },
-  eventTimeText: { fontSize: 14, fontWeight: '700' },
-  eventInfo: { flex: 1 },
-  eventTitle: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', marginBottom: 2 },
-  eventLocation: { fontSize: 12, color: '#888888' },
+  timelineTitle: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', marginBottom: 4, fontFamily: 'Pretendard' },
+  timelineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  timelineLoc: { fontSize: 12, color: '#A0A0A0' },
+  timelineMemberWrap: { marginTop: 6, alignSelf: 'flex-start', backgroundColor: '#F4F3F0', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
+  timelineMember: { fontSize: 10, fontWeight: '600', color: '#888' },
 
-  recentGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  recentCard: {
-    width: '48%', backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16,
-    borderWidth: 1, borderColor: '#EAEAEA',
+  // Record Cards
+  recordGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  recordCard: { width: '47%', borderRadius: 18, overflow: 'hidden' },
+  recordCardLarge: { width: '100%', marginBottom: 2 },
+  recordGradient: { padding: 18, minHeight: 110, justifyContent: 'flex-end', borderRadius: 18 },
+  recordIconWrap: { position: 'absolute', top: 14, right: 14 },
+  recordBottom: {},
+  recordType: { color: 'rgba(0,0,0,0.35)', fontWeight: '600', marginBottom: 4 },
+  recordTitle: { color: 'rgba(0,0,0,0.7)', fontWeight: '700', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
+  recordDate: { fontSize: 11, color: 'rgba(0,0,0,0.3)', marginTop: 4 },
+
+  // Quick Record
+  quickScroll: { gap: 8, paddingTop: 8 },
+  quickChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: '#FFFFFF', paddingHorizontal: 16, paddingVertical: 10,
+    borderRadius: 24, borderWidth: 1, borderColor: '#EAEAEA',
   },
-  recentIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
-  recentTitle: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', marginBottom: 4 },
-  recentMeta: { fontSize: 11, color: '#888888' },
+  quickLabel: { fontSize: 13, fontWeight: '500', color: '#4A4A4A', fontFamily: 'Pretendard' },
 
   // Notification Modal
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  notifModal: { backgroundColor: '#F9F8F5', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '75%', padding: 20, paddingBottom: 40 },
-  notifHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#EAEAEA' },
-  notifTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F' },
-  notifItem: { flexDirection: 'row', gap: 12, padding: 14, borderRadius: 12, marginBottom: 6, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA' },
-  notifItemUnread: { backgroundColor: '#FFF8F0', borderColor: '#F5D5C0' },
-  notifIcon: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
+  notifModal: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '75%', paddingHorizontal: 20, paddingBottom: 40 },
+  notifHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginTop: 10, marginBottom: 12 },
+  notifHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  notifTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
+  notifClose: { padding: 4 },
+  notifItem: { flexDirection: 'row', gap: 12, padding: 14, borderRadius: 14, marginBottom: 6, backgroundColor: '#FAFAFA' },
+  notifItemUnread: { backgroundColor: '#F5F0EC' },
+  notifIcon: { width: 36, height: 36, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
   notifContent: { flex: 1 },
   notifItemTitle: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', marginBottom: 2 },
-  notifItemDesc: { fontSize: 12, color: '#666666' },
+  notifItemDesc: { fontSize: 12, color: '#888' },
   notifMeta: { alignItems: 'flex-end', gap: 4 },
-  notifTime: { fontSize: 11, color: '#888888' },
-  notifDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#C05A4E' },
+  notifTime: { fontSize: 11, color: '#A0A0A0' },
+  notifDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#C05A4E' },
 });
