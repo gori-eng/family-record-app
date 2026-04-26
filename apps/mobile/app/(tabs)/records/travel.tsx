@@ -24,7 +24,7 @@ export default function TravelScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: '여행 위시' }} />
+      <Stack.Screen options={{ title: '여행 기록' }} />
       <View style={s.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.statsRow}>

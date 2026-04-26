@@ -33,14 +33,20 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
+          fontFamily: 'Pretendard',
         },
         tabBarHideOnKeyboard: true,
         headerStyle: {
           backgroundColor: '#F9F8F5',
         },
-        headerTintColor: '#2D2D2D',
+        headerTitleStyle: {
+          fontFamily: 'PretendardBold',
+          fontSize: 17,
+          letterSpacing: -0.3,
+        },
+        headerTintColor: '#1F1F1F',
         headerShadowVisible: false,
-        animation: 'shift',
+        animation: 'fade',
       }}
     >
       <Tabs.Screen

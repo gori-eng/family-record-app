@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, Modal, Animated, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const MOCK_EVENTS: Record<string, { time: string; title: string; color: string; location?: string; member?: string }[]> = {
   '2026-4-2': [
@@ -28,6 +28,24 @@ export default function CalendarScreen() {
   const [newTitle, setNewTitle] = useState('');
   const [newTime, setNewTime] = useState('');
   const [newLocation, setNewLocation] = useState('');
+
+  const modalBg = useRef(new Animated.Value(0)).current;
+  const modalSlide = useRef(new Animated.Value(500)).current;
+
+  const openModal = (type: 'detail' | 'add', event?: EventType) => {
+    if (type === 'detail' && event) setShowDetail(event);
+    else setShowAdd(true);
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+    ]).start();
+  };
+  const closeModal = () => {
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
+    ]).start(() => { setShowDetail(null); setShowAdd(false); });
+  };
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
@@ -66,15 +84,19 @@ export default function CalendarScreen() {
   return (
     <View style={styles.container}>
       {/* Event Detail Modal */}
-      <Modal visible={!!showDetail} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.detailModal}>
+      <Modal visible={!!showDetail || showAdd} transparent statusBarTranslucent animationType="none">
+        <View style={styles.modalWrap}>
+          <Animated.View style={[styles.modalBgLayer, { opacity: modalBg }]}>
+            <Pressable style={{ flex: 1 }} onPress={closeModal} />
+          </Animated.View>
+          <Animated.View style={[styles.detailModal, { transform: [{ translateY: modalSlide }] }]}>
+            <View style={styles.modalHandle} />
             {showDetail && (
               <>
                 <View style={styles.detailHeader}>
                   <View style={[styles.detailColorDot, { backgroundColor: showDetail.color }]} />
                   <Text style={styles.detailTitle}>{showDetail.title}</Text>
-                  <TouchableOpacity onPress={() => setShowDetail(null)} activeOpacity={0.7}>
+                  <TouchableOpacity onPress={closeModal} activeOpacity={0.7}>
                     <FontAwesome name="times" size={20} color="#5C4A32" />
                   </TouchableOpacity>
                 </View>
@@ -115,17 +137,11 @@ export default function CalendarScreen() {
                 </View>
               </>
             )}
-          </View>
-        </View>
-      </Modal>
-
-      {/* Add Event Modal */}
-      <Modal visible={showAdd} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.addModal}>
+            {showAdd && (
+              <>
             <View style={styles.addHeader}>
               <Text style={styles.addTitle}>새 일정 추가</Text>
-              <TouchableOpacity onPress={() => setShowAdd(false)} activeOpacity={0.7}>
+              <TouchableOpacity onPress={closeModal} activeOpacity={0.7}>
                 <FontAwesome name="times" size={20} color="#5C4A32" />
               </TouchableOpacity>
             </View>
@@ -140,10 +156,12 @@ export default function CalendarScreen() {
             <TextInput style={styles.addInput} placeholder="예: 정자동 한강갈비" placeholderTextColor="#BFAE99"
               value={newLocation} onChangeText={setNewLocation} />
             <TouchableOpacity style={styles.addSubmit} activeOpacity={0.8}
-              onPress={() => { setShowAdd(false); setNewTitle(''); setNewTime(''); setNewLocation(''); }}>
+              onPress={() => { closeModal(); setNewTitle(''); setNewTime(''); setNewLocation(''); }}>
               <Text style={styles.addSubmitText}>일정 등록</Text>
             </TouchableOpacity>
-          </View>
+              </>
+            )}
+          </Animated.View>
         </View>
       </Modal>
 
@@ -204,14 +222,14 @@ export default function CalendarScreen() {
             {currentMonth+1}월 {selectedDay}일 {isToday(selectedDay)?'(오늘)':''} 일정
           </Text>
           {selectedEvents.length === 0 ? (
-            <TouchableOpacity style={styles.emptyState} activeOpacity={0.7} onPress={() => setShowAdd(true)}>
+            <TouchableOpacity style={styles.emptyState} activeOpacity={0.7} onPress={() => openModal('add')}>
               <FontAwesome name="calendar-plus-o" size={32} color="#D4C8B0" />
               <Text style={styles.emptyText}>등록된 일정이 없어요</Text>
               <Text style={styles.emptySubtext}>탭하여 일정을 추가해보세요</Text>
             </TouchableOpacity>
           ) : (
             selectedEvents.map((ev,i) => (
-              <TouchableOpacity key={i} style={styles.eventCard} activeOpacity={0.7} onPress={() => setShowDetail(ev)}>
+              <TouchableOpacity key={i} style={styles.eventCard} activeOpacity={0.7} onPress={() => openModal('detail', ev)}>
                 <View style={[styles.eventColorBar, { backgroundColor: ev.color }]} />
                 <View style={styles.eventContent}>
                   <Text style={styles.eventTime}>{ev.time}</Text>
@@ -231,7 +249,7 @@ export default function CalendarScreen() {
         <View style={{height:80}}/>
       </ScrollView>
 
-      <TouchableOpacity style={styles.fab} activeOpacity={0.8} onPress={() => setShowAdd(true)}>
+      <TouchableOpacity style={styles.fab} activeOpacity={0.8} onPress={() => openModal('add')}>
         <FontAwesome name="plus" size={22} color="#FFFFFF" />
       </TouchableOpacity>
     </View>
@@ -251,10 +269,10 @@ const styles = StyleSheet.create({
   saturdayColor: { color:'#4A90C8' },
   calendarGrid: { flexDirection:'row', flexWrap:'wrap', paddingHorizontal:12, marginBottom:16 },
   dayCell: { width:`${100/7}%`, aspectRatio:1, justifyContent:'center', alignItems:'center' },
-  todayCell: { backgroundColor:'#C05A4E', borderRadius:20 },
+  todayCell: { backgroundColor:'#C05A4E', borderRadius:22, minWidth:44, minHeight:44, justifyContent:'center', alignItems:'center' },
   selectedCell: { backgroundColor:'#FFF0ED', borderRadius:20 },
-  dayText: { fontSize:15, color:'#1F1F1F' },
-  todayText: { color:'#FFFFFF', fontWeight:'700' },
+  dayText: { fontSize:15, color:'#1F1F1F', fontFamily:'Pretendard' },
+  todayText: { color:'#FFFFFF', fontWeight:'700', fontFamily:'PretendardBold' },
   selectedText: { color:'#C05A4E', fontWeight:'700' },
   eventIndicator: { width:6, height:6, borderRadius:3, backgroundColor:'#C05A4E', marginTop:3 },
   eventIndicatorToday: { backgroundColor:'#FFFFFF' },
@@ -277,8 +295,10 @@ const styles = StyleSheet.create({
   fab: { position:'absolute', bottom:24, right:24, width:56, height:56, borderRadius:28, backgroundColor:'#C05A4E', justifyContent:'center', alignItems:'center', shadowColor:'#C05A4E', shadowOffset:{width:0,height:4}, shadowOpacity:0.3, shadowRadius:8, elevation:8 },
 
   // Modals
-  modalOverlay: { flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'flex-end' },
-  detailModal: { backgroundColor:'#F9F8F5', borderTopLeftRadius:24, borderTopRightRadius:24, padding:24, paddingBottom:40 },
+  modalWrap: { flex:1, justifyContent:'flex-end' },
+  modalBgLayer: { ...StyleSheet.absoluteFillObject, backgroundColor:'rgba(0,0,0,0.3)' },
+  modalHandle: { width:36, height:4, backgroundColor:'#E0E0E0', borderRadius:2, alignSelf:'center', marginTop:10, marginBottom:12 },
+  detailModal: { backgroundColor:'#FFFFFF', borderTopLeftRadius:24, borderTopRightRadius:24, padding:24, paddingBottom:40 },
   detailHeader: { flexDirection:'row', alignItems:'center', gap:10, marginBottom:20 },
   detailColorDot: { width:12, height:12, borderRadius:6 },
   detailTitle: { flex:1, fontSize:20, fontWeight:'700', color:'#1F1F1F', fontFamily:'PretendardBold', letterSpacing:-0.3 },
@@ -291,7 +311,6 @@ const styles = StyleSheet.create({
   detailBtnText: { fontSize:14, fontWeight:'600', color:'#C05A4E', fontFamily:'Pretendard' },
   detailBtnDanger: { backgroundColor:'#FFF0F0' },
 
-  addModal: { backgroundColor:'#F9F8F5', borderTopLeftRadius:24, borderTopRightRadius:24, padding:24, paddingBottom:40 },
   addHeader: { flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:8 },
   addTitle: { fontSize:20, fontWeight:'700', color:'#1F1F1F', fontFamily:'PretendardBold', letterSpacing:-0.3 },
   addDate: { fontSize:14, color:'#9C8B75', marginBottom:20 },

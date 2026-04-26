@@ -8,15 +8,11 @@ const CATEGORIES = [
   { icon: 'book', label: '독서 목록', color: '#B8D8C0', count: 12, screen: 'reading' },
   { icon: 'money', label: '가계부', color: '#E8D8C0', count: 18, screen: 'finance' },
   { icon: 'film', label: '영화 관람', color: '#B0C8D8', count: 8, screen: 'movies' },
-  { icon: 'plane', label: '여행 위시', color: '#E8D8C0', count: 5, screen: 'travel' },
+  { icon: 'plane', label: '여행 기록', color: '#E8D8C0', count: 5, screen: 'travel' },
   { icon: 'cutlery', label: '레시피', color: '#E8D0C0', count: 15, screen: 'recipes' },
-  { icon: 'microphone', label: '음성/영상', color: '#C8B0D0', count: 3, screen: 'media' },
   { icon: 'trophy', label: '가족 목표', color: '#D8CDB8', count: 7, screen: 'goals' },
   { icon: 'heartbeat', label: '건강 기록', color: '#E0B0B0', count: 6, screen: 'health' },
-  { icon: 'sitemap', label: '가계도', color: '#B8D0B8', count: 1, screen: 'family-tree' },
   { icon: 'clock-o', label: '타임캡슐', color: '#D8D4B0', count: 2, screen: 'time-capsule' },
-  { icon: 'id-card', label: 'MBTI 기록', color: '#B0B8D0', count: 4, screen: 'identity' },
-  { icon: 'lock', label: '디지털 유산', color: '#D0B0C0', count: 0, screen: 'legacy' },
 ];
 
 export default function RecordsScreen() {
