@@ -17,7 +17,7 @@ export default function MediaScreen() {
       <View style={s.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.intro}>
-            <FontAwesome name="headphones" size={20} color="#C05A4E" />
+            <FontAwesome name="headphones" size={20} color="#4A8C6F" />
             <Text style={s.introText}>가족의 목소리와 영상을 기록하세요. 텍스트보다 훨씬 더 강력한 기억이 됩니다.</Text>
           </View>
 
@@ -43,7 +43,7 @@ export default function MediaScreen() {
                   </View>
                 </View>
                 <TouchableOpacity style={s.playBtn} activeOpacity={0.7}>
-                  <FontAwesome name="play" size={14} color="#C05A4E" />
+                  <FontAwesome name="play" size={14} color="#4A8C6F" />
                 </TouchableOpacity>
               </TouchableOpacity>
             ))}
@@ -60,8 +60,8 @@ export default function MediaScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
-  intro: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, margin: 20, backgroundColor: '#FFF0ED', borderRadius: 14, padding: 16 },
-  introText: { flex: 1, fontSize: 13, color: '#C05A4E', lineHeight: 20, fontFamily: 'Pretendard' },
+  intro: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, margin: 20, backgroundColor: '#EFF6F1', borderRadius: 14, padding: 16 },
+  introText: { flex: 1, fontSize: 13, color: '#4A8C6F', lineHeight: 20, fontFamily: 'Pretendard' },
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginBottom: 24 },
   stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   statNum: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', marginTop: 4, fontFamily: 'PretendardBold' },
@@ -74,6 +74,6 @@ const s = StyleSheet.create({
   meta: { fontSize: 12, color: '#A0A0A0', marginBottom: 4, fontFamily: 'Pretendard' },
   memberRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   member: { fontSize: 11, color: '#7A6B55' },
-  playBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFF0ED', justifyContent: 'center', alignItems: 'center' },
-  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center', shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+  playBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#EFF6F1', justifyContent: 'center', alignItems: 'center' },
+  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
 });

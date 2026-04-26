@@ -84,7 +84,7 @@ export default function GoalsScreen() {
                     <Text style={s.modalLabel}>상태</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       {selectedItem.status === '달성' && <FontAwesome name="check-circle" size={16} color="#4AA86B" />}
-                      <Text style={[s.modalValue, { color: selectedItem.status === '달성' ? '#4AA86B' : '#C05A4E', fontWeight: '600' }]}>{selectedItem.status}</Text>
+                      <Text style={[s.modalValue, { color: selectedItem.status === '달성' ? '#4AA86B' : '#4A8C6F', fontWeight: '600' }]}>{selectedItem.status}</Text>
                     </View>
                   </View>
                 </View>
@@ -125,7 +125,7 @@ export default function GoalsScreen() {
               <Text style={s.summaryLabel}>달성 완료</Text>
             </View>
             <View style={s.summaryCard}>
-              <Text style={[s.summaryNum, { color: '#C05A4E' }]}>4</Text>
+              <Text style={[s.summaryNum, { color: '#4A8C6F' }]}>4</Text>
               <Text style={s.summaryLabel}>진행 중</Text>
             </View>
           </View>
@@ -185,7 +185,7 @@ const s = StyleSheet.create({
   progressMeta: { flexDirection: 'row', justifyContent: 'space-between' },
   progressPct: { fontSize: 13, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
   targetDate: { fontSize: 12, color: '#A0A0A0', fontFamily: 'Pretendard' },
-  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center', shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
@@ -197,6 +197,6 @@ const s = StyleSheet.create({
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
-  createSubmit: { backgroundColor: '#C05A4E', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
+  createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 });

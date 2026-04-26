@@ -15,7 +15,7 @@ const NOTIFICATIONS = [
 const TODAY_EVENTS = [
   { time: '10:00', endTime: '11:00', title: '서준이 수영 수업', location: '분당 수영장', color: '#4A8EC8', member: '서준' },
   { time: '14:00', endTime: '16:00', title: '학교 발표회', location: '서현초등학교', color: '#3D9A5F', member: '서준' },
-  { time: '18:00', endTime: '20:00', title: '가족 저녁 식사', location: '정자동 한강갈비', color: '#C05A4E', member: '전체' },
+  { time: '18:00', endTime: '20:00', title: '가족 저녁 식사', location: '정자동 한강갈비', color: '#4A8C6F', member: '전체' },
 ];
 
 const RECENT_RECORDS = [
@@ -114,7 +114,7 @@ export default function HomeScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#C05A4E" colors={['#C05A4E']} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4A8C6F" colors={['#4A8C6F']} />}
       >
         {/* Header — 알림만 */}
         <View style={s.header}>
@@ -140,7 +140,7 @@ export default function HomeScreen() {
             </View>
             <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')} style={s.seeAllBtn}>
               <Text style={s.seeAllText}>전체</Text>
-              <FontAwesome name="arrow-right" size={11} color="#C05A4E" />
+              <FontAwesome name="arrow-right" size={11} color="#4A8C6F" />
             </TouchableOpacity>
           </View>
           {TODAY_EVENTS.length === 0 ? (
@@ -205,7 +205,7 @@ export default function HomeScreen() {
             </View>
             <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/records')} style={s.seeAllBtn}>
               <Text style={s.seeAllText}>전체</Text>
-              <FontAwesome name="arrow-right" size={11} color="#C05A4E" />
+              <FontAwesome name="arrow-right" size={11} color="#4A8C6F" />
             </TouchableOpacity>
           </View>
           {RECENT_RECORDS.length === 0 ? (
@@ -248,7 +248,7 @@ const s = StyleSheet.create({
   // Header — 2. 프로필 우측
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 4, paddingBottom: 4, gap: 10 },
   headerIcon: { padding: 8 },
-  badge: { position: 'absolute', top: 2, right: 2, backgroundColor: '#C05A4E', borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4 },
+  badge: { position: 'absolute', top: 2, right: 2, backgroundColor: '#4A8C6F', borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4 },
   badgeText: { color: '#FFF', fontSize: 9, fontWeight: '700' },
 
   // 1. Hero — 한 줄
@@ -262,7 +262,7 @@ const s = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   sectionSub: { fontSize: 12, color: '#A0A0A0', marginTop: 2 },
   seeAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 4 },
-  seeAllText: { fontSize: 13, color: '#C05A4E', fontWeight: '600' },
+  seeAllText: { fontSize: 13, color: '#4A8C6F', fontWeight: '600' },
 
   // Empty state
   emptyState: { alignItems: 'center', paddingVertical: 36, backgroundColor: '#FFFFFF', borderRadius: 16, borderWidth: 1, borderColor: '#EAEAEA' },
@@ -327,10 +327,10 @@ const s = StyleSheet.create({
   notifContent: { flex: 1 },
   notifItemTitle: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', marginBottom: 2 },
   notifAuthorRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 },
-  notifAuthorDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#C05A4E' },
+  notifAuthorDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#4A8C6F' },
   notifAuthor: { fontSize: 11, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
   notifItemDesc: { fontSize: 12, color: '#888' },
   notifMeta: { alignItems: 'flex-end', gap: 4 },
   notifTime: { fontSize: 11, color: '#A0A0A0' },
-  notifDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#C05A4E' },
+  notifDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#4A8C6F' },
 });

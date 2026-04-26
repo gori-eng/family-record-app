@@ -19,12 +19,12 @@ const FamilyTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: '#C05A4E',
+    primary: '#4A8C6F',
     background: '#F9F8F5',
     card: '#FFFFFF',
     text: '#1F1F1F',
     border: '#EAEAEA',
-    notification: '#C05A4E',
+    notification: '#4A8C6F',
   },
 };
 

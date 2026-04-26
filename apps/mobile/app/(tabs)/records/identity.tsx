@@ -81,7 +81,7 @@ export default function IdentityScreen() {
 
           {/* AI 분석 */}
           <View style={s.aiCard}>
-            <FontAwesome name="magic" size={14} color="#C05A4E" />
+            <FontAwesome name="magic" size={14} color="#4A8C6F" />
             <View style={s.aiContent}>
               <Text style={s.aiTitle}>AI 닮은 점 분석</Text>
               <Text style={s.aiText}>"서준이는 7살 때 아버지가 가졌던 호기심과 90% 일치하는 패턴을 보이고 있어요!"</Text>
@@ -106,7 +106,7 @@ const s = StyleSheet.create({
   avatarText: { fontSize: 20, fontWeight: '700', color: '#5C4A32' },
   memberInfo: { flex: 1 },
   memberName: { fontSize: 17, fontWeight: '700', color: '#1F1F1F', marginBottom: 4, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  mbtiBadge: { backgroundColor: '#C05A4E', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8, alignSelf: 'flex-start' },
+  mbtiBadge: { backgroundColor: '#4A8C6F', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8, alignSelf: 'flex-start' },
   mbtiText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF', letterSpacing: 1 },
   traits: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 14 },
   traitChip: { backgroundColor: '#FFF8F0', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
@@ -114,12 +114,12 @@ const s = StyleSheet.create({
   historyTitle: { fontSize: 13, fontWeight: '700', color: '#A0A0A0', marginBottom: 8, fontFamily: 'PretendardBold' },
   historyRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   historyYear: { fontSize: 12, fontWeight: '600', color: '#A0A0A0', width: 36, fontFamily: 'Pretendard' },
-  historyDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#C05A4E' },
+  historyDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4A8C6F' },
   historyContent: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
   historyMbti: { fontSize: 13, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
   historyNote: { fontSize: 12, color: '#888', flex: 1, fontFamily: 'Pretendard' },
-  aiCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginHorizontal: 20, backgroundColor: '#FFF0ED', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#F5D5C0' },
+  aiCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginHorizontal: 20, backgroundColor: '#EFF6F1', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#D0E4D6' },
   aiContent: { flex: 1 },
-  aiTitle: { fontSize: 13, fontWeight: '700', color: '#C05A4E', marginBottom: 4, fontFamily: 'PretendardBold' },
+  aiTitle: { fontSize: 13, fontWeight: '700', color: '#4A8C6F', marginBottom: 4, fontFamily: 'PretendardBold' },
   aiText: { fontSize: 13, color: '#5C4A32', lineHeight: 20, fontFamily: 'Pretendard' },
 });

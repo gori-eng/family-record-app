@@ -159,7 +159,7 @@ export default function ParentingScreen() {
           {/* Stats */}
           <View style={styles.statsRow}>
             <TouchableOpacity style={styles.statCard} onPress={() => setActiveChild('전체')} activeOpacity={0.7}>
-              <FontAwesome name="book" size={18} color="#C05A4E" />
+              <FontAwesome name="book" size={18} color="#4A8C6F" />
               <Text style={styles.statNumber}>47</Text>
               <Text style={styles.statLabel}>총 기록</Text>
             </TouchableOpacity>
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 8, borderRadius: 24,
     backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA',
   },
-  filterChipActive: { backgroundColor: '#C05A4E', borderColor: '#C05A4E' },
+  filterChipActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
   filterDot: { width: 8, height: 8, borderRadius: 4 },
   filterText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
   filterTextActive: { color: '#FFFFFF' },
@@ -290,8 +290,8 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute', bottom: 16, right: 20, zIndex: 10,
     width: 56, height: 56, borderRadius: 28,
-    backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center',
-    shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 },
+    backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center',
+    shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3, shadowRadius: 8, elevation: 8,
   },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
@@ -305,6 +305,6 @@ const styles = StyleSheet.create({
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
-  createSubmit: { backgroundColor: '#C05A4E', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
+  createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 });

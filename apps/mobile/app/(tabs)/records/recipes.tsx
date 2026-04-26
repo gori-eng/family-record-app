@@ -12,7 +12,7 @@ const RECIPES = [
   { name: '아빠표 볶음밥', origin: '주말 아침 단골 메뉴', author: '민준', difficulty: '쉬움', time: '20분', ingredients: 7, color: '#81C784', icon: 'spoon' },
 ];
 
-const DIFF_COLOR: Record<string, string> = { '쉬움': '#4AA86B', '보통': '#E6A817', '어려움': '#C05A4E' };
+const DIFF_COLOR: Record<string, string> = { '쉬움': '#4AA86B', '보통': '#E6A817', '어려움': '#4A8C6F' };
 
 export default function RecipesScreen() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -186,7 +186,7 @@ const s = StyleSheet.create({
   dot: { color: '#D4C8B0' },
   time: { fontSize: 11, color: '#7A6B55' },
   author: { fontSize: 11, color: '#7A6B55' },
-  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center', shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
@@ -200,9 +200,9 @@ const s = StyleSheet.create({
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   pillRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
   pill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
-  pillActive: { backgroundColor: '#C05A4E', borderColor: '#C05A4E' },
+  pillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
   pillText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
   pillTextActive: { color: '#FFFFFF' },
-  createSubmit: { backgroundColor: '#C05A4E', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
+  createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 });

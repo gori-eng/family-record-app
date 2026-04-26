@@ -3,7 +3,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 
 const SUBSCRIPTIONS = [
-  { name: 'Netflix', cost: '17,000원/월', icon: 'tv', color: '#E53935' },
+  { name: 'Netflix', cost: '17,000원/월', icon: 'tv', color: '#D94040' },
   { name: 'Spotify', cost: '10,900원/월', icon: 'music', color: '#1DB954' },
   { name: 'iCloud 200GB', cost: '3,900원/월', icon: 'cloud', color: '#007AFF' },
   { name: 'YouTube Premium', cost: '14,900원/월', icon: 'youtube-play', color: '#FF0000' },
@@ -59,7 +59,7 @@ export default function LegacyScreen() {
                   <Text style={s.msgRecipient}>{msg.recipient}</Text>
                   <Text style={s.msgTrigger}>{msg.trigger} · 밀봉: {msg.sealed}</Text>
                 </View>
-                <FontAwesome name="lock" size={14} color="#C05A4E" />
+                <FontAwesome name="lock" size={14} color="#4A8C6F" />
               </TouchableOpacity>
             ))}
           </View>
@@ -92,7 +92,7 @@ const s = StyleSheet.create({
   subCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   subIcon: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   subName: { flex: 1, fontSize: 15, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
-  subCost: { fontSize: 13, color: '#C05A4E', fontWeight: '600' },
+  subCost: { fontSize: 13, color: '#4A8C6F', fontWeight: '600' },
   msgCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   msgIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
   msgInfo: { flex: 1 },
@@ -100,5 +100,5 @@ const s = StyleSheet.create({
   msgTrigger: { fontSize: 12, color: '#A0A0A0', fontFamily: 'Pretendard' },
   warning: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginHorizontal: 20, backgroundColor: '#F5F0E5', borderRadius: 12, padding: 14 },
   warningText: { flex: 1, fontSize: 12, color: '#7A6B55', lineHeight: 18, fontFamily: 'Pretendard' },
-  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center', shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
 });

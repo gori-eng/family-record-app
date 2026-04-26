@@ -82,9 +82,9 @@ export default function TimeCapsuleScreen() {
                       <FontAwesome
                         name={selectedItem.locked ? 'lock' : 'unlock'}
                         size={14}
-                        color={selectedItem.locked ? '#C05A4E' : '#4AA86B'}
+                        color={selectedItem.locked ? '#4A8C6F' : '#4AA86B'}
                       />
-                      <Text style={[s.modalValue, { color: selectedItem.locked ? '#C05A4E' : '#4AA86B', fontWeight: '600' }]}>
+                      <Text style={[s.modalValue, { color: selectedItem.locked ? '#4A8C6F' : '#4AA86B', fontWeight: '600' }]}>
                         {selectedItem.locked ? '잠김' : '개봉 완료'}
                       </Text>
                     </View>
@@ -120,7 +120,7 @@ export default function TimeCapsuleScreen() {
 
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.intro}>
-            <FontAwesome name="clock-o" size={20} color="#C05A4E" />
+            <FontAwesome name="clock-o" size={20} color="#4A8C6F" />
             <View style={s.introContent}>
               <Text style={s.introTitle}>미래의 가족에게 메시지를 남기세요</Text>
               <Text style={s.introDesc}>특정 날짜나 조건이 되면 자동으로 공개됩니다</Text>
@@ -138,8 +138,8 @@ export default function TimeCapsuleScreen() {
                   <Text style={s.capsuleTitle}>{c.title}</Text>
                   <Text style={s.capsuleType}>{c.type} · {c.author}</Text>
                   <View style={s.dateRow}>
-                    <FontAwesome name={c.locked ? 'lock' : 'unlock'} size={11} color={c.locked ? '#C05A4E' : '#4AA86B'} />
-                    <Text style={[s.dateText, { color: c.locked ? '#C05A4E' : '#4AA86B' }]}>
+                    <FontAwesome name={c.locked ? 'lock' : 'unlock'} size={11} color={c.locked ? '#4A8C6F' : '#4AA86B'} />
+                    <Text style={[s.dateText, { color: c.locked ? '#4A8C6F' : '#4AA86B' }]}>
                       {c.locked ? `${c.target} 개봉 예정` : '개봉 완료!'}
                     </Text>
                   </View>
@@ -172,7 +172,7 @@ const s = StyleSheet.create({
   capsuleType: { fontSize: 12, color: '#A0A0A0', marginBottom: 6, fontFamily: 'Pretendard' },
   dateRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   dateText: { fontSize: 12, fontWeight: '600' },
-  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center', shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
@@ -184,6 +184,6 @@ const s = StyleSheet.create({
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
-  createSubmit: { backgroundColor: '#C05A4E', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
+  createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 });

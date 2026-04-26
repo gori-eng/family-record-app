@@ -5,11 +5,11 @@ import { useState, useRef } from 'react';
 const MOCK_EVENTS: Record<string, { time: string; title: string; color: string; location?: string; member?: string }[]> = {
   '2026-4-2': [
     { time: '14:00', title: '학교 발표회', color: '#4A90C8', location: '서현초등학교', member: '서준' },
-    { time: '18:00', title: '가족 저녁 식사', color: '#C05A4E', location: '정자동 한강갈비', member: '전체' },
+    { time: '18:00', title: '가족 저녁 식사', color: '#4A8C6F', location: '정자동 한강갈비', member: '전체' },
   ],
   '2026-4-5': [{ time: '10:00', title: '서준이 수영 수업', color: '#4A90C8', member: '서준' }],
   '2026-4-10': [{ time: '09:00', title: '지우 유치원 소풍', color: '#4AA86B', location: '에버랜드', member: '지우' }],
-  '2026-4-15': [{ time: '19:00', title: '부모님 결혼기념일', color: '#C05A4E', member: '전체' }],
+  '2026-4-15': [{ time: '19:00', title: '부모님 결혼기념일', color: '#4A8C6F', member: '전체' }],
   '2026-4-22': [
     { time: '11:00', title: '가족 사진 촬영', color: '#9C27B0', location: '분당 중앙공원', member: '전체' },
     { time: '17:00', title: '지우 소아과 정기검진', color: '#E6A817', member: '지우' },
@@ -119,7 +119,7 @@ export default function CalendarScreen() {
                 )}
                 {/* AI 보조 */}
                 <View style={styles.aiHint}>
-                  <FontAwesome name="magic" size={12} color="#C05A4E" />
+                  <FontAwesome name="magic" size={12} color="#4A8C6F" />
                   <Text style={styles.aiHintText}>
                     {showDetail.location
                       ? `"${showDetail.location}" 근처 맛집을 추천해드릴까요?`
@@ -128,12 +128,12 @@ export default function CalendarScreen() {
                 </View>
                 <View style={styles.detailActions}>
                   <TouchableOpacity style={styles.detailBtn} activeOpacity={0.7}>
-                    <FontAwesome name="pencil" size={14} color="#C05A4E" />
+                    <FontAwesome name="pencil" size={14} color="#4A8C6F" />
                     <Text style={styles.detailBtnText}>수정</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.detailBtn, styles.detailBtnDanger]} activeOpacity={0.7}>
-                    <FontAwesome name="trash-o" size={14} color="#E53935" />
-                    <Text style={[styles.detailBtnText, { color: '#E53935' }]}>삭제</Text>
+                    <FontAwesome name="trash-o" size={14} color="#D94040" />
+                    <Text style={[styles.detailBtnText, { color: '#D94040' }]}>삭제</Text>
                   </TouchableOpacity>
                 </View>
               </>
@@ -184,7 +184,7 @@ export default function CalendarScreen() {
 
         {!isCurrentMonth && (
           <TouchableOpacity style={styles.todayChip} onPress={goToToday} activeOpacity={0.7}>
-            <FontAwesome name="calendar-check-o" size={12} color="#C05A4E" />
+            <FontAwesome name="calendar-check-o" size={12} color="#4A8C6F" />
             <Text style={styles.todayChipText}>오늘로 이동</Text>
           </TouchableOpacity>
         )}
@@ -212,7 +212,7 @@ export default function CalendarScreen() {
 
         {/* AI 보조 힌트 */}
         <View style={styles.aiCalHint}>
-          <FontAwesome name="magic" size={12} color="#C05A4E" />
+          <FontAwesome name="magic" size={12} color="#4A8C6F" />
           <Text style={styles.aiCalHintText}>
             {selectedEvents.length > 0
               ? `오늘 ${selectedEvents.length}개 일정이 있어요. 이동 시간을 고려하면 여유롭게 준비하세요.`
@@ -264,20 +264,20 @@ const styles = StyleSheet.create({
   monthNav: { flexDirection:'row', justifyContent:'space-between', alignItems:'center', paddingHorizontal:20, paddingTop:12, paddingBottom:8 },
   navButton: { width:40, height:40, borderRadius:20, backgroundColor:'#FFFFFF', justifyContent:'center', alignItems:'center', borderWidth:1, borderColor:'#EAEAEA' },
   monthTitle: { fontSize:20, fontWeight:'700', color:'#1F1F1F', fontFamily:'PretendardBold', letterSpacing:-0.3 },
-  todayChip: { flexDirection:'row', alignItems:'center', alignSelf:'center', gap:6, backgroundColor:'#FFF0ED', paddingHorizontal:14, paddingVertical:6, borderRadius:16, marginBottom:8 },
-  todayChipText: { fontSize:12, fontWeight:'600', color:'#C05A4E', fontFamily:'Pretendard' },
+  todayChip: { flexDirection:'row', alignItems:'center', alignSelf:'center', gap:6, backgroundColor:'#EFF6F1', paddingHorizontal:14, paddingVertical:6, borderRadius:16, marginBottom:8 },
+  todayChipText: { fontSize:12, fontWeight:'600', color:'#4A8C6F', fontFamily:'Pretendard' },
   weekHeader: { flexDirection:'row', paddingHorizontal:20, marginBottom:4 },
   weekDay: { flex:1, textAlign:'center', fontSize:13, fontWeight:'600', color:'#9C8B75', fontFamily:'Pretendard' },
-  sundayColor: { color:'#C05A4E' },
+  sundayColor: { color:'#4A8C6F' },
   saturdayColor: { color:'#4A90C8' },
   calendarGrid: { flexDirection:'row', flexWrap:'wrap', paddingHorizontal:12, marginBottom:16 },
   dayCell: { width:`${100/7}%`, aspectRatio:1, justifyContent:'center', alignItems:'center', position:'relative' as const },
-  todayCell: { backgroundColor:'#C05A4E', borderRadius:20 },
-  selectedCell: { backgroundColor:'#FFF0ED', borderRadius:20 },
+  todayCell: { backgroundColor:'#4A8C6F', borderRadius:20 },
+  selectedCell: { backgroundColor:'#EFF6F1', borderRadius:20 },
   dayText: { fontSize:15, color:'#1F1F1F', fontFamily:'Pretendard' },
   todayText: { color:'#FFFFFF', fontWeight:'700', fontFamily:'PretendardBold' },
-  selectedText: { color:'#C05A4E', fontWeight:'700' },
-  eventIndicator: { width:5, height:5, borderRadius:3, backgroundColor:'#C05A4E', position:'absolute' as const, bottom:'15%' },
+  selectedText: { color:'#4A8C6F', fontWeight:'700' },
+  eventIndicator: { width:5, height:5, borderRadius:3, backgroundColor:'#4A8C6F', position:'absolute' as const, bottom:'15%' },
   eventIndicatorToday: { backgroundColor:'#FFFFFF' },
 
   aiCalHint: { flexDirection:'row', alignItems:'flex-start', gap:8, marginHorizontal:20, marginBottom:16, backgroundColor:'#FFF8F0', borderRadius:12, padding:12, borderWidth:1, borderColor:'#F5E8D8' },
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
   eventName: { fontSize:15, fontWeight:'600', color:'#1F1F1F', fontFamily:'Pretendard' },
   eventLocRow: { flexDirection:'row', alignItems:'center', gap:4, marginTop:4 },
   eventLoc: { fontSize:12, color:'#9C8B75' },
-  fab: { position:'absolute', bottom:24, right:24, width:56, height:56, borderRadius:28, backgroundColor:'#C05A4E', justifyContent:'center', alignItems:'center', shadowColor:'#C05A4E', shadowOffset:{width:0,height:4}, shadowOpacity:0.3, shadowRadius:8, elevation:8 },
+  fab: { position:'absolute', bottom:24, right:24, width:56, height:56, borderRadius:28, backgroundColor:'#4A8C6F', justifyContent:'center', alignItems:'center', shadowColor:'#4A8C6F', shadowOffset:{width:0,height:4}, shadowOpacity:0.3, shadowRadius:8, elevation:8 },
 
   // Modals
   modalWrap: { flex:1, justifyContent:'flex-end' },
@@ -309,11 +309,11 @@ const styles = StyleSheet.create({
   detailIconBox: { width:24, height:24, justifyContent:'center', alignItems:'center', marginTop:2 },
   detailLabel: { fontSize:12, color:'#A0A0A0', fontFamily:'Pretendard', marginBottom:2 },
   detailValue: { fontSize:15, color:'#1F1F1F', fontFamily:'Pretendard' },
-  aiHint: { flexDirection:'row', alignItems:'flex-start', gap:8, backgroundColor:'#FFF0ED', borderRadius:12, padding:14, marginVertical:16 },
-  aiHintText: { flex:1, fontSize:13, color:'#C05A4E', lineHeight:20 },
+  aiHint: { flexDirection:'row', alignItems:'flex-start', gap:8, backgroundColor:'#EFF6F1', borderRadius:12, padding:14, marginVertical:16 },
+  aiHintText: { flex:1, fontSize:13, color:'#4A8C6F', lineHeight:20 },
   detailActions: { flexDirection:'row', gap:12, marginTop:12 },
-  detailBtn: { flex:1, flexDirection:'row', alignItems:'center', justifyContent:'center', gap:6, paddingVertical:14, borderRadius:12, backgroundColor:'#FFF0ED' },
-  detailBtnText: { fontSize:14, fontWeight:'600', color:'#C05A4E', fontFamily:'Pretendard' },
+  detailBtn: { flex:1, flexDirection:'row', alignItems:'center', justifyContent:'center', gap:6, paddingVertical:14, borderRadius:12, backgroundColor:'#EFF6F1' },
+  detailBtnText: { fontSize:14, fontWeight:'600', color:'#4A8C6F', fontFamily:'Pretendard' },
   detailBtnDanger: { backgroundColor:'#FFF0F0' },
 
   addHeader: { flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:8 },
@@ -321,6 +321,6 @@ const styles = StyleSheet.create({
   addDate: { fontSize:14, color:'#9C8B75', marginBottom:20 },
   addLabel: { fontSize:13, fontWeight:'600', color:'#4A4A4A', marginBottom:6, fontFamily:'Pretendard' },
   addInput: { backgroundColor:'#FFFFFF', borderWidth:1, borderColor:'#EAEAEA', borderRadius:12, paddingHorizontal:14, paddingVertical:12, fontSize:15, color:'#1F1F1F', marginBottom:16, fontFamily:'Pretendard' },
-  addSubmit: { backgroundColor:'#C05A4E', borderRadius:12, paddingVertical:16, alignItems:'center', marginTop:8 },
+  addSubmit: { backgroundColor:'#4A8C6F', borderRadius:12, paddingVertical:16, alignItems:'center', marginTop:8 },
   addSubmitText: { color:'#FFFFFF', fontSize:16, fontWeight:'700', fontFamily:'PretendardBold' },
 });

@@ -39,7 +39,7 @@ export default function AIScreen() {
         {/* AI Welcome */}
         <View style={styles.aiMessage}>
           <View style={styles.aiAvatar}>
-            <FontAwesome name="magic" size={16} color="#C05A4E" />
+            <FontAwesome name="magic" size={16} color="#4A8C6F" />
           </View>
           <View style={styles.aiMessageBubble}>
             <Text style={styles.aiMessageText}>
@@ -71,7 +71,7 @@ export default function AIScreen() {
                   <Text style={[styles.roleLabel, isSelected && styles.roleLabelSelected]}>{role.label}</Text>
                   {isSelected && <Text style={styles.roleHint}>{role.hint}</Text>}
                 </View>
-                {isSelected && <FontAwesome name="check-circle" size={18} color="#C05A4E" />}
+                {isSelected && <FontAwesome name="check-circle" size={18} color="#4A8C6F" />}
               </TouchableOpacity>
             );
           })}
@@ -81,7 +81,7 @@ export default function AIScreen() {
       {/* Selected Role Indicator */}
       {selectedRole !== null && (
         <View style={styles.selectedIndicator}>
-          <FontAwesome name={ROLES[selectedRole].icon as any} size={12} color="#C05A4E" />
+          <FontAwesome name={ROLES[selectedRole].icon as any} size={12} color="#4A8C6F" />
           <Text style={styles.selectedIndicatorText}>{ROLES[selectedRole].label} 모드</Text>
           <TouchableOpacity onPress={() => setSelectedRole(null)} activeOpacity={0.7}>
             <FontAwesome name="times" size={14} color="#BFAE99" />
@@ -136,21 +136,21 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#EAEAEA',
   },
   roleCardSelected: {
-    borderColor: '#C05A4E', borderWidth: 2, backgroundColor: '#FFF8F5',
+    borderColor: '#4A8C6F', borderWidth: 2, backgroundColor: '#FFF8F5',
   },
   roleIcon: {
     width: 36, height: 36, borderRadius: 18,
     justifyContent: 'center', alignItems: 'center',
   },
   roleLabel: { fontSize: 13, fontWeight: '600', color: '#1F1F1F' },
-  roleLabelSelected: { color: '#C05A4E' },
+  roleLabelSelected: { color: '#4A8C6F' },
   roleHint: { fontSize: 10, color: '#888888', marginTop: 2 },
   selectedIndicator: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 16, paddingVertical: 8,
-    backgroundColor: '#FFF0ED',
+    backgroundColor: '#EFF6F1',
   },
-  selectedIndicatorText: { fontSize: 12, fontWeight: '600', color: '#C05A4E', flex: 1 },
+  selectedIndicatorText: { fontSize: 12, fontWeight: '600', color: '#4A8C6F', flex: 1 },
   inputBar: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     padding: 16, backgroundColor: '#FFFFFF',
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center',
   },
   sendButtonDisabled: { opacity: 0.4 },
 });

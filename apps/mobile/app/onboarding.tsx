@@ -19,7 +19,7 @@ export default function OnboardingScreen() {
         {STEPS.map((step, i) => (
           <View key={i} style={styles.stepRow}>
             <View style={styles.stepIcon}>
-              <FontAwesome name={step.icon as any} size={20} color="#C05A4E" />
+              <FontAwesome name={step.icon as any} size={20} color="#4A8C6F" />
             </View>
             <View style={styles.stepContent}>
               <Text style={styles.stepTitle}>{step.title}</Text>
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', paddingHorizontal: 32,
   },
   welcome: {
-    fontSize: 26, fontWeight: '700', color: '#C05A4E',
+    fontSize: 26, fontWeight: '700', color: '#4A8C6F',
     textAlign: 'center', marginBottom: 48,
   },
   stepsContainer: { gap: 24, marginBottom: 48 },
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   stepDesc: { fontSize: 13, color: '#888888', lineHeight: 20 },
   startButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#C05A4E', borderRadius: 12,
+    backgroundColor: '#4A8C6F', borderRadius: 12,
     paddingVertical: 16, alignSelf: 'stretch',
   },
   startButtonText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF' },

@@ -36,7 +36,7 @@ export default function PlaceholderRecordScreen() {
         <Text style={styles.description}>{info.description}</Text>
 
         <View style={styles.badge}>
-          <FontAwesome name="wrench" size={14} color="#C05A4E" />
+          <FontAwesome name="wrench" size={14} color="#4A8C6F" />
           <Text style={styles.badgeText}>준비 중인 기능이에요</Text>
         </View>
 
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#FFF0ED',
+    backgroundColor: '#EFF6F1',
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 24,
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#C05A4E',
+    color: '#4A8C6F',
   },
   subtext: {
     fontSize: 14,
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#C05A4E',
+    backgroundColor: '#4A8C6F',
     paddingHorizontal: 24,
     paddingVertical: 14,
     borderRadius: 12,

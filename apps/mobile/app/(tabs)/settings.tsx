@@ -57,14 +57,14 @@ export default function SettingsScreen() {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <TouchableOpacity style={styles.profileCard} activeOpacity={0.7} onPress={() => router.push('/settings/profile')}>
         <View style={styles.avatar}>
-          <FontAwesome name="user" size={28} color="#C05A4E" />
+          <FontAwesome name="user" size={28} color="#4A8C6F" />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.profileName}>김지수</Text>
           <Text style={styles.profileRole}>관리자 (부모)</Text>
         </View>
         <View style={styles.editProfileButton}>
-          <FontAwesome name="pencil" size={14} color="#C05A4E" />
+          <FontAwesome name="pencil" size={14} color="#4A8C6F" />
         </View>
       </TouchableOpacity>
 
@@ -89,7 +89,7 @@ export default function SettingsScreen() {
       ))}
 
       <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut} activeOpacity={0.6}>
-        <FontAwesome name="sign-out" size={18} color="#E53935" />
+        <FontAwesome name="sign-out" size={18} color="#D94040" />
         <Text style={styles.signOutText}>로그아웃</Text>
       </TouchableOpacity>
 
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   profileRole: { fontSize: 13, color: '#888', marginTop: 2, fontFamily: 'Pretendard' },
   editProfileButton: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: '#FFF0ED', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: '#EFF6F1', justifyContent: 'center', alignItems: 'center',
   },
   section: { marginBottom: 24 },
   sectionTitle: { fontSize: 13, fontWeight: '700', color: '#A0A0A0', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5, fontFamily: 'PretendardBold' },
@@ -140,6 +140,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 16, marginTop: 8,
   },
-  signOutText: { fontSize: 15, fontWeight: '600', color: '#E53935', fontFamily: 'Pretendard' },
+  signOutText: { fontSize: 15, fontWeight: '600', color: '#D94040', fontFamily: 'Pretendard' },
   version: { textAlign: 'center', color: '#A0A0A0', fontSize: 12, marginTop: 16, marginBottom: 32, fontFamily: 'Pretendard' },
 });

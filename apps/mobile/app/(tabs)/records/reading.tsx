@@ -109,7 +109,7 @@ export default function ReadingScreen() {
                       <Text style={styles.modalLabel}>진행률</Text>
                       <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                         <View style={{ flex: 1, height: 6, backgroundColor: '#EAEAEA', borderRadius: 3 }}>
-                          <View style={{ height: 6, backgroundColor: '#C05A4E', borderRadius: 3, width: `${selectedItem.progress}%` }} />
+                          <View style={{ height: 6, backgroundColor: '#4A8C6F', borderRadius: 3, width: `${selectedItem.progress}%` }} />
                         </View>
                         <Text style={styles.modalValue}>{selectedItem.progress}%</Text>
                       </View>
@@ -165,7 +165,7 @@ export default function ReadingScreen() {
           {/* Stats */}
           <View style={styles.statsRow}>
             <TouchableOpacity style={styles.statCard} onPress={() => setActiveStatus('전체')} activeOpacity={0.7}>
-              <FontAwesome name="book" size={18} color="#C05A4E" />
+              <FontAwesome name="book" size={18} color="#4A8C6F" />
               <Text style={styles.statNumber}>12</Text>
               <Text style={styles.statLabel}>총 도서</Text>
             </TouchableOpacity>
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 8, borderRadius: 24,
     backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA',
   },
-  filterChipActive: { backgroundColor: '#C05A4E', borderColor: '#C05A4E' },
+  filterChipActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
   filterText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
   filterTextActive: { color: '#FFFFFF' },
   bookList: { paddingHorizontal: 20 },
@@ -295,14 +295,14 @@ const styles = StyleSheet.create({
   readerName: { fontSize: 11, color: '#5C4A32', fontWeight: '600' },
   progressRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flex: 1 },
   progressBarBg: { flex: 1, height: 6, backgroundColor: '#EAEAEA', borderRadius: 3 },
-  progressBar: { height: 6, backgroundColor: '#C05A4E', borderRadius: 3 },
+  progressBar: { height: 6, backgroundColor: '#4A8C6F', borderRadius: 3 },
   progressText: { fontSize: 11, color: '#7A6B55', fontWeight: '500' },
   bookNotes: { fontSize: 12, color: '#5C4A32', fontStyle: 'italic', lineHeight: 18, fontFamily: 'Pretendard' },
   fab: {
     position: 'absolute', bottom: 16, right: 20, zIndex: 10,
     width: 56, height: 56, borderRadius: 28,
-    backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center',
-    shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 },
+    backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center',
+    shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3, shadowRadius: 8, elevation: 8,
   },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
@@ -318,9 +318,9 @@ const styles = StyleSheet.create({
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   pillRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
   pill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
-  pillActive: { backgroundColor: '#C05A4E', borderColor: '#C05A4E' },
+  pillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
   pillText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
   pillTextActive: { color: '#FFFFFF' },
-  createSubmit: { backgroundColor: '#C05A4E', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
+  createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 });
