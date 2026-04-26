@@ -19,10 +19,10 @@ const TODAY_EVENTS = [
 ];
 
 const RECENT_RECORDS = [
-  { type: '육아 일기', icon: 'child', color: '#FFB6C1', title: '지우의 첫 자전거 타기', date: '오늘', route: './records/parenting' },
-  { type: '독서 목록', icon: 'book', color: '#B8E6C8', title: '어린 왕자 완독', date: '어제', route: './records/reading' },
-  { type: '가계부', icon: 'money', color: '#FFE4C4', title: '3월 지출 정산', date: '2일 전', route: './records/finance' },
-  { type: '레시피', icon: 'cutlery', color: '#FFDAB9', title: '엄마 김치찌개 레시피', date: '3일 전', route: './records/recipes' },
+  { type: '육아 일기', icon: 'child', color: '#FFB6C1', title: '지우의 첫 자전거 타기', date: '오늘', route: '/(tabs)/records/parenting' },
+  { type: '독서 목록', icon: 'book', color: '#B8E6C8', title: '어린 왕자 완독', date: '어제', route: '/(tabs)/records/reading' },
+  { type: '가계부', icon: 'money', color: '#FFE4C4', title: '3월 지출 정산', date: '2일 전', route: '/(tabs)/records/finance' },
+  { type: '레시피', icon: 'cutlery', color: '#FFDAB9', title: '엄마 김치찌개 레시피', date: '3일 전', route: '/(tabs)/records/recipes' },
 ];
 
 export default function HomeScreen() {

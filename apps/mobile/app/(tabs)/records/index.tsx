@@ -24,7 +24,7 @@ export default function RecordsScreen() {
   const totalRecords = CATEGORIES.reduce((sum, cat) => sum + cat.count, 0);
 
   const handlePress = (screen: string) => {
-    router.push(`./${screen}` as any);
+    router.push(`/(tabs)/records/${screen}` as any);
   };
 
   return (

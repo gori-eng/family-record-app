@@ -1,7 +1,7 @@
 import React from 'react';
 import { Platform } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter, useSegments } from 'expo-router';
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
@@ -11,6 +11,9 @@ function TabBarIcon(props: {
 }
 
 export default function TabLayout() {
+  const router = useRouter();
+  const segments = useSegments();
+
   return (
     <Tabs
       screenOptions={{
@@ -62,6 +65,17 @@ export default function TabLayout() {
           headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="book" color={color} />,
         }}
+        listeners={{
+          tabPress: (e) => {
+            // 이미 기록 탭에 있으면 카테고리 목록(index)으로 돌아가기
+            const inRecords = segments[1] === 'records';
+            const inSubPage = segments.length > 2;
+            if (inRecords && inSubPage) {
+              e.preventDefault();
+              router.replace('/(tabs)/records');
+            }
+          },
+        }}
       />
       <Tabs.Screen
         name="settings"
@@ -70,7 +84,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
         }}
       />
-      {/* AI 비서 탭 숨김 - 각 기능 내부에 보조 역할로 통합 */}
+      {/* AI 비서 탭 숨김 */}
       <Tabs.Screen name="ai" options={{ href: null }} />
     </Tabs>
   );
