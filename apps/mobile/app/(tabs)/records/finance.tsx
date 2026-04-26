@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef } from 'react';
@@ -30,8 +30,26 @@ function formatAmount(amount: number, type: string) {
 export default function FinanceScreen() {
   const [activeCategory, setActiveCategory] = useState('전체');
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [createType, setCreateType] = useState<'income' | 'expense'>('expense');
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
+  const createBg = useRef(new Animated.Value(0)).current;
+  const createSlide = useRef(new Animated.Value(500)).current;
+
+  const openCreate = () => {
+    setShowCreate(true);
+    Animated.parallel([
+      Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(createSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+    ]).start();
+  };
+  const closeCreate = () => {
+    Animated.parallel([
+      Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
+    ]).start(() => { setShowCreate(false); setCreateType('expense'); });
+  };
 
   const openDetail = (item: any) => {
     setSelectedItem(item);
@@ -84,6 +102,39 @@ export default function FinanceScreen() {
                   </View>
                 </View>
               )}
+            </Animated.View>
+          </View>
+        </Modal>
+
+        <Modal visible={showCreate} transparent statusBarTranslucent animationType="none">
+          <View style={styles.modalWrap}>
+            <Animated.View style={[styles.modalBg, { opacity: createBg }]}>
+              <Pressable style={{ flex: 1 }} onPress={closeCreate} />
+            </Animated.View>
+            <Animated.View style={[styles.modalSheet, { transform: [{ translateY: createSlide }] }]}>
+              <View style={styles.modalHandle} />
+              <Text style={styles.modalTitle}>새 거래 기록</Text>
+              <View style={styles.pillRow}>
+                {([['수입', 'income'], ['지출', 'expense']] as const).map(([label, val]) => (
+                  <TouchableOpacity
+                    key={val}
+                    style={[styles.pill, createType === val && styles.pillActive]}
+                    activeOpacity={0.7}
+                    onPress={() => setCreateType(val as 'income' | 'expense')}
+                  >
+                    <Text style={[styles.pillText, createType === val && styles.pillTextActive]}>{label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={styles.createLabel}>금액</Text>
+              <TextInput style={styles.createInput} placeholder="금액을 입력하세요" placeholderTextColor="#BFAE99" keyboardType="numeric" />
+              <Text style={styles.createLabel}>카테고리</Text>
+              <TextInput style={styles.createInput} placeholder="예: 식비, 교통, 교육" placeholderTextColor="#BFAE99" />
+              <Text style={styles.createLabel}>내역</Text>
+              <TextInput style={styles.createInput} placeholder="내역을 입력하세요" placeholderTextColor="#BFAE99" />
+              <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
+                <Text style={styles.createSubmitText}>저장하기</Text>
+              </TouchableOpacity>
             </Animated.View>
           </View>
         </Modal>
@@ -194,7 +245,7 @@ export default function FinanceScreen() {
         <TouchableOpacity
           style={styles.fab}
           activeOpacity={0.8}
-          onPress={() => Alert.alert('거래 추가', '수입/지출 기록 기능이 곧 추가됩니다.')}
+          onPress={openCreate}
         >
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
@@ -279,4 +330,13 @@ const styles = StyleSheet.create({
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
   modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
+  createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
+  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
+  pillRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
+  pill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
+  pillActive: { backgroundColor: '#C05A4E', borderColor: '#C05A4E' },
+  pillText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
+  pillTextActive: { color: '#FFFFFF' },
+  createSubmit: { backgroundColor: '#C05A4E', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
+  createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 });

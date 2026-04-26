@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef } from 'react';
@@ -20,8 +20,25 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
 export default function TravelScreen() {
   const [filter, setFilter] = useState('전체');
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [showCreate, setShowCreate] = useState(false);
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
+  const createBg = useRef(new Animated.Value(0)).current;
+  const createSlide = useRef(new Animated.Value(500)).current;
+
+  const openCreate = () => {
+    setShowCreate(true);
+    Animated.parallel([
+      Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(createSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+    ]).start();
+  };
+  const closeCreate = () => {
+    Animated.parallel([
+      Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
+    ]).start(() => setShowCreate(false));
+  };
 
   const openDetail = (item: any) => {
     setSelectedItem(item);
@@ -88,6 +105,31 @@ export default function TravelScreen() {
           </View>
         </Modal>
 
+        <Modal visible={showCreate} transparent statusBarTranslucent animationType="none">
+          <View style={s.modalWrap}>
+            <Animated.View style={[s.modalBg, { opacity: createBg }]}>
+              <Pressable style={{ flex: 1 }} onPress={closeCreate} />
+            </Animated.View>
+            <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
+              <View style={s.modalHandle} />
+              <Text style={s.modalTitle}>새 여행 기록</Text>
+              <Text style={s.createLabel}>목적지</Text>
+              <TextInput style={s.createInput} placeholder="목적지를 입력하세요" placeholderTextColor="#BFAE99" />
+              <Text style={s.createLabel}>국가</Text>
+              <TextInput style={s.createInput} placeholder="국가를 입력하세요" placeholderTextColor="#BFAE99" />
+              <Text style={s.createLabel}>예상 시기</Text>
+              <TextInput style={s.createInput} placeholder="예: 2026.7" placeholderTextColor="#BFAE99" />
+              <Text style={s.createLabel}>예산</Text>
+              <TextInput style={s.createInput} placeholder="예: 300만원" placeholderTextColor="#BFAE99" />
+              <Text style={s.createLabel}>한줄 메모</Text>
+              <TextInput style={s.createInput} placeholder="한줄 메모를 남겨보세요" placeholderTextColor="#BFAE99" />
+              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
+                <Text style={s.createSubmitText}>저장하기</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+        </Modal>
+
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.statsRow}>
             <View style={s.stat}><Text style={s.statNum}>2</Text><Text style={s.statLabel}>다녀온 곳</Text></View>
@@ -130,7 +172,7 @@ export default function TravelScreen() {
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
-        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => Alert.alert('여행지 추가', '새 여행지 기록 기능이 곧 추가됩니다.')}>
+        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={openCreate}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
@@ -172,4 +214,8 @@ const s = StyleSheet.create({
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
   modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
+  createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
+  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
+  createSubmit: { backgroundColor: '#C05A4E', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
+  createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 });

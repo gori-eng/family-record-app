@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef } from 'react';
@@ -16,8 +16,26 @@ const DIFF_COLOR: Record<string, string> = { '쉬움': '#4AA86B', '보통': '#E6
 
 export default function RecipesScreen() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [createDifficulty, setCreateDifficulty] = useState('보통');
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
+  const createBg = useRef(new Animated.Value(0)).current;
+  const createSlide = useRef(new Animated.Value(500)).current;
+
+  const openCreate = () => {
+    setShowCreate(true);
+    Animated.parallel([
+      Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(createSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+    ]).start();
+  };
+  const closeCreate = () => {
+    Animated.parallel([
+      Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
+    ]).start(() => { setShowCreate(false); setCreateDifficulty('보통'); });
+  };
 
   const openDetail = (item: any) => {
     setSelectedItem(item);
@@ -73,6 +91,40 @@ export default function RecipesScreen() {
           </View>
         </Modal>
 
+        <Modal visible={showCreate} transparent statusBarTranslucent animationType="none">
+          <View style={s.modalWrap}>
+            <Animated.View style={[s.modalBg, { opacity: createBg }]}>
+              <Pressable style={{ flex: 1 }} onPress={closeCreate} />
+            </Animated.View>
+            <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
+              <View style={s.modalHandle} />
+              <Text style={s.modalTitle}>새 레시피</Text>
+              <Text style={s.createLabel}>레시피 이름</Text>
+              <TextInput style={s.createInput} placeholder="레시피 이름을 입력하세요" placeholderTextColor="#BFAE99" />
+              <Text style={s.createLabel}>유래 / 출처</Text>
+              <TextInput style={s.createInput} placeholder="예: 할머니로부터 전수" placeholderTextColor="#BFAE99" />
+              <Text style={s.createLabel}>난이도</Text>
+              <View style={s.pillRow}>
+                {(['쉬움', '보통', '어려움'] as const).map(label => (
+                  <TouchableOpacity
+                    key={label}
+                    style={[s.pill, createDifficulty === label && s.pillActive]}
+                    activeOpacity={0.7}
+                    onPress={() => setCreateDifficulty(label)}
+                  >
+                    <Text style={[s.pillText, createDifficulty === label && s.pillTextActive]}>{label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={s.createLabel}>조리시간</Text>
+              <TextInput style={s.createInput} placeholder="예: 30분" placeholderTextColor="#BFAE99" />
+              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
+                <Text style={s.createSubmitText}>저장하기</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+        </Modal>
+
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.header}>
             <Text style={s.subtitle}>우리 가족만의 손맛을 기록하세요</Text>
@@ -107,7 +159,7 @@ export default function RecipesScreen() {
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
-        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => Alert.alert('레시피 추가', '새 레시피 기록 기능이 곧 추가됩니다.')}>
+        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={openCreate}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
@@ -144,4 +196,13 @@ const s = StyleSheet.create({
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
   modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
+  createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
+  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
+  pillRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
+  pill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
+  pillActive: { backgroundColor: '#C05A4E', borderColor: '#C05A4E' },
+  pillText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
+  pillTextActive: { color: '#FFFFFF' },
+  createSubmit: { backgroundColor: '#C05A4E', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
+  createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 });

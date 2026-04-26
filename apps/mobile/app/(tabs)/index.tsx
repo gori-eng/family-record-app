@@ -94,11 +94,12 @@ export default function HomeScreen() {
                     <FontAwesome name={n.icon as any} size={14} color="#4A4A4A" />
                   </View>
                   <View style={s.notifContent}>
-                    <View style={s.notifAuthorRow}>
-                      <Text style={s.notifAuthor}>{n.author}</Text>
-                      <Text style={s.notifItemTitle}>{n.title}</Text>
-                    </View>
+                    <Text style={s.notifItemTitle}>{n.title}</Text>
                     <Text style={s.notifItemDesc}>{n.desc}</Text>
+                    <View style={s.notifAuthorRow}>
+                      <View style={s.notifAuthorDot} />
+                      <Text style={s.notifAuthor}>{n.author}</Text>
+                    </View>
                   </View>
                   <View style={s.notifMeta}>
                     <Text style={s.notifTime}>{n.time}</Text>
@@ -303,9 +304,10 @@ const s = StyleSheet.create({
   notifItemUnread: { backgroundColor: '#F5F0EC' },
   notifIcon: { width: 36, height: 36, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
   notifContent: { flex: 1 },
-  notifAuthorRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 },
-  notifAuthor: { fontSize: 12, fontWeight: '700', color: '#C05A4E', fontFamily: 'PretendardBold' },
-  notifItemTitle: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', flex: 1 },
+  notifItemTitle: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', marginBottom: 2 },
+  notifAuthorRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 },
+  notifAuthorDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#C05A4E' },
+  notifAuthor: { fontSize: 11, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
   notifItemDesc: { fontSize: 12, color: '#888' },
   notifMeta: { alignItems: 'flex-end', gap: 4 },
   notifTime: { fontSize: 11, color: '#A0A0A0' },

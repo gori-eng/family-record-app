@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef } from 'react';
@@ -47,8 +47,25 @@ const CHILD_COLORS: Record<string, string> = { '지우': '#F0B8B8', '서준': '#
 export default function ParentingScreen() {
   const [activeChild, setActiveChild] = useState('전체');
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [showCreate, setShowCreate] = useState(false);
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
+  const createBg = useRef(new Animated.Value(0)).current;
+  const createSlide = useRef(new Animated.Value(500)).current;
+
+  const openCreate = () => {
+    setShowCreate(true);
+    Animated.parallel([
+      Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(createSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+    ]).start();
+  };
+  const closeCreate = () => {
+    Animated.parallel([
+      Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
+    ]).start(() => setShowCreate(false));
+  };
 
   const openDetail = (item: any) => {
     setSelectedItem(item);
@@ -111,6 +128,29 @@ export default function ParentingScreen() {
                   )}
                 </View>
               )}
+            </Animated.View>
+          </View>
+        </Modal>
+
+        <Modal visible={showCreate} transparent statusBarTranslucent animationType="none">
+          <View style={styles.modalWrap}>
+            <Animated.View style={[styles.modalBg, { opacity: createBg }]}>
+              <Pressable style={{ flex: 1 }} onPress={closeCreate} />
+            </Animated.View>
+            <Animated.View style={[styles.modalSheet, { transform: [{ translateY: createSlide }] }]}>
+              <View style={styles.modalHandle} />
+              <Text style={styles.modalTitle}>새 육아 일기</Text>
+              <Text style={styles.createLabel}>아이 이름</Text>
+              <TextInput style={styles.createInput} placeholder="아이 이름을 입력하세요" placeholderTextColor="#BFAE99" />
+              <Text style={styles.createLabel}>제목</Text>
+              <TextInput style={styles.createInput} placeholder="제목을 입력하세요" placeholderTextColor="#BFAE99" />
+              <Text style={styles.createLabel}>내용</Text>
+              <TextInput style={[styles.createInput, { height: 100, textAlignVertical: 'top' }]} placeholder="내용을 입력하세요" placeholderTextColor="#BFAE99" multiline numberOfLines={4} />
+              <Text style={styles.createLabel}>마일스톤 태그</Text>
+              <TextInput style={styles.createInput} placeholder="쉼표로 구분" placeholderTextColor="#BFAE99" />
+              <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
+                <Text style={styles.createSubmitText}>저장하기</Text>
+              </TouchableOpacity>
             </Animated.View>
           </View>
         </Modal>
@@ -193,7 +233,7 @@ export default function ParentingScreen() {
         <TouchableOpacity
           style={styles.fab}
           activeOpacity={0.8}
-          onPress={() => Alert.alert('육아 일기 작성', '새 육아 일기 작성 기능이 곧 추가됩니다.')}
+          onPress={openCreate}
         >
           <FontAwesome name="pencil" size={20} color="#FFFFFF" />
         </TouchableOpacity>
@@ -263,4 +303,8 @@ const styles = StyleSheet.create({
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
   modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
+  createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
+  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
+  createSubmit: { backgroundColor: '#C05A4E', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
+  createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 });

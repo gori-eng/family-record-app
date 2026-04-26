@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef } from 'react';
@@ -27,8 +27,26 @@ function StarRating({ rating }: { rating: number }) {
 export default function ReadingScreen() {
   const [activeStatus, setActiveStatus] = useState('전체');
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [createStatus, setCreateStatus] = useState('읽고 싶은');
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
+  const createBg = useRef(new Animated.Value(0)).current;
+  const createSlide = useRef(new Animated.Value(500)).current;
+
+  const openCreate = () => {
+    setShowCreate(true);
+    Animated.parallel([
+      Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(createSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+    ]).start();
+  };
+  const closeCreate = () => {
+    Animated.parallel([
+      Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
+    ]).start(() => { setShowCreate(false); setCreateStatus('읽고 싶은'); });
+  };
 
   const openDetail = (item: any) => {
     setSelectedItem(item);
@@ -105,6 +123,40 @@ export default function ReadingScreen() {
                   ) : null}
                 </View>
               )}
+            </Animated.View>
+          </View>
+        </Modal>
+
+        <Modal visible={showCreate} transparent statusBarTranslucent animationType="none">
+          <View style={styles.modalWrap}>
+            <Animated.View style={[styles.modalBg, { opacity: createBg }]}>
+              <Pressable style={{ flex: 1 }} onPress={closeCreate} />
+            </Animated.View>
+            <Animated.View style={[styles.modalSheet, { transform: [{ translateY: createSlide }] }]}>
+              <View style={styles.modalHandle} />
+              <Text style={styles.modalTitle}>새 도서 등록</Text>
+              <Text style={styles.createLabel}>책 제목</Text>
+              <TextInput style={styles.createInput} placeholder="책 제목을 입력하세요" placeholderTextColor="#BFAE99" />
+              <Text style={styles.createLabel}>저자</Text>
+              <TextInput style={styles.createInput} placeholder="저자를 입력하세요" placeholderTextColor="#BFAE99" />
+              <Text style={styles.createLabel}>읽는 사람</Text>
+              <TextInput style={styles.createInput} placeholder="읽는 사람 이름" placeholderTextColor="#BFAE99" />
+              <Text style={styles.createLabel}>상태</Text>
+              <View style={styles.pillRow}>
+                {(['읽고 싶은', '읽는 중', '완독'] as const).map(label => (
+                  <TouchableOpacity
+                    key={label}
+                    style={[styles.pill, createStatus === label && styles.pillActive]}
+                    activeOpacity={0.7}
+                    onPress={() => setCreateStatus(label)}
+                  >
+                    <Text style={[styles.pillText, createStatus === label && styles.pillTextActive]}>{label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
+                <Text style={styles.createSubmitText}>저장하기</Text>
+              </TouchableOpacity>
             </Animated.View>
           </View>
         </Modal>
@@ -192,7 +244,7 @@ export default function ReadingScreen() {
         <TouchableOpacity
           style={styles.fab}
           activeOpacity={0.8}
-          onPress={() => Alert.alert('도서 추가', '새 도서 등록 기능이 곧 추가됩니다.')}
+          onPress={openCreate}
         >
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
@@ -262,4 +314,13 @@ const styles = StyleSheet.create({
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
   modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
+  createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
+  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
+  pillRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
+  pill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
+  pillActive: { backgroundColor: '#C05A4E', borderColor: '#C05A4E' },
+  pillText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
+  pillTextActive: { color: '#FFFFFF' },
+  createSubmit: { backgroundColor: '#C05A4E', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
+  createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 });

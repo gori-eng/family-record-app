@@ -28,6 +28,7 @@ export default function CalendarScreen() {
   const [newTitle, setNewTitle] = useState('');
   const [newTime, setNewTime] = useState('');
   const [newLocation, setNewLocation] = useState('');
+  const [newMemo, setNewMemo] = useState('');
 
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
@@ -101,19 +102,19 @@ export default function CalendarScreen() {
                   </TouchableOpacity>
                 </View>
                 <View style={styles.detailRow}>
-                  <FontAwesome name="clock-o" size={16} color="#9C8B75" />
-                  <Text style={styles.detailText}>{currentMonth + 1}월 {selectedDay}일 {showDetail.time}</Text>
+                  <View style={styles.detailIconBox}><FontAwesome name="clock-o" size={15} color="#A0A0A0" /></View>
+                  <View><Text style={styles.detailLabel}>시간</Text><Text style={styles.detailValue}>{currentMonth + 1}월 {selectedDay}일 {showDetail.time}</Text></View>
                 </View>
                 {showDetail.location && (
                   <View style={styles.detailRow}>
-                    <FontAwesome name="map-marker" size={16} color="#9C8B75" />
-                    <Text style={styles.detailText}>{showDetail.location}</Text>
+                    <View style={styles.detailIconBox}><FontAwesome name="map-marker" size={15} color="#A0A0A0" /></View>
+                    <View><Text style={styles.detailLabel}>장소</Text><Text style={styles.detailValue}>{showDetail.location}</Text></View>
                   </View>
                 )}
                 {showDetail.member && (
                   <View style={styles.detailRow}>
-                    <FontAwesome name="user" size={16} color="#9C8B75" />
-                    <Text style={styles.detailText}>참여자: {showDetail.member}</Text>
+                    <View style={styles.detailIconBox}><FontAwesome name="users" size={14} color="#A0A0A0" /></View>
+                    <View><Text style={styles.detailLabel}>참여자</Text><Text style={styles.detailValue}>{showDetail.member}</Text></View>
                   </View>
                 )}
                 {/* AI 보조 */}
@@ -155,8 +156,11 @@ export default function CalendarScreen() {
             <Text style={styles.addLabel}>장소 (선택)</Text>
             <TextInput style={styles.addInput} placeholder="예: 정자동 한강갈비" placeholderTextColor="#BFAE99"
               value={newLocation} onChangeText={setNewLocation} />
+            <Text style={styles.addLabel}>메모 (선택)</Text>
+            <TextInput style={[styles.addInput, { minHeight: 80, textAlignVertical: 'top' }]} placeholder="일정에 대한 메모를 남겨보세요" placeholderTextColor="#BFAE99"
+              value={newMemo} onChangeText={setNewMemo} multiline numberOfLines={3} />
             <TouchableOpacity style={styles.addSubmit} activeOpacity={0.8}
-              onPress={() => { closeModal(); setNewTitle(''); setNewTime(''); setNewLocation(''); }}>
+              onPress={() => { closeModal(); setNewTitle(''); setNewTime(''); setNewLocation(''); setNewMemo(''); }}>
               <Text style={styles.addSubmitText}>일정 등록</Text>
             </TouchableOpacity>
               </>
@@ -301,8 +305,10 @@ const styles = StyleSheet.create({
   detailHeader: { flexDirection:'row', alignItems:'center', gap:10, marginBottom:24 },
   detailColorDot: { width:12, height:12, borderRadius:6 },
   detailTitle: { flex:1, fontSize:20, fontWeight:'700', color:'#1F1F1F', fontFamily:'PretendardBold', letterSpacing:-0.3 },
-  detailRow: { flexDirection:'row', alignItems:'center', gap:12, marginBottom:16 },
-  detailText: { fontSize:15, color:'#1F1F1F', fontFamily:'Pretendard' },
+  detailRow: { flexDirection:'row', alignItems:'flex-start', gap:12, marginBottom:14 },
+  detailIconBox: { width:24, height:24, justifyContent:'center', alignItems:'center', marginTop:2 },
+  detailLabel: { fontSize:12, color:'#A0A0A0', fontFamily:'Pretendard', marginBottom:2 },
+  detailValue: { fontSize:15, color:'#1F1F1F', fontFamily:'Pretendard' },
   aiHint: { flexDirection:'row', alignItems:'flex-start', gap:8, backgroundColor:'#FFF0ED', borderRadius:12, padding:14, marginVertical:16 },
   aiHintText: { flex:1, fontSize:13, color:'#C05A4E', lineHeight:20 },
   detailActions: { flexDirection:'row', gap:12, marginTop:12 },
