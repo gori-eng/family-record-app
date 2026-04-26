@@ -1,0 +1,104 @@
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { Stack } from 'expo-router';
+import { useState } from 'react';
+
+const FILTERS = [
+  { label: '전체', active: true }, { label: '최근 관람' }, { label: '평점 높은순' }, { label: '보고 싶은' },
+];
+
+const MOVIES = [
+  { title: '인사이드 아웃 2', genre: '애니메이션', date: '2026.3.28', rating: 5, watchedWith: ['전체'], review: '온 가족이 함께 울고 웃었어요. 불안이 새 감정이 된다는 메시지가 좋았어요.', color: '#FFD54F' },
+  { title: '파묘', genre: '미스터리', date: '2026.3.15', rating: 4, watchedWith: ['지수', '민준'], review: '긴장감 넘치는 전개! 부부 데이트로 딱이었어요.', color: '#90A4AE' },
+  { title: '듄: 파트 2', genre: 'SF', date: '2026.2.20', rating: 4, watchedWith: ['민준', '서준'], review: '서준이가 SF에 빠지는 계기가 된 영화. 영상미 최고.', color: '#CE93D8' },
+  { title: '위시', genre: '애니메이션', date: '2026.1.10', rating: 3, watchedWith: ['전체'], review: '지우가 노래를 따라 부르며 좋아했어요.', color: '#80DEEA' },
+  { title: '오펜하이머', genre: '드라마', date: '2025.12.25', rating: 5, watchedWith: ['지수', '민준'], review: '크리스마스에 본 묵직한 영화. 대화를 많이 나눴어요.', color: '#FFAB91' },
+];
+
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 2 }}>
+      {[1,2,3,4,5].map(i => (
+        <FontAwesome key={i} name={i <= rating ? 'star' : 'star-o'} size={12} color="#E6A817" />
+      ))}
+    </View>
+  );
+}
+
+export default function MoviesScreen() {
+  const [activeFilter, setActiveFilter] = useState(0);
+
+  return (
+    <>
+      <Stack.Screen options={{ title: '영화 관람' }} />
+      <View style={s.container}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={s.statsRow}>
+            <View style={s.stat}><Text style={s.statNum}>12</Text><Text style={s.statLabel}>총 관람</Text></View>
+            <View style={s.stat}><Text style={s.statNum}>4.2</Text><Text style={s.statLabel}>평균 평점</Text></View>
+            <View style={s.stat}><Text style={s.statNum}>8</Text><Text style={s.statLabel}>가족 함께</Text></View>
+          </View>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filterRow}>
+            {FILTERS.map((f, i) => (
+              <TouchableOpacity key={i} style={[s.chip, activeFilter === i && s.chipActive]} activeOpacity={0.7} onPress={() => setActiveFilter(i)}>
+                <Text style={[s.chipText, activeFilter === i && s.chipTextActive]}>{f.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <View style={s.list}>
+            {MOVIES.map((m, i) => (
+              <TouchableOpacity key={i} style={s.card} activeOpacity={0.7}
+                onPress={() => Alert.alert(m.title, `장르: ${m.genre}\n관람일: ${m.date}\n함께 본 사람: ${m.watchedWith.join(', ')}\n\n${m.review}`)}>
+                <View style={[s.poster, { backgroundColor: m.color }]}>
+                  <FontAwesome name="film" size={24} color="#FFFFFF" />
+                </View>
+                <View style={s.info}>
+                  <Text style={s.title}>{m.title}</Text>
+                  <Text style={s.genre}>{m.genre} · {m.date}</Text>
+                  <View style={s.meta}>
+                    <StarRating rating={m.rating} />
+                    <View style={s.watchedBadge}>
+                      <FontAwesome name="users" size={10} color="#7A6B55" />
+                      <Text style={s.watchedText}>{m.watchedWith.join(', ')}</Text>
+                    </View>
+                  </View>
+                  <Text style={s.review} numberOfLines={1}>{m.review}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <View style={{ height: 80 }} />
+        </ScrollView>
+        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => Alert.alert('영화 기록', '새 영화 기록 기능이 곧 추가됩니다.')}>
+          <FontAwesome name="plus" size={22} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+}
+
+const s = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
+  stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#F0E8D8' },
+  statNum: { fontSize: 22, fontWeight: '700', color: '#2D2D2D' },
+  statLabel: { fontSize: 11, color: '#7A6B55', marginTop: 2 },
+  filterRow: { paddingHorizontal: 20, gap: 8, marginBottom: 16 },
+  chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#F0E8D8' },
+  chipActive: { backgroundColor: '#C85A4A', borderColor: '#C85A4A' },
+  chipText: { fontSize: 13, fontWeight: '600', color: '#7A6B55' },
+  chipTextActive: { color: '#FFFFFF' },
+  list: { paddingHorizontal: 20 },
+  card: { flexDirection: 'row', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#F0E8D8' },
+  poster: { width: 64, height: 88, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  info: { flex: 1 },
+  title: { fontSize: 16, fontWeight: '700', color: '#2D2D2D', marginBottom: 2 },
+  genre: { fontSize: 12, color: '#9C8B75', marginBottom: 6 },
+  meta: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },
+  watchedBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  watchedText: { fontSize: 11, color: '#7A6B55' },
+  review: { fontSize: 12, color: '#5C4A32', fontStyle: 'italic' },
+  fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C85A4A', justifyContent: 'center', alignItems: 'center', shadowColor: '#C85A4A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+});

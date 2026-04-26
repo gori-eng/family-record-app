@@ -19,18 +19,12 @@ const CATEGORIES = [
   { icon: 'lock', label: '디지털 유산', color: '#E6B8D4', count: 0, screen: 'legacy' },
 ];
 
-const IMPLEMENTED = ['parenting', 'reading', 'finance'];
-
 export default function RecordsScreen() {
   const router = useRouter();
   const totalRecords = CATEGORIES.reduce((sum, cat) => sum + cat.count, 0);
 
   const handlePress = (screen: string) => {
-    if (IMPLEMENTED.includes(screen)) {
-      router.push(`./${screen}` as any);
-    } else {
-      router.push({ pathname: './[type]', params: { type: screen } } as any);
-    }
+    router.push(`./${screen}` as any);
   };
 
   return (
