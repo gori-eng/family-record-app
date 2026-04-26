@@ -31,8 +31,7 @@ export default function LoginScreen() {
 
         {/* Brand */}
         <View style={s.brand}>
-          <Text style={s.logoEmoji}>🌿</Text>
-          <Text style={s.logo}>패밀로그</Text>
+          <Text style={s.logo}>familog</Text>
         </View>
 
         {/* Form */}
@@ -112,12 +111,11 @@ const s = StyleSheet.create({
   scrollContent: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 28, paddingVertical: 48 },
 
   // Brand
-  brand: { alignItems: 'center', marginBottom: 48 },
-  logoEmoji: { fontSize: 48, marginBottom: 8 },
+  brand: { alignItems: 'center', marginBottom: 52 },
   logo: {
-    fontSize: 40, color: '#2D5A3F',
-    fontFamily: 'GaeguBold', letterSpacing: -0.5,
-    transform: [{ rotate: '-1deg' }],
+    fontSize: 48, color: '#2D5A3F',
+    fontFamily: 'GaeguBold', letterSpacing: 1,
+    transform: [{ rotate: '-2deg' }],
   },
 
   // Form

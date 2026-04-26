@@ -32,8 +32,7 @@ export default function RegisterScreen() {
       <ScrollView contentContainerStyle={s.scrollContent} keyboardShouldPersistTaps="handled">
 
         <View style={s.brand}>
-          <Text style={s.logoEmoji}>🌿</Text>
-          <Text style={s.logo}>패밀로그</Text>
+          <Text style={s.logo}>familog</Text>
         </View>
 
         <View style={s.form}>
@@ -77,9 +76,8 @@ export default function RegisterScreen() {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   scrollContent: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 28, paddingVertical: 48 },
-  brand: { alignItems: 'center', marginBottom: 48 },
-  logoEmoji: { fontSize: 48, marginBottom: 8 },
-  logo: { fontSize: 40, color: '#2D5A3F', fontFamily: 'GaeguBold', letterSpacing: -0.5, transform: [{ rotate: '-1deg' }] },
+  brand: { alignItems: 'center', marginBottom: 52 },
+  logo: { fontSize: 48, color: '#2D5A3F', fontFamily: 'GaeguBold', letterSpacing: 1, transform: [{ rotate: '-2deg' }] },
   form: { marginBottom: 32 },
   label: { fontSize: 13, fontWeight: '600', color: '#666', marginBottom: 6, fontFamily: 'Pretendard' },
   input: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 15, fontSize: 16, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
