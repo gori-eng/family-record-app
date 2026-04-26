@@ -1,7 +1,23 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useRef, useCallback } from 'react';
+
+function PressableCard({ children, onPress, style }: any) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const onPressIn = useCallback(() => {
+    Animated.spring(scale, { toValue: 0.96, tension: 300, friction: 10, useNativeDriver: true }).start();
+  }, []);
+  const onPressOut = useCallback(() => {
+    Animated.spring(scale, { toValue: 1, tension: 300, friction: 10, useNativeDriver: true }).start();
+  }, []);
+  return (
+    <TouchableOpacity activeOpacity={1} onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut}>
+      <Animated.View style={[style, { transform: [{ scale }] }]}>{children}</Animated.View>
+    </TouchableOpacity>
+  );
+}
 
 const CATEGORIES = [
   { icon: 'child', label: '육아 일기', color: '#F0B8B8', count: 24, screen: 'parenting' },
@@ -33,18 +49,17 @@ export default function RecordsScreen() {
 
         <View style={styles.grid}>
           {CATEGORIES.map((cat, index) => (
-            <TouchableOpacity
+            <PressableCard
               key={index}
               style={styles.card}
-              activeOpacity={0.7}
               onPress={() => handlePress(cat.screen)}
             >
               <View style={[styles.iconCircle, { backgroundColor: cat.color }]}>
-                <FontAwesome name={cat.icon as any} size={22} color="#5C4A32" />
+                <FontAwesome name={cat.icon as any} size={22} color="#4A4A4A" />
               </View>
               <Text style={styles.cardLabel}>{cat.label}</Text>
               <Text style={styles.cardCount}>{cat.count}개</Text>
-            </TouchableOpacity>
+            </PressableCard>
           ))}
         </View>
 

@@ -10,7 +10,7 @@ export default function NotFoundScreen() {
       <Stack.Screen options={{ title: '', headerShown: false }} />
       <View style={styles.container}>
         <View style={styles.iconCircle}>
-          <FontAwesome name="map-signs" size={40} color="#C85A4A" />
+          <FontAwesome name="map-signs" size={40} color="#C05A4E" />
         </View>
         <Text style={styles.title}>페이지를 찾을 수 없어요</Text>
         <Text style={styles.subtitle}>요청하신 페이지가 존재하지 않거나{'\n'}이동되었을 수 있어요.</Text>
@@ -26,7 +26,7 @@ export default function NotFoundScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, backgroundColor: '#FFFDF0',
+    flex: 1, backgroundColor: '#F9F8F5',
     alignItems: 'center', justifyContent: 'center', padding: 40,
   },
   iconCircle: {
@@ -34,11 +34,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF0ED', justifyContent: 'center', alignItems: 'center',
     marginBottom: 24,
   },
-  title: { fontSize: 22, fontWeight: '700', color: '#2D2D2D', marginBottom: 8 },
-  subtitle: { fontSize: 15, color: '#8B7355', textAlign: 'center', lineHeight: 22, marginBottom: 32 },
+  title: { fontSize: 22, fontWeight: '700', color: '#1F1F1F', marginBottom: 8 },
+  subtitle: { fontSize: 15, color: '#888888', textAlign: 'center', lineHeight: 22, marginBottom: 32 },
   button: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#C85A4A', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 12,
+    backgroundColor: '#C05A4E', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 12,
   },
   buttonText: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
 });

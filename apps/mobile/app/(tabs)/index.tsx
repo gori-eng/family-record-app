@@ -143,6 +143,13 @@ export default function HomeScreen() {
               <FontAwesome name="arrow-right" size={11} color="#C05A4E" />
             </TouchableOpacity>
           </View>
+          {TODAY_EVENTS.length === 0 ? (
+            <TouchableOpacity style={s.emptyState} activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')}>
+              <FontAwesome name="calendar-o" size={32} color="#D0D0D0" />
+              <Text style={s.emptyTitle}>오늘 일정이 없어요</Text>
+              <Text style={s.emptySub}>캘린더에서 일정을 추가해보세요</Text>
+            </TouchableOpacity>
+          ) : (
           <View style={s.timeline}>
             {TODAY_EVENTS.map((ev, i) => (
               <TouchableOpacity key={i} style={s.timelineItem} activeOpacity={0.7}
@@ -165,6 +172,7 @@ export default function HomeScreen() {
               </TouchableOpacity>
             ))}
           </View>
+          )}
         </View>
 
         {/* 빠른 기록 */}
@@ -200,6 +208,13 @@ export default function HomeScreen() {
               <FontAwesome name="arrow-right" size={11} color="#C05A4E" />
             </TouchableOpacity>
           </View>
+          {RECENT_RECORDS.length === 0 ? (
+            <TouchableOpacity style={s.emptyState} activeOpacity={0.7} onPress={() => router.push('/(tabs)/records')}>
+              <FontAwesome name="pencil-square-o" size={32} color="#D0D0D0" />
+              <Text style={s.emptyTitle}>아직 기록이 없어요</Text>
+              <Text style={s.emptySub}>첫 번째 가족 기록을 남겨보세요</Text>
+            </TouchableOpacity>
+          ) : (
           <View style={s.recordGrid}>
             {RECENT_RECORDS.map((rec, i) => (
               <TouchableOpacity key={i} style={[s.recordCard, i === 0 && s.recordCardLarge]} activeOpacity={0.85}
@@ -218,6 +233,7 @@ export default function HomeScreen() {
               </TouchableOpacity>
             ))}
           </View>
+          )}
         </View>
 
         <View style={{ height: 24 }} />
@@ -247,6 +263,11 @@ const s = StyleSheet.create({
   sectionSub: { fontSize: 12, color: '#A0A0A0', marginTop: 2 },
   seeAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 4 },
   seeAllText: { fontSize: 13, color: '#C05A4E', fontWeight: '600' },
+
+  // Empty state
+  emptyState: { alignItems: 'center', paddingVertical: 36, backgroundColor: '#FFFFFF', borderRadius: 16, borderWidth: 1, borderColor: '#EAEAEA' },
+  emptyTitle: { fontSize: 15, fontWeight: '600', color: '#888', marginTop: 12, fontFamily: 'Pretendard' },
+  emptySub: { fontSize: 13, color: '#A0A0A0', marginTop: 4, fontFamily: 'Pretendard' },
 
   // Timeline
   timeline: {},

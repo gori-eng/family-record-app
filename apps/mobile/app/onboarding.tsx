@@ -19,7 +19,7 @@ export default function OnboardingScreen() {
         {STEPS.map((step, i) => (
           <View key={i} style={styles.stepRow}>
             <View style={styles.stepIcon}>
-              <FontAwesome name={step.icon as any} size={20} color="#C85A4A" />
+              <FontAwesome name={step.icon as any} size={20} color="#C05A4E" />
             </View>
             <View style={styles.stepContent}>
               <Text style={styles.stepTitle}>{step.title}</Text>
@@ -43,11 +43,11 @@ export default function OnboardingScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, backgroundColor: '#FFFDF0',
+    flex: 1, backgroundColor: '#F9F8F5',
     justifyContent: 'center', paddingHorizontal: 32,
   },
   welcome: {
-    fontSize: 26, fontWeight: '700', color: '#C85A4A',
+    fontSize: 26, fontWeight: '700', color: '#C05A4E',
     textAlign: 'center', marginBottom: 48,
   },
   stepsContainer: { gap: 24, marginBottom: 48 },
@@ -57,11 +57,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFDAB9', justifyContent: 'center', alignItems: 'center',
   },
   stepContent: { flex: 1 },
-  stepTitle: { fontSize: 16, fontWeight: '700', color: '#2D2D2D', marginBottom: 4 },
-  stepDesc: { fontSize: 13, color: '#8B7355', lineHeight: 20 },
+  stepTitle: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', marginBottom: 4 },
+  stepDesc: { fontSize: 13, color: '#888888', lineHeight: 20 },
   startButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#C85A4A', borderRadius: 12,
+    backgroundColor: '#C05A4E', borderRadius: 12,
     paddingVertical: 16, alignSelf: 'stretch',
   },
   startButtonText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF' },

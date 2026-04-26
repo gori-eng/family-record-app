@@ -47,7 +47,7 @@ export default function LoginScreen() {
         {/* Logo */}
         <View style={styles.logoContainer}>
           <View style={styles.logoCircle}>
-            <FontAwesome name="users" size={40} color="#C85A4A" />
+            <FontAwesome name="users" size={40} color="#C05A4E" />
           </View>
           <Text style={styles.appName}>우리 가족</Text>
           <Text style={styles.tagline}>소중한 추억을 따스하게 담아보세요</Text>
@@ -143,7 +143,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFDF0',
+    backgroundColor: '#F9F8F5',
   },
   scrollContent: {
     flexGrow: 1,
@@ -167,12 +167,12 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#C85A4A',
+    color: '#C05A4E',
     marginBottom: 8,
   },
   tagline: {
     fontSize: 14,
-    color: '#8B7355',
+    color: '#888888',
   },
   form: {
     marginBottom: 24,
@@ -180,18 +180,18 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#5C4A32',
+    color: '#4A4A4A',
     marginBottom: 8,
   },
   input: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#F0E8D8',
+    borderColor: '#EAEAEA',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: '#2D2D2D',
+    color: '#1F1F1F',
     marginBottom: 16,
   },
   passwordRow: {
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#F0E8D8',
+    borderColor: '#EAEAEA',
     borderRadius: 12,
     marginBottom: 16,
   },
@@ -208,14 +208,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: '#2D2D2D',
+    color: '#1F1F1F',
   },
   eyeButton: {
     paddingHorizontal: 14,
     paddingVertical: 14,
   },
   loginButton: {
-    backgroundColor: '#C85A4A',
+    backgroundColor: '#C05A4E',
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#F0E8D8',
+    backgroundColor: '#EAEAEA',
   },
   dividerText: {
     color: '#BFAE99',
@@ -256,18 +256,18 @@ const styles = StyleSheet.create({
     gap: 8,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#F0E8D8',
+    borderColor: '#EAEAEA',
     borderRadius: 12,
     paddingVertical: 14,
   },
   socialText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#2D2D2D',
+    color: '#1F1F1F',
   },
   appleButton: {
-    backgroundColor: '#2D2D2D',
-    borderColor: '#2D2D2D',
+    backgroundColor: '#1F1F1F',
+    borderColor: '#1F1F1F',
   },
   appleText: {
     fontSize: 14,
@@ -280,11 +280,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   registerText: {
-    color: '#8B7355',
+    color: '#888888',
     fontSize: 14,
   },
   registerLink: {
-    color: '#C85A4A',
+    color: '#C05A4E',
     fontSize: 14,
     fontWeight: '700',
     textDecorationLine: 'underline',

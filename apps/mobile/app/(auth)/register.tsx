@@ -59,7 +59,7 @@ export default function RegisterScreen() {
       >
         <View style={styles.logoContainer}>
           <View style={styles.logoCircle}>
-            <FontAwesome name="users" size={40} color="#C85A4A" />
+            <FontAwesome name="users" size={40} color="#C05A4E" />
           </View>
           <Text style={styles.title}>회원가입</Text>
           <Text style={styles.subtitle}>가족의 소중한 기록을 시작하세요</Text>
@@ -136,7 +136,7 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  container: { flex: 1, backgroundColor: '#F9F8F5' },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
@@ -150,22 +150,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
     marginBottom: 16,
   },
-  title: { fontSize: 28, fontWeight: '700', color: '#C85A4A', marginBottom: 8 },
-  subtitle: { fontSize: 14, color: '#8B7355' },
+  title: { fontSize: 28, fontWeight: '700', color: '#C05A4E', marginBottom: 8 },
+  subtitle: { fontSize: 14, color: '#888888' },
   form: { marginBottom: 24 },
-  label: { fontSize: 14, fontWeight: '600', color: '#5C4A32', marginBottom: 8 },
+  label: { fontSize: 14, fontWeight: '600', color: '#4A4A4A', marginBottom: 8 },
   input: {
     backgroundColor: '#FFFFFF',
-    borderWidth: 1, borderColor: '#F0E8D8', borderRadius: 12,
+    borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12,
     paddingHorizontal: 16, paddingVertical: 14,
-    fontSize: 16, color: '#2D2D2D', marginBottom: 16,
+    fontSize: 16, color: '#1F1F1F', marginBottom: 16,
   },
   passwordRow: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#F0E8D8',
+    borderColor: '#EAEAEA',
     borderRadius: 12,
     marginBottom: 16,
   },
@@ -174,22 +174,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: '#2D2D2D',
+    color: '#1F1F1F',
   },
   eyeButton: {
     paddingHorizontal: 14,
     paddingVertical: 14,
   },
   button: {
-    backgroundColor: '#C85A4A', borderRadius: 12,
+    backgroundColor: '#C05A4E', borderRadius: 12,
     paddingVertical: 16, alignItems: 'center', marginTop: 8,
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   loginRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
-  loginText: { color: '#8B7355', fontSize: 14 },
+  loginText: { color: '#888888', fontSize: 14 },
   loginLink: {
-    color: '#C85A4A', fontSize: 14, fontWeight: '700',
+    color: '#C05A4E', fontSize: 14, fontWeight: '700',
     textDecorationLine: 'underline',
   },
 });

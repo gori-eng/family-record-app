@@ -98,7 +98,7 @@ export default function CalendarScreen() {
                   <View style={[styles.detailColorDot, { backgroundColor: showDetail.color }]} />
                   <Text style={styles.detailTitle}>{showDetail.title}</Text>
                   <TouchableOpacity onPress={closeModal} activeOpacity={0.7}>
-                    <FontAwesome name="times" size={20} color="#5C4A32" />
+                    <FontAwesome name="times" size={20} color="#4A4A4A" />
                   </TouchableOpacity>
                 </View>
                 <View style={styles.detailRow}>
@@ -143,21 +143,21 @@ export default function CalendarScreen() {
             <View style={styles.addHeader}>
               <Text style={styles.addTitle}>새 일정 추가</Text>
               <TouchableOpacity onPress={closeModal} activeOpacity={0.7}>
-                <FontAwesome name="times" size={20} color="#5C4A32" />
+                <FontAwesome name="times" size={20} color="#4A4A4A" />
               </TouchableOpacity>
             </View>
             <Text style={styles.addDate}>{currentYear}년 {currentMonth + 1}월 {selectedDay}일</Text>
             <Text style={styles.addLabel}>일정 제목</Text>
-            <TextInput style={styles.addInput} placeholder="예: 가족 저녁 식사" placeholderTextColor="#BFAE99"
+            <TextInput style={styles.addInput} placeholder="예: 가족 저녁 식사" placeholderTextColor="#A0A0A0"
               value={newTitle} onChangeText={setNewTitle} />
             <Text style={styles.addLabel}>시간</Text>
-            <TextInput style={styles.addInput} placeholder="예: 18:00" placeholderTextColor="#BFAE99"
+            <TextInput style={styles.addInput} placeholder="예: 18:00" placeholderTextColor="#A0A0A0"
               value={newTime} onChangeText={setNewTime} />
             <Text style={styles.addLabel}>장소 (선택)</Text>
-            <TextInput style={styles.addInput} placeholder="예: 정자동 한강갈비" placeholderTextColor="#BFAE99"
+            <TextInput style={styles.addInput} placeholder="예: 정자동 한강갈비" placeholderTextColor="#A0A0A0"
               value={newLocation} onChangeText={setNewLocation} />
             <Text style={styles.addLabel}>메모 (선택)</Text>
-            <TextInput style={[styles.addInput, { minHeight: 80, textAlignVertical: 'top' }]} placeholder="일정에 대한 메모를 남겨보세요" placeholderTextColor="#BFAE99"
+            <TextInput style={[styles.addInput, { minHeight: 80, textAlignVertical: 'top' }]} placeholder="일정에 대한 메모를 남겨보세요" placeholderTextColor="#A0A0A0"
               value={newMemo} onChangeText={setNewMemo} multiline numberOfLines={3} />
             <TouchableOpacity style={styles.addSubmit} activeOpacity={0.8}
               onPress={() => { closeModal(); setNewTitle(''); setNewTime(''); setNewLocation(''); setNewMemo(''); }}>
@@ -172,13 +172,13 @@ export default function CalendarScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.monthNav}>
           <TouchableOpacity onPress={goToPrevMonth} style={styles.navButton} activeOpacity={0.7}>
-            <FontAwesome name="chevron-left" size={16} color="#5C4A32" />
+            <FontAwesome name="chevron-left" size={16} color="#4A4A4A" />
           </TouchableOpacity>
           <TouchableOpacity onPress={goToToday} activeOpacity={0.7}>
             <Text style={styles.monthTitle}>{currentYear}년 {currentMonth + 1}월</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={goToNextMonth} style={styles.navButton} activeOpacity={0.7}>
-            <FontAwesome name="chevron-right" size={16} color="#5C4A32" />
+            <FontAwesome name="chevron-right" size={16} color="#4A4A4A" />
           </TouchableOpacity>
         </View>
 
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   addHeader: { flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:8 },
   addTitle: { fontSize:20, fontWeight:'700', color:'#1F1F1F', fontFamily:'PretendardBold', letterSpacing:-0.3 },
   addDate: { fontSize:14, color:'#9C8B75', marginBottom:20 },
-  addLabel: { fontSize:13, fontWeight:'600', color:'#5C4A32', marginBottom:6, fontFamily:'Pretendard' },
+  addLabel: { fontSize:13, fontWeight:'600', color:'#4A4A4A', marginBottom:6, fontFamily:'Pretendard' },
   addInput: { backgroundColor:'#FFFFFF', borderWidth:1, borderColor:'#EAEAEA', borderRadius:12, paddingHorizontal:14, paddingVertical:12, fontSize:15, color:'#1F1F1F', marginBottom:16, fontFamily:'Pretendard' },
   addSubmit: { backgroundColor:'#C05A4E', borderRadius:12, paddingVertical:16, alignItems:'center', marginTop:8 },
   addSubmitText: { color:'#FFFFFF', fontSize:16, fontWeight:'700', fontFamily:'PretendardBold' },

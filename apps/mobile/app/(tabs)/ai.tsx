@@ -39,7 +39,7 @@ export default function AIScreen() {
         {/* AI Welcome */}
         <View style={styles.aiMessage}>
           <View style={styles.aiAvatar}>
-            <FontAwesome name="magic" size={16} color="#C85A4A" />
+            <FontAwesome name="magic" size={16} color="#C05A4E" />
           </View>
           <View style={styles.aiMessageBubble}>
             <Text style={styles.aiMessageText}>
@@ -65,13 +65,13 @@ export default function AIScreen() {
                 activeOpacity={0.7}
               >
                 <View style={[styles.roleIcon, { backgroundColor: isSelected ? role.color : role.color + '80' }]}>
-                  <FontAwesome name={role.icon as any} size={18} color={isSelected ? '#FFFFFF' : '#5C4A32'} />
+                  <FontAwesome name={role.icon as any} size={18} color={isSelected ? '#FFFFFF' : '#4A4A4A'} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.roleLabel, isSelected && styles.roleLabelSelected]}>{role.label}</Text>
                   {isSelected && <Text style={styles.roleHint}>{role.hint}</Text>}
                 </View>
-                {isSelected && <FontAwesome name="check-circle" size={18} color="#C85A4A" />}
+                {isSelected && <FontAwesome name="check-circle" size={18} color="#C05A4E" />}
               </TouchableOpacity>
             );
           })}
@@ -81,7 +81,7 @@ export default function AIScreen() {
       {/* Selected Role Indicator */}
       {selectedRole !== null && (
         <View style={styles.selectedIndicator}>
-          <FontAwesome name={ROLES[selectedRole].icon as any} size={12} color="#C85A4A" />
+          <FontAwesome name={ROLES[selectedRole].icon as any} size={12} color="#C05A4E" />
           <Text style={styles.selectedIndicatorText}>{ROLES[selectedRole].label} 모드</Text>
           <TouchableOpacity onPress={() => setSelectedRole(null)} activeOpacity={0.7}>
             <FontAwesome name="times" size={14} color="#BFAE99" />
@@ -116,7 +116,7 @@ export default function AIScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDF0' },
+  container: { flex: 1, backgroundColor: '#F9F8F5' },
   chatArea: { flex: 1 },
   chatContent: { padding: 20 },
   aiMessage: { flexDirection: 'row', gap: 10, marginBottom: 20 },
@@ -126,46 +126,46 @@ const styles = StyleSheet.create({
   },
   aiMessageBubble: {
     flex: 1, backgroundColor: '#FFFFFF', borderRadius: 16,
-    padding: 16, borderWidth: 1, borderColor: '#F0E8D8',
+    padding: 16, borderWidth: 1, borderColor: '#EAEAEA',
   },
-  aiMessageText: { fontSize: 14, lineHeight: 22, color: '#2D2D2D' },
+  aiMessageText: { fontSize: 14, lineHeight: 22, color: '#1F1F1F' },
   roleCards: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   roleCard: {
     width: '47%', flexDirection: 'row', alignItems: 'center', gap: 10,
     backgroundColor: '#FFFFFF', borderRadius: 12, padding: 14,
-    borderWidth: 1, borderColor: '#F0E8D8',
+    borderWidth: 1, borderColor: '#EAEAEA',
   },
   roleCardSelected: {
-    borderColor: '#C85A4A', borderWidth: 2, backgroundColor: '#FFF8F5',
+    borderColor: '#C05A4E', borderWidth: 2, backgroundColor: '#FFF8F5',
   },
   roleIcon: {
     width: 36, height: 36, borderRadius: 18,
     justifyContent: 'center', alignItems: 'center',
   },
-  roleLabel: { fontSize: 13, fontWeight: '600', color: '#2D2D2D' },
-  roleLabelSelected: { color: '#C85A4A' },
-  roleHint: { fontSize: 10, color: '#8B7355', marginTop: 2 },
+  roleLabel: { fontSize: 13, fontWeight: '600', color: '#1F1F1F' },
+  roleLabelSelected: { color: '#C05A4E' },
+  roleHint: { fontSize: 10, color: '#888888', marginTop: 2 },
   selectedIndicator: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 16, paddingVertical: 8,
     backgroundColor: '#FFF0ED',
   },
-  selectedIndicatorText: { fontSize: 12, fontWeight: '600', color: '#C85A4A', flex: 1 },
+  selectedIndicatorText: { fontSize: 12, fontWeight: '600', color: '#C05A4E', flex: 1 },
   inputBar: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     padding: 16, backgroundColor: '#FFFFFF',
-    borderTopWidth: 1, borderTopColor: '#F0E8D8',
+    borderTopWidth: 1, borderTopColor: '#EAEAEA',
   },
   input: {
     flex: 1, backgroundColor: '#F8F4E8', borderRadius: 24,
-    paddingHorizontal: 18, paddingVertical: 12, fontSize: 15, color: '#2D2D2D',
+    paddingHorizontal: 18, paddingVertical: 12, fontSize: 15, color: '#1F1F1F',
   },
   inputMultiline: {
     maxHeight: 80,
   },
   sendButton: {
     width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#C85A4A', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center',
   },
   sendButtonDisabled: { opacity: 0.4 },
 });

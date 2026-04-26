@@ -21,7 +21,7 @@ export default function PlaceholderRecordScreen() {
   const info = CATEGORY_INFO[type] || {
     icon: 'folder-o',
     label: type,
-    color: '#F0E8D8',
+    color: '#EAEAEA',
     description: '곧 만나볼 수 있어요',
   };
 
@@ -30,13 +30,13 @@ export default function PlaceholderRecordScreen() {
       <Stack.Screen options={{ title: info.label }} />
       <View style={styles.container}>
         <View style={[styles.iconCircle, { backgroundColor: info.color }]}>
-          <FontAwesome name={info.icon as any} size={48} color="#5C4A32" />
+          <FontAwesome name={info.icon as any} size={48} color="#4A4A4A" />
         </View>
         <Text style={styles.title}>{info.label}</Text>
         <Text style={styles.description}>{info.description}</Text>
 
         <View style={styles.badge}>
-          <FontAwesome name="wrench" size={14} color="#C85A4A" />
+          <FontAwesome name="wrench" size={14} color="#C05A4E" />
           <Text style={styles.badgeText}>준비 중인 기능이에요</Text>
         </View>
 
@@ -56,7 +56,7 @@ export default function PlaceholderRecordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFDF0',
+    backgroundColor: '#F9F8F5',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 40,
@@ -72,12 +72,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#2D2D2D',
+    color: '#1F1F1F',
     marginBottom: 8,
   },
   description: {
     fontSize: 15,
-    color: '#5C4A32',
+    color: '#4A4A4A',
     textAlign: 'center',
     marginBottom: 32,
     lineHeight: 24,
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#C85A4A',
+    color: '#C05A4E',
   },
   subtext: {
     fontSize: 14,
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#C85A4A',
+    backgroundColor: '#C05A4E',
     paddingHorizontal: 24,
     paddingVertical: 14,
     borderRadius: 12,
