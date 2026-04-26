@@ -1,6 +1,7 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
+import { useState, useRef } from 'react';
 
 const CAPSULES = [
   { title: '서준이 성인식에 열어보세요', target: '2036.5.15', type: '성인식', author: '지수, 민준', sealed: '2026.3.1', locked: true, icon: 'gift', color: '#CE93D8' },
@@ -10,10 +11,73 @@ const CAPSULES = [
 ];
 
 export default function TimeCapsuleScreen() {
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const modalBg = useRef(new Animated.Value(0)).current;
+  const modalSlide = useRef(new Animated.Value(500)).current;
+
+  const openDetail = (item: any) => {
+    setSelectedItem(item);
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+    ]).start();
+  };
+  const closeDetail = () => {
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
+    ]).start(() => setSelectedItem(null));
+  };
+
   return (
     <>
       <Stack.Screen options={{ title: '타임캡슐' }} />
       <View style={s.container}>
+        <Modal visible={!!selectedItem} transparent statusBarTranslucent animationType="none">
+          <View style={s.modalWrap}>
+            <Animated.View style={[s.modalBg, { opacity: modalBg }]}>
+              <Pressable style={{ flex: 1 }} onPress={closeDetail} />
+            </Animated.View>
+            <Animated.View style={[s.modalSheet, { transform: [{ translateY: modalSlide }] }]}>
+              <View style={s.modalHandle} />
+              {selectedItem && (
+                <View style={s.modalContent}>
+                  <Text style={s.modalTitle}>{selectedItem.title}</Text>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>유형</Text>
+                    <Text style={s.modalValue}>{selectedItem.type}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>작성자</Text>
+                    <Text style={s.modalValue}>{selectedItem.author}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>밀봉일</Text>
+                    <Text style={s.modalValue}>{selectedItem.sealed}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>개봉일</Text>
+                    <Text style={s.modalValue}>{selectedItem.target}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>상태</Text>
+                    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <FontAwesome
+                        name={selectedItem.locked ? 'lock' : 'unlock'}
+                        size={14}
+                        color={selectedItem.locked ? '#C05A4E' : '#4AA86B'}
+                      />
+                      <Text style={[s.modalValue, { color: selectedItem.locked ? '#C05A4E' : '#4AA86B', fontWeight: '600' }]}>
+                        {selectedItem.locked ? '잠김' : '개봉 완료'}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+            </Animated.View>
+          </View>
+        </Modal>
+
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.intro}>
             <FontAwesome name="clock-o" size={20} color="#C05A4E" />
@@ -26,13 +90,7 @@ export default function TimeCapsuleScreen() {
           <View style={s.list}>
             {CAPSULES.map((c, i) => (
               <TouchableOpacity key={i} style={s.card} activeOpacity={0.7}
-                onPress={() => {
-                  if (c.locked) {
-                    Alert.alert('잠긴 타임캡슐', `이 캡슐은 ${c.target}에 열 수 있습니다.\n\n밀봉일: ${c.sealed}\n작성자: ${c.author}\n유형: ${c.type}`);
-                  } else {
-                    Alert.alert('열린 타임캡슐! 🎉', `${c.title}\n\n밀봉일: ${c.sealed}\n작성자: ${c.author}\n\n내용 보기 기능이 곧 추가됩니다.`);
-                  }
-                }}>
+                onPress={() => openDetail(c)}>
                 <View style={[s.capsuleIcon, { backgroundColor: c.color }]}>
                   <FontAwesome name={c.icon as any} size={20} color="#FFFFFF" />
                 </View>
@@ -75,4 +133,13 @@ const s = StyleSheet.create({
   dateRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   dateText: { fontSize: 12, fontWeight: '600' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center', shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+  modalWrap: { flex: 1, justifyContent: 'flex-end' },
+  modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
+  modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  modalContent: {},
+  modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
+  modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
+  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
+  modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
 });

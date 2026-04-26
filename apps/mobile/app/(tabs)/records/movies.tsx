@@ -1,7 +1,7 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const FILTERS = [
   { label: '전체', active: true }, { label: '최근 관람' }, { label: '평점 높은순' }, { label: '보고 싶은' },
@@ -15,11 +15,11 @@ const MOVIES = [
   { title: '오펜하이머', genre: '드라마', date: '2025.12.25', rating: 5, watchedWith: ['지수', '민준'], review: '크리스마스에 본 묵직한 영화. 대화를 많이 나눴어요.', color: '#FFAB91' },
 ];
 
-function StarRating({ rating }: { rating: number }) {
+function StarRating({ rating, size = 12 }: { rating: number; size?: number }) {
   return (
     <View style={{ flexDirection: 'row', gap: 2 }}>
       {[1,2,3,4,5].map(i => (
-        <FontAwesome key={i} name={i <= rating ? 'star' : 'star-o'} size={12} color="#E6A817" />
+        <FontAwesome key={i} name={i <= rating ? 'star' : 'star-o'} size={size} color="#E6A817" />
       ))}
     </View>
   );
@@ -27,11 +27,64 @@ function StarRating({ rating }: { rating: number }) {
 
 export default function MoviesScreen() {
   const [activeFilter, setActiveFilter] = useState(0);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const modalBg = useRef(new Animated.Value(0)).current;
+  const modalSlide = useRef(new Animated.Value(500)).current;
+
+  const openDetail = (item: any) => {
+    setSelectedItem(item);
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+    ]).start();
+  };
+  const closeDetail = () => {
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
+    ]).start(() => setSelectedItem(null));
+  };
 
   return (
     <>
       <Stack.Screen options={{ title: '영화 관람' }} />
       <View style={s.container}>
+        <Modal visible={!!selectedItem} transparent statusBarTranslucent animationType="none">
+          <View style={s.modalWrap}>
+            <Animated.View style={[s.modalBg, { opacity: modalBg }]}>
+              <Pressable style={{ flex: 1 }} onPress={closeDetail} />
+            </Animated.View>
+            <Animated.View style={[s.modalSheet, { transform: [{ translateY: modalSlide }] }]}>
+              <View style={s.modalHandle} />
+              {selectedItem && (
+                <View style={s.modalContent}>
+                  <Text style={s.modalTitle}>{selectedItem.title}</Text>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>장르</Text>
+                    <Text style={s.modalValue}>{selectedItem.genre}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>관람일</Text>
+                    <Text style={s.modalValue}>{selectedItem.date}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>평점</Text>
+                    <StarRating rating={selectedItem.rating} size={16} />
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>함께</Text>
+                    <Text style={s.modalValue}>{selectedItem.watchedWith.join(', ')}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>리뷰</Text>
+                    <Text style={s.modalValue}>{selectedItem.review}</Text>
+                  </View>
+                </View>
+              )}
+            </Animated.View>
+          </View>
+        </Modal>
+
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.statsRow}>
             <View style={s.stat}><Text style={s.statNum}>12</Text><Text style={s.statLabel}>총 관람</Text></View>
@@ -50,7 +103,7 @@ export default function MoviesScreen() {
           <View style={s.list}>
             {MOVIES.map((m, i) => (
               <TouchableOpacity key={i} style={s.card} activeOpacity={0.7}
-                onPress={() => Alert.alert(m.title, `장르: ${m.genre}\n관람일: ${m.date}\n함께 본 사람: ${m.watchedWith.join(', ')}\n\n${m.review}`)}>
+                onPress={() => openDetail(m)}>
                 <View style={[s.poster, { backgroundColor: m.color }]}>
                   <FontAwesome name="film" size={24} color="#FFFFFF" />
                 </View>
@@ -101,4 +154,13 @@ const s = StyleSheet.create({
   watchedText: { fontSize: 11, color: '#7A6B55' },
   review: { fontSize: 12, color: '#5C4A32', fontStyle: 'italic', fontFamily: 'Pretendard' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center', shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+  modalWrap: { flex: 1, justifyContent: 'flex-end' },
+  modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
+  modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  modalContent: {},
+  modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
+  modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
+  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
+  modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
 });

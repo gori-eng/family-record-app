@@ -1,7 +1,7 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const ALL_CATEGORIES = ['전체', '식비', '교통', '주거', '교육', '의료', '여가'];
 
@@ -29,6 +29,23 @@ function formatAmount(amount: number, type: string) {
 
 export default function FinanceScreen() {
   const [activeCategory, setActiveCategory] = useState('전체');
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const modalBg = useRef(new Animated.Value(0)).current;
+  const modalSlide = useRef(new Animated.Value(500)).current;
+
+  const openDetail = (item: any) => {
+    setSelectedItem(item);
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+    ]).start();
+  };
+  const closeDetail = () => {
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
+    ]).start(() => setSelectedItem(null));
+  };
 
   const filteredTransactions = TRANSACTIONS.map(group => ({
     ...group,
@@ -41,6 +58,36 @@ export default function FinanceScreen() {
     <>
       <Stack.Screen options={{ title: '가계부' }} />
       <View style={styles.container}>
+        <Modal visible={!!selectedItem} transparent statusBarTranslucent animationType="none">
+          <View style={styles.modalWrap}>
+            <Animated.View style={[styles.modalBg, { opacity: modalBg }]}>
+              <Pressable style={{ flex: 1 }} onPress={closeDetail} />
+            </Animated.View>
+            <Animated.View style={[styles.modalSheet, { transform: [{ translateY: modalSlide }] }]}>
+              <View style={styles.modalHandle} />
+              {selectedItem && (
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>{selectedItem.desc}</Text>
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalLabel}>카테고리</Text>
+                    <Text style={styles.modalValue}>{selectedItem.category}</Text>
+                  </View>
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalLabel}>금액</Text>
+                    <Text style={[styles.modalValue, { color: selectedItem.type === 'income' ? '#4AA86B' : '#C05A4E', fontWeight: '700' }]}>
+                      {formatAmount(selectedItem.amount, selectedItem.type)}
+                    </Text>
+                  </View>
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalLabel}>날짜</Text>
+                    <Text style={styles.modalValue}>{selectedItem._date}</Text>
+                  </View>
+                </View>
+              )}
+            </Animated.View>
+          </View>
+        </Modal>
+
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Monthly Summary */}
           <View style={styles.summaryCard}>
@@ -122,7 +169,7 @@ export default function FinanceScreen() {
                     key={ii}
                     style={styles.transItem}
                     activeOpacity={0.7}
-                    onPress={() => Alert.alert(item.desc, `카테고리: ${item.category}\n금액: ${formatAmount(item.amount, item.type)}\n\n거래 상세 보기 기능이 곧 추가됩니다.`)}
+                    onPress={() => openDetail({ ...item, _date: group.date })}
                   >
                     <View style={[styles.transIcon, { backgroundColor: item.color }]}>
                       <FontAwesome name={item.icon as any} size={14} color="#5C4A32" />
@@ -223,4 +270,13 @@ const styles = StyleSheet.create({
     shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3, shadowRadius: 8, elevation: 8,
   },
+  modalWrap: { flex: 1, justifyContent: 'flex-end' },
+  modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
+  modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  modalContent: {},
+  modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
+  modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
+  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
+  modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
 });

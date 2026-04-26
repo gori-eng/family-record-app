@@ -1,7 +1,7 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const STATUS_OPTIONS = ['전체', '읽는 중', '완독', '읽고 싶은'];
 
@@ -14,22 +14,35 @@ const BOOKS = [
   { title: '해리포터 시리즈', author: 'J.K. 롤링', reader: '지우', status: '읽고 싶은', color: '#F0B8B8', notes: '' },
 ];
 
-function StarRating({ rating, title }: { rating: number; title: string }) {
+function StarRating({ rating }: { rating: number }) {
   return (
-    <TouchableOpacity
-      style={{ flexDirection: 'row', gap: 2 }}
-      activeOpacity={0.7}
-      onPress={() => Alert.alert('평점', `"${title}" 평점: ${rating}/5\n\n평점 수정 기능이 곧 추가됩니다.`)}
-    >
+    <View style={{ flexDirection: 'row', gap: 2 }}>
       {[1, 2, 3, 4, 5].map(i => (
         <FontAwesome key={i} name={i <= rating ? 'star' : 'star-o'} size={12} color="#E6A817" />
       ))}
-    </TouchableOpacity>
+    </View>
   );
 }
 
 export default function ReadingScreen() {
   const [activeStatus, setActiveStatus] = useState('전체');
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const modalBg = useRef(new Animated.Value(0)).current;
+  const modalSlide = useRef(new Animated.Value(500)).current;
+
+  const openDetail = (item: any) => {
+    setSelectedItem(item);
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+    ]).start();
+  };
+  const closeDetail = () => {
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
+    ]).start(() => setSelectedItem(null));
+  };
 
   const filteredBooks = activeStatus === '전체'
     ? BOOKS
@@ -39,6 +52,63 @@ export default function ReadingScreen() {
     <>
       <Stack.Screen options={{ title: '독서 목록' }} />
       <View style={styles.container}>
+        <Modal visible={!!selectedItem} transparent statusBarTranslucent animationType="none">
+          <View style={styles.modalWrap}>
+            <Animated.View style={[styles.modalBg, { opacity: modalBg }]}>
+              <Pressable style={{ flex: 1 }} onPress={closeDetail} />
+            </Animated.View>
+            <Animated.View style={[styles.modalSheet, { transform: [{ translateY: modalSlide }] }]}>
+              <View style={styles.modalHandle} />
+              {selectedItem && (
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>{selectedItem.title}</Text>
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalLabel}>저자</Text>
+                    <Text style={styles.modalValue}>{selectedItem.author}</Text>
+                  </View>
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalLabel}>읽는 이</Text>
+                    <Text style={styles.modalValue}>{selectedItem.reader}</Text>
+                  </View>
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalLabel}>상태</Text>
+                    <View style={[styles.statusBadge, {
+                      backgroundColor: selectedItem.status === '완독' ? '#E8F5E9' : selectedItem.status === '읽는 중' ? '#FFF3E0' : '#F3E5F5'
+                    }]}>
+                      <Text style={[styles.statusText, {
+                        color: selectedItem.status === '완독' ? '#4AA86B' : selectedItem.status === '읽는 중' ? '#E6A817' : '#9C27B0'
+                      }]}>{selectedItem.status}</Text>
+                    </View>
+                  </View>
+                  {selectedItem.rating && (
+                    <View style={styles.modalRow}>
+                      <Text style={styles.modalLabel}>평점</Text>
+                      <StarRating rating={selectedItem.rating} />
+                    </View>
+                  )}
+                  {selectedItem.progress && (
+                    <View style={styles.modalRow}>
+                      <Text style={styles.modalLabel}>진행률</Text>
+                      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <View style={{ flex: 1, height: 6, backgroundColor: '#EAEAEA', borderRadius: 3 }}>
+                          <View style={{ height: 6, backgroundColor: '#C05A4E', borderRadius: 3, width: `${selectedItem.progress}%` }} />
+                        </View>
+                        <Text style={styles.modalValue}>{selectedItem.progress}%</Text>
+                      </View>
+                    </View>
+                  )}
+                  {selectedItem.notes ? (
+                    <View style={styles.modalRow}>
+                      <Text style={styles.modalLabel}>메모</Text>
+                      <Text style={styles.modalValue}>{selectedItem.notes}</Text>
+                    </View>
+                  ) : null}
+                </View>
+              )}
+            </Animated.View>
+          </View>
+        </Modal>
+
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Stats */}
           <View style={styles.statsRow}>
@@ -80,7 +150,7 @@ export default function ReadingScreen() {
                 key={i}
                 style={styles.bookCard}
                 activeOpacity={0.7}
-                onPress={() => Alert.alert(book.title, `저자: ${book.author}\n읽는 이: ${book.reader}\n상태: ${book.status}${book.notes ? `\n\n${book.notes}` : ''}`)}
+                onPress={() => openDetail(book)}
               >
                 <View style={[styles.bookCover, { backgroundColor: book.color }]}>
                   <FontAwesome name="book" size={24} color="#5C4A32" />
@@ -100,7 +170,7 @@ export default function ReadingScreen() {
                   <View style={styles.bookMeta}>
                     <View style={[styles.readerDot, { backgroundColor: book.color }]} />
                     <Text style={styles.readerName}>{book.reader}</Text>
-                    {book.rating && <StarRating rating={book.rating} title={book.title} />}
+                    {book.rating && <StarRating rating={book.rating} />}
                     {book.progress && (
                       <View style={styles.progressRow}>
                         <View style={styles.progressBarBg}>
@@ -183,4 +253,13 @@ const styles = StyleSheet.create({
     shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3, shadowRadius: 8, elevation: 8,
   },
+  modalWrap: { flex: 1, justifyContent: 'flex-end' },
+  modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
+  modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  modalContent: {},
+  modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
+  modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
+  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
+  modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
 });

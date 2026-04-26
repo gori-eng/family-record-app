@@ -1,7 +1,7 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const ENTRIES = [
   {
@@ -46,6 +46,23 @@ const CHILD_COLORS: Record<string, string> = { '지우': '#F0B8B8', '서준': '#
 
 export default function ParentingScreen() {
   const [activeChild, setActiveChild] = useState('전체');
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const modalBg = useRef(new Animated.Value(0)).current;
+  const modalSlide = useRef(new Animated.Value(500)).current;
+
+  const openDetail = (item: any) => {
+    setSelectedItem(item);
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+    ]).start();
+  };
+  const closeDetail = () => {
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
+    ]).start(() => setSelectedItem(null));
+  };
 
   const filteredEntries = activeChild === '전체'
     ? ENTRIES
@@ -55,6 +72,49 @@ export default function ParentingScreen() {
     <>
       <Stack.Screen options={{ title: '육아 일기' }} />
       <View style={styles.container}>
+        <Modal visible={!!selectedItem} transparent statusBarTranslucent animationType="none">
+          <View style={styles.modalWrap}>
+            <Animated.View style={[styles.modalBg, { opacity: modalBg }]}>
+              <Pressable style={{ flex: 1 }} onPress={closeDetail} />
+            </Animated.View>
+            <Animated.View style={[styles.modalSheet, { transform: [{ translateY: modalSlide }] }]}>
+              <View style={styles.modalHandle} />
+              {selectedItem && (
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>{selectedItem.title}</Text>
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalLabel}>날짜</Text>
+                    <Text style={styles.modalValue}>{selectedItem.date}</Text>
+                  </View>
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalLabel}>아이</Text>
+                    <View style={[styles.childBadge, { backgroundColor: selectedItem.child === '지우' ? '#F0B8B8' : '#B0C8D8' }]}>
+                      <Text style={styles.childBadgeText}>{selectedItem.child}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalLabel}>내용</Text>
+                    <Text style={styles.modalValue}>{selectedItem.content}</Text>
+                  </View>
+                  {selectedItem.milestones && selectedItem.milestones.length > 0 && (
+                    <View style={styles.modalRow}>
+                      <Text style={styles.modalLabel}>마일스톤</Text>
+                      <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                        {selectedItem.milestones.map((ms: string, mi: number) => (
+                          <View key={mi} style={styles.milestoneBadge}>
+                            <FontAwesome name="star" size={10} color="#E6A817" />
+                            <Text style={styles.milestoneText}>{ms}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+                </View>
+              )}
+            </Animated.View>
+          </View>
+        </Modal>
+
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Stats */}
           <View style={styles.statsRow}>
@@ -97,7 +157,7 @@ export default function ParentingScreen() {
                 key={i}
                 style={styles.entryCard}
                 activeOpacity={0.7}
-                onPress={() => Alert.alert(entry.title, `${entry.date} · ${entry.child}\n\n${entry.content}`)}>
+                onPress={() => openDetail(entry)}>
                 <View style={styles.timelineLine}>
                   <View style={[styles.timelineDot, { backgroundColor: entry.child === '지우' ? '#F0B8B8' : '#B0C8D8' }]} />
                   {i < filteredEntries.length - 1 && <View style={styles.timelineConnector} />}
@@ -113,15 +173,13 @@ export default function ParentingScreen() {
                   <Text style={styles.entryText} numberOfLines={2}>{entry.content}</Text>
                   <View style={styles.entryFooter}>
                     {entry.milestones.map((ms, mi) => (
-                      <TouchableOpacity key={mi} style={styles.milestoneBadge} activeOpacity={0.7} onPress={() => Alert.alert('마일스톤', `"${ms}" 마일스톤이에요!\n\n관련 기록을 모아보는 기능이 곧 추가됩니다.`)}>
+                      <View key={mi} style={styles.milestoneBadge}>
                         <FontAwesome name="star" size={10} color="#E6A817" />
                         <Text style={styles.milestoneText}>{ms}</Text>
-                      </TouchableOpacity>
+                      </View>
                     ))}
                     <View style={{ flex: 1 }} />
-                    <TouchableOpacity onPress={() => Alert.alert('기분', `이 날의 기분 기록이에요.\n\n기분 변경 기능이 곧 추가됩니다.`)}>
-                      <FontAwesome name={entry.mood as any} size={16} color="#BFAE99" />
-                    </TouchableOpacity>
+                    <FontAwesome name={entry.mood as any} size={16} color="#9C8B75" />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -196,4 +254,13 @@ const styles = StyleSheet.create({
     shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3, shadowRadius: 8, elevation: 8,
   },
+  modalWrap: { flex: 1, justifyContent: 'flex-end' },
+  modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
+  modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  modalContent: {},
+  modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
+  modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
+  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
+  modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
 });

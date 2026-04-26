@@ -113,7 +113,7 @@ export default function CalendarScreen() {
                 {showDetail.member && (
                   <View style={styles.detailRow}>
                     <FontAwesome name="user" size={16} color="#9C8B75" />
-                    <Text style={styles.detailText}>참여: {showDetail.member}</Text>
+                    <Text style={styles.detailText}>참여자: {showDetail.member}</Text>
                   </View>
                 )}
                 {/* AI 보조 */}
@@ -298,14 +298,14 @@ const styles = StyleSheet.create({
   modalBgLayer: { ...StyleSheet.absoluteFillObject, backgroundColor:'rgba(0,0,0,0.3)' },
   modalHandle: { width:36, height:4, backgroundColor:'#E0E0E0', borderRadius:2, alignSelf:'center', marginTop:10, marginBottom:12 },
   detailModal: { backgroundColor:'#FFFFFF', borderTopLeftRadius:24, borderTopRightRadius:24, padding:24, paddingBottom:40 },
-  detailHeader: { flexDirection:'row', alignItems:'center', gap:10, marginBottom:20 },
+  detailHeader: { flexDirection:'row', alignItems:'center', gap:10, marginBottom:24 },
   detailColorDot: { width:12, height:12, borderRadius:6 },
   detailTitle: { flex:1, fontSize:20, fontWeight:'700', color:'#1F1F1F', fontFamily:'PretendardBold', letterSpacing:-0.3 },
-  detailRow: { flexDirection:'row', alignItems:'center', gap:10, marginBottom:12 },
-  detailText: { fontSize:15, color:'#5C4A32', fontFamily:'Pretendard' },
+  detailRow: { flexDirection:'row', alignItems:'center', gap:12, marginBottom:16 },
+  detailText: { fontSize:15, color:'#1F1F1F', fontFamily:'Pretendard' },
   aiHint: { flexDirection:'row', alignItems:'flex-start', gap:8, backgroundColor:'#FFF0ED', borderRadius:12, padding:14, marginVertical:16 },
   aiHintText: { flex:1, fontSize:13, color:'#C05A4E', lineHeight:20 },
-  detailActions: { flexDirection:'row', gap:12, marginTop:8 },
+  detailActions: { flexDirection:'row', gap:12, marginTop:12 },
   detailBtn: { flex:1, flexDirection:'row', alignItems:'center', justifyContent:'center', gap:6, paddingVertical:14, borderRadius:12, backgroundColor:'#FFF0ED' },
   detailBtnText: { fontSize:14, fontWeight:'600', color:'#C05A4E', fontFamily:'Pretendard' },
   detailBtnDanger: { backgroundColor:'#FFF0F0' },

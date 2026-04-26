@@ -5,11 +5,11 @@ import { useRouter } from 'expo-router';
 import { useState, useCallback, useRef, useEffect } from 'react';
 
 const NOTIFICATIONS = [
-  { id: 1, icon: 'book', color: '#B8D8C0', title: '서준이가 독서 기록을 추가했어요', desc: '"어린 왕자" 완독!', time: '10분 전', unread: true },
-  { id: 2, icon: 'calendar', color: '#B0C8D8', title: '내일 학교 발표회가 있어요', desc: '서현초등학교 14:00', time: '1시간 전', unread: true },
-  { id: 3, icon: 'child', color: '#F0B8B8', title: '지우의 육아일지에 새 기록', desc: '첫 자전거 타기 성공!', time: '3시간 전', unread: true },
-  { id: 4, icon: 'money', color: '#E8D8C0', title: '이번 달 가계부 정산 알림', desc: '4월 지출 요약이 준비되었어요', time: '어제', unread: false },
-  { id: 5, icon: 'trophy', color: '#D8CDB8', title: '가족 목표 달성률 업데이트', desc: '"주말 가족 운동" 75% 달성', time: '2일 전', unread: false },
+  { id: 1, icon: 'book', color: '#B8D8C0', title: '독서 기록을 추가했어요', desc: '"어린 왕자" 완독!', time: '10분 전', unread: true, author: '서준' },
+  { id: 2, icon: 'calendar', color: '#B0C8D8', title: '내일 학교 발표회가 있어요', desc: '서현초등학교 14:00', time: '1시간 전', unread: true, author: '시스템' },
+  { id: 3, icon: 'child', color: '#F0B8B8', title: '육아일지에 새 기록을 남겼어요', desc: '첫 자전거 타기 성공!', time: '3시간 전', unread: true, author: '지수' },
+  { id: 4, icon: 'money', color: '#E8D8C0', title: '이번 달 가계부 정산 알림', desc: '4월 지출 요약이 준비되었어요', time: '어제', unread: false, author: '시스템' },
+  { id: 5, icon: 'trophy', color: '#D8CDB8', title: '가족 목표 달성률 업데이트', desc: '"주말 가족 운동" 75% 달성', time: '2일 전', unread: false, author: '민준' },
 ];
 
 const TODAY_EVENTS = [
@@ -94,7 +94,10 @@ export default function HomeScreen() {
                     <FontAwesome name={n.icon as any} size={14} color="#4A4A4A" />
                   </View>
                   <View style={s.notifContent}>
-                    <Text style={s.notifItemTitle}>{n.title}</Text>
+                    <View style={s.notifAuthorRow}>
+                      <Text style={s.notifAuthor}>{n.author}</Text>
+                      <Text style={s.notifItemTitle}>{n.title}</Text>
+                    </View>
                     <Text style={s.notifItemDesc}>{n.desc}</Text>
                   </View>
                   <View style={s.notifMeta}>
@@ -300,7 +303,9 @@ const s = StyleSheet.create({
   notifItemUnread: { backgroundColor: '#F5F0EC' },
   notifIcon: { width: 36, height: 36, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
   notifContent: { flex: 1 },
-  notifItemTitle: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', marginBottom: 2 },
+  notifAuthorRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 },
+  notifAuthor: { fontSize: 12, fontWeight: '700', color: '#C05A4E', fontFamily: 'PretendardBold' },
+  notifItemTitle: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', flex: 1 },
   notifItemDesc: { fontSize: 12, color: '#888' },
   notifMeta: { alignItems: 'flex-end', gap: 4 },
   notifTime: { fontSize: 11, color: '#A0A0A0' },

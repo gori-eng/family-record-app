@@ -1,7 +1,7 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const TRIPS = [
   { dest: '제주도', country: '한국', status: '다녀옴', date: '2025.8', color: '#4FC3F7', icon: 'sun-o', members: '전체', highlight: '우도 자전거 투어가 최고였어요!', budget: '180만원' },
@@ -19,6 +19,24 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
 
 export default function TravelScreen() {
   const [filter, setFilter] = useState('전체');
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const modalBg = useRef(new Animated.Value(0)).current;
+  const modalSlide = useRef(new Animated.Value(500)).current;
+
+  const openDetail = (item: any) => {
+    setSelectedItem(item);
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+    ]).start();
+  };
+  const closeDetail = () => {
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
+    ]).start(() => setSelectedItem(null));
+  };
+
   const filters = ['전체', '다녀옴', '계획 중', '가고 싶은'];
   const filtered = filter === '전체' ? TRIPS : TRIPS.filter(t => t.status === filter);
 
@@ -26,6 +44,50 @@ export default function TravelScreen() {
     <>
       <Stack.Screen options={{ title: '여행 기록' }} />
       <View style={s.container}>
+        <Modal visible={!!selectedItem} transparent statusBarTranslucent animationType="none">
+          <View style={s.modalWrap}>
+            <Animated.View style={[s.modalBg, { opacity: modalBg }]}>
+              <Pressable style={{ flex: 1 }} onPress={closeDetail} />
+            </Animated.View>
+            <Animated.View style={[s.modalSheet, { transform: [{ translateY: modalSlide }] }]}>
+              <View style={s.modalHandle} />
+              {selectedItem && (
+                <View style={s.modalContent}>
+                  <Text style={s.modalTitle}>{selectedItem.dest}</Text>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>국가</Text>
+                    <Text style={s.modalValue}>{selectedItem.country}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>상태</Text>
+                    <View style={[s.statusBadge, { backgroundColor: STATUS_COLORS[selectedItem.status].bg }]}>
+                      <Text style={[s.statusText, { color: STATUS_COLORS[selectedItem.status].text }]}>{selectedItem.status}</Text>
+                    </View>
+                  </View>
+                  {selectedItem.date ? (
+                    <View style={s.modalRow}>
+                      <Text style={s.modalLabel}>시기</Text>
+                      <Text style={s.modalValue}>{selectedItem.date}</Text>
+                    </View>
+                  ) : null}
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>참여</Text>
+                    <Text style={s.modalValue}>{selectedItem.members}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>예산</Text>
+                    <Text style={s.modalValue}>{selectedItem.budget}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>하이라이트</Text>
+                    <Text style={s.modalValue}>{selectedItem.highlight}</Text>
+                  </View>
+                </View>
+              )}
+            </Animated.View>
+          </View>
+        </Modal>
+
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.statsRow}>
             <View style={s.stat}><Text style={s.statNum}>2</Text><Text style={s.statLabel}>다녀온 곳</Text></View>
@@ -44,7 +106,7 @@ export default function TravelScreen() {
           <View style={s.list}>
             {filtered.map((t, i) => (
               <TouchableOpacity key={i} style={s.card} activeOpacity={0.7}
-                onPress={() => Alert.alert(t.dest, `${t.country}\n상태: ${t.status}${t.date ? `\n시기: ${t.date}` : ''}\n참여: ${t.members}\n예산: ${t.budget}\n\n${t.highlight}`)}>
+                onPress={() => openDetail(t)}>
                 <View style={[s.destIcon, { backgroundColor: t.color }]}>
                   <FontAwesome name={t.icon as any} size={22} color="#FFFFFF" />
                 </View>
@@ -101,4 +163,13 @@ const s = StyleSheet.create({
   members: { fontSize: 11, color: '#9C8B75', flex: 1 },
   budget: { fontSize: 12, fontWeight: '600', color: '#C05A4E' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center', shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+  modalWrap: { flex: 1, justifyContent: 'flex-end' },
+  modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
+  modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  modalContent: {},
+  modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
+  modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
+  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
+  modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
 });

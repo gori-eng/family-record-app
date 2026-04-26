@@ -1,6 +1,7 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
+import { useState, useRef } from 'react';
 
 const RECIPES = [
   { name: '엄마 김치찌개', origin: '할머니로부터 전수', author: '지수', difficulty: '쉬움', time: '30분', ingredients: 6, color: '#FF8A65', icon: 'fire' },
@@ -14,10 +15,64 @@ const RECIPES = [
 const DIFF_COLOR: Record<string, string> = { '쉬움': '#4AA86B', '보통': '#E6A817', '어려움': '#C05A4E' };
 
 export default function RecipesScreen() {
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const modalBg = useRef(new Animated.Value(0)).current;
+  const modalSlide = useRef(new Animated.Value(500)).current;
+
+  const openDetail = (item: any) => {
+    setSelectedItem(item);
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+    ]).start();
+  };
+  const closeDetail = () => {
+    Animated.parallel([
+      Animated.timing(modalBg, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
+    ]).start(() => setSelectedItem(null));
+  };
+
   return (
     <>
       <Stack.Screen options={{ title: '레시피' }} />
       <View style={s.container}>
+        <Modal visible={!!selectedItem} transparent statusBarTranslucent animationType="none">
+          <View style={s.modalWrap}>
+            <Animated.View style={[s.modalBg, { opacity: modalBg }]}>
+              <Pressable style={{ flex: 1 }} onPress={closeDetail} />
+            </Animated.View>
+            <Animated.View style={[s.modalSheet, { transform: [{ translateY: modalSlide }] }]}>
+              <View style={s.modalHandle} />
+              {selectedItem && (
+                <View style={s.modalContent}>
+                  <Text style={s.modalTitle}>{selectedItem.name}</Text>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>유래</Text>
+                    <Text style={s.modalValue}>{selectedItem.origin}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>기록자</Text>
+                    <Text style={s.modalValue}>{selectedItem.author}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>난이도</Text>
+                    <Text style={[s.modalValue, { color: DIFF_COLOR[selectedItem.difficulty], fontWeight: '600' }]}>{selectedItem.difficulty}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>조리시간</Text>
+                    <Text style={s.modalValue}>{selectedItem.time}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>재료 수</Text>
+                    <Text style={s.modalValue}>{selectedItem.ingredients}개</Text>
+                  </View>
+                </View>
+              )}
+            </Animated.View>
+          </View>
+        </Modal>
+
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.header}>
             <Text style={s.subtitle}>우리 가족만의 손맛을 기록하세요</Text>
@@ -30,7 +85,7 @@ export default function RecipesScreen() {
           <View style={s.list}>
             {RECIPES.map((r, i) => (
               <TouchableOpacity key={i} style={s.card} activeOpacity={0.7}
-                onPress={() => Alert.alert(r.name, `유래: ${r.origin}\n기록자: ${r.author}\n난이도: ${r.difficulty}\n조리시간: ${r.time}\n재료 수: ${r.ingredients}개`)}>
+                onPress={() => openDetail(r)}>
                 <View style={[s.recipeIcon, { backgroundColor: r.color }]}>
                   <FontAwesome name={r.icon as any} size={20} color="#FFFFFF" />
                 </View>
@@ -80,4 +135,13 @@ const s = StyleSheet.create({
   time: { fontSize: 11, color: '#7A6B55' },
   author: { fontSize: 11, color: '#7A6B55' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#C05A4E', justifyContent: 'center', alignItems: 'center', shadowColor: '#C05A4E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
+  modalWrap: { flex: 1, justifyContent: 'flex-end' },
+  modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
+  modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  modalContent: {},
+  modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
+  modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
+  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
+  modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
 });
