@@ -7,12 +7,15 @@ const FILTERS = [
   { label: '전체', active: true }, { label: '최근 관람' }, { label: '평점 높은순' }, { label: '보고 싶은' },
 ];
 
+const MEMBERS = ['지수', '민준', '지우', '서준'];
+const CURRENT_USER = '지수';
+
 const MOVIES = [
-  { title: '인사이드 아웃 2', genre: '애니메이션', date: '2026.3.28', rating: 5, watchedWith: ['전체'], review: '온 가족이 함께 울고 웃었어요. 불안이 새 감정이 된다는 메시지가 좋았어요.', color: '#FFD54F' },
-  { title: '파묘', genre: '미스터리', date: '2026.3.15', rating: 4, watchedWith: ['지수', '민준'], review: '긴장감 넘치는 전개! 부부 데이트로 딱이었어요.', color: '#90A4AE' },
-  { title: '듄: 파트 2', genre: 'SF', date: '2026.2.20', rating: 4, watchedWith: ['민준', '서준'], review: '서준이가 SF에 빠지는 계기가 된 영화. 영상미 최고.', color: '#CE93D8' },
-  { title: '위시', genre: '애니메이션', date: '2026.1.10', rating: 3, watchedWith: ['전체'], review: '지우가 노래를 따라 부르며 좋아했어요.', color: '#80DEEA' },
-  { title: '오펜하이머', genre: '드라마', date: '2025.12.25', rating: 5, watchedWith: ['지수', '민준'], review: '크리스마스에 본 묵직한 영화. 대화를 많이 나눴어요.', color: '#FFAB91' },
+  { title: '인사이드 아웃 2', genre: '애니메이션', date: '2026.3.28', rating: 5, watchedWith: ['지수', '민준', '지우', '서준'], recordedBy: '지수', review: '온 가족이 함께 울고 웃었어요. 불안이 새 감정이 된다는 메시지가 좋았어요.', color: '#FFD54F' },
+  { title: '파묘', genre: '미스터리', date: '2026.3.15', rating: 4, watchedWith: ['지수', '민준'], recordedBy: '민준', review: '긴장감 넘치는 전개! 부부 데이트로 딱이었어요.', color: '#90A4AE' },
+  { title: '듄: 파트 2', genre: 'SF', date: '2026.2.20', rating: 4, watchedWith: ['민준', '서준'], recordedBy: '민준', review: '서준이가 SF에 빠지는 계기가 된 영화. 영상미 최고.', color: '#CE93D8' },
+  { title: '위시', genre: '애니메이션', date: '2026.1.10', rating: 3, watchedWith: ['지수', '민준', '지우', '서준'], recordedBy: '지수', review: '지우가 노래를 따라 부르며 좋아했어요.', color: '#80DEEA' },
+  { title: '오펜하이머', genre: '드라마', date: '2025.12.25', rating: 5, watchedWith: ['지수', '민준'], recordedBy: '지수', review: '크리스마스에 본 묵직한 영화. 대화를 많이 나눴어요.', color: '#FFAB91' },
 ];
 
 function StarRating({ rating, size = 12 }: { rating: number; size?: number }) {
@@ -29,6 +32,9 @@ export default function MoviesScreen() {
   const [activeFilter, setActiveFilter] = useState(0);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [createWith, setCreateWith] = useState<string[]>([CURRENT_USER]);
+  const toggleMember = (m: string) =>
+    setCreateWith(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m]);
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
   const createBg = useRef(new Animated.Value(0)).current;
@@ -93,6 +99,10 @@ export default function MoviesScreen() {
                     <Text style={s.modalValue}>{selectedItem.watchedWith.join(', ')}</Text>
                   </View>
                   <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>작성자</Text>
+                    <Text style={s.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
+                  </View>
+                  <View style={s.modalRow}>
                     <Text style={s.modalLabel}>리뷰</Text>
                     <Text style={s.modalValue}>{selectedItem.review}</Text>
                   </View>
@@ -116,8 +126,20 @@ export default function MoviesScreen() {
               <TextInput style={s.createInput} placeholder="예: 애니메이션, SF, 드라마" placeholderTextColor="#BFAE99" />
               <Text style={s.createLabel}>관람일</Text>
               <TextInput style={s.createInput} placeholder="예: 2026.4.26" placeholderTextColor="#BFAE99" />
-              <Text style={s.createLabel}>함께 본 사람</Text>
-              <TextInput style={s.createInput} placeholder="함께 본 사람을 입력하세요" placeholderTextColor="#BFAE99" />
+              <Text style={s.createLabel}>함께 본 사람 (복수 선택)</Text>
+              <View style={s.memberRow}>
+                {MEMBERS.map(m => (
+                  <TouchableOpacity
+                    key={m}
+                    style={[s.memberPill, createWith.includes(m) && s.memberPillActive]}
+                    activeOpacity={0.7}
+                    onPress={() => toggleMember(m)}
+                  >
+                    <Text style={[s.memberPillText, createWith.includes(m) && s.memberPillTextActive]}>{m}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={s.authorHint}>작성자: {CURRENT_USER} (나)</Text>
               <Text style={s.createLabel}>한줄평</Text>
               <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="한줄평을 남겨보세요" placeholderTextColor="#BFAE99" multiline />
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
@@ -209,4 +231,10 @@ const s = StyleSheet.create({
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
+  memberRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
+  memberPill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' },
+  memberPillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
+  memberPillText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
+  memberPillTextActive: { color: '#FFFFFF' },
+  authorHint: { fontSize: 12, color: '#888', marginBottom: 16, marginTop: -4, fontFamily: 'Pretendard' },
 });

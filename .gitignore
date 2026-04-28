@@ -46,3 +46,6 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Local Claude Code dev config (preview launch.json 등)
+.claude/

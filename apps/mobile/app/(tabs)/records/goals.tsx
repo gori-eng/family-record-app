@@ -4,11 +4,56 @@ import { Stack } from 'expo-router';
 import { useState, useRef } from 'react';
 
 const GOALS = [
-  { title: '주말 가족 운동', desc: '매주 토요일 가족 산책 또는 자전거', progress: 75, target: '2026.12', icon: 'bicycle', color: '#81C784', status: '진행 중' },
-  { title: '가족 독서 100권', desc: '가족 전체 연간 독서 100권 달성', progress: 42, target: '2026.12', icon: 'book', color: '#4FC3F7', status: '진행 중' },
-  { title: '5년 뒤 가족 동남아 여행', desc: '매달 30만원씩 여행 저금', progress: 20, target: '2031.7', icon: 'plane', color: '#FFB74D', status: '진행 중' },
-  { title: '1억 모으기', desc: '주택 자금 마련을 위한 저축 목표', progress: 35, target: '2028.12', icon: 'home', color: '#E57373', status: '진행 중' },
-  { title: '서준이 수영 자격증', desc: '수영 1급 자격증 취득', progress: 100, target: '2026.3', icon: 'trophy', color: '#CE93D8', status: '달성' },
+  {
+    title: '주말 가족 운동', desc: '매주 토요일 가족 산책 또는 자전거', progress: 75, target: '2026.12', icon: 'bicycle', color: '#81C784', status: '진행 중',
+    milestones: [
+      { label: '가족 자전거 구매', done: true },
+      { label: '근처 자전거 코스 3곳 답사', done: true },
+      { label: '월 4회 이상 운동 3개월 연속', done: true },
+      { label: '가족 마라톤 5km 완주', done: false },
+    ],
+    notes: '비 오는 날엔 실내 클라이밍장으로 대체. 지우는 보조바퀴 떼고 한 달째 잘 타는 중.',
+  },
+  {
+    title: '가족 독서 100권', desc: '가족 전체 연간 독서 100권 달성', progress: 42, target: '2026.12', icon: 'book', color: '#4FC3F7', status: '진행 중',
+    milestones: [
+      { label: '1분기 25권', done: true },
+      { label: '2분기 50권', done: false },
+      { label: '3분기 75권', done: false },
+      { label: '4분기 100권', done: false },
+    ],
+    notes: '서준 18권, 지수 12권, 민준 8권, 지우 4권. 매주 일요일 저녁 30분 가족 독서 시간 확보가 효과적.',
+  },
+  {
+    title: '5년 뒤 가족 동남아 여행', desc: '매달 30만원씩 여행 저금', progress: 20, target: '2031.7', icon: 'plane', color: '#FFB74D', status: '진행 중',
+    milestones: [
+      { label: '여행 적금 통장 개설', done: true },
+      { label: '1년차 360만원 적립', done: true },
+      { label: '3년차 1,080만원 적립', done: false },
+      { label: '5년차 1,800만원 + 출발', done: false },
+    ],
+    notes: '목적지 후보: 발리, 푸켓, 다낭. 아이들이 초등 고학년이 되었을 때 떠나기로 합의.',
+  },
+  {
+    title: '1억 모으기', desc: '주택 자금 마련을 위한 저축 목표', progress: 35, target: '2028.12', icon: 'home', color: '#E57373', status: '진행 중',
+    milestones: [
+      { label: '월 250만원 자동 저축 세팅', done: true },
+      { label: '5천만원 도달', done: false },
+      { label: '7천만원 도달', done: false },
+      { label: '1억 도달', done: false },
+    ],
+    notes: '청약 통장은 별도 운영. 비상금 300만원은 항상 별도 보유.',
+  },
+  {
+    title: '서준이 수영 자격증', desc: '수영 1급 자격증 취득', progress: 100, target: '2026.3', icon: 'trophy', color: '#CE93D8', status: '달성',
+    milestones: [
+      { label: '수영 4급', done: true },
+      { label: '수영 3급', done: true },
+      { label: '수영 2급', done: true },
+      { label: '수영 1급', done: true },
+    ],
+    notes: '2026년 3월 시험 합격! 다음 목표로 인명구조 자격증 도전 예정.',
+  },
 ];
 
 export default function GoalsScreen() {
@@ -59,35 +104,70 @@ export default function GoalsScreen() {
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: modalSlide }] }]}>
               <View style={s.modalHandle} />
               {selectedItem && (
-                <View style={s.modalContent}>
-                  <Text style={s.modalTitle}>{selectedItem.title}</Text>
-                  <View style={s.modalRow}>
-                    <Text style={s.modalLabel}>설명</Text>
-                    <Text style={s.modalValue}>{selectedItem.desc}</Text>
-                  </View>
-                  <View style={s.modalRow}>
-                    <Text style={s.modalLabel}>달성률</Text>
-                    <View style={{ flex: 1 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <View style={{ flex: 1, height: 8, backgroundColor: '#EAEAEA', borderRadius: 4 }}>
-                          <View style={{ height: 8, borderRadius: 4, width: `${selectedItem.progress}%`, backgroundColor: selectedItem.progress === 100 ? '#4AA86B' : selectedItem.color }} />
+                <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 560 }}>
+                  <View style={s.modalContent}>
+                    <Text style={s.modalTitle}>{selectedItem.title}</Text>
+                    <View style={s.modalRow}>
+                      <Text style={s.modalLabel}>설명</Text>
+                      <Text style={s.modalValue}>{selectedItem.desc}</Text>
+                    </View>
+                    <View style={s.modalRow}>
+                      <Text style={s.modalLabel}>달성률</Text>
+                      <View style={{ flex: 1 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                          <View style={{ flex: 1, height: 8, backgroundColor: '#EAEAEA', borderRadius: 4 }}>
+                            <View style={{ height: 8, borderRadius: 4, width: `${selectedItem.progress}%`, backgroundColor: selectedItem.progress === 100 ? '#4AA86B' : selectedItem.color }} />
+                          </View>
+                          <Text style={{ fontSize: 15, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' }}>{selectedItem.progress}%</Text>
                         </View>
-                        <Text style={{ fontSize: 15, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' }}>{selectedItem.progress}%</Text>
                       </View>
                     </View>
-                  </View>
-                  <View style={s.modalRow}>
-                    <Text style={s.modalLabel}>목표일</Text>
-                    <Text style={s.modalValue}>{selectedItem.target}</Text>
-                  </View>
-                  <View style={s.modalRow}>
-                    <Text style={s.modalLabel}>상태</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      {selectedItem.status === '달성' && <FontAwesome name="check-circle" size={16} color="#4AA86B" />}
-                      <Text style={[s.modalValue, { color: selectedItem.status === '달성' ? '#4AA86B' : '#4A8C6F', fontWeight: '600' }]}>{selectedItem.status}</Text>
+                    <View style={s.modalRow}>
+                      <Text style={s.modalLabel}>목표일</Text>
+                      <Text style={s.modalValue}>{selectedItem.target}</Text>
                     </View>
+                    <View style={s.modalRow}>
+                      <Text style={s.modalLabel}>상태</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        {selectedItem.status === '달성' && <FontAwesome name="check-circle" size={16} color="#4AA86B" />}
+                        <Text style={[s.modalValue, { color: selectedItem.status === '달성' ? '#4AA86B' : '#4A8C6F', fontWeight: '600' }]}>{selectedItem.status}</Text>
+                      </View>
+                    </View>
+
+                    {selectedItem.milestones && selectedItem.milestones.length > 0 ? (
+                      <>
+                        <View style={s.divider} />
+                        <View style={s.subHeader}>
+                          <FontAwesome name="check-square-o" size={13} color="#4A8C6F" />
+                          <Text style={s.subTitle}>
+                            세부 마일스톤 ({selectedItem.milestones.filter((m: any) => m.done).length}/{selectedItem.milestones.length})
+                          </Text>
+                        </View>
+                        {selectedItem.milestones.map((m: any, i: number) => (
+                          <View key={i} style={s.msRow}>
+                            <FontAwesome
+                              name={m.done ? 'check-circle' : 'circle-o'}
+                              size={16}
+                              color={m.done ? '#4AA86B' : '#C8C8C8'}
+                            />
+                            <Text style={[s.msText, m.done && s.msTextDone]}>{m.label}</Text>
+                          </View>
+                        ))}
+                      </>
+                    ) : null}
+
+                    {selectedItem.notes ? (
+                      <>
+                        <View style={s.divider} />
+                        <View style={s.subHeader}>
+                          <FontAwesome name="sticky-note-o" size={13} color="#4A8C6F" />
+                          <Text style={s.subTitle}>메모</Text>
+                        </View>
+                        <Text style={s.notesText}>{selectedItem.notes}</Text>
+                      </>
+                    ) : null}
                   </View>
-                </View>
+                </ScrollView>
               )}
             </Animated.View>
           </View>
@@ -101,15 +181,31 @@ export default function GoalsScreen() {
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
               <Text style={s.modalTitle}>새 가족 목표</Text>
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>목표 제목</Text>
               <TextInput style={s.createInput} placeholder="목표 제목을 입력하세요" placeholderTextColor="#BFAE99" />
               <Text style={s.createLabel}>설명</Text>
               <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="목표에 대한 설명을 입력하세요" placeholderTextColor="#BFAE99" multiline />
               <Text style={s.createLabel}>목표 시점</Text>
               <TextInput style={s.createInput} placeholder="예: 2027.12" placeholderTextColor="#BFAE99" />
+              <Text style={s.createLabel}>세부 마일스톤</Text>
+              <TextInput
+                style={[s.createInput, { height: 110, textAlignVertical: 'top' }]}
+                placeholder={'한 줄에 하나씩 적어주세요\n예) 1분기 달성 항목\n2분기 달성 항목'}
+                placeholderTextColor="#BFAE99"
+                multiline
+              />
+              <Text style={s.createLabel}>메모</Text>
+              <TextInput
+                style={[s.createInput, { height: 80, textAlignVertical: 'top' }]}
+                placeholder="진행 상황, 함께하는 가족, 보상 등을 자유롭게"
+                placeholderTextColor="#BFAE99"
+                multiline
+              />
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
                 <Text style={s.createSubmitText}>저장하기</Text>
               </TouchableOpacity>
+              </ScrollView>
             </Animated.View>
           </View>
         </Modal>
@@ -199,4 +295,11 @@ const s = StyleSheet.create({
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
+  divider: { height: 1, backgroundColor: '#EAEAEA', marginVertical: 14 },
+  subHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
+  subTitle: { fontSize: 14, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
+  msRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
+  msText: { fontSize: 14, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
+  msTextDone: { color: '#888', textDecorationLine: 'line-through' },
+  notesText: { fontSize: 14, color: '#1F1F1F', lineHeight: 22, fontFamily: 'Pretendard' },
 });

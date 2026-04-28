@@ -3,12 +3,15 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef } from 'react';
 
+const MEMBERS = ['지수', '민준', '지우', '서준'];
+const CURRENT_USER = '지수';
+
 const RECORDS = [
-  { member: '민준', type: '건강검진', date: '2026.3.15', result: '정상', notes: '혈압 120/80, 콜레스테롤 정상 범위', nextDate: '2027.3', color: '#B0C8D8', icon: 'stethoscope' },
-  { member: '지수', type: '치과 검진', date: '2026.2.20', result: '충치 1개', notes: '왼쪽 아래 어금니 충치 발견, 다음 주 치료 예약', nextDate: '2026.8', color: '#E8D0C0', icon: 'medkit' },
-  { member: '지우', type: '영유아 검진', date: '2026.1.10', result: '정상 발달', notes: '키 91.2cm, 체중 13.5kg. 또래 평균 이상', nextDate: '2026.7', color: '#F0B8B8', icon: 'heart' },
-  { member: '서준', type: '시력 검사', date: '2025.12.5', result: '양호', notes: '양쪽 시력 1.0, 안경 불필요', nextDate: '2026.12', color: '#B8D8C0', icon: 'eye' },
-  { member: '지우', type: '예방접종', date: '2025.11.20', result: '완료', notes: 'DTaP 4차 접종 완료', nextDate: '2026.5', color: '#F0B8B8', icon: 'plus-square' },
+  { member: '민준', recordedBy: '민준', type: '건강검진', date: '2026.3.15', result: '정상', notes: '혈압 120/80, 콜레스테롤 정상 범위', nextDate: '2027.3', color: '#B0C8D8', icon: 'stethoscope' },
+  { member: '지수', recordedBy: '지수', type: '치과 검진', date: '2026.2.20', result: '충치 1개', notes: '왼쪽 아래 어금니 충치 발견, 다음 주 치료 예약', nextDate: '2026.8', color: '#E8D0C0', icon: 'medkit' },
+  { member: '지우', recordedBy: '지수', type: '영유아 검진', date: '2026.1.10', result: '정상 발달', notes: '키 91.2cm, 체중 13.5kg. 또래 평균 이상', nextDate: '2026.7', color: '#F0B8B8', icon: 'heart' },
+  { member: '서준', recordedBy: '민준', type: '시력 검사', date: '2025.12.5', result: '양호', notes: '양쪽 시력 1.0, 안경 불필요', nextDate: '2026.12', color: '#B8D8C0', icon: 'eye' },
+  { member: '지우', recordedBy: '지수', type: '예방접종', date: '2025.11.20', result: '완료', notes: 'DTaP 4차 접종 완료', nextDate: '2026.5', color: '#F0B8B8', icon: 'plus-square' },
 ];
 
 const RESULT_COLOR: Record<string, { bg: string; text: string }> = {
@@ -22,6 +25,7 @@ const RESULT_COLOR: Record<string, { bg: string; text: string }> = {
 export default function HealthScreen() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [createMember, setCreateMember] = useState<string>(CURRENT_USER);
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
   const createBg = useRef(new Animated.Value(0)).current;
@@ -70,8 +74,12 @@ export default function HealthScreen() {
                 <View style={s.modalContent}>
                   <Text style={s.modalTitle}>{selectedItem.member} - {selectedItem.type}</Text>
                   <View style={s.modalRow}>
-                    <Text style={s.modalLabel}>구성원</Text>
+                    <Text style={s.modalLabel}>대상</Text>
                     <Text style={s.modalValue}>{selectedItem.member}</Text>
+                  </View>
+                  <View style={s.modalRow}>
+                    <Text style={s.modalLabel}>작성자</Text>
+                    <Text style={s.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
                   </View>
                   <View style={s.modalRow}>
                     <Text style={s.modalLabel}>검진</Text>
@@ -112,8 +120,20 @@ export default function HealthScreen() {
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
               <Text style={s.modalTitle}>새 건강 기록</Text>
-              <Text style={s.createLabel}>가족 구성원 이름</Text>
-              <TextInput style={s.createInput} placeholder="이름을 입력하세요" placeholderTextColor="#BFAE99" />
+              <Text style={s.createLabel}>기록 대상</Text>
+              <View style={s.memberRow}>
+                {MEMBERS.map(m => (
+                  <TouchableOpacity
+                    key={m}
+                    style={[s.memberPill, createMember === m && s.memberPillActive]}
+                    activeOpacity={0.7}
+                    onPress={() => setCreateMember(m)}
+                  >
+                    <Text style={[s.memberPillText, createMember === m && s.memberPillTextActive]}>{m}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={s.authorHint}>작성자: {CURRENT_USER} (나)</Text>
               <Text style={s.createLabel}>검진 유형</Text>
               <TextInput style={s.createInput} placeholder="예: 건강검진, 치과 검진" placeholderTextColor="#BFAE99" />
               <Text style={s.createLabel}>검진일</Text>
@@ -203,4 +223,10 @@ const s = StyleSheet.create({
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
+  memberRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
+  memberPill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' },
+  memberPillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
+  memberPillText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
+  memberPillTextActive: { color: '#FFFFFF' },
+  authorHint: { fontSize: 12, color: '#888', marginBottom: 16, marginTop: -4, fontFamily: 'Pretendard' },
 });

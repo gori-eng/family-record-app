@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { Stack } from 'expo-router';
-import { useState, useRef } from 'react';
+import { Stack, useLocalSearchParams } from 'expo-router';
+import { useState, useRef, useEffect } from 'react';
 
 const ENTRIES = [
   {
@@ -45,6 +45,7 @@ const CHILD_NAMES = ['전체', '지우', '서준'];
 const CHILD_COLORS: Record<string, string> = { '지우': '#F0B8B8', '서준': '#B0C8D8' };
 
 export default function ParentingScreen() {
+  const { openTitle } = useLocalSearchParams<{ openTitle?: string }>();
   const [activeChild, setActiveChild] = useState('전체');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -52,6 +53,19 @@ export default function ParentingScreen() {
   const modalSlide = useRef(new Animated.Value(500)).current;
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
+
+  useEffect(() => {
+    if (openTitle) {
+      const match = ENTRIES.find(e => e.title === openTitle);
+      if (match) {
+        setSelectedItem(match);
+        Animated.parallel([
+          Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+          Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+        ]).start();
+      }
+    }
+  }, [openTitle]);
 
   const openCreate = () => {
     setShowCreate(true);

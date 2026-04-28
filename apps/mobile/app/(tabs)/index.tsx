@@ -19,10 +19,10 @@ const TODAY_EVENTS = [
 ];
 
 const RECENT_RECORDS = [
-  { type: '육아 일기', icon: 'child', bg: '#F0B8B8', title: '지우의 첫 자전거', date: '오늘', route: '/(tabs)/records/parenting' },
-  { type: '독서 목록', icon: 'book', bg: '#B8D8C0', title: '어린 왕자 완독', date: '어제', route: '/(tabs)/records/reading' },
+  { type: '육아 일기', icon: 'child', bg: '#F0B8B8', title: '지우의 첫 자전거', date: '오늘', route: '/(tabs)/records/parenting', match: '첫 자전거 타기 성공!' },
+  { type: '독서 목록', icon: 'book', bg: '#B8D8C0', title: '어린 왕자 완독', date: '어제', route: '/(tabs)/records/reading', match: '어린 왕자' },
   { type: '가계부', icon: 'money', bg: '#E8D8C0', title: '3월 지출 정산', date: '2일 전', route: '/(tabs)/records/finance' },
-  { type: '레시피', icon: 'cutlery', bg: '#E8D0C0', title: '엄마 김치찌개', date: '3일 전', route: '/(tabs)/records/recipes' },
+  { type: '레시피', icon: 'cutlery', bg: '#E8D0C0', title: '엄마 김치찌개', date: '3일 전', route: '/(tabs)/records/recipes', match: '엄마 김치찌개' },
 ];
 
 export default function HomeScreen() {
@@ -218,7 +218,14 @@ export default function HomeScreen() {
           <View style={s.recordGrid}>
             {RECENT_RECORDS.map((rec, i) => (
               <TouchableOpacity key={i} style={[s.recordCard, i === 0 && s.recordCardLarge]} activeOpacity={0.85}
-                onPress={() => router.push(rec.route as any)}>
+                onPress={() => {
+                  const r: any = rec;
+                  if (r.match) {
+                    router.push({ pathname: r.route, params: { openTitle: r.match } });
+                  } else {
+                    router.push(r.route as any);
+                  }
+                }}>
                 <View style={[s.recordInner, { backgroundColor: rec.bg }]}>
                   {/* 아이콘 우측 중앙 */}
                   <View style={s.recordIconWrap}>

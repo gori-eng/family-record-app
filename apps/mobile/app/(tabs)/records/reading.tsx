@@ -1,17 +1,19 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { Stack } from 'expo-router';
-import { useState, useRef } from 'react';
+import { Stack, useLocalSearchParams } from 'expo-router';
+import { useState, useRef, useEffect } from 'react';
 
 const STATUS_OPTIONS = ['전체', '읽는 중', '완독', '읽고 싶은'];
+const MEMBERS = ['지수', '민준', '지우', '서준'];
+const CURRENT_USER = '지수';
 
-const BOOKS = [
-  { title: '어린 왕자', author: '생텍쥐페리', reader: '서준', status: '완독', rating: 5, color: '#B8D8C0', notes: '혼자서 처음 완독! "어른들은 참 이상해" 가 인상적이었대요' },
-  { title: '아몬드', author: '손원평', reader: '지수', status: '읽는 중', progress: 65, color: '#F0B8B8', notes: '감정을 느끼지 못하는 소년의 이야기. 챕터 12까지 읽음' },
-  { title: '나미야 잡화점의 기적', author: '히가시노 게이고', reader: '민준', status: '완독', rating: 4, color: '#B0C8D8', notes: '시간여행과 편지의 조합이 따뜻했음' },
-  { title: '코스모스', author: '칼 세이건', reader: '민준', status: '읽는 중', progress: 30, color: '#B0C8D8', notes: '우주의 광대함을 느끼는 중' },
-  { title: '모모', author: '미하엘 엔데', reader: '서준', status: '읽고 싶은', color: '#D8CDB8', notes: '' },
-  { title: '해리포터 시리즈', author: 'J.K. 롤링', reader: '지우', status: '읽고 싶은', color: '#F0B8B8', notes: '' },
+const INITIAL_BOOKS = [
+  { title: '어린 왕자', author: '생텍쥐페리', reader: '서준', recordedBy: '지수', status: '완독', rating: 5, color: '#B8D8C0', notes: '혼자서 처음 완독! "어른들은 참 이상해" 가 인상적이었대요' },
+  { title: '아몬드', author: '손원평', reader: '지수', recordedBy: '지수', status: '읽는 중', progress: 65, color: '#F0B8B8', notes: '감정을 느끼지 못하는 소년의 이야기. 챕터 12까지 읽음' },
+  { title: '나미야 잡화점의 기적', author: '히가시노 게이고', reader: '민준', recordedBy: '민준', status: '완독', rating: 4, color: '#B0C8D8', notes: '시간여행과 편지의 조합이 따뜻했음' },
+  { title: '코스모스', author: '칼 세이건', reader: '민준', recordedBy: '민준', status: '읽는 중', progress: 30, color: '#B0C8D8', notes: '우주의 광대함을 느끼는 중' },
+  { title: '모모', author: '미하엘 엔데', reader: '서준', recordedBy: '지수', status: '읽고 싶은', color: '#D8CDB8', notes: '' },
+  { title: '해리포터 시리즈', author: 'J.K. 롤링', reader: '지우', recordedBy: '지수', status: '읽고 싶은', color: '#F0B8B8', notes: '' },
 ];
 
 function StarRating({ rating }: { rating: number }) {
@@ -25,14 +27,39 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function ReadingScreen() {
+  const { openTitle } = useLocalSearchParams<{ openTitle?: string }>();
+  const [books, setBooks] = useState(INITIAL_BOOKS);
   const [activeStatus, setActiveStatus] = useState('전체');
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const selectedItem = selectedIndex !== null ? books[selectedIndex] : null;
+  const [editProgress, setEditProgress] = useState(0);
+  const [editNotes, setEditNotes] = useState('');
+  const [editStatus, setEditStatus] = useState<'읽는 중' | '완독'>('읽는 중');
+  const [editRating, setEditRating] = useState(0);
   const [showCreate, setShowCreate] = useState(false);
   const [createStatus, setCreateStatus] = useState('읽고 싶은');
+  const [createReader, setCreateReader] = useState<string>(CURRENT_USER);
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
+
+  useEffect(() => {
+    if (openTitle) {
+      const idx = books.findIndex(b => b.title === openTitle);
+      if (idx >= 0) {
+        setSelectedIndex(idx);
+        setEditProgress(books[idx].progress ?? 0);
+        setEditNotes(books[idx].notes ?? '');
+        setEditStatus((books[idx].status === '완독' ? '완독' : '읽는 중') as '읽는 중' | '완독');
+        setEditRating(books[idx].rating ?? 0);
+        Animated.parallel([
+          Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
+          Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+        ]).start();
+      }
+    }
+  }, [openTitle]);
 
   const openCreate = () => {
     setShowCreate(true);
@@ -48,8 +75,12 @@ export default function ReadingScreen() {
     ]).start(() => { setShowCreate(false); setCreateStatus('읽고 싶은'); });
   };
 
-  const openDetail = (item: any) => {
-    setSelectedItem(item);
+  const openDetail = (idx: number) => {
+    setSelectedIndex(idx);
+    setEditProgress(books[idx].progress ?? 0);
+    setEditNotes(books[idx].notes ?? '');
+    setEditStatus((books[idx].status === '완독' ? '완독' : '읽는 중') as '읽는 중' | '완독');
+    setEditRating(books[idx].rating ?? 0);
     Animated.parallel([
       Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
       Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
@@ -59,12 +90,33 @@ export default function ReadingScreen() {
     Animated.parallel([
       Animated.timing(modalBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
-    ]).start(() => setSelectedItem(null));
+    ]).start(() => setSelectedIndex(null));
   };
 
-  const filteredBooks = activeStatus === '전체'
-    ? BOOKS
-    : BOOKS.filter(b => b.status === activeStatus);
+  const saveEdits = () => {
+    if (selectedIndex === null) return;
+    if (editStatus === '완독') {
+      if (editRating === 0) {
+        Alert.alert('평점 필요', '완독으로 변경하려면 평점을 1~5점으로 남겨주세요.');
+        return;
+      }
+      setBooks(prev => prev.map((b, i) => i === selectedIndex
+        ? { ...b, status: '완독', progress: 100, rating: editRating, notes: editNotes }
+        : b));
+      Alert.alert('완독 처리 완료', `평점 ${editRating}점으로 완독 처리되었어요.`);
+    } else {
+      const clamped = Math.max(0, Math.min(99, Math.round(editProgress)));
+      setBooks(prev => prev.map((b, i) => i === selectedIndex
+        ? { ...b, status: '읽는 중', progress: clamped, notes: editNotes }
+        : b));
+      Alert.alert('저장 완료', '진척도와 메모가 업데이트되었어요.');
+    }
+    closeDetail();
+  };
+
+  const filteredIndexes = books
+    .map((b, i) => ({ b, i }))
+    .filter(({ b }) => activeStatus === '전체' ? true : b.status === activeStatus);
 
   return (
     <>
@@ -78,6 +130,7 @@ export default function ReadingScreen() {
             <Animated.View style={[styles.modalSheet, { transform: [{ translateY: modalSlide }] }]}>
               <View style={styles.modalHandle} />
               {selectedItem && (
+                <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 560 }}>
                 <View style={styles.modalContent}>
                   <Text style={styles.modalTitle}>{selectedItem.title}</Text>
                   <View style={styles.modalRow}>
@@ -87,6 +140,10 @@ export default function ReadingScreen() {
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>읽는 이</Text>
                     <Text style={styles.modalValue}>{selectedItem.reader}</Text>
+                  </View>
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalLabel}>작성자</Text>
+                    <Text style={styles.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
                   </View>
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>상태</Text>
@@ -104,24 +161,93 @@ export default function ReadingScreen() {
                       <StarRating rating={selectedItem.rating} />
                     </View>
                   )}
-                  {selectedItem.progress && (
-                    <View style={styles.modalRow}>
-                      <Text style={styles.modalLabel}>진행률</Text>
-                      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                        <View style={{ flex: 1, height: 6, backgroundColor: '#EAEAEA', borderRadius: 3 }}>
-                          <View style={{ height: 6, backgroundColor: '#4A8C6F', borderRadius: 3, width: `${selectedItem.progress}%` }} />
-                        </View>
-                        <Text style={styles.modalValue}>{selectedItem.progress}%</Text>
+                  {selectedItem.status === '읽는 중' ? (
+                    <>
+                      <View style={styles.editDivider} />
+                      <Text style={styles.editSectionTitle}>독서 상태</Text>
+                      <View style={styles.editStatusRow}>
+                        {(['읽는 중', '완독'] as const).map(s => (
+                          <TouchableOpacity
+                            key={s}
+                            style={[styles.editStatusPill, editStatus === s && styles.editStatusPillActive]}
+                            activeOpacity={0.7}
+                            onPress={() => {
+                              setEditStatus(s);
+                              if (s === '완독' && editRating === 0) setEditRating(5);
+                            }}
+                          >
+                            <Text style={[styles.editStatusText, editStatus === s && styles.editStatusTextActive]}>{s}</Text>
+                          </TouchableOpacity>
+                        ))}
                       </View>
-                    </View>
+
+                      {editStatus === '읽는 중' ? (
+                        <>
+                          <Text style={styles.editLabel}>진척도</Text>
+                          <View style={styles.progressEditRow}>
+                            <TouchableOpacity style={styles.stepBtn} activeOpacity={0.7}
+                              onPress={() => setEditProgress(p => Math.max(0, p - 5))}>
+                              <FontAwesome name="minus" size={12} color="#4A8C6F" />
+                            </TouchableOpacity>
+                            <View style={styles.progressBarWrap}>
+                              <View style={styles.progressBarBgEdit}>
+                                <View style={[styles.progressBarFillEdit, { width: `${editProgress}%` }]} />
+                              </View>
+                            </View>
+                            <TouchableOpacity style={styles.stepBtn} activeOpacity={0.7}
+                              onPress={() => setEditProgress(p => Math.min(99, p + 5))}>
+                              <FontAwesome name="plus" size={12} color="#4A8C6F" />
+                            </TouchableOpacity>
+                            <TextInput
+                              style={styles.progressInput}
+                              value={String(editProgress)}
+                              onChangeText={v => setEditProgress(Math.max(0, Math.min(99, parseInt(v.replace(/[^0-9]/g, '') || '0', 10))))}
+                              keyboardType="number-pad"
+                            />
+                            <Text style={styles.percentSign}>%</Text>
+                          </View>
+                        </>
+                      ) : (
+                        <>
+                          <Text style={styles.editLabel}>평점</Text>
+                          <View style={styles.ratingEditRow}>
+                            {[1, 2, 3, 4, 5].map(n => (
+                              <TouchableOpacity key={n} activeOpacity={0.7} onPress={() => setEditRating(n)}>
+                                <FontAwesome
+                                  name={n <= editRating ? 'star' : 'star-o'}
+                                  size={28}
+                                  color="#E6A817"
+                                />
+                              </TouchableOpacity>
+                            ))}
+                            <Text style={styles.ratingEditText}>{editRating > 0 ? `${editRating}점` : '평가해주세요'}</Text>
+                          </View>
+                        </>
+                      )}
+
+                      <Text style={styles.editLabel}>특이사항 / 메모</Text>
+                      <TextInput
+                        style={[styles.createInput, { height: 90, textAlignVertical: 'top', marginBottom: 12 }]}
+                        value={editNotes}
+                        onChangeText={setEditNotes}
+                        placeholder="기억에 남는 문장, 인상 등을 적어보세요"
+                        placeholderTextColor="#BFAE99"
+                        multiline
+                      />
+                      <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={saveEdits}>
+                        <Text style={styles.createSubmitText}>{editStatus === '완독' ? '완독으로 저장' : '저장하기'}</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    selectedItem.notes ? (
+                      <View style={styles.modalRow}>
+                        <Text style={styles.modalLabel}>메모</Text>
+                        <Text style={styles.modalValue}>{selectedItem.notes}</Text>
+                      </View>
+                    ) : null
                   )}
-                  {selectedItem.notes ? (
-                    <View style={styles.modalRow}>
-                      <Text style={styles.modalLabel}>메모</Text>
-                      <Text style={styles.modalValue}>{selectedItem.notes}</Text>
-                    </View>
-                  ) : null}
                 </View>
+                </ScrollView>
               )}
             </Animated.View>
           </View>
@@ -140,7 +266,19 @@ export default function ReadingScreen() {
               <Text style={styles.createLabel}>저자</Text>
               <TextInput style={styles.createInput} placeholder="저자를 입력하세요" placeholderTextColor="#BFAE99" />
               <Text style={styles.createLabel}>읽는 사람</Text>
-              <TextInput style={styles.createInput} placeholder="읽는 사람 이름" placeholderTextColor="#BFAE99" />
+              <View style={styles.pillRow}>
+                {MEMBERS.map(m => (
+                  <TouchableOpacity
+                    key={m}
+                    style={[styles.memberPill, createReader === m && styles.memberPillActive]}
+                    activeOpacity={0.7}
+                    onPress={() => setCreateReader(m)}
+                  >
+                    <Text style={[styles.pillText, createReader === m && styles.pillTextActive]}>{m}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={styles.authorHint}>작성자: {CURRENT_USER} (나)</Text>
               <Text style={styles.createLabel}>상태</Text>
               <View style={styles.pillRow}>
                 {(['읽고 싶은', '읽는 중', '완독'] as const).map(label => (
@@ -197,12 +335,12 @@ export default function ReadingScreen() {
 
           {/* Book List */}
           <View style={styles.bookList}>
-            {filteredBooks.map((book, i) => (
+            {filteredIndexes.map(({ b: book, i }) => (
               <TouchableOpacity
                 key={i}
                 style={styles.bookCard}
                 activeOpacity={0.7}
-                onPress={() => openDetail(book)}
+                onPress={() => openDetail(i)}
               >
                 <View style={[styles.bookCover, { backgroundColor: book.color }]}>
                   <FontAwesome name="book" size={24} color="#5C4A32" />
@@ -316,11 +454,31 @@ const styles = StyleSheet.create({
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
-  pillRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
+  pillRow: { flexDirection: 'row', gap: 8, marginBottom: 16, flexWrap: 'wrap' },
   pill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
   pillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
   pillText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
   pillTextActive: { color: '#FFFFFF' },
+  memberPill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' },
+  memberPillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
+  authorHint: { fontSize: 12, color: '#888', marginBottom: 16, marginTop: -4, fontFamily: 'Pretendard' },
+  editDivider: { height: 1, backgroundColor: '#EAEAEA', marginVertical: 12 },
+  editSectionTitle: { fontSize: 14, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 10 },
+  editLabel: { fontSize: 12, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
+  progressEditRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
+  stepBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#EFF6F1', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#D0E4D6' },
+  progressBarWrap: { flex: 1 },
+  progressBarBgEdit: { height: 8, backgroundColor: '#EAEAEA', borderRadius: 4, overflow: 'hidden' },
+  progressBarFillEdit: { height: 8, backgroundColor: '#4A8C6F', borderRadius: 4 },
+  progressInput: { width: 48, height: 32, borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 8, textAlign: 'center', fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard', backgroundColor: '#FFFFFF', paddingVertical: 0 },
+  percentSign: { fontSize: 13, color: '#888', fontFamily: 'Pretendard' },
+  editStatusRow: { flexDirection: 'row', gap: 8, marginBottom: 14 },
+  editStatusPill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' },
+  editStatusPillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
+  editStatusText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
+  editStatusTextActive: { color: '#FFFFFF' },
+  ratingEditRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 14 },
+  ratingEditText: { fontSize: 13, color: '#7A6B55', marginLeft: 6, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 });

@@ -28,8 +28,8 @@ export default function PrivacyScreen() {
         </View>
         <View style={s.row}>
           <View style={s.info}>
-            <Text style={s.label}>건강 기록 부모만 열람</Text>
-            <Text style={s.desc}>건강 기록은 부모/관리자만 열람 가능</Text>
+            <Text style={s.label}>건강 기록 부/모만 열람</Text>
+            <Text style={s.desc}>건강 기록은 부/모 역할만 열람 가능</Text>
           </View>
           <Switch value={hideHealth} onValueChange={setHideHealth}
             trackColor={{ false: '#E8E0D0', true: '#F5C0B0' }} thumbColor={hideHealth ? '#C85A4A' : '#BFAE99'} />
