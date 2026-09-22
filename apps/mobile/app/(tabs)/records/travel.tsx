@@ -1,35 +1,18 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
+import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
+import { CURRENT_USER } from '../../../constants/family';
 
-const TRIPS = [
-  {
-    dest: '제주도', country: '한국', status: '다녀옴', date: '2025.8', color: '#4FC3F7', icon: 'sun-o', members: '전체',
-    highlight: '우도 자전거 투어가 최고였어요!', budget: '180만원',
-    journal: '3박 4일 일정으로 다녀온 여름 가족 여행. 첫째 날은 협재해변에서 물놀이를 했고, 둘째 날 우도에서 자전거를 빌려 섬을 한 바퀴 돌았다. 지우는 처음 자전거 뒷자리를 타봐서 신기해했고, 서준이는 우도땅콩 아이스크림에 푹 빠졌다. 셋째 날엔 한라산 어승생악 코스를 가족 모두 무리 없이 완등. 마지막 날 흑돼지 구이로 마무리.',
-  },
-  {
-    dest: '오사카', country: '일본', status: '계획 중', date: '2026.7 예정', color: '#FF8A65', icon: 'plane', members: '전체',
-    highlight: '유니버설 스튜디오 + 도톤보리 맛집 투어', budget: '400만원',
-    journal: 'USJ 1일권은 사전 예매 필수. 슈퍼닌텐도월드는 입장 정리권 챙기기. 도톤보리 → 신세카이 → 우메다 동선으로 둘째 날 진행. 서준이가 엑스프레스 패스를 원함. 숙소는 USJ 인근 호텔 1박, 도심 호텔 2박으로 분산.',
-  },
-  {
-    dest: '방콕', country: '태국', status: '가고 싶은', date: '', color: '#CE93D8', icon: 'map-marker', members: '지수, 민준',
-    highlight: '부부 여행으로 가보고 싶은 곳', budget: '250만원',
-    journal: '아이들 학기 중에 부부 둘이서 4박 5일 정도 다녀오면 좋겠다. 차오프라야 강 야경 디너 크루즈, 짜뚜짝 주말시장, 아유타야 당일 투어가 위시리스트.',
-  },
-  {
-    dest: '강릉', country: '한국', status: '다녀옴', date: '2026.1', color: '#81C784', icon: 'tree', members: '전체',
-    highlight: '겨울 바다와 카페 투어. 아이들이 모래놀이 좋아했어요.', budget: '85만원',
-    journal: '1박 2일로 가볍게 다녀온 겨울 여행. 안목해변 카페거리에서 따뜻한 코코아 한 잔, 정동진에서 일출 시도(흐려서 실패). 아이들은 추운데도 모래놀이를 멈추지 않아 손이 빨개져서 차에서 핫팩으로 데웠다.',
-  },
-  {
-    dest: '파리', country: '프랑스', status: '가고 싶은', date: '', color: '#FFD54F', icon: 'building', members: '전체',
-    highlight: '서준이가 에펠탑 보고 싶대요', budget: '800만원',
-    journal: '서준이 초등 졸업 기념 여행으로 계획 중. 에펠탑, 루브르, 베르사유는 필수. 디즈니랜드 파리 1일 추가. 시차 적응을 위해 7박 이상 권장.',
-  },
-];
+type Trip = {
+  dest: string; country: string; status: string; date: string;
+  color: string; icon: string; members: string;
+  highlight: string; budget: string; journal: string;
+};
+
+/** 새로 추가하는 여행 카드에 돌아가며 입히는 색 */
+const NEW_TRIP_COLORS = ['#4FC3F7', '#FF8A65', '#CE93D8', '#81C784', '#FFD54F'];
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   '다녀옴': { bg: '#E8F5E9', text: '#2E7D32' },
@@ -41,12 +24,30 @@ export default function TravelScreen() {
   const [filter, setFilter] = useState('전체');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);
+
+  // 창고에서 여행 기록만 최신순으로 꺼낸다.
+  const trips = useRecordsByCategory<Trip>('travel');
+  const addRecord = useRecordsStore((s) => s.addRecord);
+
+  // 작성 폼에 사용자가 입력한 값을 담아둘 칸들
+  const [formDest, setFormDest] = useState('');
+  const [formDate, setFormDate] = useState('');
+  const [formHighlight, setFormHighlight] = useState('');
+  const [formJournal, setFormJournal] = useState('');
+  const [formStatus, setFormStatus] = useState('다녀옴');
+
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
 
   const openCreate = () => {
+    // 폼을 열 때마다 지난번에 쓰던 내용을 비운다.
+    setFormDest('');
+    setFormDate('');
+    setFormHighlight('');
+    setFormJournal('');
+    setFormStatus('다녀옴');
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -58,6 +59,32 @@ export default function TravelScreen() {
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
     ]).start(() => setShowCreate(false));
+  };
+
+  const handleSave = () => {
+    const dest = formDest.trim();
+    if (!dest) {
+      Alert.alert('목적지를 입력해주세요', '어디로 가는 여행인지 알려주세요.');
+      return;
+    }
+    addRecord({
+      category: 'travel',
+      title: dest,
+      recordedBy: CURRENT_USER,
+      data: {
+        dest,
+        country: '',
+        status: formStatus,
+        date: formDate.trim(),
+        color: NEW_TRIP_COLORS[trips.length % NEW_TRIP_COLORS.length],
+        icon: 'map-marker',
+        members: '전체',
+        highlight: formHighlight.trim(),
+        budget: '',
+        journal: formJournal.trim(),
+      },
+    });
+    closeCreate();
   };
 
   const openDetail = (item: any) => {
@@ -75,7 +102,16 @@ export default function TravelScreen() {
   };
 
   const filters = ['전체', '다녀옴', '계획 중', '가고 싶은'];
-  const filtered = filter === '전체' ? TRIPS : TRIPS.filter(t => t.status === filter);
+  const filtered = useMemo(
+    () => (filter === '전체' ? trips : trips.filter((t) => t.data.status === filter)),
+    [trips, filter]
+  );
+  // 상단 통계 — 박아둔 숫자가 아니라 실제 기록에서 센다.
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { '다녀옴': 0, '계획 중': 0, '가고 싶은': 0 };
+    for (const t of trips) if (t.data.status in c) c[t.data.status] += 1;
+    return c;
+  }, [trips]);
 
   return (
     <>
@@ -98,8 +134,8 @@ export default function TravelScreen() {
                     </View>
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>상태</Text>
-                      <View style={[s.statusBadge, { backgroundColor: STATUS_COLORS[selectedItem.status].bg }]}>
-                        <Text style={[s.statusText, { color: STATUS_COLORS[selectedItem.status].text }]}>{selectedItem.status}</Text>
+                      <View style={[s.statusBadge, { backgroundColor: (STATUS_COLORS[selectedItem.status] ?? { bg: '#EFEFEF' }).bg }]}>
+                        <Text style={[s.statusText, { color: (STATUS_COLORS[selectedItem.status] ?? { text: '#4A4A4A' }).text }]}>{selectedItem.status}</Text>
                       </View>
                     </View>
                     {selectedItem.date ? (
@@ -147,19 +183,51 @@ export default function TravelScreen() {
               <Text style={s.modalTitle}>새 여행 기록</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>목적지</Text>
-              <TextInput style={s.createInput} placeholder="예: 제주도, 오사카" placeholderTextColor="#BFAE99" />
+              <TextInput
+                style={s.createInput}
+                placeholder="예: 제주도, 오사카"
+                placeholderTextColor="#BFAE99"
+                value={formDest}
+                onChangeText={setFormDest}
+              />
+              <Text style={s.createLabel}>상태</Text>
+              <View style={s.statusPicker}>
+                {['다녀옴', '계획 중', '가고 싶은'].map((st) => (
+                  <TouchableOpacity
+                    key={st}
+                    style={[s.chip, formStatus === st && s.chipActive]}
+                    activeOpacity={0.7}
+                    onPress={() => setFormStatus(st)}>
+                    <Text style={[s.chipText, formStatus === st && s.chipTextActive]}>{st}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
               <Text style={s.createLabel}>여행일자</Text>
-              <TextInput style={s.createInput} placeholder="예: 2026.7.10 ~ 7.13" placeholderTextColor="#BFAE99" />
+              <TextInput
+                style={s.createInput}
+                placeholder="예: 2026.7.10 ~ 7.13"
+                placeholderTextColor="#BFAE99"
+                value={formDate}
+                onChangeText={setFormDate}
+              />
               <Text style={s.createLabel}>여행 한 줄 소감</Text>
-              <TextInput style={s.createInput} placeholder="이번 여행을 한 문장으로" placeholderTextColor="#BFAE99" />
+              <TextInput
+                style={s.createInput}
+                placeholder="이번 여행을 한 문장으로"
+                placeholderTextColor="#BFAE99"
+                value={formHighlight}
+                onChangeText={setFormHighlight}
+              />
               <Text style={s.createLabel}>여행 일지</Text>
               <TextInput
                 style={[s.createInput, { height: 160, textAlignVertical: 'top' }]}
                 placeholder={'다녀온 코스, 인상 깊었던 순간, 다음에 갈 때 챙길 점 등을 자유롭게 적어주세요.'}
                 placeholderTextColor="#BFAE99"
                 multiline
+                value={formJournal}
+                onChangeText={setFormJournal}
               />
-              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
+              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>저장하기</Text>
               </TouchableOpacity>
               </ScrollView>
@@ -169,9 +237,9 @@ export default function TravelScreen() {
 
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.statsRow}>
-            <View style={s.stat}><Text style={s.statNum}>2</Text><Text style={s.statLabel}>다녀온 곳</Text></View>
-            <View style={s.stat}><Text style={s.statNum}>1</Text><Text style={s.statLabel}>계획 중</Text></View>
-            <View style={s.stat}><Text style={s.statNum}>2</Text><Text style={s.statLabel}>가고 싶은</Text></View>
+            <View style={s.stat}><Text style={s.statNum}>{counts['다녀옴']}</Text><Text style={s.statLabel}>다녀온 곳</Text></View>
+            <View style={s.stat}><Text style={s.statNum}>{counts['계획 중']}</Text><Text style={s.statLabel}>계획 중</Text></View>
+            <View style={s.stat}><Text style={s.statNum}>{counts['가고 싶은']}</Text><Text style={s.statLabel}>가고 싶은</Text></View>
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filterRow}>
@@ -183,29 +251,47 @@ export default function TravelScreen() {
           </ScrollView>
 
           <View style={s.list}>
-            {filtered.map((t, i) => (
-              <TouchableOpacity key={i} style={s.card} activeOpacity={0.7}
-                onPress={() => openDetail(t)}>
+            {filtered.map((record) => {
+              const t = record.data;
+              const statusColor = STATUS_COLORS[t.status] ?? { bg: '#EFEFEF', text: '#4A4A4A' };
+              return (
+              <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
+                onPress={() => openDetail({ ...t, id: record.id, recordedBy: record.recordedBy })}>
                 <View style={[s.destIcon, { backgroundColor: t.color }]}>
                   <FontAwesome name={t.icon as any} size={22} color="#FFFFFF" />
                 </View>
                 <View style={s.info}>
                   <View style={s.topRow}>
                     <Text style={s.destName}>{t.dest}</Text>
-                    <View style={[s.statusBadge, { backgroundColor: STATUS_COLORS[t.status].bg }]}>
-                      <Text style={[s.statusText, { color: STATUS_COLORS[t.status].text }]}>{t.status}</Text>
+                    <View style={[s.statusBadge, { backgroundColor: statusColor.bg }]}>
+                      <Text style={[s.statusText, { color: statusColor.text }]}>{t.status}</Text>
                     </View>
                   </View>
-                  <Text style={s.country}>{t.country}{t.date ? ` · ${t.date}` : ''}</Text>
-                  <Text style={s.highlight} numberOfLines={1}>{t.highlight}</Text>
+                  {/* 안 적은 항목은 빈 줄을 남기지 않고 아예 숨긴다 */}
+                  {(t.country || t.date) ? (
+                    <Text style={s.country}>{[t.country, t.date].filter(Boolean).join(' · ')}</Text>
+                  ) : null}
+                  {t.highlight ? (
+                    <Text style={s.highlight} numberOfLines={1}>{t.highlight}</Text>
+                  ) : null}
                   <View style={s.bottomRow}>
                     <FontAwesome name="users" size={10} color="#9C8B75" />
                     <Text style={s.members}>{t.members}</Text>
-                    <Text style={s.budget}>{t.budget}</Text>
+                    {t.budget ? <Text style={s.budget}>{t.budget}</Text> : null}
                   </View>
                 </View>
               </TouchableOpacity>
-            ))}
+              );
+            })}
+            {filtered.length === 0 && (
+              <View style={s.empty}>
+                <FontAwesome name="plane" size={32} color="#CFC7BA" />
+                <Text style={s.emptyText}>
+                  {filter === '전체' ? '아직 여행 기록이 없어요' : `'${filter}' 여행이 없어요`}
+                </Text>
+                <Text style={s.emptySub}>아래 + 버튼으로 첫 기록을 남겨보세요</Text>
+              </View>
+            )}
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
@@ -259,4 +345,8 @@ const s = StyleSheet.create({
   journalHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
   journalTitle: { fontSize: 14, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   journalText: { fontSize: 14, color: '#1F1F1F', lineHeight: 22, fontFamily: 'Pretendard' },
+  statusPicker: { flexDirection: 'row', gap: 8, marginBottom: 4 },
+  empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
+  emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
+  emptySub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
 });

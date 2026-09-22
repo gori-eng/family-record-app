@@ -1,47 +1,22 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
+import { CURRENT_USER } from '../../../constants/family';
 
-const ENTRIES = [
-  {
-    date: '2026년 4월 1일', child: '지우',
-    title: '첫 자전거 타기 성공!',
-    content: '드디어 보조바퀴 없이 자전거를 탔어요. 처음엔 무서워서 울다가, 아빠가 잡아주면서 연습했더니 혼자서도 잘 타요!',
-    milestones: ['첫 자전거'],
-    mood: 'smile-o',
-  },
-  {
-    date: '2026년 3월 28일', child: '서준',
-    title: '구구단 마스터',
-    content: '서준이가 드디어 구구단을 전부 외웠어요! 7단이 제일 어려웠는데 노래로 외우니까 금방 했어요.',
-    milestones: ['학습 성취'],
-    mood: 'star',
-  },
-  {
-    date: '2026년 3월 25일', child: '지우',
-    title: '유치원 입학식',
-    content: '지우가 유치원에 처음 간 날. 엄마 손을 꼭 잡고 들어가다가, 친구들 보자마자 활짝 웃으면서 뛰어갔어요. 사실 엄마가 더 울뻔...',
-    milestones: ['유치원 입학', '첫 등원'],
-    mood: 'heart',
-  },
-  {
-    date: '2026년 3월 20일', child: '서준',
-    title: '생일 파티',
-    content: '서준이 8번째 생일! 친구들 다섯 명 초대해서 케이크 자르고 보물찾기 놀이했어요. "최고의 생일이었어!" 라고 하네요.',
-    milestones: ['생일'],
-    mood: 'birthday-cake',
-  },
-  {
-    date: '2026년 3월 15일', child: '지우',
-    title: '키 90cm 돌파!',
-    content: '정기 소아과 검진에서 키 91.2cm, 몸무게 13.5kg. 또래 평균보다 조금 큰 편이래요. 건강하게 잘 자라줘서 고마워~',
-    milestones: ['성장 기록'],
-    mood: 'line-chart',
-  },
-];
+type ParentingEntry = {
+  date: string; child: string; content: string;
+  milestones: string[]; mood: string;
+};
 
 const CHILD_NAMES = ['전체', '지우', '서준'];
+const CHILDREN = ['지우', '서준'];
+/** 오늘 날짜를 '2026년 9월 22일' 형식으로 */
+const todayLabel = () => {
+  const d = new Date();
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+};
 const CHILD_COLORS: Record<string, string> = { '지우': '#F0B8B8', '서준': '#B0C8D8' };
 
 export default function ParentingScreen() {
@@ -49,6 +24,17 @@ export default function ParentingScreen() {
   const [activeChild, setActiveChild] = useState('전체');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);
+
+  // 창고에서 육아 일기만 최신순으로 꺼낸다.
+  const entries = useRecordsByCategory<ParentingEntry>('parenting');
+  const addRecord = useRecordsStore((s) => s.addRecord);
+
+  // 작성 폼 입력값
+  const [formChild, setFormChild] = useState(CHILDREN[0]);
+  const [formTitle, setFormTitle] = useState('');
+  const [formContent, setFormContent] = useState('');
+  const [formMilestones, setFormMilestones] = useState('');
+
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
   const createBg = useRef(new Animated.Value(0)).current;
@@ -56,18 +42,22 @@ export default function ParentingScreen() {
 
   useEffect(() => {
     if (openTitle) {
-      const match = ENTRIES.find(e => e.title === openTitle);
+      const match = entries.find(e => e.title === openTitle);
       if (match) {
-        setSelectedItem(match);
+        setSelectedItem({ ...match.data, title: match.title, id: match.id });
         Animated.parallel([
           Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
           Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
         ]).start();
       }
     }
-  }, [openTitle]);
+  }, [openTitle, entries]);
 
   const openCreate = () => {
+    setFormChild(CHILDREN[0]);
+    setFormTitle('');
+    setFormContent('');
+    setFormMilestones('');
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -79,6 +69,28 @@ export default function ParentingScreen() {
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
     ]).start(() => setShowCreate(false));
+  };
+
+  const handleSave = () => {
+    const title = formTitle.trim();
+    if (!title) {
+      Alert.alert('제목을 입력해주세요', '오늘의 한 줄 제목을 적어주세요.');
+      return;
+    }
+    addRecord({
+      category: 'parenting',
+      title,
+      recordedBy: CURRENT_USER,
+      data: {
+        date: todayLabel(),
+        child: formChild,
+        content: formContent.trim(),
+        // "첫 자전거, 생일" 처럼 쉼표로 나눠 적은 걸 배열로
+        milestones: formMilestones.split(',').map((m) => m.trim()).filter(Boolean),
+        mood: 'smile-o',
+      },
+    });
+    closeCreate();
   };
 
   const openDetail = (item: any) => {
@@ -95,9 +107,14 @@ export default function ParentingScreen() {
     ]).start(() => setSelectedItem(null));
   };
 
-  const filteredEntries = activeChild === '전체'
-    ? ENTRIES
-    : ENTRIES.filter(e => e.child === activeChild);
+  const filteredEntries = useMemo(
+    () => (activeChild === '전체' ? entries : entries.filter((e) => e.data.child === activeChild)),
+    [entries, activeChild]
+  );
+  const milestoneCount = useMemo(
+    () => entries.reduce((sum, e) => sum + (e.data.milestones?.length ?? 0), 0),
+    [entries]
+  );
 
   return (
     <>
@@ -154,15 +171,46 @@ export default function ParentingScreen() {
             <Animated.View style={[styles.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={styles.modalHandle} />
               <Text style={styles.modalTitle}>새 육아 일기</Text>
-              <Text style={styles.createLabel}>아이 이름</Text>
-              <TextInput style={styles.createInput} placeholder="아이 이름을 입력하세요" placeholderTextColor="#BFAE99" />
+              <Text style={styles.createLabel}>아이</Text>
+              <View style={styles.childPicker}>
+                {CHILDREN.map((name) => (
+                  <TouchableOpacity
+                    key={name}
+                    style={[styles.filterChip, formChild === name && styles.filterChipActive]}
+                    activeOpacity={0.7}
+                    onPress={() => setFormChild(name)}>
+                    <View style={[styles.filterDot, { backgroundColor: CHILD_COLORS[name] }]} />
+                    <Text style={[styles.filterText, formChild === name && styles.filterTextActive]}>{name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
               <Text style={styles.createLabel}>제목</Text>
-              <TextInput style={styles.createInput} placeholder="제목을 입력하세요" placeholderTextColor="#BFAE99" />
+              <TextInput
+                style={styles.createInput}
+                placeholder="제목을 입력하세요"
+                placeholderTextColor="#BFAE99"
+                value={formTitle}
+                onChangeText={setFormTitle}
+              />
               <Text style={styles.createLabel}>내용</Text>
-              <TextInput style={[styles.createInput, { height: 100, textAlignVertical: 'top' }]} placeholder="내용을 입력하세요" placeholderTextColor="#BFAE99" multiline numberOfLines={4} />
+              <TextInput
+                style={[styles.createInput, { height: 100, textAlignVertical: 'top' }]}
+                placeholder="내용을 입력하세요"
+                placeholderTextColor="#BFAE99"
+                multiline
+                numberOfLines={4}
+                value={formContent}
+                onChangeText={setFormContent}
+              />
               <Text style={styles.createLabel}>마일스톤 태그</Text>
-              <TextInput style={styles.createInput} placeholder="쉼표로 구분" placeholderTextColor="#BFAE99" />
-              <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
+              <TextInput
+                style={styles.createInput}
+                placeholder="쉼표로 구분 (예: 첫 자전거, 생일)"
+                placeholderTextColor="#BFAE99"
+                value={formMilestones}
+                onChangeText={setFormMilestones}
+              />
+              <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={styles.createSubmitText}>저장하기</Text>
               </TouchableOpacity>
             </Animated.View>
@@ -174,12 +222,12 @@ export default function ParentingScreen() {
           <View style={styles.statsRow}>
             <TouchableOpacity style={styles.statCard} onPress={() => setActiveChild('전체')} activeOpacity={0.7}>
               <FontAwesome name="book" size={18} color="#4A8C6F" />
-              <Text style={styles.statNumber}>47</Text>
+              <Text style={styles.statNumber}>{entries.length}</Text>
               <Text style={styles.statLabel}>총 기록</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.statCard} onPress={() => Alert.alert('마일스톤', '지우: 7개\n서준: 5개\n\n마일스톤 관리 기능이 곧 추가됩니다.')} activeOpacity={0.7}>
               <FontAwesome name="trophy" size={18} color="#E6A817" />
-              <Text style={styles.statNumber}>12</Text>
+              <Text style={styles.statNumber}>{milestoneCount}</Text>
               <Text style={styles.statLabel}>마일스톤</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.statCard} onPress={() => Alert.alert('사진 앨범', '저장된 사진 156장\n\n사진 앨범 기능이 곧 추가됩니다.')} activeOpacity={0.7}>
@@ -206,12 +254,14 @@ export default function ParentingScreen() {
 
           {/* Timeline */}
           <View style={styles.timeline}>
-            {filteredEntries.map((entry, i) => (
+            {filteredEntries.map((record, i) => {
+              const entry = { ...record.data, title: record.title };
+              return (
               <TouchableOpacity
-                key={i}
+                key={record.id}
                 style={styles.entryCard}
                 activeOpacity={0.7}
-                onPress={() => openDetail(entry)}>
+                onPress={() => openDetail({ ...entry, id: record.id, recordedBy: record.recordedBy })}>
                 <View style={styles.timelineLine}>
                   <View style={[styles.timelineDot, { backgroundColor: entry.child === '지우' ? '#F0B8B8' : '#B0C8D8' }]} />
                   {i < filteredEntries.length - 1 && <View style={styles.timelineConnector} />}
@@ -237,7 +287,17 @@ export default function ParentingScreen() {
                   </View>
                 </View>
               </TouchableOpacity>
-            ))}
+              );
+            })}
+            {filteredEntries.length === 0 && (
+              <View style={styles.empty}>
+                <FontAwesome name="pencil" size={32} color="#CFC7BA" />
+                <Text style={styles.emptyText}>
+                  {activeChild === '전체' ? '아직 육아 일기가 없어요' : `${activeChild}의 일기가 아직 없어요`}
+                </Text>
+                <Text style={styles.emptySub}>아래 연필 버튼으로 오늘을 기록해보세요</Text>
+              </View>
+            )}
           </View>
 
           <View style={{ height: 80 }} />
@@ -258,6 +318,10 @@ export default function ParentingScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
+  childPicker: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+  empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
+  emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
+  emptySub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
   statCard: {
     flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,

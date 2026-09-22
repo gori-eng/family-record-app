@@ -1,22 +1,21 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
+import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
+import { MEMBERS, CURRENT_USER } from '../../../constants/family';
+
+type Movie = {
+  title: string; genre: string; date: string; rating: number;
+  watchedWith: string[]; review: string; color: string;
+};
 
 const FILTERS = [
   { label: '전체', active: true }, { label: '최근 관람' }, { label: '평점 높은순' }, { label: '보고 싶은' },
 ];
 
-const MEMBERS = ['지수', '민준', '지우', '서준'];
-const CURRENT_USER = '지수';
-
-const MOVIES = [
-  { title: '인사이드 아웃 2', genre: '애니메이션', date: '2026.3.28', rating: 5, watchedWith: ['지수', '민준', '지우', '서준'], recordedBy: '지수', review: '온 가족이 함께 울고 웃었어요. 불안이 새 감정이 된다는 메시지가 좋았어요.', color: '#FFD54F' },
-  { title: '파묘', genre: '미스터리', date: '2026.3.15', rating: 4, watchedWith: ['지수', '민준'], recordedBy: '민준', review: '긴장감 넘치는 전개! 부부 데이트로 딱이었어요.', color: '#90A4AE' },
-  { title: '듄: 파트 2', genre: 'SF', date: '2026.2.20', rating: 4, watchedWith: ['민준', '서준'], recordedBy: '민준', review: '서준이가 SF에 빠지는 계기가 된 영화. 영상미 최고.', color: '#CE93D8' },
-  { title: '위시', genre: '애니메이션', date: '2026.1.10', rating: 3, watchedWith: ['지수', '민준', '지우', '서준'], recordedBy: '지수', review: '지우가 노래를 따라 부르며 좋아했어요.', color: '#80DEEA' },
-  { title: '오펜하이머', genre: '드라마', date: '2025.12.25', rating: 5, watchedWith: ['지수', '민준'], recordedBy: '지수', review: '크리스마스에 본 묵직한 영화. 대화를 많이 나눴어요.', color: '#FFAB91' },
-];
+/** 새로 추가하는 영화 카드에 돌아가며 입히는 색 */
+const NEW_MOVIE_COLORS = ['#FFD54F', '#90A4AE', '#CE93D8', '#80DEEA', '#FFAB91'];
 
 function StarRating({ rating, size = 12 }: { rating: number; size?: number }) {
   return (
@@ -35,12 +34,30 @@ export default function MoviesScreen() {
   const [createWith, setCreateWith] = useState<string[]>([CURRENT_USER]);
   const toggleMember = (m: string) =>
     setCreateWith(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m]);
+
+  // 창고에서 영화 기록만 최신순으로 꺼낸다.
+  const movies = useRecordsByCategory<Movie>('movies');
+  const addRecord = useRecordsStore((s) => s.addRecord);
+
+  // 작성 폼 입력값
+  const [formTitle, setFormTitle] = useState('');
+  const [formGenre, setFormGenre] = useState('');
+  const [formDate, setFormDate] = useState('');
+  const [formRating, setFormRating] = useState(5);
+  const [formReview, setFormReview] = useState('');
+
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
 
   const openCreate = () => {
+    setFormTitle('');
+    setFormGenre('');
+    setFormDate('');
+    setFormRating(5);
+    setFormReview('');
+    setCreateWith([CURRENT_USER]);
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -52,6 +69,29 @@ export default function MoviesScreen() {
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
     ]).start(() => setShowCreate(false));
+  };
+
+  const handleSave = () => {
+    const title = formTitle.trim();
+    if (!title) {
+      Alert.alert('영화 제목을 입력해주세요', '어떤 영화를 봤는지 알려주세요.');
+      return;
+    }
+    addRecord({
+      category: 'movies',
+      title,
+      recordedBy: CURRENT_USER,
+      data: {
+        title,
+        genre: formGenre.trim(),
+        date: formDate.trim(),
+        rating: formRating,
+        watchedWith: createWith,
+        review: formReview.trim(),
+        color: NEW_MOVIE_COLORS[movies.length % NEW_MOVIE_COLORS.length],
+      },
+    });
+    closeCreate();
   };
 
   const openDetail = (item: any) => {
@@ -67,6 +107,29 @@ export default function MoviesScreen() {
       Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
     ]).start(() => setSelectedItem(null));
   };
+
+  // 필터칩에 따라 목록을 실제로 정렬한다.
+  const visible = useMemo(() => {
+    const label = FILTERS[activeFilter]?.label;
+    if (label === '평점 높은순') {
+      return [...movies].sort((a, b) => (b.data.rating ?? 0) - (a.data.rating ?? 0));
+    }
+    if (label === '보고 싶은') {
+      // 아직 평점을 매기지 않은(=안 본) 기록
+      return movies.filter((m) => !m.data.rating);
+    }
+    return movies; // '전체' / '최근 관람' — 창고가 이미 최신순으로 준다
+  }, [movies, activeFilter]);
+
+  // 상단 통계 — 실제 기록에서 계산
+  const stats = useMemo(() => {
+    const rated = movies.filter((m) => m.data.rating > 0);
+    const avg = rated.length
+      ? (rated.reduce((sum, m) => sum + m.data.rating, 0) / rated.length).toFixed(1)
+      : '–';
+    const together = movies.filter((m) => (m.data.watchedWith?.length ?? 0) >= 3).length;
+    return { total: movies.length, avg, together };
+  }, [movies]);
 
   return (
     <>
@@ -121,11 +184,41 @@ export default function MoviesScreen() {
               <View style={s.modalHandle} />
               <Text style={s.modalTitle}>새 영화 기록</Text>
               <Text style={s.createLabel}>영화 제목</Text>
-              <TextInput style={s.createInput} placeholder="영화 제목을 입력하세요" placeholderTextColor="#BFAE99" />
+              <TextInput
+                style={s.createInput}
+                placeholder="영화 제목을 입력하세요"
+                placeholderTextColor="#BFAE99"
+                value={formTitle}
+                onChangeText={setFormTitle}
+              />
               <Text style={s.createLabel}>장르</Text>
-              <TextInput style={s.createInput} placeholder="예: 애니메이션, SF, 드라마" placeholderTextColor="#BFAE99" />
+              <TextInput
+                style={s.createInput}
+                placeholder="예: 애니메이션, SF, 드라마"
+                placeholderTextColor="#BFAE99"
+                value={formGenre}
+                onChangeText={setFormGenre}
+              />
               <Text style={s.createLabel}>관람일</Text>
-              <TextInput style={s.createInput} placeholder="예: 2026.4.26" placeholderTextColor="#BFAE99" />
+              <TextInput
+                style={s.createInput}
+                placeholder="예: 2026.4.26"
+                placeholderTextColor="#BFAE99"
+                value={formDate}
+                onChangeText={setFormDate}
+              />
+              <Text style={s.createLabel}>평점</Text>
+              <View style={s.ratingPicker}>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <TouchableOpacity key={i} activeOpacity={0.7} onPress={() => setFormRating(i)}>
+                    <FontAwesome
+                      name={i <= formRating ? 'star' : 'star-o'}
+                      size={28}
+                      color="#E6A817"
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
               <Text style={s.createLabel}>함께 본 사람 (복수 선택)</Text>
               <View style={s.memberRow}>
                 {MEMBERS.map(m => (
@@ -141,8 +234,15 @@ export default function MoviesScreen() {
               </View>
               <Text style={s.authorHint}>작성자: {CURRENT_USER} (나)</Text>
               <Text style={s.createLabel}>한줄평</Text>
-              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="한줄평을 남겨보세요" placeholderTextColor="#BFAE99" multiline />
-              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
+              <TextInput
+                style={[s.createInput, { height: 80, textAlignVertical: 'top' }]}
+                placeholder="한줄평을 남겨보세요"
+                placeholderTextColor="#BFAE99"
+                multiline
+                value={formReview}
+                onChangeText={setFormReview}
+              />
+              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>저장하기</Text>
               </TouchableOpacity>
             </Animated.View>
@@ -151,9 +251,9 @@ export default function MoviesScreen() {
 
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.statsRow}>
-            <View style={s.stat}><Text style={s.statNum}>12</Text><Text style={s.statLabel}>총 관람</Text></View>
-            <View style={s.stat}><Text style={s.statNum}>4.2</Text><Text style={s.statLabel}>평균 평점</Text></View>
-            <View style={s.stat}><Text style={s.statNum}>8</Text><Text style={s.statLabel}>가족 함께</Text></View>
+            <View style={s.stat}><Text style={s.statNum}>{stats.total}</Text><Text style={s.statLabel}>총 관람</Text></View>
+            <View style={s.stat}><Text style={s.statNum}>{stats.avg}</Text><Text style={s.statLabel}>평균 평점</Text></View>
+            <View style={s.stat}><Text style={s.statNum}>{stats.together}</Text><Text style={s.statLabel}>가족 함께</Text></View>
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filterRow}>
@@ -165,26 +265,43 @@ export default function MoviesScreen() {
           </ScrollView>
 
           <View style={s.list}>
-            {MOVIES.map((m, i) => (
-              <TouchableOpacity key={i} style={s.card} activeOpacity={0.7}
-                onPress={() => openDetail(m)}>
+            {visible.map((record) => {
+              const m = record.data;
+              return (
+              <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
+                onPress={() => openDetail({ ...m, id: record.id, recordedBy: record.recordedBy })}>
                 <View style={[s.poster, { backgroundColor: m.color }]}>
                   <FontAwesome name="film" size={24} color="#FFFFFF" />
                 </View>
                 <View style={s.info}>
                   <Text style={s.title}>{m.title}</Text>
-                  <Text style={s.genre}>{m.genre} · {m.date}</Text>
+                  {/* 안 적은 항목은 빈 줄을 남기지 않는다 */}
+                  {(m.genre || m.date) ? (
+                    <Text style={s.genre}>{[m.genre, m.date].filter(Boolean).join(' · ')}</Text>
+                  ) : null}
                   <View style={s.meta}>
                     <StarRating rating={m.rating} />
-                    <View style={s.watchedBadge}>
-                      <FontAwesome name="users" size={10} color="#7A6B55" />
-                      <Text style={s.watchedText}>{m.watchedWith.join(', ')}</Text>
-                    </View>
+                    {m.watchedWith?.length ? (
+                      <View style={s.watchedBadge}>
+                        <FontAwesome name="users" size={10} color="#7A6B55" />
+                        <Text style={s.watchedText}>{m.watchedWith.join(', ')}</Text>
+                      </View>
+                    ) : null}
                   </View>
-                  <Text style={s.review} numberOfLines={1}>{m.review}</Text>
+                  {m.review ? (
+                    <Text style={s.review} numberOfLines={1}>{m.review}</Text>
+                  ) : null}
                 </View>
               </TouchableOpacity>
-            ))}
+              );
+            })}
+            {visible.length === 0 && (
+              <View style={s.empty}>
+                <FontAwesome name="film" size={32} color="#CFC7BA" />
+                <Text style={s.emptyText}>아직 영화 기록이 없어요</Text>
+                <Text style={s.emptySub}>아래 + 버튼으로 첫 기록을 남겨보세요</Text>
+              </View>
+            )}
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
@@ -237,4 +354,8 @@ const s = StyleSheet.create({
   memberPillText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
   memberPillTextActive: { color: '#FFFFFF' },
   authorHint: { fontSize: 12, color: '#888', marginBottom: 16, marginTop: -4, fontFamily: 'Pretendard' },
+  ratingPicker: { flexDirection: 'row', gap: 10, marginBottom: 16 },
+  empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
+  emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
+  emptySub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
 });

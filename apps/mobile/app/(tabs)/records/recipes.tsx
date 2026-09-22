@@ -1,7 +1,9 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
+import { CURRENT_USER } from '../../../constants/family';
 
 type Recipe = {
   name: string; origin: string; author: string; difficulty: string; time: string;
@@ -11,81 +13,8 @@ type Recipe = {
   tip?: string;
 };
 
-const RECIPES: Recipe[] = [
-  {
-    name: '엄마 김치찌개', origin: '할머니로부터 전수', author: '지수', difficulty: '쉬움', time: '30분', color: '#FF8A65', icon: 'fire',
-    ingredients: ['묵은지 1/4포기', '돼지고기 앞다리살 200g', '두부 1/2모', '대파 1대', '다진 마늘 1큰술', '고춧가루 1큰술', '들기름 1큰술', '쌀뜨물 500ml'],
-    steps: [
-      '냄비에 들기름을 두르고 묵은지를 5분간 볶는다.',
-      '돼지고기를 넣고 겉면이 익을 때까지 함께 볶는다.',
-      '쌀뜨물 500ml를 붓고 다진 마늘, 고춧가루를 넣어 끓인다.',
-      '중불로 줄여 20분간 푹 끓인다.',
-      '두부와 대파를 넣고 5분 더 끓인 뒤 간을 맞춘다.',
-    ],
-    tip: '쌀뜨물 대신 멸치 육수를 쓰면 더 깊은 맛이 나요.',
-  },
-  {
-    name: '할머니 갈비찜', origin: '명절 특별 레시피', author: '지수', difficulty: '보통', time: '2시간', color: '#A1887F', icon: 'cutlery',
-    ingredients: ['소갈비 1kg', '무 1/4개', '당근 1개', '대추 8알', '밤 8개', '간장 6큰술', '설탕 3큰술', '배즙 1/2컵', '다진 마늘 2큰술', '대파 1대', '후추 약간', '참기름 1큰술'],
-    steps: [
-      '갈비는 찬물에 1시간 이상 담가 핏물을 뺀다.',
-      '끓는 물에 갈비를 넣고 5분 데쳐 기름기를 제거한다.',
-      '간장, 설탕, 배즙, 마늘, 후추로 양념장을 만든다.',
-      '갈비에 양념장을 넣고 30분 재운다.',
-      '냄비에 갈비와 양념을 모두 넣고 물 3컵을 부어 끓인다.',
-      '한 시간 후 무, 당근, 밤, 대추를 넣고 30분 더 졸인다.',
-      '마지막에 참기름을 두르고 마무리한다.',
-    ],
-    tip: '하루 전날 만들어 두면 양념이 잘 배어 더 맛있어요.',
-  },
-  {
-    name: '서준이 좋아하는 계란말이', origin: '가족 오리지널', author: '민준', difficulty: '쉬움', time: '15분', color: '#FFD54F', icon: 'sun-o',
-    ingredients: ['계란 4개', '당근 1/4개', '대파 약간', '소금 1/4작은술', '식용유 1큰술'],
-    steps: [
-      '당근과 대파를 잘게 다진다.',
-      '계란을 풀어 다진 채소와 소금을 섞는다.',
-      '약불로 달군 팬에 기름을 두르고 계란물을 1/3 붓는다.',
-      '겉면이 살짝 익으면 한쪽부터 돌돌 말아준다.',
-      '남은 계란물을 부어 같은 방식으로 마저 만다.',
-    ],
-  },
-  {
-    name: '지우 이유식 - 단호박죽', origin: '소아과 추천', author: '지수', difficulty: '쉬움', time: '40분', color: '#FFB74D', icon: 'leaf',
-    ingredients: ['단호박 1/4통', '쌀가루 3큰술', '물 또는 모유 300ml'],
-    steps: [
-      '단호박은 껍질을 벗기고 잘게 썰어 찐다.',
-      '익힌 단호박을 으깨거나 곱게 갈아준다.',
-      '냄비에 쌀가루와 물을 풀고 약불로 저으며 끓인다.',
-      '쌀이 풀어지면 으깬 단호박을 넣고 5분 더 끓인다.',
-    ],
-    tip: '월령에 따라 농도와 양을 조절해주세요.',
-  },
-  {
-    name: '크리스마스 케이크', origin: '가족 연례 행사', author: '전체', difficulty: '어려움', time: '3시간', color: '#E57373', icon: 'birthday-cake',
-    ingredients: ['박력분 200g', '버터 200g', '설탕 150g', '계란 4개', '베이킹파우더 1작은술', '바닐라 익스트랙 1작은술', '생크림 500ml', '딸기 1팩', '체리 약간', '슈가파우더 약간'],
-    steps: [
-      '오븐을 170도로 예열한다.',
-      '버터와 설탕을 크림 상태가 될 때까지 휘핑한다.',
-      '계란을 하나씩 넣으며 잘 섞는다.',
-      '체에 친 박력분, 베이킹파우더를 넣고 가볍게 섞는다.',
-      '170도 오븐에서 30분간 굽는다.',
-      '식힌 시트를 두 장으로 자르고 생크림과 딸기를 넣어 샌드한다.',
-      '윗면과 옆면에 생크림을 발라 마무리하고 딸기, 체리로 장식한다.',
-    ],
-    tip: '시트는 하루 전에 구워 냉장 보관하면 잘 잘려요.',
-  },
-  {
-    name: '아빠표 볶음밥', origin: '주말 아침 단골 메뉴', author: '민준', difficulty: '쉬움', time: '20분', color: '#81C784', icon: 'spoon',
-    ingredients: ['밥 2공기', '계란 2개', '햄 100g', '양파 1/2개', '당근 1/4개', '대파 1대', '진간장 1큰술', '식용유 2큰술', '참기름 1작은술', '후추 약간'],
-    steps: [
-      '햄, 양파, 당근을 잘게 깍둑썬다.',
-      '팬에 기름을 두르고 계란을 풀어 스크램블 한다.',
-      '같은 팬에 대파를 넣어 향을 내고 채소와 햄을 볶는다.',
-      '밥을 넣고 진간장을 둘러가며 빠르게 볶는다.',
-      '계란을 다시 넣고 후추, 참기름으로 마무리한다.',
-    ],
-  },
-];
+/** 새로 추가하는 레시피 카드에 돌아가며 입히는 색 */
+const NEW_RECIPE_COLORS = ['#FF8A65', '#81C784', '#FFD54F', '#CE93D8'];
 
 const DIFF_COLOR: Record<string, string> = { '쉬움': '#4AA86B', '보통': '#E6A817', '어려움': '#4A8C6F' };
 
@@ -95,6 +24,18 @@ export default function RecipesScreen() {
   const [showCreate, setShowCreate] = useState(false);
   const [createDifficulty, setCreateDifficulty] = useState('보통');
 
+  // 창고에서 레시피만 최신순으로 꺼낸다.
+  const recipes = useRecordsByCategory<Recipe>('recipes');
+  const addRecord = useRecordsStore((s) => s.addRecord);
+
+  // 작성 폼 입력값
+  const [formName, setFormName] = useState('');
+  const [formOrigin, setFormOrigin] = useState('');
+  const [formTime, setFormTime] = useState('');
+  const [formIngredients, setFormIngredients] = useState('');
+  const [formSteps, setFormSteps] = useState('');
+  const [formTip, setFormTip] = useState('');
+
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
   const createBg = useRef(new Animated.Value(0)).current;
@@ -102,18 +43,25 @@ export default function RecipesScreen() {
 
   useEffect(() => {
     if (openTitle) {
-      const match = RECIPES.find(r => r.name === openTitle);
+      const match = recipes.find(r => r.title === openTitle);
       if (match) {
-        setSelectedItem(match);
+        setSelectedItem({ ...match.data, id: match.id });
         Animated.parallel([
           Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
           Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
         ]).start();
       }
     }
-  }, [openTitle]);
+  }, [openTitle, recipes]);
 
   const openCreate = () => {
+    setFormName('');
+    setFormOrigin('');
+    setFormTime('');
+    setFormIngredients('');
+    setFormSteps('');
+    setFormTip('');
+    setCreateDifficulty('보통');
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -125,6 +73,46 @@ export default function RecipesScreen() {
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
     ]).start(() => { setShowCreate(false); setCreateDifficulty('보통'); });
+  };
+
+  // "세대 전수" — 윗세대에서 물려받은 레시피 수.
+  // 제목과 유래 양쪽에서 '할머니' 같은 단어를 찾는다 (예: 제목만 '할머니 갈비찜'인 경우).
+  const inheritedCount = useMemo(
+    () => recipes.filter((r) =>
+      /할머니|할아버지|외할머니|어머니|아버지|외가|친정|전수|물려/.test(
+        `${r.title} ${r.data.origin ?? ''}`
+      )
+    ).length,
+    [recipes]
+  );
+
+  /** 여러 줄로 적은 입력을 줄 단위 배열로 (빈 줄은 버린다) */
+  const toLines = (v: string) => v.split('\n').map((l) => l.trim()).filter(Boolean);
+
+  const handleSave = () => {
+    const name = formName.trim();
+    if (!name) {
+      Alert.alert('레시피 이름을 입력해주세요', '어떤 요리인지 알려주세요.');
+      return;
+    }
+    addRecord({
+      category: 'recipes',
+      title: name,
+      recordedBy: CURRENT_USER,
+      data: {
+        name,
+        origin: formOrigin.trim(),
+        author: CURRENT_USER,
+        difficulty: createDifficulty,
+        time: formTime.trim(),
+        color: NEW_RECIPE_COLORS[recipes.length % NEW_RECIPE_COLORS.length],
+        icon: 'cutlery',
+        ingredients: toLines(formIngredients),
+        steps: toLines(formSteps),
+        tip: formTip.trim() || undefined,
+      },
+    });
+    closeCreate();
   };
 
   const openDetail = (item: any) => {
@@ -220,9 +208,11 @@ export default function RecipesScreen() {
               <Text style={s.modalTitle}>새 레시피</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>레시피 이름</Text>
-              <TextInput style={s.createInput} placeholder="레시피 이름을 입력하세요" placeholderTextColor="#BFAE99" />
+              <TextInput style={s.createInput} placeholder="레시피 이름을 입력하세요" placeholderTextColor="#BFAE99"
+                value={formName} onChangeText={setFormName} />
               <Text style={s.createLabel}>유래 / 출처</Text>
-              <TextInput style={s.createInput} placeholder="예: 할머니로부터 전수" placeholderTextColor="#BFAE99" />
+              <TextInput style={s.createInput} placeholder="예: 할머니로부터 전수" placeholderTextColor="#BFAE99"
+                value={formOrigin} onChangeText={setFormOrigin} />
               <Text style={s.createLabel}>난이도</Text>
               <View style={s.pillRow}>
                 {(['쉬움', '보통', '어려움'] as const).map(label => (
@@ -237,13 +227,16 @@ export default function RecipesScreen() {
                 ))}
               </View>
               <Text style={s.createLabel}>조리시간</Text>
-              <TextInput style={s.createInput} placeholder="예: 30분" placeholderTextColor="#BFAE99" />
+              <TextInput style={s.createInput} placeholder="예: 30분" placeholderTextColor="#BFAE99"
+                value={formTime} onChangeText={setFormTime} />
               <Text style={s.createLabel}>재료</Text>
               <TextInput
                 style={[s.createInput, { height: 110, textAlignVertical: 'top' }]}
                 placeholder={'재료를 한 줄에 하나씩 입력하세요\n예) 묵은지 1/4포기\n돼지고기 200g'}
                 placeholderTextColor="#BFAE99"
                 multiline
+                value={formIngredients}
+                onChangeText={setFormIngredients}
               />
               <Text style={s.createLabel}>조리 순서</Text>
               <TextInput
@@ -251,6 +244,8 @@ export default function RecipesScreen() {
                 placeholder={'조리 순서를 한 줄에 하나씩 입력하세요\n예) 들기름에 묵은지를 볶는다\n돼지고기를 넣고 함께 볶는다'}
                 placeholderTextColor="#BFAE99"
                 multiline
+                value={formSteps}
+                onChangeText={setFormSteps}
               />
               <Text style={s.createLabel}>꿀팁 (선택)</Text>
               <TextInput
@@ -258,8 +253,10 @@ export default function RecipesScreen() {
                 placeholder="레시피만의 비법이 있다면 적어주세요"
                 placeholderTextColor="#BFAE99"
                 multiline
+                value={formTip}
+                onChangeText={setFormTip}
               />
-              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
+              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>저장하기</Text>
               </TouchableOpacity>
               </ScrollView>
@@ -271,15 +268,17 @@ export default function RecipesScreen() {
           <View style={s.header}>
             <Text style={s.subtitle}>가족만의 손맛을 기록하세요</Text>
             <View style={s.statsRow}>
-              <View style={s.stat}><Text style={s.statNum}>{RECIPES.length}</Text><Text style={s.statLabel}>총 레시피</Text></View>
-              <View style={s.stat}><Text style={s.statNum}>3</Text><Text style={s.statLabel}>세대 전수</Text></View>
+              <View style={s.stat}><Text style={s.statNum}>{recipes.length}</Text><Text style={s.statLabel}>총 레시피</Text></View>
+              <View style={s.stat}><Text style={s.statNum}>{inheritedCount}</Text><Text style={s.statLabel}>세대 전수</Text></View>
             </View>
           </View>
 
           <View style={s.list}>
-            {RECIPES.map((r, i) => (
-              <TouchableOpacity key={i} style={s.card} activeOpacity={0.7}
-                onPress={() => openDetail(r)}>
+            {recipes.map((record) => {
+              const r = record.data;
+              return (
+              <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
+                onPress={() => openDetail({ ...r, id: record.id })}>
                 <View style={[s.recipeIcon, { backgroundColor: r.color }]}>
                   <FontAwesome name={r.icon as any} size={20} color="#FFFFFF" />
                 </View>
@@ -297,7 +296,15 @@ export default function RecipesScreen() {
                 </View>
                 <FontAwesome name="chevron-right" size={12} color="#D4C8B0" />
               </TouchableOpacity>
-            ))}
+              );
+            })}
+            {recipes.length === 0 && (
+              <View style={s.empty}>
+                <FontAwesome name="cutlery" size={32} color="#CFC7BA" />
+                <Text style={s.emptyText}>아직 등록한 레시피가 없어요</Text>
+                <Text style={s.emptySub}>아래 + 버튼으로 가족의 손맛을 남겨보세요</Text>
+              </View>
+            )}
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
@@ -311,6 +318,9 @@ export default function RecipesScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
+  empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
+  emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
+  emptySub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
   header: { padding: 20, paddingBottom: 8 },
   subtitle: { fontSize: 13, color: '#A0A0A0', marginBottom: 16, fontFamily: 'Pretendard' },
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },

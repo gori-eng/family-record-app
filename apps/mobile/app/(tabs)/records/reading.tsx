@@ -1,21 +1,19 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
+import { MEMBERS, CURRENT_USER } from '../../../constants/family';
+
+type Book = {
+  author: string; reader: string; status: string;
+  rating?: number; progress?: number; color: string; notes: string;
+};
 
 const STATUS_OPTIONS = ['전체', '읽는 중', '완독', '읽고 싶은'];
-const MEMBERS = ['지수', '민준', '지우', '서준'];
-const CURRENT_USER = '지수';
 
-const INITIAL_BOOKS = [
-  { title: '어린 왕자', author: '생텍쥐페리', reader: '서준', recordedBy: '지수', status: '완독', rating: 5, color: '#B8D8C0', notes: '혼자서 처음 완독! "어른들은 참 이상해" 가 인상적이었대요' },
-  { title: '아몬드', author: '손원평', reader: '지수', recordedBy: '지수', status: '읽는 중', progress: 65, color: '#F0B8B8', notes: '감정을 느끼지 못하는 소년의 이야기. 챕터 12까지 읽음' },
-  { title: '나미야 잡화점의 기적', author: '히가시노 게이고', reader: '민준', recordedBy: '민준', status: '완독', rating: 4, color: '#B0C8D8', notes: '시간여행과 편지의 조합이 따뜻했음' },
-  { title: '코스모스', author: '칼 세이건', reader: '민준', recordedBy: '민준', status: '읽는 중', progress: 30, color: '#B0C8D8', notes: '우주의 광대함을 느끼는 중' },
-  { title: '모모', author: '미하엘 엔데', reader: '서준', recordedBy: '지수', status: '읽고 싶은', color: '#D8CDB8', notes: '' },
-  { title: '해리포터 시리즈', author: 'J.K. 롤링', reader: '지우', recordedBy: '지수', status: '읽고 싶은', color: '#F0B8B8', notes: '' },
-];
-
+/** 새로 등록하는 책 표지에 돌아가며 입히는 색 */
+const NEW_BOOK_COLORS = ['#B8D8C0', '#F0B8B8', '#B0C8D8', '#D8CDB8'];
 function StarRating({ rating }: { rating: number }) {
   return (
     <View style={{ flexDirection: 'row', gap: 2 }}>
@@ -28,10 +26,21 @@ function StarRating({ rating }: { rating: number }) {
 
 export default function ReadingScreen() {
   const { openTitle } = useLocalSearchParams<{ openTitle?: string }>();
-  const [books, setBooks] = useState(INITIAL_BOOKS);
+  // 창고에서 독서 기록만 최신순으로 꺼낸다.
+  const books = useRecordsByCategory<Book>('reading');
+  const addRecord = useRecordsStore((s) => s.addRecord);
+  const patchRecordData = useRecordsStore((s) => s.patchRecordData);
+
   const [activeStatus, setActiveStatus] = useState('전체');
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const selectedItem = selectedIndex !== null ? books[selectedIndex] : null;
+  // 순번(index)이 아니라 기록의 id로 지목한다. 목록 순서가 바뀌어도 엉뚱한 책을 고치지 않는다.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedRecord = useMemo(
+    () => books.find((b) => b.id === selectedId) ?? null,
+    [books, selectedId]
+  );
+  const selectedItem = selectedRecord
+    ? { ...selectedRecord.data, title: selectedRecord.title, recordedBy: selectedRecord.recordedBy }
+    : null;
   const [editProgress, setEditProgress] = useState(0);
   const [editNotes, setEditNotes] = useState('');
   const [editStatus, setEditStatus] = useState<'읽는 중' | '완독'>('읽는 중');
@@ -39,6 +48,8 @@ export default function ReadingScreen() {
   const [showCreate, setShowCreate] = useState(false);
   const [createStatus, setCreateStatus] = useState('읽고 싶은');
   const [createReader, setCreateReader] = useState<string>(CURRENT_USER);
+  const [formTitle, setFormTitle] = useState('');
+  const [formAuthor, setFormAuthor] = useState('');
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
   const createBg = useRef(new Animated.Value(0)).current;
@@ -46,22 +57,26 @@ export default function ReadingScreen() {
 
   useEffect(() => {
     if (openTitle) {
-      const idx = books.findIndex(b => b.title === openTitle);
-      if (idx >= 0) {
-        setSelectedIndex(idx);
-        setEditProgress(books[idx].progress ?? 0);
-        setEditNotes(books[idx].notes ?? '');
-        setEditStatus((books[idx].status === '완독' ? '완독' : '읽는 중') as '읽는 중' | '완독');
-        setEditRating(books[idx].rating ?? 0);
+      const match = books.find(b => b.title === openTitle);
+      if (match) {
+        setSelectedId(match.id);
+        setEditProgress(match.data.progress ?? 0);
+        setEditNotes(match.data.notes ?? '');
+        setEditStatus((match.data.status === '완독' ? '완독' : '읽는 중') as '읽는 중' | '완독');
+        setEditRating(match.data.rating ?? 0);
         Animated.parallel([
           Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
           Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
         ]).start();
       }
     }
-  }, [openTitle]);
+  }, [openTitle, books]);
 
   const openCreate = () => {
+    setFormTitle('');
+    setFormAuthor('');
+    setCreateReader(CURRENT_USER);
+    setCreateStatus('읽고 싶은');
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -75,12 +90,12 @@ export default function ReadingScreen() {
     ]).start(() => { setShowCreate(false); setCreateStatus('읽고 싶은'); });
   };
 
-  const openDetail = (idx: number) => {
-    setSelectedIndex(idx);
-    setEditProgress(books[idx].progress ?? 0);
-    setEditNotes(books[idx].notes ?? '');
-    setEditStatus((books[idx].status === '완독' ? '완독' : '읽는 중') as '읽는 중' | '완독');
-    setEditRating(books[idx].rating ?? 0);
+  const openDetail = (record: { id: string; data: Book }) => {
+    setSelectedId(record.id);
+    setEditProgress(record.data.progress ?? 0);
+    setEditNotes(record.data.notes ?? '');
+    setEditStatus((record.data.status === '완독' ? '완독' : '읽는 중') as '읽는 중' | '완독');
+    setEditRating(record.data.rating ?? 0);
     Animated.parallel([
       Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
       Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
@@ -90,33 +105,57 @@ export default function ReadingScreen() {
     Animated.parallel([
       Animated.timing(modalBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
-    ]).start(() => setSelectedIndex(null));
+    ]).start(() => setSelectedId(null));
   };
 
   const saveEdits = () => {
-    if (selectedIndex === null) return;
+    if (!selectedId) return;
     if (editStatus === '완독') {
       if (editRating === 0) {
         Alert.alert('평점 필요', '완독으로 변경하려면 평점을 1~5점으로 남겨주세요.');
         return;
       }
-      setBooks(prev => prev.map((b, i) => i === selectedIndex
-        ? { ...b, status: '완독', progress: 100, rating: editRating, notes: editNotes }
-        : b));
+      patchRecordData(selectedId, { status: '완독', progress: 100, rating: editRating, notes: editNotes });
       Alert.alert('완독 처리 완료', `평점 ${editRating}점으로 완독 처리되었어요.`);
     } else {
       const clamped = Math.max(0, Math.min(99, Math.round(editProgress)));
-      setBooks(prev => prev.map((b, i) => i === selectedIndex
-        ? { ...b, status: '읽는 중', progress: clamped, notes: editNotes }
-        : b));
+      patchRecordData(selectedId, { status: '읽는 중', progress: clamped, notes: editNotes });
       Alert.alert('저장 완료', '진척도와 메모가 업데이트되었어요.');
     }
     closeDetail();
   };
 
-  const filteredIndexes = books
-    .map((b, i) => ({ b, i }))
-    .filter(({ b }) => activeStatus === '전체' ? true : b.status === activeStatus);
+  const handleCreate = () => {
+    const title = formTitle.trim();
+    if (!title) {
+      Alert.alert('책 제목을 입력해주세요', '어떤 책인지 알려주세요.');
+      return;
+    }
+    addRecord({
+      category: 'reading',
+      title,
+      recordedBy: CURRENT_USER,
+      data: {
+        author: formAuthor.trim(),
+        reader: createReader,
+        status: createStatus,
+        color: NEW_BOOK_COLORS[books.length % NEW_BOOK_COLORS.length],
+        notes: '',
+        ...(createStatus === '읽는 중' ? { progress: 0 } : {}),
+      },
+    });
+    closeCreate();
+  };
+
+  const filtered = useMemo(
+    () => (activeStatus === '전체' ? books : books.filter((b) => b.data.status === activeStatus)),
+    [books, activeStatus]
+  );
+  const stats = useMemo(() => ({
+    total: books.length,
+    done: books.filter((b) => b.data.status === '완독').length,
+    reading: books.filter((b) => b.data.status === '읽는 중').length,
+  }), [books]);
 
   return (
     <>
@@ -262,9 +301,21 @@ export default function ReadingScreen() {
               <View style={styles.modalHandle} />
               <Text style={styles.modalTitle}>새 도서 등록</Text>
               <Text style={styles.createLabel}>책 제목</Text>
-              <TextInput style={styles.createInput} placeholder="책 제목을 입력하세요" placeholderTextColor="#BFAE99" />
+              <TextInput
+                style={styles.createInput}
+                placeholder="책 제목을 입력하세요"
+                placeholderTextColor="#BFAE99"
+                value={formTitle}
+                onChangeText={setFormTitle}
+              />
               <Text style={styles.createLabel}>저자</Text>
-              <TextInput style={styles.createInput} placeholder="저자를 입력하세요" placeholderTextColor="#BFAE99" />
+              <TextInput
+                style={styles.createInput}
+                placeholder="저자를 입력하세요"
+                placeholderTextColor="#BFAE99"
+                value={formAuthor}
+                onChangeText={setFormAuthor}
+              />
               <Text style={styles.createLabel}>읽는 사람</Text>
               <View style={styles.pillRow}>
                 {MEMBERS.map(m => (
@@ -292,7 +343,7 @@ export default function ReadingScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
+              <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={handleCreate}>
                 <Text style={styles.createSubmitText}>저장하기</Text>
               </TouchableOpacity>
             </Animated.View>
@@ -304,17 +355,17 @@ export default function ReadingScreen() {
           <View style={styles.statsRow}>
             <TouchableOpacity style={styles.statCard} onPress={() => setActiveStatus('전체')} activeOpacity={0.7}>
               <FontAwesome name="book" size={18} color="#4A8C6F" />
-              <Text style={styles.statNumber}>12</Text>
+              <Text style={styles.statNumber}>{stats.total}</Text>
               <Text style={styles.statLabel}>총 도서</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.statCard} onPress={() => setActiveStatus('완독')} activeOpacity={0.7}>
               <FontAwesome name="check-circle" size={18} color="#4AA86B" />
-              <Text style={styles.statNumber}>7</Text>
+              <Text style={styles.statNumber}>{stats.done}</Text>
               <Text style={styles.statLabel}>완독</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.statCard} onPress={() => setActiveStatus('읽는 중')} activeOpacity={0.7}>
               <FontAwesome name="bookmark" size={18} color="#E6A817" />
-              <Text style={styles.statNumber}>3</Text>
+              <Text style={styles.statNumber}>{stats.reading}</Text>
               <Text style={styles.statLabel}>읽는 중</Text>
             </TouchableOpacity>
           </View>
@@ -335,12 +386,14 @@ export default function ReadingScreen() {
 
           {/* Book List */}
           <View style={styles.bookList}>
-            {filteredIndexes.map(({ b: book, i }) => (
+            {filtered.map((record) => {
+              const book = { ...record.data, title: record.title };
+              return (
               <TouchableOpacity
-                key={i}
+                key={record.id}
                 style={styles.bookCard}
                 activeOpacity={0.7}
-                onPress={() => openDetail(i)}
+                onPress={() => openDetail(record)}
               >
                 <View style={[styles.bookCover, { backgroundColor: book.color }]}>
                   <FontAwesome name="book" size={24} color="#5C4A32" />
@@ -373,7 +426,17 @@ export default function ReadingScreen() {
                   {book.notes ? <Text style={styles.bookNotes} numberOfLines={1}>{book.notes}</Text> : null}
                 </View>
               </TouchableOpacity>
-            ))}
+              );
+            })}
+            {filtered.length === 0 && (
+              <View style={styles.empty}>
+                <FontAwesome name="book" size={32} color="#CFC7BA" />
+                <Text style={styles.emptyText}>
+                  {activeStatus === '전체' ? '아직 등록한 책이 없어요' : `'${activeStatus}' 책이 없어요`}
+                </Text>
+                <Text style={styles.emptySub}>아래 + 버튼으로 첫 책을 등록해보세요</Text>
+              </View>
+            )}
           </View>
 
           <View style={{ height: 80 }} />
@@ -393,6 +456,9 @@ export default function ReadingScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
+  empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
+  emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
+  emptySub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
   statCard: {
     flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,

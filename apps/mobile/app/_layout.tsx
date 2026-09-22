@@ -9,6 +9,11 @@ import { onAuthStateChange, getSession } from '@core/supabase';
 import type { Session } from '@supabase/supabase-js';
 import { StatusBar } from 'react-native';
 import 'react-native-reanimated';
+import { seedRecords } from '../store/seed';
+
+// 앱이 켜질 때 기록 창고에 예시 데이터를 한 번 채운다.
+// Supabase 연결 후에는 이 줄과 store/seed.ts를 함께 지운다.
+seedRecords();
 
 export { ErrorBoundary } from 'expo-router';
 
