@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 
@@ -44,7 +45,7 @@ export default function FamilyTreeScreen() {
               <View style={s.membersRow}>
                 {gen.members.map((m, mi) => (
                   <TouchableOpacity key={mi} style={s.memberCard} activeOpacity={0.7}
-                    onPress={() => Alert.alert(m.name, `관계: ${m.relation}\n출생: ${m.birth}년\n상태: ${m.alive ? '생존' : '작고'}\n\n인물 상세 페이지가 곧 추가됩니다.`)}>
+                    onPress={() => showAlert(m.name, `관계: ${m.relation}\n출생: ${m.birth}년\n상태: ${m.alive ? '생존' : '작고'}\n\n인물 상세 페이지가 곧 추가됩니다.`)}>
                     <View style={[s.avatar, { backgroundColor: m.color, opacity: m.alive ? 1 : 0.5 }]}>
                       <Text style={s.avatarText}>{m.name[1]}</Text>
                     </View>
@@ -65,7 +66,7 @@ export default function FamilyTreeScreen() {
           ))}
 
           <TouchableOpacity style={s.addMember} activeOpacity={0.7}
-            onPress={() => Alert.alert('구성원 추가', '가계도에 새 구성원을 추가하는 기능이 곧 추가됩니다.')}>
+            onPress={() => showAlert('구성원 추가', '가계도에 새 구성원을 추가하는 기능이 곧 추가됩니다.')}>
             <FontAwesome name="plus-circle" size={18} color="#4A8C6F" />
             <Text style={s.addText}>구성원 추가하기</Text>
           </TouchableOpacity>

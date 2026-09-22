@@ -1,4 +1,5 @@
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { showAlert } from '../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { useState } from 'react';
 
@@ -18,7 +19,7 @@ export default function AIScreen() {
       return;
     }
     const roleName = selectedRole !== null ? ROLES[selectedRole].label : 'AI 비서';
-    Alert.alert(
+    showAlert(
       '준비 중',
       `${roleName} 기능은 곧 연결될 예정이에요.\n\n보내려는 메시지:\n"${message.trim()}"`,
     );

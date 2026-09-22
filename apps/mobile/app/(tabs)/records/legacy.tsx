@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 
@@ -35,7 +36,7 @@ export default function LegacyScreen() {
             <Text style={s.sectionSubtitle}>월 총 46,700원</Text>
             {SUBSCRIPTIONS.map((sub, i) => (
               <TouchableOpacity key={i} style={s.subCard} activeOpacity={0.7}
-                onPress={() => Alert.alert(sub.name, `비용: ${sub.cost}\n\n이 구독 정보는 가족에게 공유됩니다.`)}>
+                onPress={() => showAlert(sub.name, `비용: ${sub.cost}\n\n이 구독 정보는 가족에게 공유됩니다.`)}>
                 <View style={[s.subIcon, { backgroundColor: sub.color }]}>
                   <FontAwesome name={sub.icon as any} size={16} color="#FFFFFF" />
                 </View>
@@ -51,7 +52,7 @@ export default function LegacyScreen() {
             <Text style={s.sectionSubtitle}>사후 공개 설정으로 가족에게 전달됩니다</Text>
             {MESSAGES.map((msg, i) => (
               <TouchableOpacity key={i} style={s.msgCard} activeOpacity={0.7}
-                onPress={() => Alert.alert('마지막 편지', `수신: ${msg.recipient}\n공개 조건: ${msg.trigger}\n밀봉일: ${msg.sealed}\n\n내용은 비공개입니다.`)}>
+                onPress={() => showAlert('마지막 편지', `수신: ${msg.recipient}\n공개 조건: ${msg.trigger}\n밀봉일: ${msg.sealed}\n\n내용은 비공개입니다.`)}>
                 <View style={[s.msgIcon, { backgroundColor: msg.color }]}>
                   <FontAwesome name={msg.icon as any} size={16} color="#5C4A32" />
                 </View>
@@ -72,7 +73,7 @@ export default function LegacyScreen() {
 
           <View style={{ height: 80 }} />
         </ScrollView>
-        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => Alert.alert('디지털 유산', '새 항목 추가 기능이 곧 추가됩니다.')}>
+        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => showAlert('디지털 유산', '새 항목 추가 기능이 곧 추가됩니다.')}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
       </View>

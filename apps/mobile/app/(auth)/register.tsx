@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { showAlert } from '../../components/AppAlert';
 import { Link, useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { signUpWithEmail } from '@core/supabase';
@@ -13,17 +14,17 @@ export default function RegisterScreen() {
   const router = useRouter();
 
   const handleRegister = async () => {
-    if (!email || !password) { Alert.alert('알림', '이메일과 비밀번호를 입력해주세요.'); return; }
-    if (password !== confirmPassword) { Alert.alert('알림', '비밀번호가 일치하지 않습니다.'); return; }
-    if (password.length < 6) { Alert.alert('알림', '비밀번호는 6자 이상이어야 합니다.'); return; }
+    if (!email || !password) { showAlert('알림', '이메일과 비밀번호를 입력해주세요.'); return; }
+    if (password !== confirmPassword) { showAlert('알림', '비밀번호가 일치하지 않습니다.'); return; }
+    if (password.length < 6) { showAlert('알림', '비밀번호는 6자 이상이어야 합니다.'); return; }
     setLoading(true);
     try {
       await signUpWithEmail(email, password);
-      Alert.alert('가입 완료', '이메일 인증 후 로그인해주세요.', [
+      showAlert('가입 완료', '이메일 인증 후 로그인해주세요.', [
         { text: '확인', onPress: () => router.replace('/(auth)/login') },
       ]);
     } catch (error: any) {
-      Alert.alert('가입 실패', error.message);
+      showAlert('가입 실패', error.message);
     } finally { setLoading(false); }
   };
 

@@ -1,4 +1,5 @@
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, Modal, Animated, Pressable, Image, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Modal, Animated, Pressable, Image, Platform } from 'react-native';
+import { showAlert } from '../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef } from 'react';
@@ -56,12 +57,12 @@ export default function ProfileScreen() {
   const pickFromCamera = async () => {
     closePhoto();
     if (Platform.OS === 'web') {
-      Alert.alert('지원 안 됨', '카메라 촬영은 모바일 앱에서만 사용할 수 있어요. 사진첩에서 불러오거나 이모지를 선택해주세요.');
+      showAlert('지원 안 됨', '카메라 촬영은 모바일 앱에서만 사용할 수 있어요. 사진첩에서 불러오거나 이모지를 선택해주세요.');
       return;
     }
     const perm = await ImagePicker.requestCameraPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('권한 필요', '카메라 권한을 허용해주세요.');
+      showAlert('권한 필요', '카메라 권한을 허용해주세요.');
       return;
     }
     const result = await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.7 });
@@ -75,7 +76,7 @@ export default function ProfileScreen() {
     closePhoto();
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('권한 필요', '사진첩 권한을 허용해주세요.');
+      showAlert('권한 필요', '사진첩 권한을 허용해주세요.');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.7 });
@@ -132,7 +133,7 @@ export default function ProfileScreen() {
           ))}
         </View>
         <TouchableOpacity style={s.saveBtn} activeOpacity={0.8}
-          onPress={() => Alert.alert('저장 완료', '프로필이 업데이트되었습니다.')}>
+          onPress={() => showAlert('저장 완료', '프로필이 업데이트되었습니다.')}>
           <Text style={s.saveBtnText}>저장하기</Text>
         </TouchableOpacity>
       </ScrollView>

@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
@@ -56,7 +57,7 @@ export default function GoalsScreen() {
   const handleSave = () => {
     const title = formTitle.trim();
     if (!title) {
-      Alert.alert('목표 제목을 입력해주세요', '무엇을 이루고 싶은지 알려주세요.');
+      showAlert('목표 제목을 입력해주세요', '무엇을 이루고 싶은지 알려주세요.');
       return;
     }
     addRecord({

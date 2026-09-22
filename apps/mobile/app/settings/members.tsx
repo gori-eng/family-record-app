@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { showAlert } from '../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 
@@ -23,7 +24,7 @@ export default function MembersScreen() {
         <Text style={s.subtitle}>가족 구성원 {MEMBERS.length}명</Text>
         {MEMBERS.map((m, i) => (
           <TouchableOpacity key={i} style={s.card} activeOpacity={0.7}
-            onPress={() => Alert.alert(m.name, `역할: ${m.role}\n이메일: ${m.email || '미등록'}\n\n역할 변경 및 프로필 수정 기능이 곧 추가됩니다.`)}>
+            onPress={() => showAlert(m.name, `역할: ${m.role}\n이메일: ${m.email || '미등록'}\n\n역할 변경 및 프로필 수정 기능이 곧 추가됩니다.`)}>
             <View style={[s.avatar, { backgroundColor: m.color }]}>
               <Text style={s.initial}>{m.name[1]}</Text>
             </View>
@@ -40,7 +41,7 @@ export default function MembersScreen() {
           </TouchableOpacity>
         ))}
         <TouchableOpacity style={s.addBtn} activeOpacity={0.7}
-          onPress={() => Alert.alert('가족 초대', '초대 코드: ABC12345\n\n이 코드를 공유하여 가족을 초대하세요.')}>
+          onPress={() => showAlert('가족 초대', '초대 코드: ABC12345\n\n이 코드를 공유하여 가족을 초대하세요.')}>
           <FontAwesome name="plus-circle" size={20} color="#C85A4A" />
           <Text style={s.addText}>새 가족 구성원 초대</Text>
         </TouchableOpacity>

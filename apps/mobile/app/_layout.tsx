@@ -10,6 +10,7 @@ import type { Session } from '@supabase/supabase-js';
 import { StatusBar } from 'react-native';
 import 'react-native-reanimated';
 import { seedRecords } from '../store/seed';
+import { AlertHost } from '../components/AppAlert';
 
 // 앱이 켜질 때 기록 창고에 예시 데이터를 한 번 채운다.
 // Supabase 연결 후에는 이 줄과 store/seed.ts를 함께 지운다.
@@ -97,6 +98,8 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider value={FamilyTheme}>
           <RootLayoutNav />
+          {/* RN의 기본 알림창은 웹에서 무음이라 공용 알림창을 여기 한 번 올려둔다 */}
+          <AlertHost />
         </ThemeProvider>
       </QueryClientProvider>
     </AuthContext.Provider>

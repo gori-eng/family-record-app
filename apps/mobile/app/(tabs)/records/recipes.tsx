@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
@@ -92,7 +93,7 @@ export default function RecipesScreen() {
   const handleSave = () => {
     const name = formName.trim();
     if (!name) {
-      Alert.alert('레시피 이름을 입력해주세요', '어떤 요리인지 알려주세요.');
+      showAlert('레시피 이름을 입력해주세요', '어떤 요리인지 알려주세요.');
       return;
     }
     addRecord({

@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 
@@ -30,7 +31,7 @@ export default function MediaScreen() {
           <View style={s.list}>
             {MEDIA.map((m, i) => (
               <TouchableOpacity key={i} style={s.card} activeOpacity={0.7}
-                onPress={() => Alert.alert(m.title, `유형: ${m.type === 'voice' ? '음성' : '영상'}\n날짜: ${m.date}\n길이: ${m.duration}\n계기: ${m.occasion}\n기록자: ${m.member}`)}>
+                onPress={() => showAlert(m.title, `유형: ${m.type === 'voice' ? '음성' : '영상'}\n날짜: ${m.date}\n길이: ${m.duration}\n계기: ${m.occasion}\n기록자: ${m.member}`)}>
                 <View style={[s.mediaIcon, { backgroundColor: m.color }]}>
                   <FontAwesome name={m.icon as any} size={18} color="#FFFFFF" />
                 </View>
@@ -50,7 +51,7 @@ export default function MediaScreen() {
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
-        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => Alert.alert('녹음/촬영', '음성/영상 기록 기능이 곧 추가됩니다.')}>
+        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => showAlert('녹음/촬영', '음성/영상 기록 기능이 곧 추가됩니다.')}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
       </View>

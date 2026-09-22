@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 
@@ -67,7 +68,7 @@ export default function IdentityScreen() {
               <Text style={s.historyTitle}>변천사</Text>
               {m.history.map((h, hi) => (
                 <TouchableOpacity key={hi} style={s.historyRow} activeOpacity={0.7}
-                  onPress={() => Alert.alert(`${m.name} - ${h.year}`, `MBTI: ${h.mbti}\n${h.note}`)}>
+                  onPress={() => showAlert(`${m.name} - ${h.year}`, `MBTI: ${h.mbti}\n${h.note}`)}>
                   <Text style={s.historyYear}>{h.year}</Text>
                   <View style={s.historyDot} />
                   <View style={s.historyContent}>

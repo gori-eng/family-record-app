@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
@@ -74,7 +75,7 @@ export default function ParentingScreen() {
   const handleSave = () => {
     const title = formTitle.trim();
     if (!title) {
-      Alert.alert('제목을 입력해주세요', '오늘의 한 줄 제목을 적어주세요.');
+      showAlert('제목을 입력해주세요', '오늘의 한 줄 제목을 적어주세요.');
       return;
     }
     addRecord({
@@ -227,12 +228,12 @@ export default function ParentingScreen() {
               <Text style={styles.statNumber}>{entries.length}</Text>
               <Text style={styles.statLabel}>총 기록</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.statCard} onPress={() => Alert.alert('마일스톤', '지우: 7개\n서준: 5개\n\n마일스톤 관리 기능이 곧 추가됩니다.')} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.statCard} onPress={() => showAlert('마일스톤', '지우: 7개\n서준: 5개\n\n마일스톤 관리 기능이 곧 추가됩니다.')} activeOpacity={0.7}>
               <FontAwesome name="trophy" size={18} color="#E6A817" />
               <Text style={styles.statNumber}>{milestoneCount}</Text>
               <Text style={styles.statLabel}>마일스톤</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.statCard} onPress={() => Alert.alert('사진 앨범', '저장된 사진 156장\n\n사진 앨범 기능이 곧 추가됩니다.')} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.statCard} onPress={() => showAlert('사진 앨범', '저장된 사진 156장\n\n사진 앨범 기능이 곧 추가됩니다.')} activeOpacity={0.7}>
               <FontAwesome name="camera" size={18} color="#4A90C8" />
               <Text style={styles.statNumber}>156</Text>
               <Text style={styles.statLabel}>사진</Text>

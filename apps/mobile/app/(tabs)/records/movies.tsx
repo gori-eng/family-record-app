@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
@@ -74,7 +75,7 @@ export default function MoviesScreen() {
   const handleSave = () => {
     const title = formTitle.trim();
     if (!title) {
-      Alert.alert('영화 제목을 입력해주세요', '어떤 영화를 봤는지 알려주세요.');
+      showAlert('영화 제목을 입력해주세요', '어떤 영화를 봤는지 알려주세요.');
       return;
     }
     addRecord({

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { showAlert } from '../../components/AppAlert';
 import { Link } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { signInWithEmail } from '@core/supabase';
@@ -12,14 +13,14 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('알림', '이메일과 비밀번호를 입력해주세요.');
+      showAlert('알림', '이메일과 비밀번호를 입력해주세요.');
       return;
     }
     setLoading(true);
     try {
       await signInWithEmail(email, password);
     } catch (error: any) {
-      Alert.alert('로그인 실패', error.message);
+      showAlert('로그인 실패', error.message);
     } finally {
       setLoading(false);
     }
@@ -81,12 +82,12 @@ export default function LoginScreen() {
           {/* Social */}
           <View style={s.socialRow}>
             <TouchableOpacity style={s.socialBtn} activeOpacity={0.7}
-              onPress={() => Alert.alert('준비 중', 'Google 로그인은 곧 지원될 예정이에요.')}>
+              onPress={() => showAlert('준비 중', 'Google 로그인은 곧 지원될 예정이에요.')}>
               <FontAwesome name="google" size={18} color="#4285F4" />
               <Text style={s.socialText}>Google</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[s.socialBtn, s.appleBtn]} activeOpacity={0.7}
-              onPress={() => Alert.alert('준비 중', 'Apple 로그인은 곧 지원될 예정이에요.')}>
+              onPress={() => showAlert('준비 중', 'Apple 로그인은 곧 지원될 예정이에요.')}>
               <FontAwesome name="apple" size={18} color="#FFFFFF" />
               <Text style={s.appleText}>Apple</Text>
             </TouchableOpacity>

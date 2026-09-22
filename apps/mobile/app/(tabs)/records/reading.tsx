@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
@@ -112,15 +113,15 @@ export default function ReadingScreen() {
     if (!selectedId) return;
     if (editStatus === '완독') {
       if (editRating === 0) {
-        Alert.alert('평점 필요', '완독으로 변경하려면 평점을 1~5점으로 남겨주세요.');
+        showAlert('평점 필요', '완독으로 변경하려면 평점을 1~5점으로 남겨주세요.');
         return;
       }
       patchRecordData(selectedId, { status: '완독', progress: 100, rating: editRating, notes: editNotes });
-      Alert.alert('완독 처리 완료', `평점 ${editRating}점으로 완독 처리되었어요.`);
+      showAlert('완독 처리 완료', `평점 ${editRating}점으로 완독 처리되었어요.`);
     } else {
       const clamped = Math.max(0, Math.min(99, Math.round(editProgress)));
       patchRecordData(selectedId, { status: '읽는 중', progress: clamped, notes: editNotes });
-      Alert.alert('저장 완료', '진척도와 메모가 업데이트되었어요.');
+      showAlert('저장 완료', '진척도와 메모가 업데이트되었어요.');
     }
     closeDetail();
   };
@@ -128,7 +129,7 @@ export default function ReadingScreen() {
   const handleCreate = () => {
     const title = formTitle.trim();
     if (!title) {
-      Alert.alert('책 제목을 입력해주세요', '어떤 책인지 알려주세요.');
+      showAlert('책 제목을 입력해주세요', '어떤 책인지 알려주세요.');
       return;
     }
     addRecord({

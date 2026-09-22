@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert, Share } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Share } from 'react-native';
+import { showAlert } from '../../components/AppAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -10,7 +11,7 @@ export default function SettingsScreen() {
   const router = useRouter();
 
   const handleSignOut = () => {
-    Alert.alert('로그아웃', '정말 로그아웃하시겠습니까?', [
+    showAlert('로그아웃', '정말 로그아웃하시겠습니까?', [
       { text: '취소', style: 'cancel' },
       { text: '로그아웃', style: 'destructive', onPress: () => signOut() },
     ]);
@@ -20,7 +21,7 @@ export default function SettingsScreen() {
     try {
       await Share.share({ message: `Familog에 초대합니다! 초대 코드: ${INVITE_CODE}` });
     } catch {
-      Alert.alert('초대 코드', INVITE_CODE);
+      showAlert('초대 코드', INVITE_CODE);
     }
   };
 
@@ -44,9 +45,9 @@ export default function SettingsScreen() {
       title: '데이터',
       items: [
         { icon: 'download', label: '데이터 내보내기', action: () => router.push('/settings/export') },
-        { icon: 'cloud-upload', label: '백업 관리', action: () => Alert.alert('백업 상태', '마지막 백업: 2026년 4월 4일\n자동 백업: 매주 일요일\n\n지금 백업하시겠습니까?', [
+        { icon: 'cloud-upload', label: '백업 관리', action: () => showAlert('백업 상태', '마지막 백업: 2026년 4월 4일\n자동 백업: 매주 일요일\n\n지금 백업하시겠습니까?', [
           { text: '취소', style: 'cancel' },
-          { text: '지금 백업', onPress: () => Alert.alert('완료', '백업이 완료되었습니다.') },
+          { text: '지금 백업', onPress: () => showAlert('완료', '백업이 완료되었습니다.') },
         ])},
       ],
     },

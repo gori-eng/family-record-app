@@ -5,6 +5,7 @@
  * Supabase를 붙이면 이 파일은 통째로 지우면 된다 — 화면 코드는 손대지 않아도 된다.
  */
 import { useRecordsStore, type NewRecord } from './records';
+import { fingerprint } from './finance';
 
 const DAY = 86_400_000;
 /** n일 전 시각. 시드 기록이 최신순으로 자연스럽게 줄 서도록 쓴다. */
@@ -420,14 +421,19 @@ const tx = (
   amount: number,
   method: string,
   memo = '',
-  recordedBy = '지수'
-): NewRecord => ({
-  category: 'finance',
-  title: desc,
-  recordedBy,
-  createdAt: new Date(`${date}T12:00:00`).getTime(),
-  data: { type, amount, category, desc, date, method, memo },
-});
+  owner = '지수',
+  recordedBy?: string
+): NewRecord => {
+  const base = { type, amount, category, desc, date, ownerMember: owner };
+  return {
+    category: 'finance',
+    title: desc,
+    // 기록한 사람을 따로 주지 않으면 쓴 사람이 직접 적은 것으로 본다
+    recordedBy: recordedBy ?? owner,
+    createdAt: new Date(`${date}T12:00:00`).getTime(),
+    data: { ...base, method, memo, source: 'manual' as const, importKey: fingerprint(base) },
+  };
+};
 
 /** 이번 달 / 지난달을 오늘 기준으로 만든다 (전월 대비 비교가 보이도록). */
 const ym = (monthsAgo: number, day: number) => {

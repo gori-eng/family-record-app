@@ -1,93 +1,20 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
-import { useState, useRef, useMemo } from 'react';
-import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
-import { CURRENT_USER } from '../../../constants/family';
-
-/**
- * 거래 한 건.
- *
- * date는 반드시 'YYYY-MM-DD' 형식으로 저장한다.
- * '4월 1일' 같은 사람이 읽는 문자열로 두면 월별 집계도 정렬도 할 수 없다.
- */
-type Transaction = {
-  type: 'income' | 'expense';
-  amount: number;
-  category: string;
-  desc: string;
-  date: string;
-  /** 결제수단 — 카드 / 현금 / 계좌이체 */
-  method: string;
-  memo: string;
-};
-
-/** 카테고리 목록과 아이콘·색. 폼에서 버튼으로 고르게 해서 오타와 표기 흔들림을 막는다. */
-export const EXPENSE_CATEGORIES = [
-  { name: '식비', icon: 'cutlery', color: '#F0B8B8' },
-  { name: '교통', icon: 'car', color: '#B0C8D8' },
-  { name: '주거', icon: 'home', color: '#E8D0C0' },
-  { name: '교육', icon: 'graduation-cap', color: '#D8CDB8' },
-  { name: '의료', icon: 'medkit', color: '#E0B0B0' },
-  { name: '여가', icon: 'film', color: '#C8B0D0' },
-  { name: '생활', icon: 'shopping-basket', color: '#C0D8C8' },
-  { name: '기타', icon: 'ellipsis-h', color: '#D0CCC4' },
-] as const;
-
-export const INCOME_CATEGORIES = [
-  { name: '급여', icon: 'won', color: '#B8D8C0' },
-  { name: '용돈', icon: 'gift', color: '#C8D8B0' },
-  { name: '기타수입', icon: 'plus-circle', color: '#B0D8C8' },
-] as const;
-
-const CATEGORY_META: Record<string, { icon: string; color: string }> = Object.fromEntries(
-  [...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES].map((c) => [c.name, { icon: c.icon, color: c.color }])
-);
-const metaOf = (category: string) => CATEGORY_META[category] ?? { icon: 'circle-o', color: '#D0CCC4' };
-
-const PAYMENT_METHODS = ['카드', '현금', '계좌이체'];
-
-// ── 날짜 유틸 ────────────────────────────────────────────────
-/** Date → 'YYYY-MM-DD' */
-const toISO = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-const todayISO = () => toISO(new Date());
-const daysAgoISO = (n: number) => {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return toISO(d);
-};
-/** 'YYYY-MM-DD' → '4월 1일 (수)' */
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
-const formatDay = (iso: string) => {
-  const [y, m, d] = iso.split('-').map(Number);
-  if (!y || !m || !d) return iso;
-  const wd = WEEKDAYS[new Date(y, m - 1, d).getDay()];
-  return `${m}월 ${d}일 (${wd})`;
-};
-/** 'YYYY-MM' → '2026년 9월' */
-const formatMonth = (ym: string) => {
-  const [y, m] = ym.split('-').map(Number);
-  return `${y}년 ${m}월`;
-};
-/** 'YYYY-MM'에서 n개월 이동 */
-const shiftMonth = (ym: string, n: number) => {
-  const [y, m] = ym.split('-').map(Number);
-  const d = new Date(y, m - 1 + n, 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-};
-const monthOf = (iso: string) => iso.slice(0, 7);
-
-/** 1234567 → '1,234,567' */
-const comma = (n: number) => n.toLocaleString('ko-KR');
-function formatAmount(amount: number, type: string) {
-  return type === 'income' ? `+${comma(amount)}원` : `-${comma(amount)}원`;
-}
+import { useState, useRef, useMemo, useEffect } from 'react';
+import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
+import { MEMBERS, CURRENT_USER } from '../../../constants/family';
+import {
+  type Transaction,
+  EXPENSE_CATEGORIES, INCOME_CATEGORIES, PAYMENT_METHODS, metaOf,
+  todayISO, daysAgoISO, isISODate, formatDay, formatMonth, shiftMonth, monthOf,
+  comma, formatAmount, parseAmount, fingerprint, frequentEntries, guessFromHistory,
+} from '../../../store/finance';
 
 export default function FinanceScreen() {
   const [activeCategory, setActiveCategory] = useState('전체');
-  const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [showCreate, setShowCreate] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // 지금 보고 있는 달. 이 값만 바꾸면 과거 달을 그대로 다시 볼 수 있다.
   const [viewMonth, setViewMonth] = useState(monthOf(todayISO()));
@@ -95,81 +22,171 @@ export default function FinanceScreen() {
   // 창고에서 거래 기록만 꺼낸다 (거래 1건 = 기록 1건).
   const records = useRecordsByCategory<Transaction>('finance');
   const addRecord = useRecordsStore((s) => s.addRecord);
+  const patchRecordData = useRecordsStore((s) => s.patchRecordData);
+  const removeRecord = useRecordsStore((s) => s.removeRecord);
 
-  // 작성 폼 입력값
-  const [createType, setCreateType] = useState<'income' | 'expense'>('expense');
+  const selectedRecord = useMemo(
+    () => records.find((r) => r.id === selectedId) ?? null,
+    [records, selectedId]
+  );
+
+  // ── 작성/수정 폼 ─────────────────────────────────────────
+  const [showForm, setShowForm] = useState(false);
+  /** null이면 새 거래, id가 있으면 그 거래를 수정하는 중 */
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formType, setFormType] = useState<'income' | 'expense'>('expense');
   const [formAmount, setFormAmount] = useState('');
   const [formCategory, setFormCategory] = useState<string>(EXPENSE_CATEGORIES[0].name);
   const [formDesc, setFormDesc] = useState('');
   const [formDate, setFormDate] = useState(todayISO());
   const [formMethod, setFormMethod] = useState(PAYMENT_METHODS[0]);
+  const [formOwner, setFormOwner] = useState(CURRENT_USER);
   const [formMemo, setFormMemo] = useState('');
+  /** 사용자가 카테고리를 직접 건드렸는지. 건드렸으면 자동 추측으로 덮어쓰지 않는다. */
+  const [categoryTouched, setCategoryTouched] = useState(false);
+
+  // 삭제 되돌리기
+  const [undoItem, setUndoItem] = useState<FamilyRecord<Transaction> | null>(null);
+  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
-  const createBg = useRef(new Animated.Value(0)).current;
-  const createSlide = useRef(new Animated.Value(500)).current;
+  const formBg = useRef(new Animated.Value(0)).current;
+  const formSlide = useRef(new Animated.Value(500)).current;
 
-  const openCreate = () => {
-    setCreateType('expense');
-    setFormAmount('');
-    setFormCategory(EXPENSE_CATEGORIES[0].name);
-    setFormDesc('');
-    setFormDate(todayISO());
-    setFormMethod(PAYMENT_METHODS[0]);
-    setFormMemo('');
-    setShowCreate(true);
+  useEffect(() => () => { if (undoTimer.current) clearTimeout(undoTimer.current); }, []);
+
+  const runOpen = (bg: Animated.Value, slide: Animated.Value) =>
     Animated.parallel([
-      Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
-      Animated.spring(createSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
+      Animated.timing(bg, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(slide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
     ]).start();
-  };
-  const closeCreate = () => {
+  const runClose = (bg: Animated.Value, slide: Animated.Value, done: () => void) =>
     Animated.parallel([
-      Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
-      Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
-    ]).start(() => setShowCreate(false));
+      Animated.timing(bg, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(slide, { toValue: 500, duration: 250, useNativeDriver: true }),
+    ]).start(done);
+
+  /**
+   * 폼 열기.
+   * - 인자가 없으면 새 거래
+   * - `edit`을 주면 그 거래를 수정
+   * - `copy`를 주면 값만 복사해서 새 거래로 (같은 가게를 또 갔을 때)
+   */
+  const openForm = (opts?: { edit?: FamilyRecord<Transaction>; copy?: Transaction }) => {
+    const src = opts?.edit?.data ?? opts?.copy;
+    setEditingId(opts?.edit?.id ?? null);
+    setFormType(src?.type ?? 'expense');
+    setFormAmount(src ? comma(src.amount) : '');
+    setFormCategory(src?.category ?? EXPENSE_CATEGORIES[0].name);
+    setFormDesc(src?.desc ?? '');
+    // 복제는 "오늘 또 썼다"는 뜻이므로 날짜를 오늘로 되돌린다
+    setFormDate(opts?.edit ? (src?.date ?? todayISO()) : todayISO());
+    setFormMethod(src?.method && src.method !== '입금' ? src.method : PAYMENT_METHODS[0]);
+    setFormOwner(src?.ownerMember ?? CURRENT_USER);
+    setFormMemo(src?.memo ?? '');
+    setCategoryTouched(!!src);
+    setShowForm(true);
+    runOpen(formBg, formSlide);
+  };
+  const closeForm = () => runClose(formBg, formSlide, () => { setShowForm(false); setEditingId(null); });
+
+  const openDetail = (id: string) => { setSelectedId(id); runOpen(modalBg, modalSlide); };
+  const closeDetail = () => runClose(modalBg, modalSlide, () => setSelectedId(null));
+
+  /** 수입/지출을 바꾸면 카테고리 후보가 달라지므로 기본값도 같이 바꾼다. */
+  const switchType = (t: 'income' | 'expense') => {
+    setFormType(t);
+    setFormCategory(t === 'income' ? INCOME_CATEGORIES[0].name : EXPENSE_CATEGORIES[0].name);
+    setCategoryTouched(false);
   };
 
-  /** 수입/지출을 바꾸면 카테고리 후보가 달라지므로 기본값도 같이 바꿔준다. */
-  const switchType = (t: 'income' | 'expense') => {
-    setCreateType(t);
-    setFormCategory(t === 'income' ? INCOME_CATEGORIES[0].name : EXPENSE_CATEGORIES[0].name);
+  /** 자주 쓴 내역 칩 — 탭 한 번으로 내역·카테고리·결제수단·금액을 한꺼번에 채운다. */
+  const applyQuick = (q: { desc: string; category: string; method: string; amount: number }) => {
+    setFormDesc(q.desc);
+    setFormCategory(q.category);
+    if (q.method && q.method !== '입금') setFormMethod(q.method);
+    setFormAmount(comma(q.amount));
+    setCategoryTouched(true);
+  };
+
+  /**
+   * 내역을 적으면 과거 기록에서 카테고리·결제수단을 추측해 채운다.
+   * 사용자가 카테고리를 직접 고른 뒤에는 건드리지 않는다.
+   */
+  const onDescChange = (v: string) => {
+    setFormDesc(v);
+    if (categoryTouched) return;
+    const guess = guessFromHistory(records, v, formType);
+    if (guess) {
+      setFormCategory(guess.category);
+      if (guess.method && guess.method !== '입금') setFormMethod(guess.method);
+    }
   };
 
   const handleSave = () => {
-    const amount = parseInt(formAmount.replace(/[^0-9]/g, '') || '0', 10);
+    const amount = parseAmount(formAmount);
     if (amount <= 0) {
-      Alert.alert('금액을 입력해주세요', '0보다 큰 금액을 입력해야 저장할 수 있어요.');
+      showAlert('금액을 입력해주세요', '0보다 큰 금액을 입력해야 저장할 수 있어요.');
       return;
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(formDate)) {
-      Alert.alert('날짜 형식을 확인해주세요', '2026-09-22 형식으로 입력해주세요.');
+    if (!isISODate(formDate)) {
+      showAlert('날짜 형식을 확인해주세요', '2026-09-22 형식으로 입력해주세요.');
       return;
     }
     const desc = formDesc.trim() || formCategory;
-    addRecord({
-      category: 'finance',
-      title: desc,
-      recordedBy: CURRENT_USER,
-      data: {
-        type: createType,
-        amount,
-        category: formCategory,
-        desc,
-        date: formDate,
-        method: createType === 'income' ? '입금' : formMethod,
-        memo: formMemo.trim(),
-      },
-    });
+    const method = formType === 'income' ? '입금' : formMethod;
+    const base = { type: formType, amount, category: formCategory, desc, date: formDate, ownerMember: formOwner };
+    const data: Transaction = {
+      ...base,
+      method,
+      memo: formMemo.trim(),
+      source: editingId ? (selectedRecord?.data.source ?? 'manual') : 'manual',
+      importKey: fingerprint(base),
+    };
+
+    if (editingId) {
+      patchRecordData(editingId, data);
+    } else {
+      addRecord({ category: 'finance', title: desc, recordedBy: CURRENT_USER, data });
+    }
     // 방금 적은 거래가 보이도록 그 달로 이동한다.
     setViewMonth(monthOf(formDate));
     setActiveCategory('전체');
-    closeCreate();
+    closeForm();
+  };
+
+  /** 삭제 — 확인 후 지우고, 6초간 되돌릴 수 있게 남겨둔다. */
+  const handleDelete = (record: FamilyRecord<Transaction>) => {
+    const doDelete = () => {
+      removeRecord(record.id);
+      closeDetail();
+      setUndoItem(record);
+      if (undoTimer.current) clearTimeout(undoTimer.current);
+      // "어? 지웠네" 하고 반응할 시간을 넉넉히 준다 (Gmail도 10초 정도를 쓴다)
+      undoTimer.current = setTimeout(() => setUndoItem(null), 10000);
+    };
+    showAlert(
+      '이 거래를 삭제할까요?',
+      `${record.data.desc} · ${formatAmount(record.data.amount, record.data.type)}`,
+      [{ text: '취소', style: 'cancel' }, { text: '삭제', style: 'destructive', onPress: doDelete }]
+    );
+  };
+
+  const handleUndo = () => {
+    if (!undoItem) return;
+    addRecord({
+      category: 'finance',
+      title: undoItem.title,
+      recordedBy: undoItem.recordedBy,
+      createdAt: undoItem.createdAt,
+      data: undoItem.data,
+    });
+    setUndoItem(null);
+    if (undoTimer.current) clearTimeout(undoTimer.current);
   };
 
   // ── 집계 ──────────────────────────────────────────────────
-  /** 보고 있는 달의 거래만 (날짜 내림차순) */
   const monthRecords = useMemo(
     () =>
       records
@@ -193,7 +210,7 @@ export default function FinanceScreen() {
     return sumOf(records.filter((r) => monthOf(r.data.date) === prev), 'expense');
   }, [records, viewMonth]);
 
-  /** 카테고리별 지출 — 큰 순서대로. 차트와 필터칩에 함께 쓴다. */
+  /** 카테고리별 지출 — 큰 순서대로. 차트와 필터에 함께 쓴다. */
   const byCategory = useMemo(() => {
     const totals: Record<string, number> = {};
     for (const r of monthRecords) {
@@ -203,16 +220,24 @@ export default function FinanceScreen() {
     const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
     const max = entries.length ? entries[0][1] : 0;
     return entries.map(([name, amount]) => ({
-      name,
-      amount,
-      // 막대 길이는 최대 항목 기준, 표시 %는 전체 지출 기준
+      name, amount,
       barPct: max ? Math.round((amount / max) * 100) : 0,
       sharePct: summary.expense ? Math.round((amount / summary.expense) * 100) : 0,
       color: metaOf(name).color,
     }));
   }, [monthRecords, summary.expense]);
 
-  /** 카테고리 필터칩 — 그 달에 실제로 쓴 카테고리만 보여준다. */
+  /** 구성원별 지출 — 3명이 각자 쓴 돈이 따로 보이도록 */
+  const byMember = useMemo(() => {
+    const totals: Record<string, number> = {};
+    for (const r of monthRecords) {
+      if (r.data.type !== 'expense') continue;
+      const who = r.data.ownerMember || r.recordedBy;
+      totals[who] = (totals[who] ?? 0) + r.data.amount;
+    }
+    return Object.entries(totals).sort((a, b) => b[1] - a[1]);
+  }, [monthRecords]);
+
   const filterChips = useMemo(
     () => ['전체', ...Array.from(new Set(monthRecords.map((r) => r.data.category)))],
     [monthRecords]
@@ -223,7 +248,7 @@ export default function FinanceScreen() {
     [monthRecords, activeCategory]
   );
 
-  /** 날짜별로 다시 묶는다. 창고에는 낱장으로 있지만 화면에서는 날짜별로 보는 게 읽기 쉽다. */
+  /** 날짜별로 다시 묶는다. 창고에는 낱장으로 있지만 화면에서는 날짜별이 읽기 쉽다. */
   const grouped = useMemo(() => {
     const map = new Map<string, typeof visible>();
     for (const r of visible) {
@@ -232,100 +257,153 @@ export default function FinanceScreen() {
       map.set(r.data.date, list);
     }
     return Array.from(map.entries()).map(([date, items]) => ({
-      date,
-      items,
-      // 그 날 쓴 돈 합계 — 하루 단위로 얼마 썼는지 바로 보인다
+      date, items,
       dayExpense: items.filter((i) => i.data.type === 'expense').reduce((s, i) => s + i.data.amount, 0),
     }));
   }, [visible]);
 
-  const openDetail = (item: any) => {
-    setSelectedItem(item);
-    Animated.parallel([
-      Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
-      Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
-    ]).start();
-  };
-  const closeDetail = () => {
-    Animated.parallel([
-      Animated.timing(modalBg, { toValue: 0, duration: 250, useNativeDriver: true }),
-      Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
-    ]).start(() => setSelectedItem(null));
-  };
+  /** 자주 쓴 내역 — 폼의 빠른 입력용. 수정 중일 때는 방해되니 숨긴다. */
+  const quickEntries = useMemo(
+    () => (editingId ? [] : frequentEntries(records, formType)),
+    [records, formType, editingId]
+  );
 
   const isThisMonth = viewMonth === monthOf(todayISO());
-  const activeCategories = createType === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+  const activeCategories = formType === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
   const diff = summary.expense - prevExpense;
+  const sel = selectedRecord?.data;
 
   return (
     <>
       <Stack.Screen options={{ title: '가계부' }} />
       <View style={styles.container}>
-        {/* 거래 상세 */}
-        <Modal visible={!!selectedItem} transparent statusBarTranslucent animationType="none">
+        {/* 거래 상세 — 수정 / 복제 / 삭제 */}
+        <Modal visible={!!selectedRecord} transparent statusBarTranslucent animationType="none">
           <View style={styles.modalWrap}>
             <Animated.View style={[styles.modalBg, { opacity: modalBg }]}>
               <Pressable style={{ flex: 1 }} onPress={closeDetail} />
             </Animated.View>
             <Animated.View style={[styles.modalSheet, { transform: [{ translateY: modalSlide }] }]}>
               <View style={styles.modalHandle} />
-              {selectedItem && (
+              {sel && selectedRecord && (
                 <View style={styles.modalContent}>
-                  <Text style={styles.modalTitle}>{selectedItem.desc}</Text>
-                  <Text style={[styles.detailAmount, { color: selectedItem.type === 'income' ? '#4AA86B' : '#1F1F1F' }]}>
-                    {formatAmount(selectedItem.amount, selectedItem.type)}
+                  <Text style={styles.modalTitle}>{sel.desc}</Text>
+                  <Text style={[styles.detailAmount, { color: sel.type === 'income' ? '#4AA86B' : '#1F1F1F' }]}>
+                    {formatAmount(sel.amount, sel.type)}
                   </Text>
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>카테고리</Text>
-                    <Text style={styles.modalValue}>{selectedItem.category}</Text>
+                    <Text style={styles.modalValue}>{sel.category}</Text>
                   </View>
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>날짜</Text>
-                    <Text style={styles.modalValue}>{formatDay(selectedItem.date)}</Text>
+                    <Text style={styles.modalValue}>{formatDay(sel.date)}</Text>
                   </View>
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>결제수단</Text>
-                    <Text style={styles.modalValue}>{selectedItem.method}</Text>
+                    <Text style={styles.modalValue}>{sel.method}</Text>
                   </View>
                   <View style={styles.modalRow}>
-                    <Text style={styles.modalLabel}>작성자</Text>
+                    <Text style={styles.modalLabel}>쓴 사람</Text>
                     <Text style={styles.modalValue}>
-                      {selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}
+                      {sel.ownerMember || selectedRecord.recordedBy}
+                      {(sel.ownerMember || selectedRecord.recordedBy) === CURRENT_USER ? ' (나)' : ''}
                     </Text>
                   </View>
-                  {selectedItem.memo ? (
+                  {/* 기록한 사람이 쓴 사람과 다를 때만 보여준다 */}
+                  {sel.ownerMember && sel.ownerMember !== selectedRecord.recordedBy && (
+                    <View style={styles.modalRow}>
+                      <Text style={styles.modalLabel}>기록</Text>
+                      <Text style={styles.modalValue}>{selectedRecord.recordedBy}</Text>
+                    </View>
+                  )}
+                  {sel.memo ? (
                     <View style={styles.modalRow}>
                       <Text style={styles.modalLabel}>메모</Text>
-                      <Text style={styles.modalValue}>{selectedItem.memo}</Text>
+                      <Text style={styles.modalValue}>{sel.memo}</Text>
                     </View>
                   ) : null}
+                  {sel.source === 'csv' && (
+                    <View style={styles.sourceTag}>
+                      <FontAwesome name="file-text-o" size={10} color="#4A8C6F" />
+                      <Text style={styles.sourceTagText}>
+                        명세서에서 가져옴{sel.sourceFile ? ` · ${sel.sourceFile}` : ''}
+                      </Text>
+                    </View>
+                  )}
+
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity
+                      style={styles.actionBtn}
+                      activeOpacity={0.7}
+                      onPress={() => { const r = selectedRecord; closeDetail(); setTimeout(() => openForm({ edit: r }), 260); }}>
+                      <FontAwesome name="pencil" size={13} color="#2D5A3F" />
+                      <Text style={styles.actionText}>수정</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.actionBtn}
+                      activeOpacity={0.7}
+                      onPress={() => { const d = sel; closeDetail(); setTimeout(() => openForm({ copy: d }), 260); }}>
+                      <FontAwesome name="copy" size={13} color="#2D5A3F" />
+                      <Text style={styles.actionText}>한 번 더</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.actionBtn, styles.actionBtnDanger]}
+                      activeOpacity={0.7}
+                      onPress={() => handleDelete(selectedRecord)}>
+                      <FontAwesome name="trash-o" size={13} color="#D94040" />
+                      <Text style={[styles.actionText, { color: '#D94040' }]}>삭제</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               )}
             </Animated.View>
           </View>
         </Modal>
 
-        {/* 새 거래 작성 */}
-        <Modal visible={showCreate} transparent statusBarTranslucent animationType="none">
+        {/* 거래 작성 / 수정 */}
+        <Modal visible={showForm} transparent statusBarTranslucent animationType="none">
           <View style={styles.modalWrap}>
-            <Animated.View style={[styles.modalBg, { opacity: createBg }]}>
-              <Pressable style={{ flex: 1 }} onPress={closeCreate} />
+            <Animated.View style={[styles.modalBg, { opacity: formBg }]}>
+              <Pressable style={{ flex: 1 }} onPress={closeForm} />
             </Animated.View>
-            <Animated.View style={[styles.modalSheet, { transform: [{ translateY: createSlide }] }]}>
+            <Animated.View style={[styles.modalSheet, { transform: [{ translateY: formSlide }] }]}>
               <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>새 거래 기록</Text>
-              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 520 }}>
+              <Text style={styles.modalTitle}>{editingId ? '거래 수정' : '새 거래 기록'}</Text>
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 480 }}>
                 <View style={styles.pillRow}>
                   {([['지출', 'expense'], ['수입', 'income']] as const).map(([label, val]) => (
                     <TouchableOpacity
                       key={val}
-                      style={[styles.pill, createType === val && styles.pillActive]}
+                      style={[styles.pill, formType === val && styles.pillActive]}
                       activeOpacity={0.7}
                       onPress={() => switchType(val)}>
-                      <Text style={[styles.pillText, createType === val && styles.pillTextActive]}>{label}</Text>
+                      <Text style={[styles.pillText, formType === val && styles.pillTextActive]}>{label}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
+
+                {/* 자주 쓴 내역 — 탭 한 번으로 전부 채워진다 */}
+                {quickEntries.length > 0 && (
+                  <>
+                    <Text style={styles.createLabel}>자주 쓴 내역 — 탭하면 한 번에 채워져요</Text>
+                    <View style={styles.quickGrid}>
+                      {quickEntries.map((q) => (
+                        <TouchableOpacity
+                          key={q.desc}
+                          style={styles.quickChip}
+                          activeOpacity={0.7}
+                          onPress={() => applyQuick(q)}>
+                          <View style={[styles.catDot, { backgroundColor: metaOf(q.category).color }]}>
+                            <FontAwesome name={metaOf(q.category).icon as any} size={10} color="#5C4A32" />
+                          </View>
+                          <Text style={styles.quickChipText} numberOfLines={1}>{q.desc}</Text>
+                          <Text style={styles.quickChipAmount}>{comma(q.amount)}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </>
+                )}
 
                 <Text style={styles.createLabel}>금액</Text>
                 <View style={styles.amountWrap}>
@@ -335,7 +413,7 @@ export default function FinanceScreen() {
                     placeholderTextColor="#CFC7BA"
                     keyboardType="numeric"
                     value={formAmount}
-                    // 입력은 숫자만 받고, 보여줄 때는 천 단위 콤마를 넣는다
+                    // 입력은 숫자만 받고, 보여줄 때 천 단위 콤마를 넣는다
                     onChangeText={(v) => {
                       const digits = v.replace(/[^0-9]/g, '');
                       setFormAmount(digits ? comma(parseInt(digits, 10)) : '');
@@ -343,6 +421,15 @@ export default function FinanceScreen() {
                   />
                   <Text style={styles.amountWon}>원</Text>
                 </View>
+
+                <Text style={styles.createLabel}>내역</Text>
+                <TextInput
+                  style={styles.createInput}
+                  placeholder="예: 이마트 장보기 (비우면 카테고리명으로 저장)"
+                  placeholderTextColor="#BFAE99"
+                  value={formDesc}
+                  onChangeText={onDescChange}
+                />
 
                 <Text style={styles.createLabel}>카테고리</Text>
                 <View style={styles.catGrid}>
@@ -353,7 +440,7 @@ export default function FinanceScreen() {
                         key={c.name}
                         style={[styles.catChip, on && styles.catChipActive]}
                         activeOpacity={0.7}
-                        onPress={() => setFormCategory(c.name)}>
+                        onPress={() => { setFormCategory(c.name); setCategoryTouched(true); }}>
                         <View style={[styles.catDot, { backgroundColor: c.color }]}>
                           <FontAwesome name={c.icon as any} size={11} color="#5C4A32" />
                         </View>
@@ -383,7 +470,7 @@ export default function FinanceScreen() {
                   onChangeText={setFormDate}
                 />
 
-                {createType === 'expense' && (
+                {formType === 'expense' && (
                   <>
                     <Text style={styles.createLabel}>결제수단</Text>
                     <View style={styles.pillRow}>
@@ -400,14 +487,21 @@ export default function FinanceScreen() {
                   </>
                 )}
 
-                <Text style={styles.createLabel}>내역</Text>
-                <TextInput
-                  style={styles.createInput}
-                  placeholder="예: 이마트 장보기 (비우면 카테고리명으로 저장)"
-                  placeholderTextColor="#BFAE99"
-                  value={formDesc}
-                  onChangeText={setFormDesc}
-                />
+                {/* 쓴 사람 — 가족이 같이 쓸 때 누구 지출인지 구분한다 */}
+                <Text style={styles.createLabel}>쓴 사람</Text>
+                <View style={styles.catGrid}>
+                  {MEMBERS.map((m) => (
+                    <TouchableOpacity
+                      key={m}
+                      style={[styles.catChip, formOwner === m && styles.catChipActive]}
+                      activeOpacity={0.7}
+                      onPress={() => setFormOwner(m)}>
+                      <Text style={[styles.catChipText, formOwner === m && styles.catChipTextActive]}>
+                        {m}{m === CURRENT_USER ? ' (나)' : ''}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
 
                 <Text style={styles.createLabel}>메모 (선택)</Text>
                 <TextInput
@@ -420,7 +514,7 @@ export default function FinanceScreen() {
                 />
 
                 <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={handleSave}>
-                  <Text style={styles.createSubmitText}>저장하기</Text>
+                  <Text style={styles.createSubmitText}>{editingId ? '수정 저장' : '저장하기'}</Text>
                 </TouchableOpacity>
               </ScrollView>
             </Animated.View>
@@ -430,11 +524,8 @@ export default function FinanceScreen() {
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* 월 요약 */}
           <View style={styles.summaryCard}>
-            {/* 월 이동 — 과거 달을 그대로 다시 볼 수 있다 */}
             <View style={styles.monthNav}>
-              <TouchableOpacity
-                style={styles.monthArrow}
-                activeOpacity={0.7}
+              <TouchableOpacity style={styles.monthArrow} activeOpacity={0.7}
                 onPress={() => setViewMonth(shiftMonth(viewMonth, -1))}>
                 <FontAwesome name="chevron-left" size={14} color="#4A8C6F" />
               </TouchableOpacity>
@@ -479,7 +570,6 @@ export default function FinanceScreen() {
                     <View style={styles.chartBarBg}>
                       <View style={[styles.chartBar, { width: `${cat.barPct}%`, backgroundColor: cat.color }]} />
                     </View>
-                    {/* 금액과 비중을 함께 — %만 보면 얼마인지 감이 안 온다 */}
                     <Text style={styles.chartAmount}>{comma(cat.amount)}원</Text>
                     <Text style={styles.chartPct}>{cat.sharePct}%</Text>
                   </TouchableOpacity>
@@ -487,6 +577,18 @@ export default function FinanceScreen() {
               </View>
             ) : (
               <Text style={styles.noChart}>이 달에는 아직 지출 기록이 없어요</Text>
+            )}
+
+            {/* 구성원별 지출 — 3명이 같이 쓸 때 누가 얼마 썼는지 */}
+            {byMember.length > 1 && (
+              <View style={styles.memberRow}>
+                {byMember.map(([who, amt]) => (
+                  <View key={who} style={styles.memberChip}>
+                    <Text style={styles.memberName}>{who}</Text>
+                    <Text style={styles.memberAmount}>{comma(amt)}원</Text>
+                  </View>
+                ))}
+              </View>
             )}
           </View>
 
@@ -503,7 +605,6 @@ export default function FinanceScreen() {
             </View>
           )}
 
-          {/* 카테고리 필터 — 그 달에 실제로 쓴 카테고리만 */}
           {filterChips.length > 1 && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll} contentContainerStyle={styles.filterContainer}>
               {filterChips.map((cat) => (
@@ -518,7 +619,6 @@ export default function FinanceScreen() {
             </ScrollView>
           )}
 
-          {/* 거래 목록 — 날짜별로 묶어서 */}
           {grouped.length === 0 ? (
             <View style={styles.emptyState}>
               <FontAwesome name="inbox" size={36} color="#E0D8C8" />
@@ -552,15 +652,14 @@ export default function FinanceScreen() {
                       key={record.id}
                       style={styles.transItem}
                       activeOpacity={0.7}
-                      onPress={() => openDetail({ ...t, id: record.id, recordedBy: record.recordedBy })}>
+                      onPress={() => openDetail(record.id)}>
                       <View style={[styles.transIcon, { backgroundColor: meta.color }]}>
                         <FontAwesome name={meta.icon as any} size={14} color="#5C4A32" />
                       </View>
                       <View style={styles.transInfo}>
                         <Text style={styles.transDesc}>{t.desc}</Text>
                         <Text style={styles.transCat}>
-                          {t.category}
-                          {t.method ? ` · ${t.method}` : ''}
+                          {[t.category, t.method, t.ownerMember].filter(Boolean).join(' · ')}
                           {t.memo ? ' · 메모' : ''}
                         </Text>
                       </View>
@@ -574,11 +673,23 @@ export default function FinanceScreen() {
             ))
           )}
 
-          <View style={{ height: 80 }} />
+          <View style={{ height: 96 }} />
         </ScrollView>
 
-        {/* FAB */}
-        <TouchableOpacity style={styles.fab} activeOpacity={0.8} onPress={openCreate}>
+        {/* 삭제 되돌리기 — 실수로 지워도 6초 안에 살릴 수 있다 */}
+        {undoItem && (
+          <View style={styles.undoBar}>
+            <Text style={styles.undoText} numberOfLines={1}>
+              '{undoItem.data.desc}' 삭제됨
+            </Text>
+            <TouchableOpacity style={styles.undoBtn} activeOpacity={0.7} onPress={handleUndo}>
+              <FontAwesome name="undo" size={12} color="#FFFFFF" />
+              <Text style={styles.undoBtnText}>되돌리기</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <TouchableOpacity style={styles.fab} activeOpacity={0.8} onPress={() => openForm()}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
@@ -621,6 +732,10 @@ const styles = StyleSheet.create({
   chartAmount: { width: 74, fontSize: 11, color: '#4A4A4A', textAlign: 'right', fontFamily: 'Pretendard' },
   chartPct: { width: 34, fontSize: 11, color: '#888888', textAlign: 'right', fontFamily: 'Pretendard' },
   noChart: { fontSize: 13, color: '#A0A0A0', textAlign: 'center', paddingVertical: 8, fontFamily: 'Pretendard' },
+  memberRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: '#F1EFEA' },
+  memberChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#F9F8F5', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6 },
+  memberName: { fontSize: 12, color: '#4A4A4A', fontFamily: 'PretendardBold' },
+  memberAmount: { fontSize: 12, color: '#888888', fontFamily: 'Pretendard' },
   emptyState: { alignItems: 'center' as const, paddingVertical: 48, gap: 6 },
   emptyText: { fontSize: 15, color: '#4A4A4A', marginTop: 8, fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   emptySubtext: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
@@ -656,6 +771,15 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#D0E4D6',
   },
   aiHintText: { flex: 1, fontSize: 12, color: '#2D5A3F', lineHeight: 18, fontFamily: 'Pretendard' },
+  undoBar: {
+    position: 'absolute', bottom: 20, left: 20, right: 88, zIndex: 11,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+    backgroundColor: '#2D2A26', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 10,
+  },
+  undoText: { flex: 1, fontSize: 13, color: '#F4F2EE', fontFamily: 'Pretendard' },
+  undoBtn: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  undoBtnText: { fontSize: 13, color: '#FFFFFF', fontFamily: 'PretendardBold' },
   fab: {
     position: 'absolute', bottom: 16, right: 20, zIndex: 10,
     width: 56, height: 56, borderRadius: 28,
@@ -673,6 +797,15 @@ const styles = StyleSheet.create({
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
   modalLabel: { fontSize: 13, color: '#A0A0A0', width: 66, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
+  sourceTag: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#EFF6F1', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 7, marginBottom: 4, alignSelf: 'flex-start' },
+  sourceTagText: { fontSize: 11, color: '#4A8C6F', fontFamily: 'Pretendard' },
+  actionRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  actionBtn: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    paddingVertical: 13, borderRadius: 12, borderWidth: 1, borderColor: '#D0E4D6', backgroundColor: '#EFF6F1',
+  },
+  actionBtnDanger: { borderColor: '#F0D4D4', backgroundColor: '#FCF2F2' },
+  actionText: { fontSize: 13, color: '#2D5A3F', fontFamily: 'PretendardBold' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   amountWrap: {
@@ -682,6 +815,14 @@ const styles = StyleSheet.create({
   },
   amountInput: { flex: 1, paddingVertical: 12, fontSize: 24, color: '#1F1F1F', fontFamily: 'PretendardBold', textAlign: 'right' },
   amountWon: { fontSize: 16, color: '#4A4A4A', marginLeft: 6, fontFamily: 'Pretendard' },
+  quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
+  quickChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 10, paddingVertical: 8, borderRadius: 12,
+    borderWidth: 1, borderColor: '#D0E4D6', backgroundColor: '#F7FBF8', maxWidth: '100%',
+  },
+  quickChipText: { fontSize: 13, color: '#2D5A3F', fontFamily: 'PretendardBold', flexShrink: 1 },
+  quickChipAmount: { fontSize: 11, color: '#7A8B7F', fontFamily: 'Pretendard' },
   catGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   catChip: {
     flexDirection: 'row', alignItems: 'center', gap: 6,

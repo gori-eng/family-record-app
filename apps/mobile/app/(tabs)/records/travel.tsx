@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
@@ -64,7 +65,7 @@ export default function TravelScreen() {
   const handleSave = () => {
     const dest = formDest.trim();
     if (!dest) {
-      Alert.alert('목적지를 입력해주세요', '어디로 가는 여행인지 알려주세요.');
+      showAlert('목적지를 입력해주세요', '어디로 가는 여행인지 알려주세요.');
       return;
     }
     addRecord({
