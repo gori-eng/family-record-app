@@ -5,6 +5,8 @@
  * - 카드사별 열 매핑 프로필 (한 번 맞춰두면 다음부터 자동)
  * - 가맹점 → 카테고리 교정 (고친 결과를 기억)
  * - 할부 처리 정책
+ * - 반복 거래 (월급·관리비처럼 매달 같은 항목)
+ * - 예산 (전체 / 카테고리별)
  *
  * 저장 위치: 웹은 localStorage, 네이티브는 아직 메모리.
  * 이 값들은 사실 "가족 공유 설정"이라 Supabase를 붙일 때 DB로 옮기는 게 맞다.
@@ -36,12 +38,39 @@ export type InstallmentPolicy =
   /** 개월 수로 나눠 매달 (실제 빠져나가는 돈에 가깝다) */
   | 'split';
 
+/**
+ * 매달 똑같이 나가는 돈. 월급·관리비·학원비처럼 매번 손으로 적기 번거로운 항목을
+ * 등록해두면 새 달에 한 번 눌러 전부 넣을 수 있다.
+ */
+export type RecurringItem = {
+  id: string;
+  type: 'income' | 'expense';
+  amount: number;
+  category: string;
+  desc: string;
+  method: string;
+  ownerMember: string;
+  /** 매달 며칠에 나가는지 (1~31). 그 달에 없는 날이면 말일로 맞춘다. */
+  day: number;
+  memo: string;
+};
+
+/** 예산. 전체 한도와 카테고리별 한도를 따로 둘 수 있다. */
+export type Budgets = {
+  /** 한 달 전체 지출 한도. 0이면 설정 안 함 */
+  total: number;
+  /** 카테고리별 한도. 없으면 설정 안 함 */
+  byCategory: Record<string, number>;
+};
+
 type Settings = {
   cardOwners: Record<string, string>;
   savedProfiles: SavedProfile[];
   /** 정규화된 가맹점명 → 카테고리 */
   categoryOverrides: Record<string, string>;
   installmentPolicy: InstallmentPolicy;
+  recurring: RecurringItem[];
+  budgets: Budgets;
 };
 
 const EMPTY: Settings = {
@@ -49,6 +78,8 @@ const EMPTY: Settings = {
   savedProfiles: [],
   categoryOverrides: {},
   installmentPolicy: 'full',
+  recurring: [],
+  budgets: { total: 0, byCategory: {} },
 };
 
 // ── 저장소 ────────────────────────────────────────────────
@@ -80,6 +111,10 @@ type SettingsStore = Settings & {
   /** 가맹점 카테고리를 고쳤을 때 기억한다 */
   setCategoryOverride: (merchant: string, category: string) => void;
   setInstallmentPolicy: (p: InstallmentPolicy) => void;
+  addRecurring: (item: Omit<RecurringItem, 'id'>) => void;
+  removeRecurring: (id: string) => void;
+  setBudgetTotal: (amount: number) => void;
+  setCategoryBudget: (category: string, amount: number) => void;
   resetAll: () => void;
 };
 
@@ -124,11 +159,47 @@ export const useFinanceSettings = create<SettingsStore>((set, get) => ({
     save({ ...get(), installmentPolicy });
   },
 
+  addRecurring: (item) => {
+    const recurring = [...get().recurring, { ...item, id: `r${Date.now().toString(36)}` }];
+    set({ recurring });
+    save({ ...get(), recurring });
+  },
+  removeRecurring: (id) => {
+    const recurring = get().recurring.filter((r) => r.id !== id);
+    set({ recurring });
+    save({ ...get(), recurring });
+  },
+
+  setBudgetTotal: (amount) => {
+    const budgets = { ...get().budgets, total: Math.max(0, amount) };
+    set({ budgets });
+    save({ ...get(), budgets });
+  },
+  setCategoryBudget: (category, amount) => {
+    const byCategory = { ...get().budgets.byCategory };
+    if (amount > 0) byCategory[category] = amount;
+    else delete byCategory[category];
+    const budgets = { ...get().budgets, byCategory };
+    set({ budgets });
+    save({ ...get(), budgets });
+  },
+
   resetAll: () => {
     set(EMPTY);
     save(EMPTY);
   },
 }));
+
+/**
+ * 반복 거래가 그 달에 들어갈 날짜를 만든다.
+ * 31일로 등록했는데 2월이면 말일(28/29일)로 맞춘다.
+ */
+export function recurringDateIn(ym: string, day: number): string {
+  const [y, m] = ym.split('-').map(Number);
+  const last = new Date(y, m, 0).getDate();
+  const d = Math.min(Math.max(1, day), last);
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
 
 /** 헤더 이름들로 파일의 지문을 만든다. 같은 카드사 파일은 같은 값이 나온다. */
 export const headerSignatureOf = (headers: string[]) =>

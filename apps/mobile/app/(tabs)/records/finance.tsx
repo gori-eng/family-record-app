@@ -4,12 +4,14 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
+import { useFinanceSettings, recurringDateIn, type RecurringItem } from '../../../store/financeSettings';
 import { MEMBERS, CURRENT_USER } from '../../../constants/family';
 import {
   type Transaction,
   EXPENSE_CATEGORIES, INCOME_CATEGORIES, PAYMENT_METHODS, metaOf,
   todayISO, daysAgoISO, isISODate, formatDay, formatMonth, shiftMonth, monthOf,
   comma, formatAmount, parseAmount, fingerprint, frequentEntries, guessFromHistory,
+  normalizeMerchant,
 } from '../../../store/finance';
 
 export default function FinanceScreen() {
@@ -19,6 +21,12 @@ export default function FinanceScreen() {
 
   // 지금 보고 있는 달. 이 값만 바꾸면 과거 달을 그대로 다시 볼 수 있다.
   const [viewMonth, setViewMonth] = useState(monthOf(todayISO()));
+  /** 검색어. 비어있지 않으면 달 구분 없이 전체에서 찾는다. */
+  const [query, setQuery] = useState('');
+  const [showBudget, setShowBudget] = useState(false);
+  const [showRecurring, setShowRecurring] = useState(false);
+
+  const settings = useFinanceSettings();
 
   // 창고에서 거래 기록만 꺼낸다 (거래 1건 = 기록 1건).
   const records = useRecordsByCategory<Transaction>('finance');
@@ -263,6 +271,82 @@ export default function FinanceScreen() {
     }));
   }, [visible]);
 
+  /**
+   * 검색 결과 — 내역·메모·카테고리·쓴 사람에서 찾는다.
+   * 검색 중에는 달을 넘나들며 찾아야 의미가 있으므로 월 필터를 무시한다.
+   */
+  const searchResults = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return null;
+    const nq = normalizeMerchant(q);
+    return records.filter((r) => {
+      const t = r.data;
+      return (
+        t.desc.toLowerCase().includes(q)
+        || normalizeMerchant(t.desc).includes(nq)
+        || (t.memo ?? '').toLowerCase().includes(q)
+        || t.category.includes(q)
+        || (t.ownerMember ?? '').includes(q)
+      );
+    });
+  }, [records, query]);
+
+  /** 이 달에 아직 안 넣은 반복 거래 */
+  const pendingRecurring = useMemo(() => {
+    if (!settings.recurring.length) return [];
+    return settings.recurring.filter((item) => {
+      const date = recurringDateIn(viewMonth, item.day);
+      const key = fingerprint({
+        type: item.type, amount: item.amount, desc: item.desc,
+        date, ownerMember: item.ownerMember,
+      });
+      return !records.some((r) => r.data.importKey === key);
+    });
+  }, [settings.recurring, records, viewMonth]);
+
+  const addRecurringToMonth = () => {
+    for (const item of pendingRecurring) {
+      const date = recurringDateIn(viewMonth, item.day);
+      const base = {
+        type: item.type, amount: item.amount, category: item.category,
+        desc: item.desc, date, ownerMember: item.ownerMember,
+      };
+      addRecord({
+        category: 'finance',
+        title: item.desc,
+        recordedBy: CURRENT_USER,
+        createdAt: new Date(`${date}T12:00:00`).getTime(),
+        data: { ...base, method: item.method, memo: item.memo, source: 'manual', importKey: fingerprint(base) },
+      });
+    }
+  };
+
+  /** 이 거래를 매달 반복으로 등록 */
+  const registerRecurring = (t: Transaction) => {
+    const day = parseInt(t.date.slice(8, 10), 10) || 1;
+    settings.addRecurring({
+      type: t.type, amount: t.amount, category: t.category, desc: t.desc,
+      method: t.method, ownerMember: t.ownerMember || CURRENT_USER, day, memo: t.memo,
+    });
+    showAlert(
+      '매달 반복으로 등록했어요',
+      `${t.desc} · 매달 ${day}일\n새 달이 되면 한 번 눌러 바로 넣을 수 있어요.`
+    );
+  };
+
+  /** 예산 진행 상황 */
+  const budget = useMemo(() => {
+    const total = settings.budgets.total;
+    if (!total) return null;
+    const used = summary.expense;
+    return {
+      total, used,
+      left: total - used,
+      pct: Math.min(200, Math.round((used / total) * 100)),
+      over: used > total,
+    };
+  }, [settings.budgets.total, summary.expense]);
+
   /** 자주 쓴 내역 — 폼의 빠른 입력용. 수정 중일 때는 방해되니 숨긴다. */
   const quickEntries = useMemo(
     () => (editingId ? [] : frequentEntries(records, formType)),
@@ -347,6 +431,13 @@ export default function FinanceScreen() {
                       onPress={() => { const d = sel; closeDetail(); setTimeout(() => openForm({ copy: d }), 260); }}>
                       <FontAwesome name="copy" size={13} color="#2D5A3F" />
                       <Text style={styles.actionText}>한 번 더</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.actionBtn}
+                      activeOpacity={0.7}
+                      onPress={() => { const d = sel; closeDetail(); setTimeout(() => registerRecurring(d), 260); }}>
+                      <FontAwesome name="repeat" size={13} color="#2D5A3F" />
+                      <Text style={styles.actionText}>매달</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.actionBtn, styles.actionBtnDanger]}
@@ -522,7 +613,24 @@ export default function FinanceScreen() {
           </View>
         </Modal>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          {/* 검색 */}
+          <View style={styles.searchWrap}>
+            <FontAwesome name="search" size={13} color="#9CB3A4" />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="내역·메모·카테고리로 찾기"
+              placeholderTextColor="#B0A89C"
+              value={query}
+              onChangeText={setQuery}
+            />
+            {query.length > 0 && (
+              <TouchableOpacity activeOpacity={0.7} onPress={() => setQuery('')}>
+                <FontAwesome name="times-circle" size={15} color="#C4BDB2" />
+              </TouchableOpacity>
+            )}
+          </View>
+
           {/* 카드 명세서에서 한 번에 불러오기 */}
           <TouchableOpacity
             style={styles.importRow}
@@ -533,6 +641,56 @@ export default function FinanceScreen() {
             <FontAwesome name="chevron-right" size={11} color="#9CB3A4" />
           </TouchableOpacity>
 
+          {/* 매달 넣는 거래 관리 */}
+          <TouchableOpacity
+            style={[styles.importRow, { marginTop: 8 }]}
+            activeOpacity={0.7}
+            onPress={() => setShowRecurring(true)}>
+            <FontAwesome name="repeat" size={14} color="#4A8C6F" />
+            <Text style={styles.importRowText}>
+              매달 넣는 거래{settings.recurring.length ? ` ${settings.recurring.length}건` : ''}
+            </Text>
+            <FontAwesome name="chevron-right" size={11} color="#9CB3A4" />
+          </TouchableOpacity>
+
+          {/* 검색 중에는 달 구분 없이 결과만 */}
+          {searchResults !== null ? (
+            <>
+              <Text style={styles.searchCount}>
+                {searchResults.length > 0
+                  ? `'${query.trim()}' 검색 결과 ${searchResults.length}건 · ${comma(
+                      searchResults.filter((r) => r.data.type === 'expense').reduce((a, r) => a + r.data.amount, 0)
+                    )}원`
+                  : `'${query.trim()}'로 찾은 기록이 없어요`}
+              </Text>
+              {searchResults.map((record) => {
+                const t = record.data;
+                const meta = metaOf(t.category);
+                return (
+                  <TouchableOpacity
+                    key={record.id}
+                    style={[styles.transItem, { marginHorizontal: 20 }]}
+                    activeOpacity={0.7}
+                    onPress={() => openDetail(record.id)}>
+                    <View style={[styles.transIcon, { backgroundColor: meta.color }]}>
+                      <FontAwesome name={meta.icon as any} size={14} color="#5C4A32" />
+                    </View>
+                    <View style={styles.transInfo}>
+                      <Text style={styles.transDesc}>{t.desc}</Text>
+                      <Text style={styles.transCat}>
+                        {formatDay(t.date)} · {[t.category, t.ownerMember].filter(Boolean).join(' · ')}
+                      </Text>
+                    </View>
+                    <Text style={[styles.transAmount, { color: t.type === 'income' ? '#4AA86B' : '#4A8C6F' }]}>
+                      {formatAmount(t.amount, t.type)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+              <View style={{ height: 96 }} />
+            </>
+          ) : (
+          <>
           {/* 월 요약 */}
           <View style={styles.summaryCard}>
             <View style={styles.monthNav}>
@@ -567,6 +725,33 @@ export default function FinanceScreen() {
               <Text style={styles.balanceAmount}>{comma(summary.balance)}원</Text>
             </View>
 
+            {/* 예산 */}
+            <TouchableOpacity style={styles.budgetRow} activeOpacity={0.7} onPress={() => setShowBudget(true)}>
+              {budget ? (
+                <>
+                  <View style={styles.budgetTop}>
+                    <Text style={styles.budgetLabel}>
+                      이 달 예산 {comma(budget.total)}원
+                    </Text>
+                    <Text style={[styles.budgetLeft, budget.over && styles.budgetOver]}>
+                      {budget.over
+                        ? `${comma(-budget.left)}원 넘었어요`
+                        : `${comma(budget.left)}원 남았어요`}
+                    </Text>
+                  </View>
+                  <View style={styles.budgetBarBg}>
+                    <View style={[
+                      styles.budgetBar,
+                      { width: `${Math.min(100, budget.pct)}%` },
+                      budget.over && styles.budgetBarOver,
+                    ]} />
+                  </View>
+                </>
+              ) : (
+                <Text style={styles.budgetEmpty}>예산을 정해두면 얼마 남았는지 바로 보여요 · 설정하기</Text>
+              )}
+            </TouchableOpacity>
+
             {byCategory.length > 0 ? (
               <View style={styles.chartContainer}>
                 {byCategory.map((cat) => (
@@ -582,7 +767,16 @@ export default function FinanceScreen() {
                       <View style={[styles.chartBar, { width: `${cat.barPct}%`, backgroundColor: cat.color }]} />
                     </View>
                     <Text style={styles.chartAmount}>{comma(cat.amount)}원</Text>
-                    <Text style={styles.chartPct}>{cat.sharePct}%</Text>
+                    {settings.budgets.byCategory[cat.name] ? (
+                      <Text style={[
+                        styles.chartPct,
+                        cat.amount > settings.budgets.byCategory[cat.name] && styles.chartOver,
+                      ]}>
+                        /{comma(settings.budgets.byCategory[cat.name])}
+                      </Text>
+                    ) : (
+                      <Text style={styles.chartPct}>{cat.sharePct}%</Text>
+                    )}
                   </TouchableOpacity>
                 ))}
               </View>
@@ -602,6 +796,19 @@ export default function FinanceScreen() {
               </View>
             )}
           </View>
+
+          {/* 이 달에 아직 안 넣은 반복 거래 */}
+          {pendingRecurring.length > 0 && (
+            <TouchableOpacity style={styles.recurRow} activeOpacity={0.7} onPress={addRecurringToMonth}>
+              <FontAwesome name="repeat" size={13} color="#2D5A3F" />
+              <Text style={styles.recurText}>
+                매달 넣는 {pendingRecurring.length}건이 아직 없어요 · 한 번에 넣기
+              </Text>
+              <Text style={styles.recurAmount}>
+                {comma(pendingRecurring.filter((r) => r.type === 'expense').reduce((a, r) => a + r.amount, 0))}원
+              </Text>
+            </TouchableOpacity>
+          )}
 
           {/* 전월 대비 — 실제 계산값 */}
           {prevExpense > 0 && summary.expense > 0 && (
@@ -685,6 +892,8 @@ export default function FinanceScreen() {
           )}
 
           <View style={{ height: 96 }} />
+          </>
+          )}
         </ScrollView>
 
         {/* 삭제 되돌리기 — 실수로 지워도 6초 안에 살릴 수 있다 */}
@@ -699,6 +908,89 @@ export default function FinanceScreen() {
             </TouchableOpacity>
           </View>
         )}
+
+        {/* 예산 설정 */}
+        <Modal visible={showBudget} transparent statusBarTranslucent animationType="fade">
+          <View style={styles.centerWrap}>
+            <Pressable style={styles.centerBg} onPress={() => setShowBudget(false)} />
+            <View style={styles.centerSheet}>
+              <Text style={styles.centerTitle}>예산 정하기</Text>
+              <Text style={styles.centerDesc}>
+                한 달에 얼마까지 쓸지 정해두면, 남은 금액이 요약에 바로 보여요.
+              </Text>
+              <Text style={styles.createLabel}>한 달 전체</Text>
+              <View style={styles.amountWrap}>
+                <TextInput
+                  style={styles.amountInput}
+                  placeholder="0"
+                  placeholderTextColor="#CFC7BA"
+                  keyboardType="numeric"
+                  value={settings.budgets.total ? comma(settings.budgets.total) : ''}
+                  onChangeText={(v) => settings.setBudgetTotal(parseAmount(v))}
+                />
+                <Text style={styles.amountWon}>원</Text>
+              </View>
+              <Text style={styles.createLabel}>카테고리별 (비워두면 설정 안 함)</Text>
+              <ScrollView style={{ maxHeight: 220 }} showsVerticalScrollIndicator={false}>
+                {EXPENSE_CATEGORIES.map((c) => (
+                  <View key={c.name} style={styles.budgetCatRow}>
+                    <View style={[styles.catDot, { backgroundColor: c.color }]}>
+                      <FontAwesome name={c.icon as any} size={11} color="#5C4A32" />
+                    </View>
+                    <Text style={styles.budgetCatName}>{c.name}</Text>
+                    <TextInput
+                      style={styles.budgetCatInput}
+                      placeholder="0"
+                      placeholderTextColor="#CFC7BA"
+                      keyboardType="numeric"
+                      value={settings.budgets.byCategory[c.name] ? comma(settings.budgets.byCategory[c.name]) : ''}
+                      onChangeText={(v) => settings.setCategoryBudget(c.name, parseAmount(v))}
+                    />
+                  </View>
+                ))}
+              </ScrollView>
+              <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={() => setShowBudget(false)}>
+                <Text style={styles.createSubmitText}>다 정했어요</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        {/* 반복 거래 관리 */}
+        <Modal visible={showRecurring} transparent statusBarTranslucent animationType="fade">
+          <View style={styles.centerWrap}>
+            <Pressable style={styles.centerBg} onPress={() => setShowRecurring(false)} />
+            <View style={styles.centerSheet}>
+              <Text style={styles.centerTitle}>매달 넣는 거래</Text>
+              <Text style={styles.centerDesc}>
+                거래를 눌러 '매달'을 고르면 여기에 등록돼요. 새 달이 되면 한 번에 넣을 수 있어요.
+              </Text>
+              {settings.recurring.length === 0 ? (
+                <Text style={styles.recurEmpty}>아직 등록한 게 없어요</Text>
+              ) : (
+                <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
+                  {settings.recurring.map((item: RecurringItem) => (
+                    <View key={item.id} style={styles.recurItem}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.recurItemDesc}>{item.desc}</Text>
+                        <Text style={styles.recurItemMeta}>
+                          매달 {item.day}일 · {item.category} · {item.ownerMember}
+                        </Text>
+                      </View>
+                      <Text style={styles.recurItemAmount}>{formatAmount(item.amount, item.type)}</Text>
+                      <TouchableOpacity activeOpacity={0.7} onPress={() => settings.removeRecurring(item.id)}>
+                        <FontAwesome name="times" size={14} color="#C4BDB2" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              )}
+              <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={() => setShowRecurring(false)}>
+                <Text style={styles.createSubmitText}>닫기</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
 
         <TouchableOpacity style={styles.fab} activeOpacity={0.8} onPress={() => openForm()}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
@@ -716,6 +1008,57 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
+  searchWrap: {
+    flexDirection: 'row', alignItems: 'center', gap: 9,
+    marginHorizontal: 20, marginTop: 16,
+    backgroundColor: '#FFFFFF', borderRadius: 12,
+    paddingHorizontal: 14, paddingVertical: 11,
+    borderWidth: 1, borderColor: '#EAEAEA',
+  },
+  searchInput: { flex: 1, fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard', paddingVertical: 0 },
+  searchCount: { fontSize: 13, color: '#4A4A4A', fontFamily: 'PretendardBold', marginHorizontal: 20, marginTop: 18, marginBottom: 10 },
+  budgetRow: { marginBottom: 16 },
+  budgetTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 },
+  budgetLabel: { fontSize: 12, color: '#888888', fontFamily: 'Pretendard' },
+  budgetLeft: { fontSize: 12, color: '#2D5A3F', fontFamily: 'PretendardBold' },
+  budgetOver: { color: '#C25A5A' },
+  budgetBarBg: { height: 8, backgroundColor: '#F1EFEA', borderRadius: 4 },
+  budgetBar: { height: 8, borderRadius: 4, backgroundColor: '#4A8C6F' },
+  budgetBarOver: { backgroundColor: '#D98A8A' },
+  budgetEmpty: { fontSize: 12, color: '#9CB3A4', fontFamily: 'Pretendard', textAlign: 'center', paddingVertical: 4 },
+  budgetCatRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
+  budgetCatName: { flex: 1, fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard' },
+  budgetCatInput: {
+    width: 110, backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA',
+    borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8,
+    fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard', textAlign: 'right',
+  },
+  chartOver: { color: '#C25A5A', fontFamily: 'PretendardBold' },
+  recurRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    marginHorizontal: 20, marginBottom: 16,
+    backgroundColor: '#FFFFFF', borderRadius: 12,
+    paddingHorizontal: 14, paddingVertical: 12,
+    borderWidth: 1, borderColor: '#D0E4D6',
+  },
+  recurText: { flex: 1, fontSize: 12, color: '#2D5A3F', fontFamily: 'PretendardBold' },
+  recurAmount: { fontSize: 12, color: '#888888', fontFamily: 'Pretendard' },
+  recurEmpty: { fontSize: 13, color: '#A0A0A0', fontFamily: 'Pretendard', textAlign: 'center', paddingVertical: 24 },
+  recurItem: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: '#F4F2EE',
+  },
+  recurItemDesc: { fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard' },
+  recurItemMeta: { fontSize: 11, color: '#A0A0A0', fontFamily: 'Pretendard', marginTop: 3 },
+  recurItemAmount: { fontSize: 13, color: '#4A8C6F', fontFamily: 'PretendardBold' },
+  centerWrap: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
+  centerBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
+  centerSheet: {
+    width: '100%', maxWidth: 420, backgroundColor: '#FFFFFF', borderRadius: 20, padding: 22,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 24, elevation: 12,
+  },
+  centerTitle: { fontSize: 17, color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
+  centerDesc: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard', marginTop: 8, marginBottom: 16, lineHeight: 19 },
   importRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     marginHorizontal: 20, marginTop: 16,
