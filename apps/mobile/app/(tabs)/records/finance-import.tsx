@@ -1,11 +1,13 @@
 /**
  * 카드 명세서 가져오기.
  *
- * 흐름: 파일 선택 → 카드별 사용자 지정 → 미리보기 → 확인 후 저장
- * 파싱·중복판정 로직은 store/statementImport.ts에 있다 (여기는 화면만).
+ * 흐름: 파일 선택 → (필요하면 열 맞추기) → 카드별 사용자 지정 → 미리보기 → 확인 후 저장
+ * 파싱·중복판정은 store/statementImport.ts, 기억해둘 설정은 store/financeSettings.ts에 있다.
  */
-import { useState, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Platform } from 'react-native';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import {
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Platform, Modal, Pressable,
+} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
@@ -13,72 +15,95 @@ import * as XLSX from 'xlsx';
 import { showAlert } from '../../../components/AppAlert';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
 import { MEMBERS, CURRENT_USER } from '../../../constants/family';
-import { type Transaction, comma, formatDay, metaOf } from '../../../store/finance';
+import { type Transaction, comma, formatDay, metaOf, EXPENSE_CATEGORIES } from '../../../store/finance';
 import {
-  SHINHAN_PROFILE, parseRows, buildCandidates, summarize, toTransaction, cardsInFile,
-  type ImportCandidate, type ColumnKey,
+  SHINHAN_PROFILE, parseRows, buildCandidates, summarize, toTransaction, toInstallments,
+  cardsInFile, type ImportCandidate, type ColumnKey, type RawRow,
 } from '../../../store/statementImport';
+import { useFinanceSettings, headerSignatureOf } from '../../../store/financeSettings';
+
+/** 열 맞추기 화면에 보여줄 항목 — 앞의 3개는 없으면 가져올 수 없다. */
+const COLUMN_FIELDS: { key: ColumnKey; label: string; required: boolean }[] = [
+  { key: 'date', label: '거래일', required: true },
+  { key: 'merchant', label: '가맹점명', required: true },
+  { key: 'amount', label: '금액', required: true },
+  { key: 'card', label: '이용카드', required: false },
+  { key: 'approvalNo', label: '승인번호', required: false },
+  { key: 'status', label: '취소상태', required: false },
+  { key: 'kind', label: '매입구분', required: false },
+  { key: 'installment', label: '할부(이용구분)', required: false },
+];
 
 export default function FinanceImportScreen() {
   const router = useRouter();
   const records = useRecordsByCategory<Transaction>('finance');
   const addRecord = useRecordsStore((s) => s.addRecord);
 
+  const settings = useFinanceSettings();
+
   const [busy, setBusy] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [fileName, setFileName] = useState('');
-  const [columns, setColumns] = useState<Record<ColumnKey, string | null> | null>(null);
+
+  // 원본 표 — 열 매핑을 바꾸면 이걸로 다시 파싱한다
+  const [headers, setHeaders] = useState<string[]>([]);
+  const [rawRows, setRawRows] = useState<RawRow[]>([]);
+  const [columnOverride, setColumnOverride] = useState<Partial<Record<ColumnKey, string>>>({});
+  const [showMapper, setShowMapper] = useState(false);
+  const [mappingField, setMappingField] = useState<ColumnKey | null>(null);
+
   const [cards, setCards] = useState<{ key: string; count: number }[]>([]);
-  /** 카드 뒷자리 → 가족 구성원. 한 파일에 카드가 여러 장 섞여 있을 수 있다. */
-  const [cardOwners, setCardOwners] = useState<Record<string, string>>({});
   const [candidates, setCandidates] = useState<ImportCandidate[] | null>(null);
-  const [rawParsed, setRawParsed] = useState<any[] | null>(null);
-  /** 중복으로 표시된 건도 굳이 넣겠다고 사용자가 고른 것들 */
   const [forceAdd, setForceAdd] = useState<Set<number>>(new Set());
+  /** 카테고리를 고치는 중인 줄 */
+  const [editingLine, setEditingLine] = useState<number | null>(null);
 
   const existing = records.map((r) => ({ id: r.id, data: r.data }));
-
   const dropRef = useRef<any>(null);
 
-  /**
-   * 바이트를 읽어 표로 만들고 미리보기까지 준비한다.
-   * 파일 고르기와 드래그&드롭이 같은 경로를 쓴다.
-   */
+  /** 표를 다시 파싱해서 미리보기를 갱신한다. 설정이 바뀔 때마다 부른다. */
+  const reparse = (
+    hs: string[],
+    rows: RawRow[],
+    override: Partial<Record<ColumnKey, string>>,
+    owners: Record<string, string> = settings.cardOwners
+  ) => {
+    const { parsed, columns } = parseRows(hs, rows, SHINHAN_PROFILE, {
+      columnOverride: override,
+      categoryOverrides: settings.categoryOverrides,
+    });
+    setCards(cardsInFile(parsed));
+    setCandidates(buildCandidates(parsed, owners, CURRENT_USER, existing));
+    return columns;
+  };
+
+  /** 바이트를 읽어 표로 만들고 미리보기까지 준비한다. */
   const loadBuffer = async (buf: ArrayBuffer, name: string) => {
     try {
       setBusy(true);
       const wb = XLSX.read(buf, { type: 'array', cellDates: true });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows: any[] = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true });
+      const rows: RawRow[] = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true });
       if (!rows.length) {
         showAlert('빈 파일이에요', '거래 내역이 들어 있는 파일인지 확인해주세요.');
-        setBusy(false);
         return;
       }
 
-      const headers = Object.keys(rows[0]);
-      const { parsed, columns: cols } = parseRows(headers, rows, SHINHAN_PROFILE);
-      if (!cols.date || !cols.amount || !cols.merchant) {
-        showAlert(
-          '이 파일은 아직 읽을 수 없어요',
-          `날짜·금액·가맹점 열을 찾지 못했어요.\n발견한 열: ${headers.join(', ')}`
-        );
-        setBusy(false);
-        return;
-      }
-
-      const foundCards = cardsInFile(parsed);
-      // 카드가 한 장뿐이면 나로 기본 지정, 여러 장이면 사용자가 고르게 둔다
-      const owners: Record<string, string> = {};
-      if (foundCards.length === 1) owners[foundCards[0].key] = CURRENT_USER;
+      const hs = Object.keys(rows[0]);
+      // 전에 이 모양의 파일을 맞춰둔 적이 있으면 그 매핑을 먼저 쓴다
+      const sig = headerSignatureOf(hs);
+      const saved = settings.savedProfiles.find((p) => p.headerSignature === sig);
+      const override = saved?.columnMap ?? {};
 
       setFileName(name);
-      setColumns(cols);
-      setCards(foundCards);
-      setCardOwners(owners);
-      setRawParsed(parsed);
-      setCandidates(buildCandidates(parsed, owners, CURRENT_USER, existing));
+      setHeaders(hs);
+      setRawRows(rows);
+      setColumnOverride(override);
       setForceAdd(new Set());
+
+      const columns = reparse(hs, rows, override);
+      // 꼭 있어야 하는 열을 못 찾았으면 사용자가 직접 지정하게 한다
+      if (!columns.date || !columns.amount || !columns.merchant) setShowMapper(true);
     } catch (e: any) {
       showAlert('파일을 읽지 못했어요', String(e?.message ?? e));
     } finally {
@@ -86,21 +111,17 @@ export default function FinanceImportScreen() {
     }
   };
 
-  /** 파일 선택 대화상자 */
   const pickFile = async () => {
     try {
       const res = await DocumentPicker.getDocumentAsync({
         type: [
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'application/vnd.ms-excel',
-          'text/csv',
-          '*/*',
+          'application/vnd.ms-excel', 'text/csv', '*/*',
         ],
         copyToCacheDirectory: true,
       });
       if (res.canceled || !res.assets?.length) return;
       const asset = res.assets[0];
-      // 웹에서는 asset.file(File 객체)이 오고, 네이티브에서는 uri가 온다
       const buf = (asset as any).file
         ? await (asset as any).file.arrayBuffer()
         : await (await fetch(asset.uri)).arrayBuffer();
@@ -110,21 +131,16 @@ export default function FinanceImportScreen() {
     }
   };
 
-  /**
-   * 웹에서는 내려받은 파일을 화면에 끌어다 놓기만 해도 된다.
-   * 데스크톱에서 파일 대화상자를 여는 것보다 빠르다.
-   */
+  /** 웹에서는 내려받은 파일을 화면에 끌어다 놓기만 해도 된다. */
   useEffect(() => {
     if (Platform.OS !== 'web') return;
     const el = dropRef.current as HTMLElement | null;
     if (!el) return;
     const stop = (e: Event) => { e.preventDefault(); e.stopPropagation(); };
     const onDrop = async (e: any) => {
-      stop(e);
-      setDragging(false);
+      stop(e); setDragging(false);
       const f = e.dataTransfer?.files?.[0];
-      if (!f) return;
-      await loadBuffer(await f.arrayBuffer(), f.name);
+      if (f) await loadBuffer(await f.arrayBuffer(), f.name);
     };
     const onOver = (e: any) => { stop(e); setDragging(true); };
     const onLeave = (e: any) => { stop(e); setDragging(false); };
@@ -136,13 +152,45 @@ export default function FinanceImportScreen() {
       el.removeEventListener('dragleave', onLeave);
       el.removeEventListener('drop', onDrop);
     };
-  }, [existing.length]);
+  }, [existing.length, settings.cardOwners, settings.categoryOverrides, settings.savedProfiles]);
 
-  /** 카드 주인을 바꾸면 소유자·지문·중복 판정이 모두 다시 계산돼야 한다. */
+  /** 카드 주인 지정 — 기억해두면 다음 가져오기 때 자동으로 붙는다. */
   const assignCard = (cardKey: string, member: string) => {
-    const next = { ...cardOwners, [cardKey]: member };
-    setCardOwners(next);
-    if (rawParsed) setCandidates(buildCandidates(rawParsed, next, CURRENT_USER, existing));
+    settings.setCardOwner(cardKey, member);
+    if (rawRows.length) {
+      reparse(headers, rawRows, columnOverride, { ...settings.cardOwners, [cardKey]: member });
+    }
+  };
+
+  /** 열을 직접 지정 — 다음부터 같은 모양 파일은 자동으로 맞춰진다. */
+  const setColumn = (key: ColumnKey, header: string | null) => {
+    const next = { ...columnOverride };
+    if (header) next[key] = header; else delete next[key];
+    setColumnOverride(next);
+    setMappingField(null);
+    reparse(headers, rawRows, next);
+  };
+
+  const saveMapping = () => {
+    const sig = headerSignatureOf(headers);
+    settings.saveProfile({
+      id: sig.slice(0, 24),
+      label: fileName.replace(/\.(xlsx|xls|csv)$/i, ''),
+      columnMap: columnOverride,
+      headerSignature: sig,
+    });
+    setShowMapper(false);
+    showAlert('열 맞추기를 저장했어요', '다음에 같은 모양의 파일을 넣으면 자동으로 맞춰져요.');
+  };
+
+  /** 카테고리 교정 — 고친 결과를 기억해 다음 가져오기 때 바로 적용한다. */
+  const fixCategory = (line: number, category: string) => {
+    const target = candidates?.find((c) => c.line === line);
+    if (target) settings.setCategoryOverride(target.merchant, category);
+    setEditingLine(null);
+    setCandidates((prev) =>
+      prev ? prev.map((c) => (c.line === line ? { ...c, category } : c)) : prev
+    );
   };
 
   const toggleForce = (line: number) => {
@@ -153,30 +201,41 @@ export default function FinanceImportScreen() {
     });
   };
 
-  const unassigned = cards.filter((c) => !cardOwners[c.key]);
+  const unassigned = cards.filter((c) => !settings.cardOwners[c.key]);
   const sum = candidates ? summarize(candidates) : null;
-  const willAdd = candidates
-    ? candidates.filter((c) => !c.skip && (!c.duplicate || forceAdd.has(c.line)))
-    : [];
+  const willAdd = useMemo(
+    () => (candidates ?? []).filter((c) => !c.skip && (!c.duplicate || forceAdd.has(c.line))),
+    [candidates, forceAdd]
+  );
+  const hasInstallment = willAdd.some((c) => c.months > 1);
+  const editingRow = candidates?.find((c) => c.line === editingLine) ?? null;
 
   const doImport = () => {
     if (!willAdd.length) return;
+    let count = 0;
     for (const c of willAdd) {
-      addRecord({
-        category: 'finance',
-        title: c.merchant,
-        recordedBy: CURRENT_USER,
-        createdAt: new Date(`${c.date}T12:00:00`).getTime(),
-        data: toTransaction(c, fileName),
-      });
+      // 할부를 나눠 적을지는 설정에 따른다
+      const txs = settings.installmentPolicy === 'split'
+        ? toInstallments(c, fileName)
+        : [toTransaction(c, fileName)];
+      for (const tx of txs) {
+        addRecord({
+          category: 'finance',
+          title: tx.desc,
+          recordedBy: CURRENT_USER,
+          createdAt: new Date(`${tx.date}T12:00:00`).getTime(),
+          data: tx,
+        });
+        count += 1;
+      }
     }
     showAlert(
-      `${willAdd.length}건을 가져왔어요`,
+      `${count}건을 가져왔어요`,
       `${comma(willAdd.reduce((s, c) => s + c.amount, 0))}원이 가계부에 추가됐어요.`,
       [{ text: '가계부로 가기', onPress: () => router.replace('./finance') }]
     );
     setCandidates(null);
-    setRawParsed(null);
+    setRawRows([]);
     setFileName('');
   };
 
@@ -202,10 +261,39 @@ export default function FinanceImportScreen() {
               <Text style={s.noteLine}>· 카드가 여러 장이면 카드별로 쓴 사람을 지정할 수 있어요</Text>
               <Text style={s.noteLine}>· 넣기 전에 미리보기로 확인할 수 있어요</Text>
             </View>
+
+            {/* 기억해둔 설정 */}
+            {(Object.keys(settings.cardOwners).length > 0
+              || settings.savedProfiles.length > 0
+              || Object.keys(settings.categoryOverrides).length > 0) && (
+              <View style={s.memoryBox}>
+                <Text style={s.memoryTitle}>기억하고 있어요</Text>
+                {Object.entries(settings.cardOwners).map(([k, v]) => (
+                  <Text key={k} style={s.memoryLine}>· 카드 ···{k} → {v}</Text>
+                ))}
+                {settings.savedProfiles.map((p) => (
+                  <Text key={p.id} style={s.memoryLine}>· 열 맞추기: {p.label}</Text>
+                ))}
+                {Object.keys(settings.categoryOverrides).length > 0 && (
+                  <Text style={s.memoryLine}>
+                    · 카테고리 교정 {Object.keys(settings.categoryOverrides).length}건
+                  </Text>
+                )}
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    showAlert('기억한 설정을 지울까요?', '카드 지정·열 맞추기·카테고리 교정이 모두 지워져요.', [
+                      { text: '취소', style: 'cancel' },
+                      { text: '지우기', style: 'destructive', onPress: () => settings.resetAll() },
+                    ])
+                  }>
+                  <Text style={s.memoryReset}>모두 지우기</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
             <TouchableOpacity style={s.pickBtn} activeOpacity={0.8} onPress={pickFile} disabled={busy}>
-              {busy ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
+              {busy ? <ActivityIndicator color="#FFFFFF" /> : (
                 <>
                   <FontAwesome name="folder-open-o" size={15} color="#FFFFFF" />
                   <Text style={s.pickBtnText}>파일 고르기</Text>
@@ -217,17 +305,22 @@ export default function FinanceImportScreen() {
                 {dragging ? '여기에 놓으세요' : '또는 파일을 이 화면에 끌어다 놓으세요'}
               </Text>
             )}
-            <Text style={s.tested}>신한카드 명세서로 검증했어요. 다른 카드사도 열 이름이 비슷하면 읽힙니다.</Text>
+            <Text style={s.tested}>
+              신한카드 명세서로 검증했어요. 다른 카드사는 열을 한 번 맞춰주면 그 뒤로 자동이에요.
+            </Text>
           </View>
         )}
 
-        {/* 2단계 — 카드별 사용자 지정 + 미리보기 */}
+        {/* 2단계 — 미리보기 */}
         {candidates && sum && (
           <>
             <View style={s.fileRow}>
               <FontAwesome name="file-excel-o" size={14} color="#4A8C6F" />
               <Text style={s.fileName} numberOfLines={1}>{fileName}</Text>
-              <TouchableOpacity activeOpacity={0.7} onPress={() => { setCandidates(null); setRawParsed(null); }}>
+              <TouchableOpacity activeOpacity={0.7} onPress={() => setShowMapper(true)}>
+                <Text style={s.changeFile}>열 맞추기</Text>
+              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.7} onPress={() => { setCandidates(null); setRawRows([]); }}>
                 <Text style={s.changeFile}>다른 파일</Text>
               </TouchableOpacity>
             </View>
@@ -236,7 +329,7 @@ export default function FinanceImportScreen() {
             <View style={s.card}>
               <Text style={s.cardTitle}>카드별로 쓴 사람을 지정하세요</Text>
               <Text style={s.cardDesc}>
-                파일에 카드 {cards.length}장이 들어 있어요. 지정해두면 누가 얼마 썼는지 갈려서 보여요.
+                파일에 카드 {cards.length}장이 들어 있어요. 한 번 지정하면 다음부터 자동으로 붙어요.
               </Text>
               {cards.map((c) => (
                 <View key={c.key} style={s.cardRow}>
@@ -249,10 +342,10 @@ export default function FinanceImportScreen() {
                     {MEMBERS.map((m) => (
                       <TouchableOpacity
                         key={m}
-                        style={[s.ownerChip, cardOwners[c.key] === m && s.ownerChipActive]}
+                        style={[s.ownerChip, settings.cardOwners[c.key] === m && s.ownerChipActive]}
                         activeOpacity={0.7}
                         onPress={() => assignCard(c.key, m)}>
-                        <Text style={[s.ownerChipText, cardOwners[c.key] === m && s.ownerChipTextActive]}>
+                        <Text style={[s.ownerChipText, settings.cardOwners[c.key] === m && s.ownerChipTextActive]}>
                           {m}
                         </Text>
                       </TouchableOpacity>
@@ -267,6 +360,30 @@ export default function FinanceImportScreen() {
               )}
             </View>
 
+            {/* 할부 정책 — 할부 건이 있을 때만 */}
+            {hasInstallment && (
+              <View style={s.card}>
+                <Text style={s.cardTitle}>할부는 어떻게 적을까요?</Text>
+                <Text style={s.cardDesc}>
+                  정답이 없어요. 명세서와 숫자를 맞추려면 '결제한 달에 전액',{'\n'}
+                  통장에서 빠지는 돈에 맞추려면 '매달 나눠서'를 고르세요.
+                </Text>
+                <View style={s.policyRow}>
+                  {([['결제한 달에 전액', 'full'], ['매달 나눠서', 'split']] as const).map(([label, val]) => (
+                    <TouchableOpacity
+                      key={val}
+                      style={[s.policyChip, settings.installmentPolicy === val && s.policyChipActive]}
+                      activeOpacity={0.7}
+                      onPress={() => settings.setInstallmentPolicy(val)}>
+                      <Text style={[s.policyText, settings.installmentPolicy === val && s.policyTextActive]}>
+                        {label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+
             {/* 요약 */}
             <View style={s.card}>
               <Text style={s.cardTitle}>이렇게 들어갑니다</Text>
@@ -278,55 +395,137 @@ export default function FinanceImportScreen() {
               </View>
               <View style={s.totalRow}>
                 <Text style={s.totalLabel}>가져올 금액</Text>
-                <Text style={s.totalValue}>
-                  {comma(willAdd.reduce((a, c) => a + c.amount, 0))}원
-                </Text>
+                <Text style={s.totalValue}>{comma(willAdd.reduce((a, c) => a + c.amount, 0))}원</Text>
               </View>
             </View>
 
-            {/* 거래 미리보기 */}
-            <Text style={s.sectionTitle}>미리보기</Text>
+            <Text style={s.sectionTitle}>미리보기 — 카테고리를 눌러 고칠 수 있어요</Text>
             {candidates.map((c) => {
               const forced = forceAdd.has(c.line);
               const will = !c.skip && (!c.duplicate || forced);
               const meta = metaOf(c.category);
               return (
                 <View key={c.line} style={[s.row, !will && s.rowOff]}>
-                  <View style={[s.rowIcon, { backgroundColor: will ? meta.color : '#EFEDE9' }]}>
+                  <TouchableOpacity
+                    style={[s.rowIcon, { backgroundColor: will ? meta.color : '#EFEDE9' }]}
+                    activeOpacity={0.7}
+                    disabled={!!c.skip}
+                    onPress={() => setEditingLine(c.line)}>
                     <FontAwesome name={meta.icon as any} size={12} color={will ? '#5C4A32' : '#B8B2A8'} />
-                  </View>
+                  </TouchableOpacity>
                   <View style={{ flex: 1 }}>
                     <Text style={[s.rowDesc, !will && s.rowTextOff]} numberOfLines={1}>{c.merchant}</Text>
-                    <Text style={s.rowMeta}>
-                      {c.date ? formatDay(c.date) : '날짜 없음'} · {c.category} · {c.ownerMember}
-                      {c.cardKey ? ` · ···${c.cardKey}` : ''}
-                    </Text>
+                    <TouchableOpacity activeOpacity={0.7} disabled={!!c.skip} onPress={() => setEditingLine(c.line)}>
+                      <Text style={s.rowMeta}>
+                        {c.date ? formatDay(c.date) : '날짜 없음'} · <Text style={s.rowCat}>{c.category}</Text> · {c.ownerMember}
+                        {c.cardKey ? ` · ···${c.cardKey}` : ''}
+                        {c.months > 1 ? ` · ${c.months}개월 할부` : ''}
+                      </Text>
+                    </TouchableOpacity>
                     {c.skip && <Text style={s.reasonSkip}>{skipLabel(c.skip)}</Text>}
                     {!c.skip && c.duplicate && (
                       <TouchableOpacity activeOpacity={0.7} onPress={() => toggleForce(c.line)}>
                         <Text style={[s.reasonDup, forced && s.reasonForced]}>
-                          {c.duplicate.reason === '같은거래'
-                            ? '이미 가계부에 있어요'
-                            : '손으로 적은 비슷한 거래가 있어요'}
-                          {' · '}
-                          <Text style={s.reasonAction}>{forced ? '넣지 않기' : '그래도 넣기'}</Text>
+                          {c.duplicate.reason === '같은거래' ? '이미 가계부에 있어요' : '손으로 적은 비슷한 거래가 있어요'}
+                          {' · '}<Text style={s.reasonAction}>{forced ? '넣지 않기' : '그래도 넣기'}</Text>
                         </Text>
                       </TouchableOpacity>
                     )}
                   </View>
                   <Text style={[s.rowAmount, !will && s.rowTextOff]}>
-                    {/* 합계 줄은 부호 없이, 취소 건은 환불이므로 +로 */}
                     {c.skip === '합계' ? '' : c.amount < 0 ? '+' : '-'}
                     {comma(Math.abs(c.amount))}원
                   </Text>
                 </View>
               );
             })}
-
             <View style={{ height: 100 }} />
           </>
         )}
       </ScrollView>
+
+      {/* 열 맞추기 */}
+      <Modal visible={showMapper} transparent statusBarTranslucent animationType="fade">
+        <View style={s.modalWrap}>
+          <Pressable style={s.modalBg} onPress={() => setShowMapper(false)} />
+          <View style={s.modalSheet}>
+            <Text style={s.modalTitle}>열 맞추기</Text>
+            <Text style={s.modalDesc}>
+              이 파일의 어느 열이 무엇인지 알려주세요. 한 번만 하면 다음부터 자동이에요.
+            </Text>
+            <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
+              {COLUMN_FIELDS.map((f) => {
+                const cur = columnOverride[f.key];
+                return (
+                  <View key={f.key} style={s.mapRow}>
+                    <Text style={s.mapLabel}>
+                      {f.label}{f.required && <Text style={s.mapReq}> *</Text>}
+                    </Text>
+                    <TouchableOpacity
+                      style={[s.mapPick, !cur && f.required && s.mapPickEmpty]}
+                      activeOpacity={0.7}
+                      onPress={() => setMappingField(mappingField === f.key ? null : f.key)}>
+                      <Text style={[s.mapPickText, !cur && s.mapPickTextEmpty]}>
+                        {cur ?? '자동 / 선택 안 함'}
+                      </Text>
+                      <FontAwesome name="caret-down" size={12} color="#888888" />
+                    </TouchableOpacity>
+                    {mappingField === f.key && (
+                      <View style={s.mapOptions}>
+                        <TouchableOpacity style={s.mapOption} activeOpacity={0.7} onPress={() => setColumn(f.key, null)}>
+                          <Text style={s.mapOptionText}>자동 / 선택 안 함</Text>
+                        </TouchableOpacity>
+                        {headers.map((h) => (
+                          <TouchableOpacity key={h} style={s.mapOption} activeOpacity={0.7} onPress={() => setColumn(f.key, h)}>
+                            <Text style={s.mapOptionText}>{h || '(이름 없는 열)'}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
+            </ScrollView>
+            <View style={s.modalBtns}>
+              <TouchableOpacity style={[s.modalBtn, s.modalBtnGhost]} activeOpacity={0.7} onPress={() => setShowMapper(false)}>
+                <Text style={s.modalBtnGhostText}>닫기</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={s.modalBtn} activeOpacity={0.7} onPress={saveMapping}>
+                <Text style={s.modalBtnText}>저장하고 기억하기</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 카테고리 고치기 */}
+      <Modal visible={!!editingRow} transparent statusBarTranslucent animationType="fade">
+        <View style={s.modalWrap}>
+          <Pressable style={s.modalBg} onPress={() => setEditingLine(null)} />
+          <View style={s.modalSheet}>
+            <Text style={s.modalTitle} numberOfLines={1}>{editingRow?.merchant}</Text>
+            <Text style={s.modalDesc}>
+              카테고리를 고르면 이 가게는 다음에도 같은 카테고리로 들어가요.
+            </Text>
+            <View style={s.catGrid}>
+              {EXPENSE_CATEGORIES.map((cat) => (
+                <TouchableOpacity
+                  key={cat.name}
+                  style={[s.catChip, editingRow?.category === cat.name && s.catChipActive]}
+                  activeOpacity={0.7}
+                  onPress={() => editingRow && fixCategory(editingRow.line, cat.name)}>
+                  <View style={[s.catDot, { backgroundColor: cat.color }]}>
+                    <FontAwesome name={cat.icon as any} size={11} color="#5C4A32" />
+                  </View>
+                  <Text style={[s.catChipText, editingRow?.category === cat.name && s.catChipTextActive]}>
+                    {cat.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {candidates && (
         <View style={s.footer}>
@@ -377,15 +576,22 @@ const s = StyleSheet.create({
   },
   noteTitle: { fontSize: 13, color: '#2D5A3F', fontFamily: 'PretendardBold', marginBottom: 2 },
   noteLine: { fontSize: 13, color: '#4A4A4A', fontFamily: 'Pretendard', lineHeight: 20 },
+  memoryBox: {
+    alignSelf: 'stretch', backgroundColor: '#EFF6F1', borderRadius: 14, padding: 16,
+    borderWidth: 1, borderColor: '#D0E4D6', marginTop: 12, gap: 4,
+  },
+  memoryTitle: { fontSize: 13, color: '#2D5A3F', fontFamily: 'PretendardBold', marginBottom: 2 },
+  memoryLine: { fontSize: 13, color: '#4A4A4A', fontFamily: 'Pretendard', lineHeight: 20 },
+  memoryReset: { fontSize: 12, color: '#4A8C6F', fontFamily: 'Pretendard', textDecorationLine: 'underline', marginTop: 6 },
   pickBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     alignSelf: 'stretch', backgroundColor: '#4A8C6F', borderRadius: 14, paddingVertical: 16, marginTop: 22,
   },
   pickBtnText: { fontSize: 16, color: '#FFFFFF', fontFamily: 'PretendardBold' },
-  tested: { fontSize: 12, color: '#888888', fontFamily: 'Pretendard', marginTop: 14, textAlign: 'center' },
+  tested: { fontSize: 12, color: '#888888', fontFamily: 'Pretendard', marginTop: 14, textAlign: 'center', lineHeight: 18 },
 
   fileRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
     marginHorizontal: 20, marginTop: 16, backgroundColor: '#EFF6F1',
     borderRadius: 12, paddingHorizontal: 14, paddingVertical: 11,
   },
@@ -411,6 +617,15 @@ const s = StyleSheet.create({
   ownerChipText: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
   ownerChipTextActive: { color: '#FFFFFF', fontFamily: 'PretendardBold' },
   warn: { fontSize: 12, color: '#C2853A', fontFamily: 'Pretendard', marginTop: 12, lineHeight: 18 },
+
+  policyRow: { flexDirection: 'row', gap: 8, marginTop: 14 },
+  policyChip: {
+    flex: 1, paddingVertical: 11, borderRadius: 12, alignItems: 'center',
+    borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF',
+  },
+  policyChipActive: { backgroundColor: '#EFF6F1', borderColor: '#4A8C6F' },
+  policyText: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
+  policyTextActive: { color: '#2D5A3F', fontFamily: 'PretendardBold' },
 
   sumRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
   sumChip: { alignItems: 'center', backgroundColor: '#F4F2EE', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 16, minWidth: 74 },
@@ -438,11 +653,51 @@ const s = StyleSheet.create({
   rowDesc: { fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard' },
   rowTextOff: { color: '#A8A29A', textDecorationLine: 'line-through' },
   rowMeta: { fontSize: 11, color: '#A0A0A0', fontFamily: 'Pretendard', marginTop: 3 },
+  rowCat: { color: '#4A8C6F', textDecorationLine: 'underline' },
   rowAmount: { fontSize: 14, color: '#4A8C6F', fontFamily: 'PretendardBold' },
   reasonSkip: { fontSize: 11, color: '#A8A29A', fontFamily: 'Pretendard', marginTop: 4 },
   reasonDup: { fontSize: 11, color: '#C2853A', fontFamily: 'Pretendard', marginTop: 4, lineHeight: 17 },
   reasonForced: { color: '#2D5A3F' },
   reasonAction: { textDecorationLine: 'underline', fontFamily: 'PretendardBold' },
+
+  modalWrap: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
+  modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
+  modalSheet: {
+    width: '100%', maxWidth: 420, backgroundColor: '#FFFFFF', borderRadius: 20, padding: 22,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 24, elevation: 12,
+  },
+  modalTitle: { fontSize: 17, color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
+  modalDesc: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard', marginTop: 8, marginBottom: 16, lineHeight: 19 },
+  mapRow: { marginBottom: 12 },
+  mapLabel: { fontSize: 13, color: '#4A4A4A', fontFamily: 'Pretendard', marginBottom: 5 },
+  mapReq: { color: '#D94040' },
+  mapPick: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA',
+    borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10,
+  },
+  mapPickEmpty: { borderColor: '#E8C4C4', backgroundColor: '#FCF6F6' },
+  mapPickText: { fontSize: 13, color: '#1F1F1F', fontFamily: 'Pretendard' },
+  mapPickTextEmpty: { color: '#B0A89C' },
+  mapOptions: { marginTop: 6, borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 10, overflow: 'hidden' },
+  mapOption: { paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#F4F2EE' },
+  mapOptionText: { fontSize: 13, color: '#4A4A4A', fontFamily: 'Pretendard' },
+  modalBtns: { flexDirection: 'row', gap: 8, marginTop: 18 },
+  modalBtn: { flex: 1, backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 13, alignItems: 'center' },
+  modalBtnGhost: { backgroundColor: '#F1EFEA' },
+  modalBtnText: { fontSize: 14, color: '#FFFFFF', fontFamily: 'PretendardBold' },
+  modalBtnGhostText: { fontSize: 14, color: '#4A4A4A', fontFamily: 'PretendardBold' },
+
+  catGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  catChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 12, paddingVertical: 9, borderRadius: 20,
+    borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF',
+  },
+  catChipActive: { borderColor: '#4A8C6F', backgroundColor: '#EFF6F1' },
+  catDot: { width: 20, height: 20, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  catChipText: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
+  catChipTextActive: { color: '#2D5A3F', fontFamily: 'PretendardBold' },
 
   footer: {
     position: 'absolute', left: 0, right: 0, bottom: 0,

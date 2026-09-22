@@ -19,7 +19,8 @@ export type ColumnKey =
   | 'card'       // 이용카드 (뒷자리로 가족 구성원을 가른다)
   | 'approvalNo' // 승인번호 (있으면 중복 판정이 정확해진다)
   | 'status'     // 취소상태
-  | 'kind';      // 매입구분 (승인취소 등)
+  | 'kind'       // 매입구분 (승인취소 등)
+  | 'installment'; // 이용구분 (일시불 / 3개월 할부 등)
 
 export type StatementProfile = {
   id: string;
@@ -51,6 +52,7 @@ export const SHINHAN_PROFILE: StatementProfile = {
     approvalNo: ['승인번호'],
     status: ['취소상태'],
     kind: ['매입구분'],
+    installment: ['이용구분', '할부개월', '할부'],
   },
   cancelMarkers: ['취소', '승인취소', '매입취소'],
   // '총 12건'처럼 거래일이 비고 가맹점명이 '총'으로 시작하는 줄
@@ -136,15 +138,42 @@ export type ParsedRow = {
   cardKey: string;
   approvalNo: string;
   category: string;
+  /** 할부 개월 수. 1이면 일시불 */
+  months: number;
   /** 이 줄을 왜 건너뛰는지. null이면 가져온다. */
   skip: null | '취소' | '합계' | '금액없음' | '날짜없음';
 };
 
+/**
+ * '3개월(1/3)' / '할부 6개월' 같은 표기에서 개월 수를 읽는다.
+ * 일시불이면 1.
+ */
+export function parseMonths(raw: unknown): number {
+  const s = String(raw ?? '');
+  if (!s || /일시불/.test(s)) return 1;
+  const m = s.match(/(\d{1,2})\s*개월/);
+  if (m) {
+    const n = parseInt(m[1], 10);
+    return n >= 2 && n <= 60 ? n : 1;
+  }
+  return 1;
+}
+
 /** 헤더 이름 후보 중 실제로 존재하는 열 이름을 찾는다. */
-export function resolveColumns(headers: string[], profile: StatementProfile) {
+export function resolveColumns(
+  headers: string[],
+  profile: StatementProfile,
+  /** 사용자가 직접 지정한 열이 있으면 그것을 먼저 쓴다 */
+  override?: Partial<Record<ColumnKey, string>>
+) {
   const found = {} as Record<ColumnKey, string | null>;
   const norm = (s: string) => s.replace(/\s/g, '');
   for (const key of Object.keys(profile.columns) as ColumnKey[]) {
+    const manual = override?.[key];
+    if (manual && headers.includes(manual)) {
+      found[key] = manual;
+      continue;
+    }
     const cands = profile.columns[key];
     const hit = headers.find((h) => cands.some((c) => norm(h) === norm(c)))
       ?? headers.find((h) => cands.some((c) => norm(h).includes(norm(c))));
@@ -157,9 +186,15 @@ export function resolveColumns(headers: string[], profile: StatementProfile) {
 export function parseRows(
   headers: string[],
   rows: RawRow[],
-  profile: StatementProfile
+  profile: StatementProfile,
+  opts?: {
+    /** 사용자가 직접 지정한 열 */
+    columnOverride?: Partial<Record<ColumnKey, string>>;
+    /** 정규화된 가맹점명 → 카테고리. 사용자가 전에 고쳐둔 것 */
+    categoryOverrides?: Record<string, string>;
+  }
 ): { parsed: ParsedRow[]; columns: Record<ColumnKey, string | null> } {
-  const columns = resolveColumns(headers, profile);
+  const columns = resolveColumns(headers, profile, opts?.columnOverride);
   const get = (row: RawRow, key: ColumnKey) => {
     const col = columns[key];
     return col ? row[col] : undefined;
@@ -182,6 +217,9 @@ export function parseRows(
     else if (!date) skip = '날짜없음';
     else if (amount === 0) skip = '금액없음';
 
+    // 전에 고쳐둔 카테고리가 있으면 규칙보다 그것을 먼저 쓴다
+    const override = opts?.categoryOverrides?.[normalizeMerchant(merchant)];
+
     return {
       line: i + 2, // 헤더가 1행이므로 데이터는 2행부터
       date: date ?? '',
@@ -189,7 +227,8 @@ export function parseRows(
       amount,
       cardKey: cardKeyOf(get(row, 'card')),
       approvalNo: String(get(row, 'approvalNo') ?? '').trim(),
-      category: guessCategory(merchant),
+      category: override ?? guessCategory(merchant),
+      months: parseMonths(get(row, 'installment')),
       skip,
     };
   });
@@ -279,13 +318,50 @@ export function toTransaction(c: ImportCandidate, sourceFile: string): Transacti
     category: c.category,
     desc: c.merchant,
     date: c.date,
-    method: '카드',
-    memo: '',
+    method: c.months > 1 ? `카드 ${c.months}개월 할부` : '카드',
+    memo: c.months > 1 ? `${c.months}개월 할부 · 총 ${c.amount.toLocaleString('ko-KR')}원` : '',
     ownerMember: c.ownerMember,
     source: 'csv',
     importKey: c.importKey,
     sourceFile,
   };
+}
+
+/**
+ * 할부를 개월 수로 나눠 매달 한 건씩 만든다.
+ *
+ * 정답이 없는 문제라 사용자가 정책을 고른다.
+ *  - 'full'  : 결제한 달에 전액 (카드 명세서 숫자와 같아진다)
+ *  - 'split' : 매달 나눠서 (실제 통장에서 빠지는 돈에 가깝다)
+ * 나누어떨어지지 않는 금액은 **첫 달에 나머지를 몰아** 합계가 원금과 정확히 맞게 한다.
+ */
+export function toInstallments(c: ImportCandidate, sourceFile: string): Transaction[] {
+  const n = c.months;
+  if (n <= 1) return [toTransaction(c, sourceFile)];
+
+  const each = Math.floor(c.amount / n);
+  const remainder = c.amount - each * n;
+  const [y, m, d] = c.date.split('-').map(Number);
+
+  return Array.from({ length: n }, (_, i) => {
+    const dt = new Date(y, m - 1 + i, d);
+    const date = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+    const amount = each + (i === 0 ? remainder : 0);
+    return {
+      type: 'expense' as const,
+      amount,
+      category: c.category,
+      desc: `${c.merchant} (${i + 1}/${n})`,
+      date,
+      method: `카드 ${n}개월 할부`,
+      memo: `${n}개월 할부 ${i + 1}회차 · 총 ${c.amount.toLocaleString('ko-KR')}원`,
+      ownerMember: c.ownerMember,
+      source: 'csv' as const,
+      // 회차마다 다른 지문이어야 중복 판정이 제대로 된다
+      importKey: `${c.importKey}|${i + 1}/${n}`,
+      sourceFile,
+    };
+  });
 }
 
 /** 파일에 들어 있던 카드 목록 — 사용자가 구성원을 지정하도록 보여준다. */

@@ -2,25 +2,28 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useRecordCounts, type RecordCategory } from '../../../store/records';
 
 const CATEGORIES = [
-  { icon: 'child', label: '육아 일기', color: '#F0B8B8', count: 24, screen: 'parenting' },
-  { icon: 'book', label: '독서 목록', color: '#B8D8C0', count: 12, screen: 'reading' },
-  { icon: 'money', label: '가계부', color: '#E8D8C0', count: 18, screen: 'finance' },
-  { icon: 'film', label: '영화 관람', color: '#B0C8D8', count: 8, screen: 'movies' },
-  { icon: 'plane', label: '여행 기록', color: '#E8D8C0', count: 5, screen: 'travel' },
-  { icon: 'cutlery', label: '레시피', color: '#E8D0C0', count: 15, screen: 'recipes' },
-  { icon: 'trophy', label: '가족 목표', color: '#D8CDB8', count: 7, screen: 'goals' },
-  { icon: 'heartbeat', label: '건강 기록', color: '#E0B0B0', count: 6, screen: 'health' },
-  { icon: 'clock-o', label: '타임캡슐', color: '#D8D4B0', count: 2, screen: 'time-capsule' },
+  { icon: 'child', label: '육아 일기', color: '#F0B8B8', screen: 'parenting' },
+  { icon: 'book', label: '독서 목록', color: '#B8D8C0', screen: 'reading' },
+  { icon: 'money', label: '가계부', color: '#E8D8C0', screen: 'finance' },
+  { icon: 'film', label: '영화 관람', color: '#B0C8D8', screen: 'movies' },
+  { icon: 'plane', label: '여행 기록', color: '#E8D8C0', screen: 'travel' },
+  { icon: 'cutlery', label: '레시피', color: '#E8D0C0', screen: 'recipes' },
+  { icon: 'trophy', label: '가족 목표', color: '#D8CDB8', screen: 'goals' },
+  { icon: 'heartbeat', label: '건강 기록', color: '#E0B0B0', screen: 'health' },
+  { icon: 'clock-o', label: '타임캡슐', color: '#D8D4B0', screen: 'time-capsule' },
 ];
 
 export default function RecordsScreen() {
   const router = useRouter();
-  const totalRecords = CATEGORIES.reduce((sum, cat) => sum + cat.count, 0);
+  // 박아둔 숫자가 아니라 실제 기록 수를 센다
+  const counts = useRecordCounts();
+  const totalRecords = Object.values(counts).reduce((sum, n) => sum + n, 0);
 
   const handlePress = (screen: string) => {
-    router.push(`/(tabs)/records/${screen}` as any);
+    router.push(`./${screen}` as any);
   };
 
   return (
@@ -43,7 +46,7 @@ export default function RecordsScreen() {
                 <FontAwesome name={cat.icon as any} size={22} color="#4A4A4A" />
               </View>
               <Text style={styles.cardLabel}>{cat.label}</Text>
-              <Text style={styles.cardCount}>{cat.count}개</Text>
+              <Text style={styles.cardCount}>{counts[cat.screen as RecordCategory] ?? 0}개</Text>
             </TouchableOpacity>
           ))}
         </View>

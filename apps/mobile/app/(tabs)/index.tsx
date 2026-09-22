@@ -2,6 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, M
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useRecentRecords, CATEGORY_LABELS, relativeDay, type RecordCategory } from '../../store/records';
 import { useState, useCallback, useRef, useEffect } from 'react';
 
 const NOTIFICATIONS = [
@@ -18,15 +19,23 @@ const TODAY_EVENTS = [
   { time: '18:00', endTime: '20:00', title: '가족 저녁 식사', location: '정자동 한강갈비', color: '#4A8C6F', member: '전체' },
 ];
 
-const RECENT_RECORDS = [
-  { type: '육아 일기', icon: 'child', bg: '#F0B8B8', title: '지우의 첫 자전거', date: '오늘', route: '/(tabs)/records/parenting', match: '첫 자전거 타기 성공!' },
-  { type: '독서 목록', icon: 'book', bg: '#B8D8C0', title: '어린 왕자 완독', date: '어제', route: '/(tabs)/records/reading', match: '어린 왕자' },
-  { type: '가계부', icon: 'money', bg: '#E8D8C0', title: '3월 지출 정산', date: '2일 전', route: '/(tabs)/records/finance' },
-  { type: '레시피', icon: 'cutlery', bg: '#E8D0C0', title: '엄마 김치찌개', date: '3일 전', route: '/(tabs)/records/recipes', match: '엄마 김치찌개' },
-];
+/** 홈 카드에 쓸 카테고리별 아이콘·색, 그리고 눌렀을 때 갈 화면 */
+const CATEGORY_UI: Record<RecordCategory, { icon: string; bg: string; screen: string; deepLink: boolean }> = {
+  parenting:      { icon: 'child',     bg: '#F0B8B8', screen: 'parenting',    deepLink: true },
+  reading:        { icon: 'book',      bg: '#B8D8C0', screen: 'reading',      deepLink: true },
+  finance:        { icon: 'money',     bg: '#E8D8C0', screen: 'finance',      deepLink: false },
+  movies:         { icon: 'film',      bg: '#B0C8D8', screen: 'movies',       deepLink: false },
+  travel:         { icon: 'plane',     bg: '#E8D8C0', screen: 'travel',       deepLink: false },
+  recipes:        { icon: 'cutlery',   bg: '#E8D0C0', screen: 'recipes',      deepLink: true },
+  goals:          { icon: 'trophy',    bg: '#D8CDB8', screen: 'goals',        deepLink: false },
+  health:         { icon: 'heartbeat', bg: '#E0B0B0', screen: 'health',       deepLink: false },
+  'time-capsule': { icon: 'clock-o',   bg: '#D8D4B0', screen: 'time-capsule', deepLink: false },
+};
 
 export default function HomeScreen() {
   const router = useRouter();
+  // 창고에서 최근에 쓴 기록 4개 — 카테고리 상관없이
+  const recent = useRecentRecords(4);
   const [refreshing, setRefreshing] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -208,7 +217,7 @@ export default function HomeScreen() {
               <FontAwesome name="arrow-right" size={11} color="#4A8C6F" />
             </TouchableOpacity>
           </View>
-          {RECENT_RECORDS.length === 0 ? (
+          {recent.length === 0 ? (
             <TouchableOpacity style={s.emptyState} activeOpacity={0.7} onPress={() => router.push('/(tabs)/records')}>
               <FontAwesome name="pencil-square-o" size={32} color="#D0D0D0" />
               <Text style={s.emptyTitle}>아직 기록이 없어요</Text>
@@ -216,29 +225,33 @@ export default function HomeScreen() {
             </TouchableOpacity>
           ) : (
           <View style={s.recordGrid}>
-            {RECENT_RECORDS.map((rec, i) => (
-              <TouchableOpacity key={i} style={[s.recordCard, i === 0 && s.recordCardLarge]} activeOpacity={0.85}
+            {recent.map((rec, i) => {
+              const ui = CATEGORY_UI[rec.category];
+              return (
+              <TouchableOpacity key={rec.id} style={[s.recordCard, i === 0 && s.recordCardLarge]} activeOpacity={0.85}
                 onPress={() => {
-                  const r: any = rec;
-                  if (r.match) {
-                    router.push({ pathname: r.route, params: { openTitle: r.match } });
+                  const path = `/(tabs)/records/${ui.screen}`;
+                  // 상세 모달까지 바로 열 수 있는 화면은 제목을 넘겨준다
+                  if (ui.deepLink) {
+                    router.push({ pathname: path as any, params: { openTitle: rec.title } });
                   } else {
-                    router.push(r.route as any);
+                    router.push(path as any);
                   }
                 }}>
-                <View style={[s.recordInner, { backgroundColor: rec.bg }]}>
+                <View style={[s.recordInner, { backgroundColor: ui.bg }]}>
                   {/* 아이콘 우측 중앙 */}
                   <View style={s.recordIconWrap}>
-                    <FontAwesome name={rec.icon as any} size={i === 0 ? 32 : 22} color="rgba(0,0,0,0.1)" />
+                    <FontAwesome name={ui.icon as any} size={i === 0 ? 32 : 22} color="rgba(0,0,0,0.1)" />
                   </View>
                   <View style={s.recordBottom}>
-                    <Text style={[s.recordType, { fontSize: i === 0 ? 11 : 10 }]}>{rec.type}</Text>
+                    <Text style={[s.recordType, { fontSize: i === 0 ? 11 : 10 }]}>{CATEGORY_LABELS[rec.category]}</Text>
                     <Text style={[s.recordTitle, { fontSize: i === 0 ? 16 : 13 }]} numberOfLines={1}>{rec.title}</Text>
-                    <Text style={s.recordDate}>{rec.date}</Text>
+                    <Text style={s.recordDate}>{relativeDay(rec.createdAt)}</Text>
                   </View>
                 </View>
               </TouchableOpacity>
-            ))}
+              );
+            })}
           </View>
           )}
         </View>
