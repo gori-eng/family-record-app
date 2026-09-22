@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
 import { MEMBERS, CURRENT_USER } from '../../../constants/family';
@@ -13,6 +13,7 @@ import {
 } from '../../../store/finance';
 
 export default function FinanceScreen() {
+  const router = useRouter();
   const [activeCategory, setActiveCategory] = useState('전체');
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -522,6 +523,16 @@ export default function FinanceScreen() {
         </Modal>
 
         <ScrollView showsVerticalScrollIndicator={false}>
+          {/* 카드 명세서에서 한 번에 불러오기 */}
+          <TouchableOpacity
+            style={styles.importRow}
+            activeOpacity={0.7}
+            onPress={() => router.push('./finance-import')}>
+            <FontAwesome name="file-excel-o" size={14} color="#4A8C6F" />
+            <Text style={styles.importRowText}>카드 명세서에서 불러오기</Text>
+            <FontAwesome name="chevron-right" size={11} color="#9CB3A4" />
+          </TouchableOpacity>
+
           {/* 월 요약 */}
           <View style={styles.summaryCard}>
             <View style={styles.monthNav}>
@@ -700,11 +711,19 @@ export default function FinanceScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   summaryCard: {
-    margin: 20, backgroundColor: '#FFFFFF', borderRadius: 20,
+    marginHorizontal: 20, marginTop: 14, marginBottom: 20, backgroundColor: '#FFFFFF', borderRadius: 20,
     padding: 20, borderWidth: 1, borderColor: '#EAEAEA',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
+  importRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    marginHorizontal: 20, marginTop: 16,
+    backgroundColor: '#EFF6F1', borderRadius: 12,
+    paddingHorizontal: 14, paddingVertical: 12,
+    borderWidth: 1, borderColor: '#D0E4D6',
+  },
+  importRowText: { flex: 1, fontSize: 13, color: '#2D5A3F', fontFamily: 'PretendardBold' },
   monthNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16 },
   monthArrow: {
     width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center',

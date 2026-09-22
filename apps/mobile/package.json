@@ -39,7 +39,9 @@
     "react-native-web": "~0.21.0",
     "zustand": "^5.0.5",
     "zod": "^3.25.7",
-    "@core/supabase": "workspace:*"
+    "@core/supabase": "workspace:*",
+    "expo-document-picker": "~14.0.8",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
