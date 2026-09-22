@@ -183,6 +183,7 @@ export default function MoviesScreen() {
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
               <Text style={s.modalTitle}>새 영화 기록</Text>
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>영화 제목</Text>
               <TextInput
                 style={s.createInput}
@@ -245,6 +246,7 @@ export default function MoviesScreen() {
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>저장하기</Text>
               </TouchableOpacity>
+            </ScrollView>
             </Animated.View>
           </View>
         </Modal>

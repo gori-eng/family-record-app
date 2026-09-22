@@ -300,6 +300,7 @@ export default function ReadingScreen() {
             <Animated.View style={[styles.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={styles.modalHandle} />
               <Text style={styles.modalTitle}>새 도서 등록</Text>
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={styles.createLabel}>책 제목</Text>
               <TextInput
                 style={styles.createInput}
@@ -346,6 +347,7 @@ export default function ReadingScreen() {
               <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={handleCreate}>
                 <Text style={styles.createSubmitText}>저장하기</Text>
               </TouchableOpacity>
+            </ScrollView>
             </Animated.View>
           </View>
         </Modal>

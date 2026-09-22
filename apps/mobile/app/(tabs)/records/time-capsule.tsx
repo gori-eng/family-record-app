@@ -2,23 +2,41 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Ani
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef } from 'react';
+import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
+import { CURRENT_USER } from '../../../constants/family';
 
-const CAPSULES = [
-  { title: '서준이 성인식에 열어보세요', target: '2036.5.15', type: '성인식', author: '지수, 민준', sealed: '2026.3.1', locked: true, icon: 'gift', color: '#CE93D8' },
-  { title: '지우에게 보내는 첫 편지', target: '2032.1.1', type: '생일', author: '지수', sealed: '2023.6.15', locked: true, icon: 'envelope', color: '#4FC3F7' },
-  { title: '2025년 가족 영상 편지', target: '2030.12.31', type: '연말', author: '전체', sealed: '2025.12.31', locked: true, icon: 'video-camera', color: '#FFB74D' },
-  { title: '우리 첫 집 기억', target: '2026.4.1', type: '기념일', author: '지수, 민준', sealed: '2024.4.1', locked: false, icon: 'home', color: '#81C784' },
-];
+type Capsule = {
+  title: string; target: string; type: string; author: string;
+  sealed: string; locked: boolean; icon: string; color: string;
+  message?: string;
+};
+
+/** 새로 만드는 캡슐에 돌아가며 입히는 색 */
+const NEW_CAPSULE_COLORS = ['#CE93D8', '#4FC3F7', '#FFB74D', '#81C784'];
 
 export default function TimeCapsuleScreen() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);
+
+  // 창고에서 타임캡슐만 최신순으로 꺼낸다.
+  const capsules = useRecordsByCategory<Capsule>('time-capsule');
+  const addRecord = useRecordsStore((s) => s.addRecord);
+
+  // 작성 폼 입력값
+  const [formTitle, setFormTitle] = useState('');
+  const [formMessage, setFormMessage] = useState('');
+  const [formTarget, setFormTarget] = useState('');
+  const [formType, setFormType] = useState('');
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
 
   const openCreate = () => {
+    setFormTitle('');
+    setFormMessage('');
+    setFormTarget('');
+    setFormType('');
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -30,6 +48,33 @@ export default function TimeCapsuleScreen() {
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
     ]).start(() => setShowCreate(false));
+  };
+
+  const handleSave = () => {
+    const title = formTitle.trim();
+    if (!title) {
+      Alert.alert('제목을 입력해주세요', '어떤 캡슐인지 알려주세요.');
+      return;
+    }
+    const today = new Date();
+    addRecord({
+      category: 'time-capsule',
+      title,
+      recordedBy: CURRENT_USER,
+      data: {
+        title,
+        target: formTarget.trim(),
+        type: formType.trim() || '기념일',
+        author: CURRENT_USER,
+        sealed: `${today.getFullYear()}.${today.getMonth() + 1}.${today.getDate()}`,
+        // 새로 만든 캡슐은 잠긴 상태로 시작한다
+        locked: true,
+        icon: 'envelope',
+        color: NEW_CAPSULE_COLORS[capsules.length % NEW_CAPSULE_COLORS.length],
+        message: formMessage.trim(),
+      },
+    });
+    closeCreate();
   };
 
   const openDetail = (item: any) => {
@@ -103,17 +148,23 @@ export default function TimeCapsuleScreen() {
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
               <Text style={s.modalTitle}>새 타임캡슐</Text>
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>제목</Text>
-              <TextInput style={s.createInput} placeholder="타임캡슐 제목을 입력하세요" placeholderTextColor="#BFAE99" />
+              <TextInput style={s.createInput} placeholder="타임캡슐 제목을 입력하세요" placeholderTextColor="#BFAE99"
+                value={formTitle} onChangeText={setFormTitle} />
               <Text style={s.createLabel}>메시지 내용</Text>
-              <TextInput style={[s.createInput, { height: 120, textAlignVertical: 'top' }]} placeholder="미래의 가족에게 전할 메시지를 작성하세요" placeholderTextColor="#BFAE99" multiline numberOfLines={5} />
+              <TextInput style={[s.createInput, { height: 120, textAlignVertical: 'top' }]} placeholder="미래의 가족에게 전할 메시지를 작성하세요" placeholderTextColor="#BFAE99" multiline numberOfLines={5}
+                value={formMessage} onChangeText={setFormMessage} />
               <Text style={s.createLabel}>개봉일</Text>
-              <TextInput style={s.createInput} placeholder="예: 2036.5.15" placeholderTextColor="#BFAE99" />
+              <TextInput style={s.createInput} placeholder="예: 2036.5.15" placeholderTextColor="#BFAE99"
+                value={formTarget} onChangeText={setFormTarget} />
               <Text style={s.createLabel}>유형</Text>
-              <TextInput style={s.createInput} placeholder="예: 성인식, 생일" placeholderTextColor="#BFAE99" />
-              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
+              <TextInput style={s.createInput} placeholder="예: 성인식, 생일" placeholderTextColor="#BFAE99"
+                value={formType} onChangeText={setFormType} />
+              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>저장하기</Text>
               </TouchableOpacity>
+            </ScrollView>
             </Animated.View>
           </View>
         </Modal>
@@ -128,9 +179,11 @@ export default function TimeCapsuleScreen() {
           </View>
 
           <View style={s.list}>
-            {CAPSULES.map((c, i) => (
-              <TouchableOpacity key={i} style={s.card} activeOpacity={0.7}
-                onPress={() => openDetail(c)}>
+            {capsules.map((record) => {
+              const c = record.data;
+              return (
+              <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
+                onPress={() => openDetail({ ...c, id: record.id })}>
                 <View style={[s.capsuleIcon, { backgroundColor: c.color }]}>
                   <FontAwesome name={c.icon as any} size={20} color="#FFFFFF" />
                 </View>
@@ -146,7 +199,15 @@ export default function TimeCapsuleScreen() {
                 </View>
                 {!c.locked && <FontAwesome name="envelope-open" size={16} color="#4AA86B" />}
               </TouchableOpacity>
-            ))}
+              );
+            })}
+            {capsules.length === 0 && (
+              <View style={s.empty}>
+                <FontAwesome name="clock-o" size={32} color="#CFC7BA" />
+                <Text style={s.emptyText}>아직 타임캡슐이 없어요</Text>
+                <Text style={s.emptySub}>아래 + 버튼으로 미래의 가족에게 편지를 남겨보세요</Text>
+              </View>
+            )}
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
@@ -160,6 +221,9 @@ export default function TimeCapsuleScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
+  empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
+  emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
+  emptySub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
   intro: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, margin: 20, backgroundColor: '#FFF8F0', borderRadius: 16, padding: 18, borderWidth: 1, borderColor: '#F5E8D8' },
   introContent: { flex: 1 },
   introTitle: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', marginBottom: 4, fontFamily: 'PretendardBold', letterSpacing: -0.3 },

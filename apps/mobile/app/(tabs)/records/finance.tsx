@@ -114,6 +114,7 @@ export default function FinanceScreen() {
             <Animated.View style={[styles.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={styles.modalHandle} />
               <Text style={styles.modalTitle}>새 거래 기록</Text>
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <View style={styles.pillRow}>
                 {([['수입', 'income'], ['지출', 'expense']] as const).map(([label, val]) => (
                   <TouchableOpacity
@@ -135,6 +136,7 @@ export default function FinanceScreen() {
               <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
                 <Text style={styles.createSubmitText}>저장하기</Text>
               </TouchableOpacity>
+            </ScrollView>
             </Animated.View>
           </View>
         </Modal>

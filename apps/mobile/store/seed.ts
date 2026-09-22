@@ -295,6 +295,116 @@ const RECIPES_SEED: NewRecord[] = [
   },
 ];
 
+const GOALS_SEED: NewRecord[] = [
+  {
+    category: 'goals', title: '주말 가족 운동', recordedBy: '지수', createdAt: daysAgo(5),
+    data: {
+    title: '주말 가족 운동', desc: '매주 토요일 가족 산책 또는 자전거', progress: 75, target: '2026.12', icon: 'bicycle', color: '#81C784', status: '진행 중',
+    milestones: [
+      { label: '가족 자전거 구매', done: true },
+      { label: '근처 자전거 코스 3곳 답사', done: true },
+      { label: '월 4회 이상 운동 3개월 연속', done: true },
+      { label: '가족 마라톤 5km 완주', done: false },
+    ],
+    notes: '비 오는 날엔 실내 클라이밍장으로 대체. 지우는 보조바퀴 떼고 한 달째 잘 타는 중.',
+  },
+  },
+  {
+    category: 'goals', title: '가족 독서 100권', recordedBy: '지수', createdAt: daysAgo(14),
+    data: {
+    title: '가족 독서 100권', desc: '가족 전체 연간 독서 100권 달성', progress: 42, target: '2026.12', icon: 'book', color: '#4FC3F7', status: '진행 중',
+    milestones: [
+      { label: '1분기 25권', done: true },
+      { label: '2분기 50권', done: false },
+      { label: '3분기 75권', done: false },
+      { label: '4분기 100권', done: false },
+    ],
+    notes: '서준 18권, 지수 12권, 민준 8권, 지우 4권. 매주 일요일 저녁 30분 가족 독서 시간 확보가 효과적.',
+  },
+  },
+  {
+    category: 'goals', title: '5년 뒤 가족 동남아 여행', recordedBy: '지수', createdAt: daysAgo(23),
+    data: {
+    title: '5년 뒤 가족 동남아 여행', desc: '매달 30만원씩 여행 저금', progress: 20, target: '2031.7', icon: 'plane', color: '#FFB74D', status: '진행 중',
+    milestones: [
+      { label: '여행 적금 통장 개설', done: true },
+      { label: '1년차 360만원 적립', done: true },
+      { label: '3년차 1,080만원 적립', done: false },
+      { label: '5년차 1,800만원 + 출발', done: false },
+    ],
+    notes: '목적지 후보: 발리, 푸켓, 다낭. 아이들이 초등 고학년이 되었을 때 떠나기로 합의.',
+  },
+  },
+  {
+    category: 'goals', title: '1억 모으기', recordedBy: '지수', createdAt: daysAgo(32),
+    data: {
+    title: '1억 모으기', desc: '주택 자금 마련을 위한 저축 목표', progress: 35, target: '2028.12', icon: 'home', color: '#E57373', status: '진행 중',
+    milestones: [
+      { label: '월 250만원 자동 저축 세팅', done: true },
+      { label: '5천만원 도달', done: false },
+      { label: '7천만원 도달', done: false },
+      { label: '1억 도달', done: false },
+    ],
+    notes: '청약 통장은 별도 운영. 비상금 300만원은 항상 별도 보유.',
+  },
+  },
+  {
+    category: 'goals', title: '서준이 수영 자격증', recordedBy: '지수', createdAt: daysAgo(41),
+    data: {
+    title: '서준이 수영 자격증', desc: '수영 1급 자격증 취득', progress: 100, target: '2026.3', icon: 'trophy', color: '#CE93D8', status: '달성',
+    milestones: [
+      { label: '수영 4급', done: true },
+      { label: '수영 3급', done: true },
+      { label: '수영 2급', done: true },
+      { label: '수영 1급', done: true },
+    ],
+    notes: '2026년 3월 시험 합격! 다음 목표로 인명구조 자격증 도전 예정.',
+  },
+  },
+];
+
+const HEALTH_SEED: NewRecord[] = [
+  {
+    category: 'health', title: '민준 건강검진', recordedBy: '민준', createdAt: daysAgo(6),
+    data: { member: '민준', recordedBy: '민준', type: '건강검진', date: '2026.3.15', result: '정상', notes: '혈압 120/80, 콜레스테롤 정상 범위', nextDate: '2027.3', color: '#B0C8D8', icon: 'stethoscope' },
+  },
+  {
+    category: 'health', title: '지수 치과 검진', recordedBy: '지수', createdAt: daysAgo(17),
+    data: { member: '지수', recordedBy: '지수', type: '치과 검진', date: '2026.2.20', result: '충치 1개', notes: '왼쪽 아래 어금니 충치 발견, 다음 주 치료 예약', nextDate: '2026.8', color: '#E8D0C0', icon: 'medkit' },
+  },
+  {
+    category: 'health', title: '지우 영유아 검진', recordedBy: '지수', createdAt: daysAgo(28),
+    data: { member: '지우', recordedBy: '지수', type: '영유아 검진', date: '2026.1.10', result: '정상 발달', notes: '키 91.2cm, 체중 13.5kg. 또래 평균 이상', nextDate: '2026.7', color: '#F0B8B8', icon: 'heart' },
+  },
+  {
+    category: 'health', title: '서준 시력 검사', recordedBy: '민준', createdAt: daysAgo(39),
+    data: { member: '서준', recordedBy: '민준', type: '시력 검사', date: '2025.12.5', result: '양호', notes: '양쪽 시력 1.0, 안경 불필요', nextDate: '2026.12', color: '#B8D8C0', icon: 'eye' },
+  },
+  {
+    category: 'health', title: '지우 예방접종', recordedBy: '지수', createdAt: daysAgo(50),
+    data: { member: '지우', recordedBy: '지수', type: '예방접종', date: '2025.11.20', result: '완료', notes: 'DTaP 4차 접종 완료', nextDate: '2026.5', color: '#F0B8B8', icon: 'plus-square' },
+  },
+];
+
+const CAPSULES_SEED: NewRecord[] = [
+  {
+    category: 'time-capsule', title: '서준이 성인식에 열어보세요', recordedBy: '지수', createdAt: daysAgo(8),
+    data: { title: '서준이 성인식에 열어보세요', target: '2036.5.15', type: '성인식', author: '지수, 민준', sealed: '2026.3.1', locked: true, icon: 'gift', color: '#CE93D8' },
+  },
+  {
+    category: 'time-capsule', title: '지우에게 보내는 첫 편지', recordedBy: '지수', createdAt: daysAgo(21),
+    data: { title: '지우에게 보내는 첫 편지', target: '2032.1.1', type: '생일', author: '지수', sealed: '2023.6.15', locked: true, icon: 'envelope', color: '#4FC3F7' },
+  },
+  {
+    category: 'time-capsule', title: '2025년 가족 영상 편지', recordedBy: '전체', createdAt: daysAgo(34),
+    data: { title: '2025년 가족 영상 편지', target: '2030.12.31', type: '연말', author: '전체', sealed: '2025.12.31', locked: true, icon: 'video-camera', color: '#FFB74D' },
+  },
+  {
+    category: 'time-capsule', title: '우리 첫 집 기억', recordedBy: '지수', createdAt: daysAgo(47),
+    data: { title: '우리 첫 집 기억', target: '2026.4.1', type: '기념일', author: '지수, 민준', sealed: '2024.4.1', locked: false, icon: 'home', color: '#81C784' },
+  },
+];
+
 /**
  * 앱이 처음 켜질 때 한 번 호출한다.
  * seedCategory는 해당 카테고리에 이미 기록이 있으면 건너뛰므로 두 번 불러도 안전하다.
@@ -306,4 +416,7 @@ export function seedRecords() {
   seedCategory('parenting', PARENTING_SEED);
   seedCategory('reading', READING_SEED);
   seedCategory('recipes', RECIPES_SEED);
+  seedCategory('goals', GOALS_SEED);
+  seedCategory('health', HEALTH_SEED);
+  seedCategory('time-capsule', CAPSULES_SEED);
 }

@@ -1,18 +1,19 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
+import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
+import { MEMBERS, CURRENT_USER } from '../../../constants/family';
 
-const MEMBERS = ['지수', '민준', '지우', '서준'];
-const CURRENT_USER = '지수';
+type HealthRecord = {
+  member: string; recordedBy: string; type: string; date: string;
+  result: string; notes: string; nextDate: string; color: string; icon: string;
+};
 
-const RECORDS = [
-  { member: '민준', recordedBy: '민준', type: '건강검진', date: '2026.3.15', result: '정상', notes: '혈압 120/80, 콜레스테롤 정상 범위', nextDate: '2027.3', color: '#B0C8D8', icon: 'stethoscope' },
-  { member: '지수', recordedBy: '지수', type: '치과 검진', date: '2026.2.20', result: '충치 1개', notes: '왼쪽 아래 어금니 충치 발견, 다음 주 치료 예약', nextDate: '2026.8', color: '#E8D0C0', icon: 'medkit' },
-  { member: '지우', recordedBy: '지수', type: '영유아 검진', date: '2026.1.10', result: '정상 발달', notes: '키 91.2cm, 체중 13.5kg. 또래 평균 이상', nextDate: '2026.7', color: '#F0B8B8', icon: 'heart' },
-  { member: '서준', recordedBy: '민준', type: '시력 검사', date: '2025.12.5', result: '양호', notes: '양쪽 시력 1.0, 안경 불필요', nextDate: '2026.12', color: '#B8D8C0', icon: 'eye' },
-  { member: '지우', recordedBy: '지수', type: '예방접종', date: '2025.11.20', result: '완료', notes: 'DTaP 4차 접종 완료', nextDate: '2026.5', color: '#F0B8B8', icon: 'plus-square' },
-];
+/** 구성원별 카드 아이콘 색 */
+const MEMBER_CARD_COLORS: Record<string, string> = {
+  '지수': '#E8D0C0', '민준': '#B0C8D8', '지우': '#F0B8B8', '서준': '#B8D8C0',
+};
 
 const RESULT_COLOR: Record<string, { bg: string; text: string }> = {
   '정상': { bg: '#E8F5E9', text: '#2E7D32' },
@@ -26,12 +27,27 @@ export default function HealthScreen() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [createMember, setCreateMember] = useState<string>(CURRENT_USER);
+
+  // 창고에서 건강 기록만 최신순으로 꺼낸다.
+  const records = useRecordsByCategory<HealthRecord>('health');
+  const addRecord = useRecordsStore((s) => s.addRecord);
+
+  // 작성 폼 입력값
+  const [formType, setFormType] = useState('');
+  const [formDate, setFormDate] = useState('');
+  const [formResult, setFormResult] = useState('');
+  const [formNotes, setFormNotes] = useState('');
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
 
   const openCreate = () => {
+    setCreateMember(CURRENT_USER);
+    setFormType('');
+    setFormDate('');
+    setFormResult('');
+    setFormNotes('');
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -43,6 +59,31 @@ export default function HealthScreen() {
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
     ]).start(() => setShowCreate(false));
+  };
+
+  const handleSave = () => {
+    const type = formType.trim();
+    if (!type) {
+      Alert.alert('검진 유형을 입력해주세요', '어떤 검진인지 알려주세요.');
+      return;
+    }
+    addRecord({
+      category: 'health',
+      title: `${createMember} ${type}`,
+      recordedBy: CURRENT_USER,
+      data: {
+        member: createMember,
+        recordedBy: CURRENT_USER,
+        type,
+        date: formDate.trim(),
+        result: formResult.trim() || '기록',
+        notes: formNotes.trim(),
+        nextDate: '',
+        color: MEMBER_CARD_COLORS[createMember] ?? '#B0C8D8',
+        icon: 'medkit',
+      },
+    });
+    closeCreate();
   };
 
   const openDetail = (item: any) => {
@@ -120,6 +161,7 @@ export default function HealthScreen() {
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
               <Text style={s.modalTitle}>새 건강 기록</Text>
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>기록 대상</Text>
               <View style={s.memberRow}>
                 {MEMBERS.map(m => (
@@ -135,16 +177,21 @@ export default function HealthScreen() {
               </View>
               <Text style={s.authorHint}>작성자: {CURRENT_USER} (나)</Text>
               <Text style={s.createLabel}>검진 유형</Text>
-              <TextInput style={s.createInput} placeholder="예: 건강검진, 치과 검진" placeholderTextColor="#BFAE99" />
+              <TextInput style={s.createInput} placeholder="예: 건강검진, 치과 검진" placeholderTextColor="#BFAE99"
+                value={formType} onChangeText={setFormType} />
               <Text style={s.createLabel}>검진일</Text>
-              <TextInput style={s.createInput} placeholder="예: 2026.4.26" placeholderTextColor="#BFAE99" />
+              <TextInput style={s.createInput} placeholder="예: 2026.4.26" placeholderTextColor="#BFAE99"
+                value={formDate} onChangeText={setFormDate} />
               <Text style={s.createLabel}>결과 요약</Text>
-              <TextInput style={s.createInput} placeholder="검진 결과를 입력하세요" placeholderTextColor="#BFAE99" />
+              <TextInput style={s.createInput} placeholder="검진 결과를 입력하세요" placeholderTextColor="#BFAE99"
+                value={formResult} onChangeText={setFormResult} />
               <Text style={s.createLabel}>메모</Text>
-              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="메모를 남겨보세요" placeholderTextColor="#BFAE99" multiline />
-              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={closeCreate}>
+              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="메모를 남겨보세요" placeholderTextColor="#BFAE99" multiline
+                value={formNotes} onChangeText={setFormNotes} />
+              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>저장하기</Text>
               </TouchableOpacity>
+            </ScrollView>
             </Animated.View>
           </View>
         </Modal>
@@ -157,11 +204,12 @@ export default function HealthScreen() {
           </View>
 
           <View style={s.list}>
-            {RECORDS.map((r, i) => {
+            {records.map((record) => {
+              const r = record.data;
               const rc = RESULT_COLOR[r.result] || { bg: '#F5F0E5', text: '#5C4A32' };
               return (
-                <TouchableOpacity key={i} style={s.card} activeOpacity={0.7}
-                  onPress={() => openDetail(r)}>
+                <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
+                  onPress={() => openDetail({ ...r, id: record.id })}>
                   <View style={[s.icon, { backgroundColor: r.color }]}>
                     <FontAwesome name={r.icon as any} size={18} color="#FFFFFF" />
                   </View>
@@ -172,16 +220,25 @@ export default function HealthScreen() {
                         <Text style={[s.resultText, { color: rc.text }]}>{r.result}</Text>
                       </View>
                     </View>
-                    <Text style={s.type}>{r.type} · {r.date}</Text>
-                    <Text style={s.notes} numberOfLines={1}>{r.notes}</Text>
-                    <View style={s.nextRow}>
-                      <FontAwesome name="calendar" size={10} color="#9C8B75" />
-                      <Text style={s.nextDate}>다음: {r.nextDate}</Text>
-                    </View>
+                    <Text style={s.type}>{[r.type, r.date].filter(Boolean).join(' · ')}</Text>
+                    {r.notes ? <Text style={s.notes} numberOfLines={1}>{r.notes}</Text> : null}
+                    {r.nextDate ? (
+                      <View style={s.nextRow}>
+                        <FontAwesome name="calendar" size={10} color="#9C8B75" />
+                        <Text style={s.nextDate}>다음: {r.nextDate}</Text>
+                      </View>
+                    ) : null}
                   </View>
                 </TouchableOpacity>
               );
             })}
+            {records.length === 0 && (
+              <View style={s.empty}>
+                <FontAwesome name="heartbeat" size={32} color="#CFC7BA" />
+                <Text style={s.emptyText}>아직 건강 기록이 없어요</Text>
+                <Text style={s.emptySub}>아래 + 버튼으로 검진 결과를 남겨보세요</Text>
+              </View>
+            )}
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
@@ -195,6 +252,9 @@ export default function HealthScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
+  empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
+  emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
+  emptySub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
   aiHint: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, margin: 20, backgroundColor: '#EFF6F1', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#D0E4D6' },
   aiHintText: { flex: 1, fontSize: 12, color: '#4A8C6F', lineHeight: 18, fontFamily: 'Pretendard' },
   list: { paddingHorizontal: 20 },

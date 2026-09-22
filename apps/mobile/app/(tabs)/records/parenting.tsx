@@ -171,6 +171,7 @@ export default function ParentingScreen() {
             <Animated.View style={[styles.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={styles.modalHandle} />
               <Text style={styles.modalTitle}>새 육아 일기</Text>
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={styles.createLabel}>아이</Text>
               <View style={styles.childPicker}>
                 {CHILDREN.map((name) => (
@@ -213,6 +214,7 @@ export default function ParentingScreen() {
               <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={styles.createSubmitText}>저장하기</Text>
               </TouchableOpacity>
+            </ScrollView>
             </Animated.View>
           </View>
         </Modal>
