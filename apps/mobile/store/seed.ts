@@ -406,6 +406,63 @@ const CAPSULES_SEED: NewRecord[] = [
 ];
 
 /**
+ * 가계부 시드.
+ *
+ * 다른 카테고리와 달리 원래 화면에는 `[{ date, items: [...] }]`처럼 날짜별로 묶여 있었다.
+ * 창고에는 "거래 1건 = 기록 1건"으로 풀어서 넣는다. 날짜별 묶음은 화면에서 다시 만든다.
+ * 날짜는 반드시 'YYYY-MM-DD' — 월별 집계와 정렬이 이 형식에 의존한다.
+ */
+const tx = (
+  date: string,
+  type: 'income' | 'expense',
+  category: string,
+  desc: string,
+  amount: number,
+  method: string,
+  memo = '',
+  recordedBy = '지수'
+): NewRecord => ({
+  category: 'finance',
+  title: desc,
+  recordedBy,
+  createdAt: new Date(`${date}T12:00:00`).getTime(),
+  data: { type, amount, category, desc, date, method, memo },
+});
+
+/** 이번 달 / 지난달을 오늘 기준으로 만든다 (전월 대비 비교가 보이도록). */
+const ym = (monthsAgo: number, day: number) => {
+  const d = new Date();
+  d.setDate(1);
+  d.setMonth(d.getMonth() - monthsAgo);
+  const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(day, last));
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+const FINANCE_SEED: NewRecord[] = [
+  // ── 이번 달 ──
+  tx(ym(0, 1), 'income', '급여', '월급', 4200000, '입금', '', '민준'),
+  tx(ym(0, 2), 'expense', '주거', '관리비', 185000, '계좌이체'),
+  tx(ym(0, 3), 'expense', '식비', '이마트 장보기', 87400, '카드', '주말 장보기 + 지우 간식'),
+  tx(ym(0, 5), 'expense', '교통', '주유소', 65000, '카드'),
+  tx(ym(0, 8), 'expense', '교육', '서준이 학원비', 350000, '계좌이체', '수학·영어 2과목', '민준'),
+  tx(ym(0, 11), 'expense', '식비', '배달의민족', 32500, '카드'),
+  tx(ym(0, 14), 'expense', '여가', '가족 영화 관람', 48000, '카드', '인사이드 아웃 2'),
+  tx(ym(0, 16), 'expense', '의료', '지우 소아과', 15000, '카드'),
+  tx(ym(0, 18), 'expense', '생활', '생필품 정기배송', 43200, '카드'),
+  tx(ym(0, 20), 'expense', '식비', '주말 외식', 68000, '카드', '가족 4명 삼겹살', '민준'),
+
+  // ── 지난달 (전월 대비 비교용) ──
+  tx(ym(1, 1), 'income', '급여', '월급', 4200000, '입금', '', '민준'),
+  tx(ym(1, 2), 'expense', '주거', '관리비', 172000, '계좌이체'),
+  tx(ym(1, 6), 'expense', '식비', '이마트 장보기', 92000, '카드'),
+  tx(ym(1, 9), 'expense', '교육', '서준이 학원비', 350000, '계좌이체', '', '민준'),
+  tx(ym(1, 13), 'expense', '교통', '주유소', 60000, '카드'),
+  tx(ym(1, 19), 'expense', '여가', '놀이공원', 96000, '카드', '지우 생일 기념'),
+  tx(ym(1, 24), 'expense', '식비', '배달 음식', 41000, '카드'),
+];
+
+/**
  * 앱이 처음 켜질 때 한 번 호출한다.
  * seedCategory는 해당 카테고리에 이미 기록이 있으면 건너뛰므로 두 번 불러도 안전하다.
  */
@@ -419,4 +476,5 @@ export function seedRecords() {
   seedCategory('goals', GOALS_SEED);
   seedCategory('health', HEALTH_SEED);
   seedCategory('time-capsule', CAPSULES_SEED);
+  seedCategory('finance', FINANCE_SEED);
 }
