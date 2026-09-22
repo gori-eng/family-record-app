@@ -188,6 +188,7 @@ Supabase 클라이언트는 `sessionStorage` 접근 차단 시 메모리 폴백�
 ## 12. 구현 현황 & TODO
 
 > 작업을 마칠 때마다 이 섹션을 최신화할 것.
+> **큰 그림·환경 세팅·다중 PC 이어작업은 [`HANDOFF.md`](./HANDOFF.md)를 볼 것.** 이 문서는 상세 일지다.
 
 ### 완료된 작업
 - [x] Turborepo + pnpm 모노레포 초기화
