@@ -569,7 +569,21 @@ ERROR: infinite recursion detected in policy for relation "family_members"
         `eyJ`로 시작하는 긴 JWT를 안내하는 글(과거 이 문서 포함)은 옛 방식이다
       - Secret 키(`sb_secret_...`)는 RLS를 우회하므로 앱에 절대 넣지 말 것
 - [ ] 마이그레이션 3개 적용 (Supabase 대시보드 SQL Editor 또는 `supabase db push`)
-- [ ] `packages/core/src/supabase/records.ts` — DB ↔ 앱 변환 계층 (snake_case ↔ camelCase)
+- [x] **Supabase 연결 확인** — 프로젝트 생성·`.env` 기입·마이그레이션 적용 완료. 테이블 5개 응답 확인
+- [x] `packages/core/src/supabase/records.ts` — DB ↔ 앱 변환 계층 (snake_case ↔ camelCase)
+- [x] `packages/core/src/supabase/family.ts` — 가족 만들기 / 초대 코드 합류 / 조회
+- [x] `00004_join_family_by_code.sql` — 초대 코드 합류용 DB 함수
+      (아직 그 가족에 속하지 않아 RLS가 `families` 조회를 막는다. 닭과 달걀이라 SECURITY DEFINER 함수가 대신 한다)
+- [x] `apps/mobile/store/session.ts` — 로그인한 사람 + 가족 + 구성원.
+      `useMemberNames()` / `useCurrentUserName()`이 기존 `MEMBERS` / `CURRENT_USER` 상수를 대신한다
+
+> 🔴 **TypeScript 함정 — `interface`는 supabase-js 타입에 못 쓴다.**
+> DB 타입을 `export interface Family {...}`로 쓰면 supabase-js가 요구하는
+> `Record<string, unknown>`에 대입되지 않는다. **interface에는 암묵적 인덱스 시그니처가 없기 때문**이다.
+> 그러면 스키마 전체가 `never`로 떨어져 **insert/update가 통째로 막힌다**
+> (`Argument of type '{...}' is not assignable to parameter of type 'never'`).
+> → DB 행 타입은 반드시 **`export type X = {...}`**. 그리고 각 테이블에 `Relationships: []`도 필요하다.
+> 증상이 헷갈리는 이유: 에러가 `client.ts`가 아니라 **호출부**에서 나고, 원인이 타입 선언 방식이라 보이지 않는다.
 - [ ] 기록 스토어를 Supabase 연동으로 전환 (`store/records.ts` 안쪽만 교체)
 - [ ] `store/seed.ts` + `_layout.tsx`의 `seedRecords()` 삭제
 - [ ] 가계부 설정을 localStorage → DB로 이전
