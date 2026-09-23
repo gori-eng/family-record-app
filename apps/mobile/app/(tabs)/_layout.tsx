@@ -90,8 +90,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
         }}
       />
-      {/* AI 비서 탭 숨김 */}
-      <Tabs.Screen name="ai" options={{ href: null }} />
     </Tabs>
   );
 }

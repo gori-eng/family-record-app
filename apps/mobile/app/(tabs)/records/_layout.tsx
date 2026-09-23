@@ -19,7 +19,7 @@ export default function RecordsLayout() {
         headerTintColor: '#1F1F1F',
         headerShadowVisible: false,
         headerBackTitle: '뒤로',
-        headerTitleStyle: { fontFamily: 'PretendardBold', fontSize: 17, letterSpacing: -0.3 },
+        headerTitleStyle: { fontFamily: 'PretendardBold', fontSize: 17 },
         headerLeft: () => <BackToIndex />,
         animation: 'slide_from_right',
       }}
@@ -35,7 +35,6 @@ export default function RecordsLayout() {
       <Stack.Screen name="goals" options={{ title: '가족 목표' }} />
       <Stack.Screen name="health" options={{ title: '건강 기록' }} />
       <Stack.Screen name="time-capsule" options={{ title: '타임캡슐' }} />
-      <Stack.Screen name="[type]" />
     </Stack>
   );
 }

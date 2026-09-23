@@ -28,7 +28,9 @@ export default function SettingsScreen() {
     }
   };
 
-  const sections = [
+  /** 설정 목록 한 줄. subtitle은 있는 줄도 있고 없는 줄도 있다 */
+  type MenuItem = { icon: string; label: string; subtitle?: string; action: () => void };
+  const sections: { title: string; items: MenuItem[] }[] = [
     {
       title: '가족 관리',
       items: [

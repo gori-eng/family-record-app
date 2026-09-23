@@ -46,21 +46,24 @@ family-record-app/
 │   ├── app/(tabs)/           # 메인 탭 (홈, 캘린더, 기록, 설정)
 │   │   ├── index.tsx         # 홈 대시보드
 │   │   ├── calendar.tsx      # 공유 캘린더
-│   │   ├── records/          # 기록 카테고리 (13개)
+│   │   ├── records/          # 기록 카테고리 9개 (전부 실제 화면)
 │   │   │   ├── index.tsx     # 기록 허브 (카테고리 목록)
 │   │   │   ├── parenting.tsx # 육아일지
 │   │   │   ├── reading.tsx   # 독서목록
-│   │   │   ├── finance.tsx   # 가계부
-│   │   │   └── [type].tsx    # 미구현 카테고리 플레이스홀더
-│   │   ├── settings.tsx      # 설정
-│   │   └── ai.tsx            # AI 비서 (탭에서 숨김, 보조용)
+│   │   │   ├── finance.tsx   # 가계부 + finance-import.tsx (명세서 가져오기)
+│   │   │   └── ... movies / travel / recipes / goals / health / time-capsule
+│   │   └── settings.tsx      # 설정
 │   ├── app/settings/         # 설정 서브 화면
 │   │   ├── members.tsx       # 가족 구성원
 │   │   ├── profile.tsx       # 프로필 수정
 │   │   ├── notifications.tsx # 알림 설정
 │   │   ├── privacy.tsx       # 개인정보 보호
 │   │   └── export.tsx        # 데이터 내보내기
-│   └── app/onboarding.tsx    # 온보딩 (미활성화)
+│   ├── app/onboarding.tsx    # 온보딩 (미활성화)
+│   ├── app/+not-found.tsx    # 없는 주소로 들어왔을 때
+│   ├── store/               # 공용 보관소 (records / events / finance / ...)
+│   ├── constants/family.ts  # 가족 구성원 (Supabase 붙이면 session.ts로 대체)
+│   └── components/AppAlert.tsx # 확인창 — Alert.alert 대신 이것을 쓴다
 ├── packages/core/            # 공유 비즈니스 로직
 │   ├── src/supabase/         # Supabase 클라이언트, 인증
 │   ├── src/utils/            # 역할 기반 권한 체크
@@ -72,7 +75,8 @@ family-record-app/
 ## 6. 하단 탭 구성
 
 4개 탭: **홈** / **캘린더** / **기록** / **설정**
-- AI 비서 탭은 `href: null`로 숨겨져 있다. AI는 각 기능 화면 내부에 보조 힌트로 삽입한다.
+- **AI 화면은 없다.** 예전에 숨겨둔 `ai.tsx`가 있었으나 2026-09-23에 지웠다.
+  AI는 각 기능 화면 내부에 보조 힌트로만 넣는다 (§2).
 
 ## 7. 홈 화면 레이아웃 규칙
 
@@ -574,8 +578,7 @@ ERROR: infinite recursion detected in policy for relation "family_members"
 - [x] **구성원 이름이 한 칸에 두 역할을 맡고 있었다** → `display_name` / `full_name`으로 나눔 (아래 별도 항목)
 - [x] 홈 "빠른 기록"의 **사진 칩이 없는 화면(`/records/media`)을 가리켰다** → 여행으로 교체
       (미디어 업로드를 만들면 그때 다시 사진으로)
-- [ ] **떠 있는 화면 정리** — `family-tree` / `media` / `identity` / `legacy`는 카테고리에서
-      빠졌는데 파일이 남아 있다. `ai.tsx`는 탭에서 숨겼지만 제목이 "ai"로 그려진다
+- [x] **떠 있는 화면 정리** — 아래 별도 항목
 - [ ] **데이터 내보내기가 아직 Alert뿐이다.** §1에서 "핵심 기능"이라고 못 박은 것이므로 JSON부터 실제로
 - [ ] 말투 통일 스프린트 (아래 별도 항목)
 - 떠오른 아이디어: 전체 기록 통합 검색 / 홈에 "1년 전 오늘" / 타임캡슐 날짜 되면 자동 열림
@@ -643,6 +646,43 @@ Supabase를 붙일 때 이 파일 안쪽만 `calendar_events` 테이블로 바�
 > (3) `innerText`는 레이아웃이 필요해서 **"사라졌는지"를 믿을 수 없다** — 계산된 스타일이나
 > `textContent`로 봐야 한다. 이번에도 "확인창이 안 닫힌다"고 오진할 뻔했다.
 > 이 상황에서는 **"생겼다"는 확인만 믿고, "없어졌다"는 확인은 믿지 말 것.**
+
+### 2026-09-23 떠 있는 화면 정리
+
+카테고리에서 빠졌는데 파일만 남아 있던 화면들을 지웠다. **지운 것은 git 이력에 남아 있으니
+되살리려면 `git show <커밋>:<경로> > <경로>` 한 줄이면 된다.**
+
+| 지운 파일 | 왜 |
+|---|---|
+| `records/family-tree.tsx` | 가계도 — §8에서 제거된 카테고리 |
+| `records/media.tsx` | 음성/영상 — 제거된 카테고리 |
+| `records/identity.tsx` | MBTI 기록 — 제거된 카테고리 |
+| `records/legacy.tsx` | 디지털 유산 — 제거된 카테고리 |
+| `records/[type].tsx` | "준비 중" 플레이스홀더. 9개 카테고리 전부 실제 화면이 생겨 쓰이지 않는다 |
+| `(tabs)/ai.tsx` | §2 "AI 비서 전용 탭은 없다"와 어긋나는 화면. 보내도 "준비 중" 알림만 떴다 |
+
+라우팅 등록도 함께 뺐다 — `records/_layout.tsx`의 `<Stack.Screen name="[type]" />`,
+`(tabs)/_layout.tsx`의 `<Tabs.Screen name="ai" href={null} />`.
+
+**`[type].tsx`를 지운 것이 특히 의미가 있다.** 이 화면은 `/records/아무거나`를 다 받아서
+예쁜 "준비 중이에요" 페이지를 띄웠다. 그래서 **오타나 끊긴 링크가 버그처럼 보이지 않고
+정상처럼 보였다.** 방금 고친 홈의 `/records/media` 링크가 정확히 그 경우다 —
+"음성/영상 준비 중"이 떠서 몇 달간 아무도 이상하게 여기지 않았다.
+이제 없는 주소는 `+not-found`("페이지를 찾을 수 없어요")로 가므로 바로 눈에 띈다.
+
+**타입 오류 4건 정리 (계속 남아 있던 것)**
+- `headerTitleStyle`의 `letterSpacing` 2곳 — 네비게이션 헤더 타입이 받지 않는 속성이다. 지웠다
+  (본문 제목 스타일에는 그대로 쓴다). 헤더 제목 렌더링은 그대로임을 확인
+- `settings.tsx`의 `sections` — 어떤 줄에는 `subtitle`이 있고 어떤 줄에는 없어서 TS가 막았다.
+  `MenuItem` 타입(`subtitle?`)을 정해줬다
+- **결과: `tsc --noEmit` 오류 0건.** 남아 있으면 앞으로 진짜 오류를 가린다
+
+**검증** (개발 서버 재시작 후, 콘솔 에러 0건)
+- 기록 허브 9개 카테고리 · 총 58개 정상
+- `/records/media`, `/ai` → **"페이지를 찾을 수 없어요"** (의도한 동작)
+- 육아일기·가족 구성원·홈·설정 모두 정상 렌더링, 헤더 제목도 그대로
+- 콘솔의 404 2건은 위 두 주소를 **일부러 열어본 것** — 앱 오류가 아니다.
+  실제 화면 요청은 전부 200
 
 ### TODO — 다음 스프린트 (Supabase 연동)
 - [ ] **운영자 작업:** Supabase 프로젝트 생성 → URL·**Publishable 키**를 `apps/mobile/.env`에 기입
