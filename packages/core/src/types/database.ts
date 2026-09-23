@@ -34,8 +34,10 @@ export type FamilyMember = {
   id: string;
   family_id: string;
   user_id: string;
-  /** 앱에서 사람을 가리키는 이름 (지수 / 민준 / …). 가족 안에서 유일하다. */
+  /** 기록에서 사람을 가리키는 짧은 이름 (지수). 가족 안에서 유일하다. */
   display_name: string;
+  /** 프로필·구성원 목록에 보여줄 이름 (김지수). 겹쳐도 된다. */
+  full_name: string;
   avatar_url: string | null;
   role: FamilyRole;
   joined_at: string;
@@ -117,6 +119,7 @@ export type FamilyMemberInsert = {
   family_id: string;
   user_id: string;
   display_name: string;
+  full_name?: string;
   role?: FamilyRole;
   avatar_url?: string | null;
 };
@@ -200,7 +203,7 @@ export type Database = {
     Functions: {
       /** 초대 코드로 가족에 합류 (00004 마이그레이션) */
       join_family_by_code: {
-        Args: { p_invite_code: string; p_display_name: string };
+        Args: { p_invite_code: string; p_display_name: string; p_full_name?: string };
         Returns: { family_id: string; member_id: string }[];
       };
       /** RLS 재귀를 피하려고 만든 함수. 정책 안에서만 쓴다 */

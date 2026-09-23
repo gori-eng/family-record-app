@@ -10,7 +10,8 @@
 
 CREATE OR REPLACE FUNCTION join_family_by_code(
   p_invite_code TEXT,
-  p_display_name TEXT
+  p_display_name TEXT,
+  p_full_name TEXT DEFAULT NULL
 )
 RETURNS TABLE (family_id UUID, member_id UUID)
 LANGUAGE plpgsql
@@ -58,8 +59,12 @@ BEGIN
     RAISE EXCEPTION '이 가족에 "%" 이름이 이미 있어요. 다른 이름을 적어주세요.', trim(p_display_name);
   END IF;
 
-  INSERT INTO family_members (family_id, user_id, display_name, role)
-  VALUES (v_family_id, v_user_id, trim(p_display_name), 'parent')
+  INSERT INTO family_members (family_id, user_id, display_name, full_name, role)
+  VALUES (
+    v_family_id, v_user_id, trim(p_display_name),
+    coalesce(nullif(trim(p_full_name), ''), trim(p_display_name)),
+    'parent'
+  )
   RETURNING id INTO v_member_id;
 
   RETURN QUERY SELECT v_family_id, v_member_id;
@@ -67,5 +72,5 @@ END;
 $$;
 
 -- 로그인한 사용자만 호출할 수 있다
-REVOKE ALL ON FUNCTION join_family_by_code(TEXT, TEXT) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION join_family_by_code(TEXT, TEXT) TO authenticated;
+REVOKE ALL ON FUNCTION join_family_by_code(TEXT, TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION join_family_by_code(TEXT, TEXT, TEXT) TO authenticated;

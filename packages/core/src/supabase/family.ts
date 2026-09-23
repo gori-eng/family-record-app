@@ -36,8 +36,11 @@ export async function fetchMembers(familyId: string): Promise<FamilyMember[]> {
  */
 export async function createFamily(
   name: string,
+  /** 기록에 뜰 짧은 이름 (지수) */
   displayName: string,
-  userId: string
+  userId: string,
+  /** 프로필에 뜰 이름 (김지수). 비우면 짧은 이름을 그대로 쓴다 */
+  fullName?: string
 ): Promise<{ family: Family; member: FamilyMember }> {
   const { data: fam, error: famErr } = await supabase
     .from('families')
@@ -54,6 +57,7 @@ export async function createFamily(
       family_id: family.id,
       user_id: userId,
       display_name: displayName,
+      full_name: fullName?.trim() || displayName,
       role: 'admin' as FamilyRole,
     })
     .select()
@@ -77,11 +81,13 @@ export async function createFamily(
  */
 export async function joinFamilyByCode(
   inviteCode: string,
-  displayName: string
+  displayName: string,
+  fullName?: string
 ): Promise<{ family: Family; member: FamilyMember }> {
   const { data, error } = await supabase.rpc('join_family_by_code', {
     p_invite_code: inviteCode.trim(),
     p_display_name: displayName.trim(),
+    p_full_name: fullName?.trim() || displayName.trim(),
   });
   if (error) throw error;
 
@@ -97,11 +103,23 @@ export async function joinFamilyByCode(
   return { family, member: me };
 }
 
-/** 내 표시 이름 바꾸기 */
-export async function updateMyDisplayName(memberId: string, displayName: string): Promise<void> {
-  const { error } = await supabase
-    .from('family_members')
-    .update({ display_name: displayName })
-    .eq('id', memberId);
+/**
+ * 내 이름 바꾸기.
+ *
+ * ⚠️ 짧은 이름(display_name)을 바꾸면 **이미 쌓인 기록과 어긋난다.**
+ *    기록은 이름 문자열로 사람을 가리키기 때문이다(`recordedBy` / `ownerMember`).
+ *    바꿀 때는 기존 기록도 함께 고쳐야 한다 — 아직 구현하지 않았다.
+ *    full_name만 바꾸는 것은 안전하다.
+ */
+export async function updateMyName(
+  memberId: string,
+  patch: { displayName?: string; fullName?: string }
+): Promise<void> {
+  const row: { display_name?: string; full_name?: string } = {};
+  if (patch.displayName !== undefined) row.display_name = patch.displayName.trim();
+  if (patch.fullName !== undefined) row.full_name = patch.fullName.trim();
+  if (!Object.keys(row).length) return;
+
+  const { error } = await supabase.from('family_members').update(row).eq('id', memberId);
   if (error) throw error;
 }

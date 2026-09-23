@@ -5,6 +5,9 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { signOut } from '@core/supabase';
 
+import { CURRENT_USER, fullNameOf } from '../../constants/family';
+
+// TODO: Supabase 연결 후 families.invite_code 에서 가져온다
 const INVITE_CODE = 'ABC12345';
 
 export default function SettingsScreen() {
@@ -19,7 +22,7 @@ export default function SettingsScreen() {
 
   const handleShareInviteCode = async () => {
     try {
-      await Share.share({ message: `Familog에 초대합니다! 초대 코드: ${INVITE_CODE}` });
+      await Share.share({ message: `familog에 초대합니다! 초대 코드: ${INVITE_CODE}` });
     } catch {
       showAlert('초대 코드', INVITE_CODE);
     }
@@ -61,7 +64,7 @@ export default function SettingsScreen() {
           <FontAwesome name="user" size={28} color="#4A8C6F" />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.profileName}>김지수</Text>
+          <Text style={styles.profileName}>{fullNameOf(CURRENT_USER)}</Text>
           <Text style={styles.profileRole}>관리자 (부모)</Text>
         </View>
         <View style={styles.editProfileButton}>
@@ -94,7 +97,7 @@ export default function SettingsScreen() {
         <Text style={styles.signOutText}>로그아웃</Text>
       </TouchableOpacity>
 
-      <Text style={styles.version}>Familog v1.0.0</Text>
+      <Text style={styles.version}>familog v1.0.0</Text>
     </ScrollView>
     </SafeAreaView>
   );

@@ -92,9 +92,21 @@ export function useMemberNames(): string[] {
   return useSession((s) => s.members).map((m) => m.display_name);
 }
 
-/** 지금 나의 표시 이름. 예전 `CURRENT_USER` 상수를 대신한다. */
+/** 지금 나의 짧은 이름 (기록에 뜨는 이름). 예전 `CURRENT_USER` 상수를 대신한다. */
 export function useCurrentUserName(): string {
   return useSession((s) => s.me?.display_name ?? '');
+}
+
+/** 지금 나의 전체 이름 (프로필에 뜨는 이름) */
+export function useCurrentFullName(): string {
+  return useSession((s) => s.me?.full_name ?? s.me?.display_name ?? '');
+}
+
+/** 짧은 이름 → 전체 이름. 구성원 목록·프로필에서 쓴다. */
+export function useFullNameOf(displayName: string): string {
+  return useSession(
+    (s) => s.members.find((m) => m.display_name === displayName)?.full_name ?? displayName
+  );
 }
 
 /** 훅 밖(이벤트 핸들러 등)에서 필요할 때 */

@@ -11,7 +11,7 @@ export {
   fetchMembers,
   createFamily,
   joinFamilyByCode,
-  updateMyDisplayName,
+  updateMyName,
 } from './supabase/family';
 export {
   fetchRecords,

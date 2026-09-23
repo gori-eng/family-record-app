@@ -3,12 +3,27 @@ import { showAlert } from '../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 
-const MEMBERS = [
-  { name: '김지수', role: '모', color: '#F0B8B8', email: 'jisoo@family.com' },
-  { name: '김민준', role: '부', color: '#B0C8D8', email: 'minjun@family.com' },
-  { name: '김지우', role: '자녀', color: '#FFD3B6', email: '' },
-  { name: '김서준', role: '자녀', color: '#B8E6C8', email: 'seojun@family.com' },
-];
+import { FAMILY_MEMBERS } from '../../constants/family';
+
+/**
+ * 역할·이메일은 아직 DB가 없어 여기 둔다. 이름과 색은 공용 목록에서 가져온다.
+ * (화면마다 이름을 따로 적어두면 기록의 작성자 이름과 어긋난다)
+ */
+const ROLE_BY_MEMBER: Record<string, { role: string; email: string }> = {
+  '지수': { role: '모', email: 'jisoo@family.com' },
+  '민준': { role: '부', email: 'minjun@family.com' },
+  '지우': { role: '자녀', email: '' },
+  '서준': { role: '자녀', email: 'seojun@family.com' },
+};
+
+const MEMBERS = FAMILY_MEMBERS.map((m) => ({
+  /** 목록에는 전체 이름을 보여준다 */
+  name: m.full,
+  /** 기록에 뜨는 짧은 이름 */
+  display: m.display,
+  color: m.color,
+  ...(ROLE_BY_MEMBER[m.display] ?? { role: '가족', email: '' }),
+}));
 
 const ROLE_BADGE: Record<string, { bg: string; fg: string }> = {
   '부': { bg: '#E3F0FA', fg: '#2D6FA8' },
