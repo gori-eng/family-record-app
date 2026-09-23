@@ -167,20 +167,49 @@ familog의 정체성은 "가족 구성원 모두가 사용하는 기록 앱, 함
 
 ## 11. Supabase 설정
 
+### 테이블 구조
+
+| 테이블 | 역할 |
+|---|---|
+| `families` / `family_members` | 가족과 구성원. 모든 격리의 기준 |
+| **`records`** | **기록 9종 공용.** 공통 송장 + `data JSONB` 내용물 |
+| `calendar_events` | 일정 (기록과 성격이 달라 따로) |
+| `finance_settings` | 가계부 설정. 가족당 한 줄 |
+
+> 카테고리별 테이블을 따로 두지 않는 이유와 상세는 `supabase/migrations/00002_create_records.sql` 상단 주석 참조.
+
 ### RLS (Row-Level Security)
-모든 테이블에 `family_id` 컬럼 → 가족 단위 데이터 격리:
+
+모든 테이블에 `family_id` → 가족 단위 격리. 정책은 **반드시 `my_family_ids()`를 쓴다.**
+
 ```sql
-CREATE POLICY "family_isolation" ON <table>
-  USING (family_id IN (
-    SELECT family_id FROM family_members WHERE user_id = auth.uid()
-  ));
+CREATE POLICY "records_select" ON records
+  FOR SELECT USING (family_id IN (SELECT my_family_ids()));
 ```
 
-### 역할 기반 접근
-- `admin` / `parent` — 전체 접근 (재무, 건강, 자산 포함)
+> 🔴 **이렇게 쓰면 안 된다 — 무한 재귀**
+> ```sql
+> -- family_members 정책 안에서 family_members를 다시 조회 → 그 조회에 또 같은 정책이 걸린다
+> USING (family_id IN (SELECT family_id FROM family_members WHERE user_id = auth.uid()))
+> --   ERROR: infinite recursion detected in policy for relation "family_members"
+> ```
+> `my_family_ids()`는 `SECURITY DEFINER` 함수라 정책을 건너뛰고 실행되어 이 고리를 끊는다.
+> 함수 안에서 `auth.uid()`로 본인 것만 읽으므로 정보가 새지 않는다. (`00001` 참조)
+
+### 중복 방지 (가계부)
+
+`records(family_id, import_key)`에 부분 UNIQUE 인덱스가 걸려 있다.
+앱 화면에서도 중복을 거르지만, **가족 여러 명이 같은 명세서를 동시에 넣는 경우는 화면 검사로 막을 수 없다.**
+DB가 마지막 방어선이다.
+
+### 역할 기반 접근 (⚠️ 아직 적용 안 됨)
+- `admin` / `parent` / `elder` — 전체 접근 (재무, 건강 포함)
 - `child` — 공유 콘텐츠만 (독서, 영화, 여행, 레시피, 목표)
-- `elder` — parent와 동일
 - `guest` — 읽기 전용
+
+> 규칙은 `packages/core/src/utils/permissions.ts`에 있지만 **RLS에는 아직 넣지 않았다.**
+> 앱이 역할을 쓰지 않는 상태에서 정책을 먼저 조이면 개발 중에 계속 막히기 때문이다.
+> 인증을 붙인 뒤 별도 마이그레이션으로 추가한다. **화면에서 숨기는 것만으로는 차단이 아니다 — DB 정책도 함께 걸 것.**
 
 ### iframe 환경 대응
 Supabase 클라이언트는 `sessionStorage` 접근 차단 시 메모리 폴백을 사용한다 (`packages/core/src/supabase/client.ts`).
