@@ -561,8 +561,13 @@ ERROR: infinite recursion detected in policy for relation "family_members"
 - 역할 기반 RLS(아이에게 가계부·건강 숨기기) — 앱이 아직 역할을 쓰지 않고, 정책을 먼저 조이면 개발 중에 계속 막힌다. 인증을 붙인 뒤 별도 마이그레이션으로
 
 ### TODO — 다음 스프린트 (Supabase 연동)
-- [ ] **운영자 작업:** Supabase 프로젝트 생성 → Settings > API에서 URL·anon key를 `apps/mobile/.env`에 기입
-      (`.env.example` 참고. `.env`는 git 제외됨)
+- [ ] **운영자 작업:** Supabase 프로젝트 생성 → URL·**Publishable 키**를 `apps/mobile/.env`에 기입
+      - Connect 창: `https://supabase.com/dashboard/project/_?showConnect=true` (`_`는 내 프로젝트로 자동 연결)
+      - 키만: `https://supabase.com/dashboard/project/_/settings/api-keys`
+      - Project URL은 언제나 `https://<ref>.supabase.co`. ref는 대시보드 주소창에 보인다
+      - ⚠️ **`anon` 키(`eyJ...`)는 2026년 말 폐지 예정.** `sb_publishable_...`를 쓴다.
+        `eyJ`로 시작하는 긴 JWT를 안내하는 글(과거 이 문서 포함)은 옛 방식이다
+      - Secret 키(`sb_secret_...`)는 RLS를 우회하므로 앱에 절대 넣지 말 것
 - [ ] 마이그레이션 3개 적용 (Supabase 대시보드 SQL Editor 또는 `supabase db push`)
 - [ ] `packages/core/src/supabase/records.ts` — DB ↔ 앱 변환 계층 (snake_case ↔ camelCase)
 - [ ] 기록 스토어를 Supabase 연동으로 전환 (`store/records.ts` 안쪽만 교체)
