@@ -5,7 +5,8 @@
  * Supabase를 붙이면 이 파일은 통째로 지우면 된다 — 화면 코드는 손대지 않아도 된다.
  */
 import { useRecordsStore, type NewRecord } from './records';
-import { fingerprint } from './finance';
+import { useEventsStore, type NewEvent } from './events';
+import { fingerprint, toISO } from './finance';
 
 const DAY = 86_400_000;
 /** n일 전 시각. 시드 기록이 최신순으로 자연스럽게 줄 서도록 쓴다. */
@@ -468,6 +469,26 @@ const FINANCE_SEED: NewRecord[] = [
   tx(ym(1, 24), 'expense', '식비', '배달 음식', 41000, '카드'),
 ];
 
+// ── 일정 시드 ─────────────────────────────────────────────
+// 오늘을 기준으로 만든다. 예전에는 `'2026-4-2'`처럼 특정 달에 박아둬서
+// 다른 달에 열면 캘린더가 늘 텅 비어 보였다.
+const dayOffset = (n: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return toISO(d);
+};
+
+const EVENTS_SEED: NewEvent[] = [
+  { date: dayOffset(0),  time: '10:00', title: '서준이 수영 수업', location: '분당 수영장',    members: ['서준'],        color: '#4A90C8', createdBy: '지수' },
+  { date: dayOffset(0),  time: '18:30', title: '가족 저녁 식사',   location: '정자동 한강갈비', members: [],              color: '#4A8C6F', createdBy: '민준', memo: '지우 생일 미리 축하' },
+  { date: dayOffset(1),  time: '14:00', title: '학교 발표회',      location: '서현초등학교',    members: ['서준'],        color: '#E6A817', createdBy: '지수', memo: '3층 강당, 학부모 좌석 뒤쪽' },
+  { date: dayOffset(3),  time: '09:30', title: '지우 유치원 소풍', location: '에버랜드',        members: ['지우'],        color: '#5FA88C', createdBy: '지수', memo: '도시락·돗자리 챙기기' },
+  { date: dayOffset(5),  time: '',      title: '부모님 결혼기념일',                            members: [],              color: '#D97757', createdBy: '민준' },
+  { date: dayOffset(8),  time: '11:00', title: '가족 사진 촬영',   location: '분당 중앙공원',   members: [],              color: '#9C7BB8', createdBy: '지수', memo: '옷 색 맞추기 — 베이지 톤' },
+  { date: dayOffset(8),  time: '17:00', title: '지우 소아과 검진', location: '지우 소아과',     members: ['지우', '지수'], color: '#E6A817', createdBy: '지수' },
+  { date: dayOffset(-4), time: '19:00', title: '민준 회사 회식',                               members: ['민준'],        color: '#4A90C8', createdBy: '민준' },
+];
+
 /**
  * 앱이 처음 켜질 때 한 번 호출한다.
  * seedCategory는 해당 카테고리에 이미 기록이 있으면 건너뛰므로 두 번 불러도 안전하다.
@@ -483,4 +504,6 @@ export function seedRecords() {
   seedCategory('health', HEALTH_SEED);
   seedCategory('time-capsule', CAPSULES_SEED);
   seedCategory('finance', FINANCE_SEED);
+
+  useEventsStore.getState().seedEvents(EVENTS_SEED);
 }

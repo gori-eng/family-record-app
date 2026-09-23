@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useRecentRecords, CATEGORY_LABELS, relativeDay, type RecordCategory } from '../../store/records';
+import { useTodayEvents, formatTime, membersLabel } from '../../store/events';
 import { useState, useCallback, useRef, useEffect } from 'react';
 
 const NOTIFICATIONS = [
@@ -11,12 +12,6 @@ const NOTIFICATIONS = [
   { id: 3, icon: 'child', color: '#F0B8B8', title: '육아일지에 새 기록을 남겼어요', desc: '첫 자전거 타기 성공!', time: '3시간 전', unread: true, author: '지수' },
   { id: 4, icon: 'money', color: '#E8D8C0', title: '이번 달 가계부 정산 알림', desc: '4월 지출 요약이 준비되었어요', time: '어제', unread: false, author: '시스템' },
   { id: 5, icon: 'trophy', color: '#D8CDB8', title: '가족 목표 달성률 업데이트', desc: '"주말 가족 운동" 75% 달성', time: '2일 전', unread: false, author: '민준' },
-];
-
-const TODAY_EVENTS = [
-  { time: '10:00', endTime: '11:00', title: '서준이 수영 수업', location: '분당 수영장', color: '#4A8EC8', member: '서준' },
-  { time: '14:00', endTime: '16:00', title: '학교 발표회', location: '서현초등학교', color: '#3D9A5F', member: '서준' },
-  { time: '18:00', endTime: '20:00', title: '가족 저녁 식사', location: '정자동 한강갈비', color: '#4A8C6F', member: '전체' },
 ];
 
 /** 홈 카드에 쓸 카테고리별 아이콘·색, 그리고 눌렀을 때 갈 화면 */
@@ -36,6 +31,8 @@ export default function HomeScreen() {
   const router = useRouter();
   // 창고에서 최근에 쓴 기록 4개 — 카테고리 상관없이
   const recent = useRecentRecords(4);
+  // 오늘 일정 — 캘린더와 **같은 보관소**를 본다
+  const todayEvents = useTodayEvents();
   const [refreshing, setRefreshing] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -145,37 +142,39 @@ export default function HomeScreen() {
           <View style={s.sectionHeader}>
             <View>
               <Text style={s.sectionTitle}>오늘의 일정</Text>
-              <Text style={s.sectionSub}>{TODAY_EVENTS.length}개의 일정</Text>
+              <Text style={s.sectionSub}>{todayEvents.length > 0 ? `${todayEvents.length}개의 일정` : '비어 있는 하루'}</Text>
             </View>
             <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')} style={s.seeAllBtn}>
               <Text style={s.seeAllText}>전체</Text>
               <FontAwesome name="arrow-right" size={11} color="#4A8C6F" />
             </TouchableOpacity>
           </View>
-          {TODAY_EVENTS.length === 0 ? (
+          {todayEvents.length === 0 ? (
             <TouchableOpacity style={s.emptyState} activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')}>
               <FontAwesome name="calendar-o" size={32} color="#D0D0D0" />
-              <Text style={s.emptyTitle}>오늘 일정이 없어요</Text>
-              <Text style={s.emptySub}>캘린더에서 일정을 추가해보세요</Text>
+              <Text style={s.emptyTitle}>오늘은 일정이 없어요</Text>
+              <Text style={s.emptySub}>눌러서 캘린더에 하나 적어볼까요?</Text>
             </TouchableOpacity>
           ) : (
           <View style={s.timeline}>
-            {TODAY_EVENTS.map((ev, i) => (
+            {todayEvents.map((ev, i) => (
               <TouchableOpacity key={i} style={s.timelineItem} activeOpacity={0.7}
                 onPress={() => router.push('/(tabs)/calendar')}>
                 <View style={s.timelineLeft}>
-                  <Text style={s.timelineTime}>{ev.time}</Text>
+                  <Text style={s.timelineTime}>{formatTime(ev.time)}</Text>
                   <View style={[s.timelineDot, { backgroundColor: ev.color }]} />
-                  {i < TODAY_EVENTS.length - 1 && <View style={s.timelineLine} />}
+                  {i < todayEvents.length - 1 && <View style={s.timelineLine} />}
                 </View>
                 <View style={[s.timelineCard, { borderLeftColor: ev.color }]}>
                   <Text style={s.timelineTitle}>{ev.title}</Text>
-                  <View style={s.timelineRow}>
-                    <FontAwesome name="map-marker" size={10} color="#A0A0A0" />
-                    <Text style={s.timelineLoc}>{ev.location}</Text>
-                  </View>
+                  {!!ev.location && (
+                    <View style={s.timelineRow}>
+                      <FontAwesome name="map-marker" size={10} color="#A0A0A0" />
+                      <Text style={s.timelineLoc}>{ev.location}</Text>
+                    </View>
+                  )}
                   <View style={s.timelineMemberWrap}>
-                    <Text style={s.timelineMember}>{ev.member}</Text>
+                    <Text style={s.timelineMember}>{membersLabel(ev.members)}</Text>
                   </View>
                 </View>
               </TouchableOpacity>
@@ -192,7 +191,7 @@ export default function HomeScreen() {
               { icon: 'pencil', label: '일기', route: '/(tabs)/records/parenting' },
               { icon: 'money', label: '가계부', route: '/(tabs)/records/finance' },
               { icon: 'book', label: '독서', route: '/(tabs)/records/reading' },
-              { icon: 'camera', label: '사진', route: '/(tabs)/records/media' },
+              { icon: 'plane', label: '여행', route: '/(tabs)/records/travel' },
               { icon: 'cutlery', label: '레시피', route: '/(tabs)/records/recipes' },
               { icon: 'film', label: '영화', route: '/(tabs)/records/movies' },
             ].map((q, i) => (
