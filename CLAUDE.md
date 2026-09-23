@@ -486,8 +486,59 @@ class Alert { static alert() {} }
 
 > 이 스프린트가 끝나면 기록은 앱을 켜 있는 동안 유지된다. 새로고침하면 사라지므로, 영속성은 다음 Supabase 스프린트에서 해결한다.
 
+### 2026-09-23 Supabase 스프린트 — 1단계: 스키마 정비
+
+**배경.** `supabase/migrations/`의 SQL이 앱 구조와 어긋나 있었다.
+카테고리 9개 중 2개(육아·독서)만 테이블이 있었고, 앱이 쓰는 공용 기록 구조
+(`data` JSON 봉투)와 가계부의 `ownerMember`/`source`/`importKey`가 빠져 있었다.
+**아직 어느 DB에도 적용한 적이 없어** ALTER가 아니라 파일을 다시 썼다.
+
+**🔴 기존 SQL에 있던 버그 — RLS 무한 재귀**
+`family_members` 정책 안에서 `family_members`를 다시 조회하고 있었다.
+그 조회에 또 같은 정책이 걸려 무한 재귀가 난다 (Supabase에서 흔한 함정):
+```
+ERROR: infinite recursion detected in policy for relation "family_members"
+```
+→ `my_family_ids()` **SECURITY DEFINER** 함수로 고리를 끊었다. 모든 정책이 이 함수를 쓴다.
+
+**스키마 구조 — 카테고리별 테이블 대신 공용 `records` 한 장**
+앱의 `FamilyRecord` 구조를 그대로 옮겼다. 이유:
+1. 9개 카테고리는 데이터 모양이 전부 달라 공통 송장 + 자유 내용물이 맞다 (앱에서 이미 검증됨)
+2. 테이블을 9개로 쪼개면 RLS 정책도 9벌이고, 공용 스토어를 카테고리별로 갈라야 해서 크게 다시 써야 한다
+3. 카테고리를 늘릴 때 마이그레이션이 필요 없다
+> 집계는 지금 앱이 화면에서 계산한다. 가족 한 집 규모면 충분하고, 느려지면 인덱스나 VIEW를 추가한다.
+
+- [x] `00001_create_families.sql` — families / family_members
+  - **RLS 재귀 수정** (`my_family_ids()`)
+  - `UNIQUE(family_id, display_name)` 추가 — 기록의 `recordedBy`/`ownerMember`가 이름으로 사람을 가리키므로 가족 안에서 이름이 겹치면 안 된다
+  - 정책을 `FOR ALL` 하나가 아니라 select/insert/update/delete로 나눠 권한을 정확히
+- [x] `00002_create_records.sql` — **`records` 공용 테이블** + `calendar_events`
+  - `records(id, family_id, category, title, created_by, recorded_by, data JSONB, import_key, created_at, updated_at)`
+  - ⭐ **`UNIQUE(family_id, import_key) WHERE import_key IS NOT NULL`** — 가계부 중복 방지의 **마지막 방어선**.
+    앱 화면에서도 거르지만, **세 사람이 같은 명세서를 동시에 넣는 경우는 화면 검사로 막을 수 없다.** DB가 막는다
+  - 인덱스: 카테고리별 최신순 / 홈 최근기록 / 가계부 날짜(부분 인덱스)
+  - `updated_at` 자동 갱신 트리거
+  - 기존 `transactions` / `parenting_entries` / `reading_entries` 테이블은 `records`로 흡수돼 사라졌다
+- [x] `00003_create_finance_settings.sql` — 가계부 설정을 **가족 공유**로
+  - 지금 localStorage에 있는 카드매핑·열프로필·카테고리교정·할부정책·반복거래·예산을 가족당 한 줄로
+  - ⚠️ 두 사람이 동시에 고치면 나중 것이 덮는다. 문제가 되면 `jsonb_set` 부분 갱신으로
+- [x] `packages/core/src/types/database.ts` — 새 스키마에 맞춰 타입 재작성
+  - `RecordRow<T>` / `FinanceSettingsRow` 추가, `Transaction`·`ParentingEntry`·`ReadingEntry` 제거
+  - **DB는 snake_case, 앱은 camelCase.** 변환은 앞으로 `packages/core/src/supabase/records.ts` 한 곳에서만 할 것
+- [x] `packages/core/src/utils/permissions.ts` — `Feature`를 실제 카테고리 9종에 맞춤,
+  스키마에서 뺀 `Visibility` 의존 제거
+
+**아직 넣지 않은 것 (의도적)**
+- 역할 기반 RLS(아이에게 가계부·건강 숨기기) — 앱이 아직 역할을 쓰지 않고, 정책을 먼저 조이면 개발 중에 계속 막힌다. 인증을 붙인 뒤 별도 마이그레이션으로
+
 ### TODO — 다음 스프린트 (Supabase 연동)
-- [ ] Supabase 프로젝트 생성 및 실제 DB 연결
+- [ ] **운영자 작업:** Supabase 프로젝트 생성 → Settings > API에서 URL·anon key를 `apps/mobile/.env`에 기입
+      (`.env.example` 참고. `.env`는 git 제외됨)
+- [ ] 마이그레이션 3개 적용 (Supabase 대시보드 SQL Editor 또는 `supabase db push`)
+- [ ] `packages/core/src/supabase/records.ts` — DB ↔ 앱 변환 계층 (snake_case ↔ camelCase)
+- [ ] 기록 스토어를 Supabase 연동으로 전환 (`store/records.ts` 안쪽만 교체)
+- [ ] `store/seed.ts` + `_layout.tsx`의 `seedRecords()` 삭제
+- [ ] 가계부 설정을 localStorage → DB로 이전
 - [ ] 인증 가드 복원 (로그인 → 홈 플로우 실제 작동)
 - [ ] 기록 CRUD 실제 데이터 저장/수정/삭제
 - [ ] 온보딩 플로우 활성화 (가족 생성 / 초대 코드)
