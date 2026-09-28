@@ -4,6 +4,7 @@ import { showAlert } from '../../components/AppAlert';
 import { Link, useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { signUpWithEmail } from '@core/supabase';
+import { goAfterAuth, authErrorMessage } from '../../lib/afterAuth';
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
@@ -19,12 +20,20 @@ export default function RegisterScreen() {
     if (password.length < 6) { showAlert('알림', '비밀번호는 6자 이상이어야 합니다.'); return; }
     setLoading(true);
     try {
-      await signUpWithEmail(email, password);
-      showAlert('가입 완료', '이메일 인증 후 로그인해주세요.', [
+      const data = await signUpWithEmail(email.trim(), password);
+      // 이메일 확인이 꺼져 있으면 가입과 동시에 세션이 생긴다 → 바로 들어간다
+      const userId = data?.session ? (data.user?.id ?? data.session.user?.id) : null;
+      if (userId) {
+        const to = await goAfterAuth(userId);
+        router.replace(to as never);
+        return;
+      }
+      // 확인 메일을 기다려야 하는 경우
+      showAlert('가입했어요', '메일로 보낸 확인 링크를 누르고 로그인해주세요.', [
         { text: '확인', onPress: () => router.replace('/(auth)/login') },
       ]);
     } catch (error: any) {
-      showAlert('가입 실패', error.message);
+      showAlert('가입하지 못했어요', authErrorMessage(error));
     } finally { setLoading(false); }
   };
 

@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { showAlert } from '../../components/AppAlert';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { signInWithEmail } from '@core/supabase';
+import { goAfterAuth, authErrorMessage } from '../../lib/afterAuth';
 
 export default function LoginScreen() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,9 +20,17 @@ export default function LoginScreen() {
     }
     setLoading(true);
     try {
-      await signInWithEmail(email, password);
-    } catch (error: any) {
-      showAlert('로그인 실패', error.message);
+      const data = await signInWithEmail(email.trim(), password);
+      const userId = data?.user?.id ?? data?.session?.user?.id;
+      if (!userId) {
+        showAlert('로그인이 끝나지 않았어요', '잠시 뒤에 다시 해주세요.');
+        return;
+      }
+      // 가드(`REQUIRE_AUTH`)가 꺼져 있어도 스스로 들어간다 — lib/afterAuth.ts 참조
+      const to = await goAfterAuth(userId);
+      router.replace(to as never);
+    } catch (error: unknown) {
+      showAlert('로그인하지 못했어요', authErrorMessage(error));
     } finally {
       setLoading(false);
     }
