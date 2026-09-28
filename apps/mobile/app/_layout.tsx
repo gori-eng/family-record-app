@@ -11,9 +11,11 @@ import { StatusBar } from 'react-native';
 import 'react-native-reanimated';
 import { seedRecords } from '../store/seed';
 import { AlertHost } from '../components/AppAlert';
+import { useSession } from '../store/session';
+import { decideRoute, whereFrom, REQUIRE_AUTH } from '../lib/authGate';
 
 // 앱이 켜질 때 기록 창고에 예시 데이터를 한 번 채운다.
-// Supabase 연결 후에는 이 줄과 store/seed.ts를 함께 지운다.
+// 기록을 Supabase에서 읽어오게 되면 이 줄과 store/seed.ts를 함께 지운다.
 seedRecords();
 
 export { ErrorBoundary } from 'expo-router';
@@ -107,19 +109,42 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const { session } = useAuth();
+  const { session, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
-  // TODO: 실제 Supabase 연결 후 아래 주석 해제
-  // useEffect(() => {
-  //   const inAuthGroup = segments[0] === '(auth)';
-  //   if (!session && !inAuthGroup) {
-  //     router.replace('/(auth)/login');
-  //   } else if (session && inAuthGroup) {
-  //     router.replace('/(tabs)');
-  //   }
-  // }, [session, segments]);
+  const setUserId = useSession((s) => s.setUserId);
+  const refresh = useSession((s) => s.refresh);
+  const clear = useSession((s) => s.clear);
+  const familyReady = useSession((s) => s.ready);
+  const hasFamily = useSession((s) => !!s.family);
+
+  /**
+   * 로그인한 사람이 바뀌면 그 사람의 가족·구성원을 다시 불러온다.
+   * 이 일을 화면마다 하지 않고 여기 한 번만 두는 이유: 가족 정보는
+   * 홈·기록·가계부가 모두 쓰는 값이라 들어오는 문 하나에서 챙기는 게 맞다.
+   */
+  useEffect(() => {
+    const userId = session?.user?.id ?? null;
+    if (!userId) {
+      clear();
+      return;
+    }
+    setUserId(userId);
+    refresh();
+  }, [session?.user?.id]);
+
+  // 길 안내 — 무엇을 어디로 보낼지는 lib/authGate.ts가 정한다 (Node에서 검증됨)
+  useEffect(() => {
+    const to = decideRoute({
+      authReady: !isLoading,
+      signedIn: !!session,
+      familyReady,
+      hasFamily,
+      where: whereFrom(segments as string[]),
+    });
+    if (to) router.replace(to as never);
+  }, [isLoading, session, familyReady, hasFamily, segments]);
 
   return (
     <>
