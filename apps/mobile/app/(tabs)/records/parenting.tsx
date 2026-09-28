@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
-import { CURRENT_USER } from '../../../constants/family';
+import { useMe } from '../../../store/family';
 
 type ParentingEntry = {
   date: string; child: string; content: string;
@@ -21,6 +21,7 @@ const todayLabel = () => {
 const CHILD_COLORS: Record<string, string> = { '지우': '#F0B8B8', '서준': '#B0C8D8' };
 
 export default function ParentingScreen() {
+  const CURRENT_USER = useMe();
   const { openTitle } = useLocalSearchParams<{ openTitle?: string }>();
   const [activeChild, setActiveChild] = useState('전체');
   const [selectedItem, setSelectedItem] = useState<any>(null);

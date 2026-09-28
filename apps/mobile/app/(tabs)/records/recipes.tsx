@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
-import { CURRENT_USER } from '../../../constants/family';
+import { useMe } from '../../../store/family';
 
 type Recipe = {
   name: string; origin: string; author: string; difficulty: string; time: string;
@@ -20,6 +20,7 @@ const NEW_RECIPE_COLORS = ['#FF8A65', '#81C784', '#FFD54F', '#CE93D8'];
 const DIFF_COLOR: Record<string, string> = { '쉬움': '#4AA86B', '보통': '#E6A817', '어려움': '#4A8C6F' };
 
 export default function RecipesScreen() {
+  const CURRENT_USER = useMe();
   const { openTitle } = useLocalSearchParams<{ openTitle?: string }>();
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);

@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
-import { MEMBERS, CURRENT_USER } from '../../../constants/family';
+import { useFamilyMembers, useMe } from '../../../store/family';
 
 type Movie = {
   title: string; genre: string; date: string; rating: number;
@@ -29,6 +29,9 @@ function StarRating({ rating, size = 12 }: { rating: number; size?: number }) {
 }
 
 export default function MoviesScreen() {
+  /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
+  const MEMBERS = useFamilyMembers();
+  const CURRENT_USER = useMe();
   const [activeFilter, setActiveFilter] = useState(0);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);

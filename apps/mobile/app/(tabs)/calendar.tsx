@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, Modal,
 import { FontAwesome } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
 import { showAlert } from '../../components/AppAlert';
-import { MEMBERS, CURRENT_USER } from '../../constants/family';
+import { useFamilyMembers, useMe } from '../../store/family';
 import {
   useEventsStore, useEventsOn, useEventDaysInMonth,
   EVENT_COLORS, formatTime, formatEventDate, membersLabel, normalizeTime, todayISO,
@@ -13,6 +13,9 @@ import {
 const TIME_CHIPS = ['09:00', '12:00', '15:00', '18:00', '20:00'];
 
 export default function CalendarScreen() {
+  /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
+  const MEMBERS = useFamilyMembers();
+  const CURRENT_USER = useMe();
   const today = new Date();
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(today.getMonth()); // 0~11

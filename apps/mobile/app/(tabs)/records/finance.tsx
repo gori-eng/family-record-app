@@ -5,7 +5,7 @@ import { Stack, useRouter } from 'expo-router';
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
 import { useFinanceSettings, recurringDateIn, type RecurringItem } from '../../../store/financeSettings';
-import { MEMBERS, CURRENT_USER } from '../../../constants/family';
+import { useFamilyMembers, useMe } from '../../../store/family';
 import {
   type Transaction,
   EXPENSE_CATEGORIES, INCOME_CATEGORIES, PAYMENT_METHODS, metaOf,
@@ -15,6 +15,9 @@ import {
 } from '../../../store/finance';
 
 export default function FinanceScreen() {
+  /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
+  const MEMBERS = useFamilyMembers();
+  const CURRENT_USER = useMe();
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState('전체');
   const [selectedId, setSelectedId] = useState<string | null>(null);

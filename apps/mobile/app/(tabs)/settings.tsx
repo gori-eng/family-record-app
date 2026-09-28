@@ -4,27 +4,47 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { signOut } from '@core/supabase';
-
-import { CURRENT_USER, fullNameOf } from '../../constants/family';
-
-// TODO: Supabase 연결 후 families.invite_code 에서 가져온다
-const INVITE_CODE = 'ABC12345';
+import { useFamilyInfo, useMe, useFullName } from '../../store/family';
+import { useSession } from '../../store/session';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  // 진짜 가족이 없으면 예시가 온다 — `isReal`로 구분한다 (store/family.ts)
+  const family = useFamilyInfo();
+  const me = useMe();
+  const myFullName = useFullName(me);
+  const clearSession = useSession((s) => s.clear);
 
   const handleSignOut = () => {
     showAlert('로그아웃', '정말 로그아웃하시겠습니까?', [
       { text: '취소', style: 'cancel' },
-      { text: '로그아웃', style: 'destructive', onPress: () => signOut() },
+      {
+        text: '로그아웃',
+        style: 'destructive',
+        onPress: async () => {
+          // ⚠️ 예전에는 signOut()만 불렀다. 가드(REQUIRE_AUTH)가 꺼져 있으면
+          //    아무도 화면을 옮기지 않아 "눌러도 아무 일 없는" 것처럼 보였다
+          //    (로그인 화면과 같은 함정 — CLAUDE.md 2026-09-28 ④).
+          try { await signOut(); } catch { /* 이미 로그아웃이어도 계속 진행 */ }
+          clearSession();
+          router.replace('/(auth)/login');
+        },
+      },
     ]);
   };
 
   const handleShareInviteCode = async () => {
+    if (!family.inviteCode) {
+      showAlert('아직 가족이 없어요', '가족을 먼저 만들면 초대 코드가 생겨요.', [
+        { text: '나중에', style: 'cancel' },
+        { text: '가족 만들기', onPress: () => router.replace('/onboarding') },
+      ]);
+      return;
+    }
     try {
-      await Share.share({ message: `familog에 초대합니다! 초대 코드: ${INVITE_CODE}` });
+      await Share.share({ message: `familog에 초대합니다! 초대 코드: ${family.inviteCode}` });
     } catch {
-      showAlert('초대 코드', INVITE_CODE);
+      showAlert('초대 코드', family.inviteCode);
     }
   };
 
@@ -34,8 +54,10 @@ export default function SettingsScreen() {
     {
       title: '가족 관리',
       items: [
-        { icon: 'users', label: '가족 구성원', subtitle: '4명', action: () => router.push('/settings/members') },
-        { icon: 'qrcode', label: '초대 코드', subtitle: INVITE_CODE, action: handleShareInviteCode },
+        { icon: 'users', label: '가족 구성원', subtitle: `${family.memberCount}명`,
+          action: () => router.push('/settings/members') },
+        { icon: 'qrcode', label: '초대 코드', subtitle: family.inviteCode ?? '아직 없어요',
+          action: handleShareInviteCode },
       ],
     },
     {
@@ -66,13 +88,27 @@ export default function SettingsScreen() {
           <FontAwesome name="user" size={28} color="#4A8C6F" />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.profileName}>{fullNameOf(CURRENT_USER)}</Text>
-          <Text style={styles.profileRole}>관리자 (부모)</Text>
+          <Text style={styles.profileName}>{myFullName}</Text>
+          <Text style={styles.profileRole}>
+            {family.isReal ? family.name : '아직 로그인하지 않았어요'}
+          </Text>
         </View>
         <View style={styles.editProfileButton}>
           <FontAwesome name="pencil" size={14} color="#4A8C6F" />
         </View>
       </TouchableOpacity>
+
+      {!family.isReal && (
+        <TouchableOpacity style={styles.sampleBanner} activeOpacity={0.8}
+          onPress={() => router.replace('/onboarding')}>
+          <FontAwesome name="info-circle" size={14} color="#7A6B55" />
+          <Text style={styles.sampleText}>
+            지금 보이는 가족은 <Text style={styles.sampleStrong}>예시</Text>예요.
+            로그인하고 가족을 만들면 우리 가족 것으로 바뀌어요.
+          </Text>
+          <FontAwesome name="chevron-right" size={11} color="#B0A590" />
+        </TouchableOpacity>
+      )}
 
       {sections.map((section, si) => (
         <View key={si} style={styles.section}>
@@ -106,6 +142,14 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
+  sampleBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: '#F4F2EE', borderRadius: 12, padding: 14,
+    marginHorizontal: 20, marginBottom: 8,
+    borderWidth: 1, borderColor: '#EAE6DE',
+  },
+  sampleText: { flex: 1, fontSize: 12, color: '#7A6B55', lineHeight: 18, fontFamily: 'Pretendard' },
+  sampleStrong: { color: '#2D5A3F', fontWeight: '700' },
   safeArea: { flex: 1, backgroundColor: '#F9F8F5' },
   container: { flex: 1, backgroundColor: '#F9F8F5', padding: 20 },
   profileCard: {

@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
-import { CURRENT_USER } from '../../../constants/family';
+import { useMe } from '../../../store/family';
 
 type Capsule = {
   title: string; target: string; type: string; author: string;
@@ -16,6 +16,7 @@ type Capsule = {
 const NEW_CAPSULE_COLORS = ['#CE93D8', '#4FC3F7', '#FFB74D', '#81C784'];
 
 export default function TimeCapsuleScreen() {
+  const CURRENT_USER = useMe();
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);
 

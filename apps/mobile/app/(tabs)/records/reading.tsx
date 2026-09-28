@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
-import { MEMBERS, CURRENT_USER } from '../../../constants/family';
+import { useFamilyMembers, useMe } from '../../../store/family';
 
 type Book = {
   author: string; reader: string; status: string;
@@ -26,6 +26,9 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function ReadingScreen() {
+  /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
+  const MEMBERS = useFamilyMembers();
+  const CURRENT_USER = useMe();
   const { openTitle } = useLocalSearchParams<{ openTitle?: string }>();
   // 창고에서 독서 기록만 최신순으로 꺼낸다.
   const books = useRecordsByCategory<Book>('reading');

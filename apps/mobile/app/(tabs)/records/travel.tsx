@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
-import { CURRENT_USER } from '../../../constants/family';
+import { useMe } from '../../../store/family';
 
 type Trip = {
   dest: string; country: string; status: string; date: string;
@@ -22,6 +22,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
 };
 
 export default function TravelScreen() {
+  const CURRENT_USER = useMe();
   const [filter, setFilter] = useState('전체');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);

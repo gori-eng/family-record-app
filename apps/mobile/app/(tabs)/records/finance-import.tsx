@@ -14,7 +14,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as XLSX from 'xlsx';
 import { showAlert } from '../../../components/AppAlert';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
-import { MEMBERS, CURRENT_USER } from '../../../constants/family';
+import { useFamilyMembers, useMe } from '../../../store/family';
 import { type Transaction, comma, formatDay, metaOf, EXPENSE_CATEGORIES } from '../../../store/finance';
 import {
   SHINHAN_PROFILE, parseRows, buildCandidates, summarize, toTransaction, toInstallments,
@@ -35,6 +35,9 @@ const COLUMN_FIELDS: { key: ColumnKey; label: string; required: boolean }[] = [
 ];
 
 export default function FinanceImportScreen() {
+  /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
+  const MEMBERS = useFamilyMembers();
+  const CURRENT_USER = useMe();
   const router = useRouter();
   const records = useRecordsByCategory<Transaction>('finance');
   const addRecord = useRecordsStore((s) => s.addRecord);

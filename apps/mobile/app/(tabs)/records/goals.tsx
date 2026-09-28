@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
-import { CURRENT_USER } from '../../../constants/family';
+import { useMe } from '../../../store/family';
 
 type Goal = {
   title: string; desc: string; progress: number; target: string;
@@ -17,6 +17,7 @@ type Goal = {
 const NEW_GOAL_COLORS = ['#81C784', '#4FC3F7', '#FFD54F', '#CE93D8'];
 
 export default function GoalsScreen() {
+  const CURRENT_USER = useMe();
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);
 
