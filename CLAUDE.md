@@ -930,6 +930,35 @@ await signInWithEmail(email, password);   // 성공해도 그냥 끝
 - ⚠️ **로그인한 상태는 아직 확인하지 못했다.** 운영자가 본인 Chrome에서 로그인했고
   내 브라우저 패널에는 세션이 없다. 패널에서 한 번 로그인하면 이후 검증이 전부 풀린다
 
+### 2026-09-29 🔴 로그인이 저장되지 않던 진짜 원인
+
+이틀 동안 "로그인했는데 안 된 것 같다"가 반복됐다. 원인은 `packages/core/src/supabase/client.ts`였다.
+
+```ts
+auth: {
+  storage: safeStorage,       // 저장할 곳은 공들여 만들어놓고
+  autoRefreshToken: false,
+  persistSession: false,      // ← 정작 저장을 꺼뒀다
+}
+```
+
+- **`persistSession: false`** → supabase가 로그인 정보를 저장소에 **쓰지 않는다.**
+  그 페이지가 떠 있는 동안 메모리에만 있다가 **새로고침하면 사라진다.**
+  로그인 자체는 성공하므로 "됐다"고 느끼지만, 화면을 옮기거나 새로고침하면 로그아웃이다
+- **`autoRefreshToken: false`** → 토큰이 한 시간쯤 뒤 만료돼도 갱신하지 않는다.
+  앱을 켜둔 채로도 조용히 로그아웃된다
+- 둘 다 **서버에서 쓸 때의 설정**이다. 사람이 쓰는 앱에서는 켜야 한다
+
+**증상이 헷갈렸던 이유.** 어느 브라우저를 열어도 `localStorage`가 **완전히 비어 있었다.**
+"로그인을 안 했나 보다"로 보이지만, 사실은 **로그인해도 아무것도 저장되지 않는** 상태였다.
+내 브라우저 패널·운영자 Chrome 양쪽에서 똑같이 비어 있던 게 결정적 단서였다.
+
+→ 둘 다 `true`로. `detectSessionInUrl`은 그대로 `false`지만,
+**구글 로그인(OAuth)을 붙이면 웹에서는 켜야 한다** (`#access_token=...`을 달고 돌아오므로).
+
+> **교훈:** 설정이 서로 모순되면 그중 하나는 죽은 코드다. `storage`를 정성껏 만들어놓고
+> `persistSession: false`인 것은 "이 저장소는 쓰이지 않는다"는 뜻이었는데, 그 신호를 놓쳤다.
+
 ### TODO — 다음 스프린트 (Supabase 연동)
 - [ ] **운영자 작업:** Supabase 프로젝트 생성 → URL·**Publishable 키**를 `apps/mobile/.env`에 기입
       - Connect 창: `https://supabase.com/dashboard/project/_?showConnect=true` (`_`는 내 프로젝트로 자동 연결)
