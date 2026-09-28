@@ -66,6 +66,11 @@ type EventsState = {
   restoreEvent: (event: CalendarEvent) => void;
   /** 시드 데이터용. 이미 일정이 있으면 건너뛴다 */
   seedEvents: (items: NewEvent[]) => void;
+
+  // ── 백업 되살리기용 (records.ts와 같은 이유) ──────────
+  setEvents: (events: CalendarEvent[]) => void;
+  /** id를 그대로 두고 넣는다 */
+  addEventsRaw: (events: CalendarEvent[]) => void;
 };
 
 export const useEventsStore = create<EventsState>((set, get) => ({
@@ -93,6 +98,13 @@ export const useEventsStore = create<EventsState>((set, get) => ({
         ? state
         : { events: [...state.events, event] }
     );
+  },
+
+  setEvents: (events) => set({ events }),
+
+  addEventsRaw: (events) => {
+    if (!events.length) return;
+    set((state) => ({ events: [...state.events, ...events] }));
   },
 
   seedEvents: (items) => {

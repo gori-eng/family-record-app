@@ -49,11 +49,11 @@ export default function SettingsScreen() {
     {
       title: '데이터',
       items: [
-        { icon: 'download', label: '데이터 내보내기', action: () => router.push('/settings/export') },
-        { icon: 'cloud-upload', label: '백업 관리', action: () => showAlert('백업 상태', '마지막 백업: 2026년 4월 4일\n자동 백업: 매주 일요일\n\n지금 백업하시겠습니까?', [
-          { text: '취소', style: 'cancel' },
-          { text: '지금 백업', onPress: () => showAlert('완료', '백업이 완료되었습니다.') },
-        ])},
+        // ⚠️ 여기 있던 '백업 관리'는 아무것도 하지 않으면서 "마지막 백업: 4월 4일",
+        //    "백업이 완료되었습니다"를 띄웠다. **기록이 안전하다고 거짓으로 알려주는**
+        //    가장 나쁜 종류의 가짜라 지웠다. 실제 백업은 아래 한 곳에서 한다.
+        { icon: 'download', label: '기록 내보내기 · 되살리기', subtitle: '백업',
+          action: () => router.push('/settings/export') },
       ],
     },
   ];

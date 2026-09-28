@@ -75,6 +75,18 @@ type RecordsState = {
   removeRecord: (id: string) => void;
   /** 시드 데이터를 한 번에 밀어넣을 때 (같은 카테고리가 이미 있으면 건너뜀) */
   seedCategory: (category: RecordCategory, items: NewRecord[]) => void;
+
+  // ── 백업 되살리기용 ──────────────────────────────────
+  /**
+   * 있는 걸 전부 버리고 주어진 것으로 바꾼다. 백업 "전부 바꾸기"에서만 쓴다.
+   * 되돌릴 수 없으므로 화면에서 반드시 확인을 받을 것.
+   */
+  setRecords: (records: FamilyRecord[]) => void;
+  /**
+   * id를 **그대로 두고** 넣는다. `addRecord`는 새 id를 붙이지만,
+   * 백업을 되살릴 때는 파일에 적힌 id를 지켜야 같은 기록을 두 번 넣지 않는다.
+   */
+  addRecordsRaw: (records: FamilyRecord[]) => void;
 };
 
 export const useRecordsStore = create<RecordsState>((set, get) => ({
@@ -109,6 +121,13 @@ export const useRecordsStore = create<RecordsState>((set, get) => ({
 
   removeRecord: (id) => {
     set((state) => ({ records: state.records.filter((r) => r.id !== id) }));
+  },
+
+  setRecords: (records) => set({ records }),
+
+  addRecordsRaw: (records) => {
+    if (!records.length) return;
+    set((state) => ({ records: [...records, ...state.records] }));
   },
 
   seedCategory: (category, items) => {

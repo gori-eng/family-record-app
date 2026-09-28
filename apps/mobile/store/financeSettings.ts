@@ -63,7 +63,8 @@ export type Budgets = {
   byCategory: Record<string, number>;
 };
 
-type Settings = {
+/** 백업에 담기는 가계부 설정. 동작(함수)은 빼고 값만 */
+export type FinanceSettingsData = {
   cardOwners: Record<string, string>;
   savedProfiles: SavedProfile[];
   /** 정규화된 가맹점명 → 카테고리 */
@@ -73,7 +74,7 @@ type Settings = {
   budgets: Budgets;
 };
 
-const EMPTY: Settings = {
+const EMPTY: FinanceSettingsData = {
   cardOwners: {},
   savedProfiles: [],
   categoryOverrides: {},
@@ -84,7 +85,7 @@ const EMPTY: Settings = {
 
 // ── 저장소 ────────────────────────────────────────────────
 /** localStorage가 막힌 환경(네이티브·시크릿 모드)에서도 죽지 않게 감싼다. */
-function load(): Settings {
+function load(): FinanceSettingsData {
   try {
     const raw = globalThis.localStorage?.getItem(KEY);
     if (!raw) return EMPTY;
@@ -93,7 +94,7 @@ function load(): Settings {
     return EMPTY;
   }
 }
-function save(s: Settings) {
+function save(s: FinanceSettingsData) {
   try {
     globalThis.localStorage?.setItem(KEY, JSON.stringify(s));
   } catch {
@@ -101,7 +102,7 @@ function save(s: Settings) {
   }
 }
 
-type SettingsStore = Settings & {
+type SettingsStore = FinanceSettingsData & {
   /** 카드 뒷자리에 구성원을 지정하고 기억한다 */
   setCardOwner: (cardKey: string, member: string) => void;
   setCardOwners: (map: Record<string, string>) => void;
@@ -204,3 +205,27 @@ export function recurringDateIn(ym: string, day: number): string {
 /** 헤더 이름들로 파일의 지문을 만든다. 같은 카드사 파일은 같은 값이 나온다. */
 export const headerSignatureOf = (headers: string[]) =>
   headers.map((h) => h.replace(/\s/g, '')).join('|');
+
+// ── 백업 ──────────────────────────────────────────────────
+/**
+ * 지금 설정을 값만 떠낸다. 스토어에는 함수도 같이 들어 있으므로
+ * 통째로 JSON으로 만들면 함수가 사라지면서 모양이 어긋난다. 그래서 골라 담는다.
+ */
+export function snapshotFinanceSettings(): FinanceSettingsData {
+  const s = useFinanceSettings.getState();
+  return {
+    cardOwners: { ...s.cardOwners },
+    savedProfiles: [...s.savedProfiles],
+    categoryOverrides: { ...s.categoryOverrides },
+    installmentPolicy: s.installmentPolicy,
+    recurring: [...s.recurring],
+    budgets: { total: s.budgets.total, byCategory: { ...s.budgets.byCategory } },
+  };
+}
+
+/** 백업에서 읽은 설정으로 덮는다. 빠진 항목은 기본값으로 채운다. */
+export function restoreFinanceSettings(data: Partial<FinanceSettingsData>) {
+  const next: FinanceSettingsData = { ...EMPTY, ...data };
+  useFinanceSettings.setState(next);
+  save(next);
+}
