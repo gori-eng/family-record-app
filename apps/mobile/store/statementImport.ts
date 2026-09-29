@@ -211,7 +211,9 @@ export function parseRows(
     const kind = String(get(row, 'kind') ?? '');
 
     let skip: ParsedRow['skip'] = null;
-    if (profile.isSummaryRow?.(asText)) skip = '합계';
+    // 합계 행 — 카드사 프로필의 판별 + 어느 카드사든 통하는 규칙(날짜 없이 '총 12건'류) (점검 C4)
+    const looksSummary = !date && /^(총|합계|소계)/.test(merchant);
+    if (profile.isSummaryRow?.(asText) || looksSummary) skip = '합계';
     // 취소 건은 건너뛴다. 카드사도 합계에서 제외한다 (가승인 취소 → 실제 결제가 따로 찍힘)
     else if (profile.cancelMarkers.some((m) => status.includes(m) || kind.includes(m)) || amount < 0) skip = '취소';
     else if (!date) skip = '날짜없음';
@@ -344,7 +346,9 @@ export function toInstallments(c: ImportCandidate, sourceFile: string): Transact
   const [y, m, d] = c.date.split('-').map(Number);
 
   return Array.from({ length: n }, (_, i) => {
-    const dt = new Date(y, m - 1 + i, d);
+    // 31일에 결제한 할부는 2월엔 말일로 — 그냥 더하면 3월 3일로 넘친다 (점검 C3)
+    const lastDay = new Date(y, m + i, 0).getDate();
+    const dt = new Date(y, m - 1 + i, Math.min(d, lastDay));
     const date = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
     const amount = each + (i === 0 ? remainder : 0);
     return {

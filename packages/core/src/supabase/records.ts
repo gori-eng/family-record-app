@@ -114,19 +114,27 @@ export async function insertRecords(inputs: InsertInput[]): Promise<AppRecord[]>
  * 한 가족의 기록을 **전부 지운다.** 백업 '파일 그대로 되돌리기'에서만 쓴다.
  * 되돌릴 수 없으므로 화면에서 반드시 확인을 받을 것.
  */
-export async function deleteAllRecords(familyId: string): Promise<void> {
-  const { error } = await supabase.from('records').delete().eq('family_id', familyId);
+export async function deleteAllRecords(familyId: string): Promise<number> {
+  // ⚠️ 정책(00008)에 걸리는 줄은 오류 없이 **남는다.** 그래서 지운 건수를 돌려준다 —
+  //    호출부가 "전부 지워졌는지"를 확인해야 한다 (관리자가 아니면 남의 기록은 못 지운다)
+  const { data, error } = await supabase.from('records').delete().eq('family_id', familyId).select('id');
   if (error) throw error;
+  return data?.length ?? 0;
 }
 
-/** 기록 수정. `data` 안쪽만 바꿀 때도 통째로 넘긴다(부분 갱신은 호출부에서 합쳐서). */
+/**
+ * 기록 수정. `data` 안쪽만 바꿀 때도 통째로 넘긴다(부분 갱신은 호출부에서 합쳐서).
+ * 가계부는 금액·날짜를 고치면 지문(`importKey`)도 바뀌므로 **DB 칸에도** 같이 적는다 —
+ * `data` 안에만 두면 중복 방지 인덱스는 옛 지문을 본다 (2026-09-29 전체 점검 B3)
+ */
 export async function updateRecord(
   id: string,
-  patch: { title?: string; data?: Record<string, unknown> }
+  patch: { title?: string; data?: Record<string, unknown>; importKey?: string }
 ): Promise<void> {
   const row: Partial<RecordInsert> = {};
   if (patch.title !== undefined) row.title = patch.title;
   if (patch.data !== undefined) row.data = patch.data;
+  if (patch.importKey !== undefined) row.import_key = patch.importKey;
   if (!Object.keys(row).length) return;
 
   const { error } = await supabase.from('records').update(row).eq('id', id);

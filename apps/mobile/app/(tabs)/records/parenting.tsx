@@ -5,6 +5,7 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
 import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
+import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
 
 type ParentingEntry = {
@@ -32,6 +33,7 @@ const childColor = (name: string) => {
 
 export default function ParentingScreen() {
   const { askDelete, undoBar } = useRecordDelete('육아 일기');
+  const ready = useRecordsReady();
   const CURRENT_USER = useMe();
   const { openTitle } = useLocalSearchParams<{ openTitle?: string }>();
   const [activeChild, setActiveChild] = useState('전체');
@@ -68,10 +70,13 @@ export default function ParentingScreen() {
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
 
+  /** 홈에서 넘어온 제목은 **한 번만** 연다 — 예전엔 목록이 바뀔 때마다 상세가 다시 열렸다 (점검 B5) */
+  const openedFor = useRef<string | null>(null);
   useEffect(() => {
-    if (openTitle) {
+    if (openTitle && openedFor.current !== openTitle) {
       const match = entries.find(e => e.title === openTitle);
       if (match) {
+        openedFor.current = openTitle;
         setSelectedItem({ ...match.data, title: match.title, id: match.id });
         Animated.parallel([
           Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -353,7 +358,8 @@ export default function ParentingScreen() {
               </TouchableOpacity>
               );
             })}
-            {filteredEntries.length === 0 && (
+            {filteredEntries.length === 0 && !ready && <LoadingRows />}
+            {filteredEntries.length === 0 &&  ready && (
               <View style={styles.empty}>
                 <FontAwesome name="pencil" size={32} color="#CFC7BA" />
                 <Text style={styles.emptyText}>

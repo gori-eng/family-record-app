@@ -18,20 +18,46 @@ const supabaseAnonKey =
 /**
  * 로그인 정보를 어디에 둘지.
  *
- * iframe이나 시크릿 모드처럼 `localStorage`가 막힌 곳에서는 접근만 해도 예외가 난다.
- * 그때는 메모리에 둔다 — 새로고침하면 사라지지만, **앱이 죽지는 않는다.**
+ * 기본값은 브라우저의 `localStorage`. iframe이나 시크릿 모드처럼 막힌 곳에서는
+ * 접근만 해도 예외가 나므로 그때는 메모리에 둔다 — 새로고침하면 사라지지만 앱이 죽지는 않는다.
+ *
+ * 🔴 **휴대폰에는 `localStorage`가 없다.** (2026-09-29 전체 점검 A1)
+ *    그래서 휴대폰은 늘 메모리로 떨어져 **앱을 켤 때마다 로그인이 풀렸다.**
+ *    이 패키지는 React Native 모듈을 모르므로, 앱 쪽(`apps/mobile/lib/storage.ts`)이
+ *    `configureAuthStorage()`로 AsyncStorage를 끼워 넣는다. 클라이언트는 만들 때가 아니라
+ *    **부를 때마다** 지금 끼워진 저장소를 쓰므로, 앱이 켜진 직후에 끼워도 늦지 않다.
  */
+export type AuthStorage = {
+  getItem: (key: string) => string | null | Promise<string | null>;
+  setItem: (key: string, value: string) => void | Promise<void>;
+  removeItem: (key: string) => void | Promise<void>;
+};
+
 const memoryStorage: Record<string, string> = {};
-const safeStorage = {
-  getItem: (key: string) => {
+const webStorage: AuthStorage = {
+  getItem: (key) => {
     try { return localStorage.getItem(key); } catch { return memoryStorage[key] ?? null; }
   },
-  setItem: (key: string, value: string) => {
+  setItem: (key, value) => {
     try { localStorage.setItem(key, value); } catch { memoryStorage[key] = value; }
   },
-  removeItem: (key: string) => {
+  removeItem: (key) => {
     try { localStorage.removeItem(key); } catch { delete memoryStorage[key]; }
   },
+};
+
+let authStorage: AuthStorage = webStorage;
+
+/** 앱이 플랫폼에 맞는 저장소를 끼워 넣는다 (휴대폰 → AsyncStorage) */
+export function configureAuthStorage(impl: AuthStorage) {
+  authStorage = impl;
+}
+
+/** supabase에 건네는 저장소 — 지금 끼워진 것으로 넘긴다 */
+const safeStorage = {
+  getItem: (key: string) => authStorage.getItem(key),
+  setItem: (key: string, value: string) => authStorage.setItem(key, value),
+  removeItem: (key: string) => authStorage.removeItem(key),
 };
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {

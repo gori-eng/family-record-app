@@ -100,7 +100,9 @@ export async function deleteEvent(id: string): Promise<void> {
 }
 
 /** 백업 '파일 그대로 되돌리기'에서만 쓴다 */
-export async function deleteAllEvents(familyId: string): Promise<void> {
-  const { error } = await supabase.from('calendar_events').delete().eq('family_id', familyId);
+export async function deleteAllEvents(familyId: string): Promise<number> {
+  // 기록과 같은 이유로 지운 건수를 돌려준다 (정책에 걸린 줄은 오류 없이 남는다)
+  const { data, error } = await supabase.from('calendar_events').delete().eq('family_id', familyId).select('id');
   if (error) throw error;
+  return data?.length ?? 0;
 }

@@ -5,29 +5,39 @@ import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
 import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
+import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { withGrownupsOnly } from '../../../components/GrownupsOnly';
+import { nameColor } from '../../../lib/nameColor';
+import { parseLooseDate, formatKoreanDate, daysUntil } from '../../../lib/dates';
+import { todayISO } from '../../../store/finance';
 
 type HealthRecord = {
-  member: string; recordedBy: string; type: string; date: string;
-  result: string; notes: string; nextDate: string; color: string; icon: string;
+  member: string; recordedBy: string; type: string;
+  /** 검진일 — 'YYYY-MM-DD'. 옛 기록은 자유 글자일 수 있다 */
+  date: string;
+  result: string; notes: string;
+  /** 다음 검진일 'YYYY-MM-DD'. 없으면 '' */
+  nextDate: string;
+  color: string; icon: string;
 };
 
-/** 구성원별 카드 아이콘 색 */
-const MEMBER_CARD_COLORS: Record<string, string> = {
-  '지수': '#E8D0C0', '민준': '#B0C8D8', '지우': '#F0B8B8', '서준': '#B8D8C0',
+/**
+ * 결과 배지 색 — 글자에서 알아본다.
+ * 예전엔 '정상'·'충치 1개' 같은 예시 값만 표에 있어서 진짜 결과는 전부 회색이었다.
+ */
+const resultTone = (result: string): { bg: string; text: string } => {
+  if (/정상|양호|완료|이상\s*없|괜찮|건강/.test(result)) return { bg: '#E8F5E9', text: '#2E7D32' };
+  if (/충치|주의|재검|이상|치료|처방|높|낮/.test(result)) return { bg: '#FFF3E0', text: '#E65100' };
+  return { bg: '#F5F0E5', text: '#5C4A32' };
 };
 
-const RESULT_COLOR: Record<string, { bg: string; text: string }> = {
-  '정상': { bg: '#E8F5E9', text: '#2E7D32' },
-  '정상 발달': { bg: '#E8F5E9', text: '#2E7D32' },
-  '양호': { bg: '#E8F5E9', text: '#2E7D32' },
-  '완료': { bg: '#E8F5E9', text: '#2E7D32' },
-  '충치 1개': { bg: '#FFF3E0', text: '#E65100' },
-};
+/** 화면에 보일 날짜 — ISO면 한국어로, 옛 자유 글자면 그대로 */
+const showDate = (d: string) => (d ? formatKoreanDate(d) : '');
 
 function HealthScreen() {
   const { askDelete, undoBar } = useRecordDelete('건강 기록');
+  const ready = useRecordsReady();
   /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
   const MEMBERS = useFamilyMembers();
   const CURRENT_USER = useMe();
@@ -44,10 +54,23 @@ function HealthScreen() {
   const [formDate, setFormDate] = useState('');
   const [formResult, setFormResult] = useState('');
   const [formNotes, setFormNotes] = useState('');
+  const [formNext, setFormNext] = useState('');
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
+
+  /**
+   * 다가오는 검진 — 예전엔 "지우의 다음 영유아 검진이 7월에…"라는 **가짜 문장**이 박혀 있었다
+   * (2026-09-29 전체 점검 A5). 이제 기록에 적힌 다음 검진일 중 가장 가까운 것을 보여준다.
+   */
+  const upcoming = useMemo(() => {
+    const today = todayISO();
+    return records
+      .filter((r) => r.data.nextDate && r.data.nextDate >= today)
+      .sort((a, b) => a.data.nextDate.localeCompare(b.data.nextDate))
+      .slice(0, 2);
+  }, [records]);
 
   const openCreate = () => {
     setCreateMember(CURRENT_USER);
@@ -55,6 +78,7 @@ function HealthScreen() {
     setFormDate('');
     setFormResult('');
     setFormNotes('');
+    setFormNext('');
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -74,6 +98,17 @@ function HealthScreen() {
       showAlert('어떤 검진이었는지 적어주세요', '건강검진, 치과, 예방접종처럼요.');
       return;
     }
+    // 날짜는 비워도 되지만, 적었으면 알아들을 수 있어야 한다
+    const date = formDate.trim() ? parseLooseDate(formDate) : '';
+    if (date === null) {
+      showAlert('검진일을 한 번 봐주세요', '2026.4.26처럼 적어주세요. 비워도 괜찮아요.');
+      return;
+    }
+    const nextDate = formNext.trim() ? parseLooseDate(formNext) : '';
+    if (nextDate === null) {
+      showAlert('다음 검진일을 한 번 봐주세요', '2026.10.26처럼 적어주세요. 비워도 괜찮아요.');
+      return;
+    }
     addRecord({
       category: 'health',
       title: `${createMember} ${type}`,
@@ -82,11 +117,11 @@ function HealthScreen() {
         member: createMember,
         recordedBy: CURRENT_USER,
         type,
-        date: formDate.trim(),
-        result: formResult.trim() || '기록',
+        date: date || todayISO(),
+        result: formResult.trim(),
         notes: formNotes.trim(),
-        nextDate: '',
-        color: MEMBER_CARD_COLORS[createMember] ?? '#B0C8D8',
+        nextDate: nextDate || '',
+        color: nameColor(createMember),
         icon: 'medkit',
       },
     });
@@ -120,40 +155,44 @@ function HealthScreen() {
               <View style={s.modalHandle} />
               {selectedItem && (
                 <View style={s.modalContent}>
-                  <Text style={s.modalTitle}>{selectedItem.member} - {selectedItem.type}</Text>
+                  <Text style={s.modalTitle}>{selectedItem.member} · {selectedItem.type}</Text>
                   <View style={s.modalRow}>
-                    <Text style={s.modalLabel}>대상</Text>
-                    <Text style={s.modalValue}>{selectedItem.member}</Text>
+                    <Text style={s.modalLabel}>누구</Text>
+                    <Text style={s.modalValue}>{selectedItem.member}{selectedItem.member === CURRENT_USER ? ' (나)' : ''}</Text>
                   </View>
                   <View style={s.modalRow}>
-                    <Text style={s.modalLabel}>작성자</Text>
+                    <Text style={s.modalLabel}>적은 사람</Text>
                     <Text style={s.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
                   </View>
-                  <View style={s.modalRow}>
-                    <Text style={s.modalLabel}>검진</Text>
-                    <Text style={s.modalValue}>{selectedItem.type}</Text>
-                  </View>
-                  <View style={s.modalRow}>
-                    <Text style={s.modalLabel}>날짜</Text>
-                    <Text style={s.modalValue}>{selectedItem.date}</Text>
-                  </View>
-                  <View style={s.modalRow}>
-                    <Text style={s.modalLabel}>결과</Text>
-                    <View style={[s.resultBadge, { backgroundColor: (RESULT_COLOR[selectedItem.result] || { bg: '#F5F0E5' }).bg }]}>
-                      <Text style={[s.resultText, { color: (RESULT_COLOR[selectedItem.result] || { text: '#5C4A32' }).text }]}>{selectedItem.result}</Text>
+                  {selectedItem.date ? (
+                    <View style={s.modalRow}>
+                      <Text style={s.modalLabel}>검진일</Text>
+                      <Text style={s.modalValue}>{showDate(selectedItem.date)}</Text>
                     </View>
-                  </View>
-                  <View style={s.modalRow}>
-                    <Text style={s.modalLabel}>상세</Text>
-                    <Text style={s.modalValue}>{selectedItem.notes}</Text>
-                  </View>
-                  <View style={s.modalRow}>
-                    <Text style={s.modalLabel}>다음</Text>
-                    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <FontAwesome name="calendar" size={13} color="#9C8B75" />
-                      <Text style={s.modalValue}>{selectedItem.nextDate}</Text>
+                  ) : null}
+                  {selectedItem.result ? (
+                    <View style={s.modalRow}>
+                      <Text style={s.modalLabel}>결과</Text>
+                      <View style={[s.resultBadge, { backgroundColor: resultTone(selectedItem.result).bg }]}>
+                        <Text style={[s.resultText, { color: resultTone(selectedItem.result).text }]}>{selectedItem.result}</Text>
+                      </View>
                     </View>
-                  </View>
+                  ) : null}
+                  {selectedItem.notes ? (
+                    <View style={s.modalRow}>
+                      <Text style={s.modalLabel}>메모</Text>
+                      <Text style={s.modalValue}>{selectedItem.notes}</Text>
+                    </View>
+                  ) : null}
+                  {selectedItem.nextDate ? (
+                    <View style={s.modalRow}>
+                      <Text style={s.modalLabel}>다음</Text>
+                      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <FontAwesome name="calendar" size={13} color="#9C8B75" />
+                        <Text style={s.modalValue}>{showDate(selectedItem.nextDate)}</Text>
+                      </View>
+                    </View>
+                  ) : null}
                 </View>
               )}
               {selectedItem && (
@@ -172,7 +211,7 @@ function HealthScreen() {
               <View style={s.modalHandle} />
               <Text style={s.modalTitle}>새 건강 기록</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
-              <Text style={s.createLabel}>기록 대상</Text>
+              <Text style={s.createLabel}>누구의 기록인가요</Text>
               <View style={s.memberRow}>
                 {MEMBERS.map(m => (
                   <TouchableOpacity
@@ -185,18 +224,21 @@ function HealthScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              <Text style={s.authorHint}>작성자: {CURRENT_USER} (나)</Text>
-              <Text style={s.createLabel}>검진 유형</Text>
-              <TextInput style={s.createInput} placeholder="예: 건강검진, 치과 검진" placeholderTextColor="#BFAE99"
+              <Text style={s.authorHint}>적는 사람: {CURRENT_USER} (나)</Text>
+              <Text style={s.createLabel}>어떤 검진</Text>
+              <TextInput style={s.createInput} placeholder="예: 건강검진, 치과, 예방접종" placeholderTextColor="#BFAE99"
                 value={formType} onChangeText={setFormType} />
-              <Text style={s.createLabel}>검진일</Text>
+              <Text style={s.createLabel}>검진일 (비우면 오늘)</Text>
               <TextInput style={s.createInput} placeholder="예: 2026.4.26" placeholderTextColor="#BFAE99"
                 value={formDate} onChangeText={setFormDate} />
-              <Text style={s.createLabel}>결과 요약</Text>
+              <Text style={s.createLabel}>결과</Text>
               <TextInput style={s.createInput} placeholder="예) 정상, 충치 1개" placeholderTextColor="#BFAE99"
                 value={formResult} onChangeText={setFormResult} />
+              <Text style={s.createLabel}>다음 검진일 (선택) — 적어두면 위에서 알려줘요</Text>
+              <TextInput style={s.createInput} placeholder="예: 2026.10.26" placeholderTextColor="#BFAE99"
+                value={formNext} onChangeText={setFormNext} />
               <Text style={s.createLabel}>메모</Text>
-              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="메모를 남겨보세요" placeholderTextColor="#BFAE99" multiline
+              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="처방, 주의할 점, 의사 선생님 말씀" placeholderTextColor="#BFAE99" multiline
                 value={formNotes} onChangeText={setFormNotes} />
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>저장하기</Text>
@@ -207,42 +249,57 @@ function HealthScreen() {
         </Modal>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* AI 보조 힌트 */}
-          <View style={s.aiHint}>
-            <FontAwesome name="magic" size={12} color="#4A8C6F" />
-            <Text style={s.aiHintText}>지우의 다음 영유아 검진이 7월에 예정되어 있어요. 미리 소아과 예약을 잡으세요.</Text>
-          </View>
+          {/* 다가오는 검진 — 기록에 적힌 진짜 날짜만 */}
+          {upcoming.length > 0 && (
+            <View style={s.upcoming}>
+              <FontAwesome name="calendar-check-o" size={13} color="#2D5A3F" />
+              <View style={{ flex: 1 }}>
+                {upcoming.map((r) => {
+                  const d = daysUntil(r.data.nextDate);
+                  const when = d === 0 ? '오늘' : d === 1 ? '내일' : `${d}일 뒤`;
+                  return (
+                    <Text key={r.id} style={s.upcomingText}>
+                      {r.data.member} {r.data.type} · {formatKoreanDate(r.data.nextDate)} ({when})
+                    </Text>
+                  );
+                })}
+              </View>
+            </View>
+          )}
 
           <View style={s.list}>
             {records.map((record) => {
               const r = record.data;
-              const rc = RESULT_COLOR[r.result] || { bg: '#F5F0E5', text: '#5C4A32' };
+              const rc = resultTone(r.result);
               return (
                 <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
                   onPress={() => openDetail({ ...r, id: record.id })}>
-                  <View style={[s.icon, { backgroundColor: r.color }]}>
-                    <FontAwesome name={r.icon as any} size={18} color="#FFFFFF" />
+                  <View style={[s.icon, { backgroundColor: nameColor(r.member) }]}>
+                    <FontAwesome name="medkit" size={18} color="#FFFFFF" />
                   </View>
                   <View style={s.info}>
                     <View style={s.topRow}>
                       <Text style={s.memberName}>{r.member}</Text>
-                      <View style={[s.resultBadge, { backgroundColor: rc.bg }]}>
-                        <Text style={[s.resultText, { color: rc.text }]}>{r.result}</Text>
-                      </View>
+                      {r.result ? (
+                        <View style={[s.resultBadge, { backgroundColor: rc.bg }]}>
+                          <Text style={[s.resultText, { color: rc.text }]}>{r.result}</Text>
+                        </View>
+                      ) : null}
                     </View>
-                    <Text style={s.type}>{[r.type, r.date].filter(Boolean).join(' · ')}</Text>
+                    <Text style={s.type}>{[r.type, showDate(r.date)].filter(Boolean).join(' · ')}</Text>
                     {r.notes ? <Text style={s.notes} numberOfLines={1}>{r.notes}</Text> : null}
                     {r.nextDate ? (
                       <View style={s.nextRow}>
                         <FontAwesome name="calendar" size={10} color="#9C8B75" />
-                        <Text style={s.nextDate}>다음: {r.nextDate}</Text>
+                        <Text style={s.nextDate}>다음: {showDate(r.nextDate)}</Text>
                       </View>
                     ) : null}
                   </View>
                 </TouchableOpacity>
               );
             })}
-            {records.length === 0 && (
+            {records.length === 0 && !ready && <LoadingRows />}
+            {records.length === 0 &&  ready && (
               <View style={s.empty}>
                 <FontAwesome name="heartbeat" size={32} color="#CFC7BA" />
                 <Text style={s.emptyText}>아직 건강 기록이 없어요</Text>
@@ -266,16 +323,16 @@ const s = StyleSheet.create({
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   emptySub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
-  aiHint: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, margin: 20, backgroundColor: '#EFF6F1', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#D0E4D6' },
-  aiHintText: { flex: 1, fontSize: 12, color: '#4A8C6F', lineHeight: 18, fontFamily: 'Pretendard' },
-  list: { paddingHorizontal: 20 },
+  upcoming: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, margin: 20, marginBottom: 4, backgroundColor: '#EFF6F1', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#D0E4D6' },
+  upcomingText: { fontSize: 12, color: '#2D5A3F', lineHeight: 18, fontFamily: 'PretendardBold' },
+  list: { paddingHorizontal: 20, paddingTop: 16 },
   card: { flexDirection: 'row', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   icon: { width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
   memberName: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   resultBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
-  resultText: { fontSize: 11, fontWeight: '700' },
+  resultText: { fontSize: 11, fontWeight: '700', fontFamily: 'PretendardBold' },
   type: { fontSize: 12, color: '#A0A0A0', marginBottom: 4, fontFamily: 'Pretendard' },
   notes: { fontSize: 13, color: '#5C4A32', marginBottom: 6, fontFamily: 'Pretendard' },
   nextRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
@@ -288,7 +345,7 @@ const s = StyleSheet.create({
   modalContent: {},
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
-  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
+  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 64, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },

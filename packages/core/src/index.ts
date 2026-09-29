@@ -1,4 +1,5 @@
-export { supabase } from './supabase/client';
+export { supabase, configureAuthStorage } from './supabase/client';
+export type { AuthStorage } from './supabase/client';
 export {
   signInWithEmail,
   signUpWithEmail,

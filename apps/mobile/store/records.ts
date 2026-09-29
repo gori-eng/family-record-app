@@ -125,6 +125,14 @@ type RecordsState = {
 /** DB가 돌려준 모양을 앱 모양으로 (이름은 이미 core에서 맞춰서 온다) */
 const fromDb = (r: AppRecord): FamilyRecord => r as FamilyRecord;
 
+/**
+ * 저장 응답이 오기 **전에** 지우거나 고친 기록 (2026-09-29 전체 점검 B10).
+ * 임시 id로는 DB에 지우기·고치기를 보낼 수 없으므로 여기 적어뒀다가, 진짜 id가 오면 그때 보낸다.
+ * 안 그러면 "지웠는데 새로고침하면 되살아나고, 고쳤는데 고친 게 사라지는" 일이 생긴다.
+ */
+const pendingDeletes = new Set<string>();
+const pendingPatches = new Map<string, { title?: string; data?: Record<string, any> }>();
+
 /** 저장에 실패했을 때 — 넣었던 것을 도로 빼고 알린다 */
 function failed(action: string, e: unknown) {
   const msg = String((e as Error)?.message ?? e);
@@ -189,13 +197,33 @@ export const useRecordsStore = create<RecordsState>((set, get) => ({
       createdAt: input.createdAt,
     })
       .then((saved) => {
-        set((state) => ({
-          records: saved
-            // 임시 id를 진짜 id로 갈아끼운다
-            ? state.records.map((r) => (r.id === record.id ? fromDb(saved) : r))
-            // null = 이미 있는 거래(중복). 조용히 빼면 된다
-            : state.records.filter((r) => r.id !== record.id),
-        }));
+        if (!saved) {
+          // null = 이미 있는 거래(중복). 명세서 가져오기는 조용히 빼면 되지만,
+          // **손으로 적은 건 사용자가 알아야 한다** — 안 그러면 방금 적은 게 증발한 것처럼 보인다 (A4)
+          set((state) => ({ records: state.records.filter((r) => r.id !== record.id) }));
+          if (input.category === 'finance' && input.data?.source === 'manual') {
+            showAlert('같은 거래가 이미 있어요', '같은 날, 같은 금액, 같은 내역이 벌써 적혀 있어요. 정말 두 번 쓴 거라면 내역에 "2번째"처럼 한마디를 덧붙여 주세요.');
+          }
+          return;
+        }
+        const real = fromDb(saved);
+        // 응답을 기다리는 사이에 지웠으면 — 지금 진짜 id로 지운다
+        if (pendingDeletes.has(record.id)) {
+          pendingDeletes.delete(record.id);
+          pendingPatches.delete(record.id);
+          dbDelete(real.id).catch((e) => failed('삭제를', e));
+          return;
+        }
+        // 응답을 기다리는 사이에 고쳤으면 — 고친 내용을 진짜 id로 다시 보낸다
+        const late = pendingPatches.get(record.id);
+        pendingPatches.delete(record.id);
+        const merged = late ? { ...real, ...late, data: late.data ?? real.data } : real;
+        // 임시 id를 진짜 id로 갈아끼운다
+        set((state) => ({ records: state.records.map((r) => (r.id === record.id ? merged : r)) }));
+        if (late) {
+          dbUpdate(real.id, { title: late.title, data: late.data, importKey: importKeyOf(late.data ?? {}) })
+            .catch((e) => failed('고친 내용을', e));
+        }
       })
       .catch((e) => {
         set((state) => ({ records: state.records.filter((r) => r.id !== record.id) }));
@@ -210,8 +238,14 @@ export const useRecordsStore = create<RecordsState>((set, get) => ({
     set((state) => ({
       records: state.records.map((r) => (r.id === id ? { ...r, ...patch } : r)),
     }));
-    if (!get().familyId || isTemp(id)) return;
-    dbUpdate(id, { title: patch.title, data: patch.data }).catch((e) => {
+    if (!get().familyId) return;
+    if (isTemp(id)) {
+      // 아직 진짜 id가 없다 — 응답이 오면 보낸다
+      const prev = pendingPatches.get(id) ?? {};
+      pendingPatches.set(id, { ...prev, ...(patch.title !== undefined ? { title: patch.title } : {}), ...(patch.data !== undefined ? { data: patch.data } : {}) });
+      return;
+    }
+    dbUpdate(id, { title: patch.title, data: patch.data, importKey: patch.data ? importKeyOf(patch.data) : undefined }).catch((e) => {
       if (before) {
         set((state) => ({ records: state.records.map((r) => (r.id === id ? before : r)) }));
       }
@@ -225,8 +259,14 @@ export const useRecordsStore = create<RecordsState>((set, get) => ({
     set((state) => ({
       records: state.records.map((r) => (r.id === id ? { ...r, data: merged } : r)),
     }));
-    if (!get().familyId || isTemp(id)) return;
-    dbUpdate(id, { data: merged }).catch((e) => {
+    if (!get().familyId) return;
+    if (isTemp(id)) {
+      const prev = pendingPatches.get(id) ?? {};
+      pendingPatches.set(id, { ...prev, data: merged });
+      return;
+    }
+    // 가계부는 지문도 같이 — data 안에만 두면 DB의 중복 방지 칸은 옛 지문을 본다 (B3)
+    dbUpdate(id, { data: merged, importKey: importKeyOf(merged) }).catch((e) => {
       if (before) {
         set((state) => ({ records: state.records.map((r) => (r.id === id ? before : r)) }));
       }
@@ -237,7 +277,12 @@ export const useRecordsStore = create<RecordsState>((set, get) => ({
   removeRecord: (id) => {
     const before = get().records.find((r) => r.id === id);
     set((state) => ({ records: state.records.filter((r) => r.id !== id) }));
-    if (!get().familyId || isTemp(id)) return;
+    if (!get().familyId) return;
+    if (isTemp(id)) {
+      // 아직 DB에 없다(저장 중) — 응답이 오면 그때 지운다
+      pendingDeletes.add(id);
+      return;
+    }
     dbDelete(id).catch((e) => {
       // 지우지 못했으면 도로 살려둔다 — 지워진 줄 알았는데 남아 있는 게 낫다
       if (before) set((state) => ({ records: [before, ...state.records] }));
@@ -246,12 +291,20 @@ export const useRecordsStore = create<RecordsState>((set, get) => ({
   },
 
   setRecords: (records) => {
+    const previous = get().records;
     set({ records });
     const { familyId, userId } = get();
     if (!familyId || !userId) return;
     // 전부 바꾸기 — DB도 비우고 새로 넣는다
     (async () => {
-      await deleteAllRecords(familyId);
+      // ⚠️ 관리자가 아니면 남의 기록은 정책에 막혀 **오류 없이 남는다.** 그 위에 파일 내용을 넣으면
+      //    남의 기록이 두 배가 된다 (2026-09-29 전체 점검 A7). 지운 건수가 모자라면 멈추고 되돌린다
+      const before = await fetchRecords(familyId);
+      const deleted = await deleteAllRecords(familyId);
+      if (deleted < before.length) {
+        set({ records: previous });
+        throw new Error('다른 가족이 쓴 기록은 관리자만 지울 수 있어서, 전부 바꾸지 못했어요. "없는 것만 더하기"를 써주세요.');
+      }
       for (const r of records) {
         await insertRecord({
           familyId, userId,

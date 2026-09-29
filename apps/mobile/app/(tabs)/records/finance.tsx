@@ -15,10 +15,12 @@ import {
 } from '../../../store/finance';
 import { ro } from '../../../lib/korean';
 import { withGrownupsOnly } from '../../../components/GrownupsOnly';
+import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 
 function FinanceScreen() {
   // 지우기는 쓴 사람과 관리자만 (store/family.ts · DB 정책 00008)
   const canDelete = useCanDelete();
+  const ready = useRecordsReady();
   /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
   const MEMBERS = useFamilyMembers();
   const CURRENT_USER = useMe();
@@ -153,12 +155,21 @@ function FinanceScreen() {
     const desc = formDesc.trim() || formCategory;
     const method = formType === 'income' ? '입금' : formMethod;
     const base = { type: formType, amount, category: formCategory, desc, date: formDate, ownerMember: formOwner };
+    /**
+     * 거래 지문. 같은 날 같은 가게에서 같은 금액을 **정말 두 번** 쓰기도 한다(커피 두 잔).
+     * 지문이 똑같으면 DB가 중복으로 거절해 두 번째가 사라지므로(2026-09-29 점검 A4),
+     * 이미 같은 지문이 있으면 `|2`, `|3`을 붙여 구분한다. 명세서 가져오기의 중복 판정은
+     * 원래 지문으로 하므로 "손으로 적은 비슷한 거래" 안내는 그대로 뜬다.
+     */
+    let importKey = fingerprint(base);
+    const taken = new Set(records.filter((r) => r.id !== editingId).map((r) => r.data.importKey));
+    for (let n = 2; taken.has(importKey); n += 1) importKey = `${fingerprint(base)}|${n}`;
     const data: Transaction = {
       ...base,
       method,
       memo: formMemo.trim(),
       source: editingId ? (selectedRecord?.data.source ?? 'manual') : 'manual',
-      importKey: fingerprint(base),
+      importKey,
     };
 
     if (editingId) {
@@ -353,6 +364,27 @@ function FinanceScreen() {
       over: used > total,
     };
   }, [settings.budgets.total, summary.expense]);
+
+  /** 예산 창에서 적는 중인 값 — 닫을 때 한 번에 저장한다 */
+  const [draftTotal, setDraftTotal] = useState('');
+  const [draftByCat, setDraftByCat] = useState<Record<string, string>>({});
+  const openBudget = () => {
+    setDraftTotal(settings.budgets.total ? comma(settings.budgets.total) : '');
+    setDraftByCat(Object.fromEntries(
+      EXPENSE_CATEGORIES.map((c) => [c.name, settings.budgets.byCategory[c.name] ? comma(settings.budgets.byCategory[c.name]) : ''])
+    ));
+    setShowBudget(true);
+  };
+  const commitBudget = () => {
+    const total = parseAmount(draftTotal);
+    if (total !== settings.budgets.total) settings.setBudgetTotal(total);
+    for (const c of EXPENSE_CATEGORIES) {
+      const next = parseAmount(draftByCat[c.name] ?? '');
+      const prev = settings.budgets.byCategory[c.name] ?? 0;
+      if (next !== prev) settings.setCategoryBudget(c.name, next);
+    }
+    setShowBudget(false);
+  };
 
   /** 자주 쓴 내역 — 폼의 빠른 입력용. 수정 중일 때는 방해되니 숨긴다. */
   const quickEntries = useMemo(
@@ -708,14 +740,19 @@ function FinanceScreen() {
                 <FontAwesome name="chevron-left" size={14} color="#4A8C6F" />
               </TouchableOpacity>
               <Text style={styles.summaryMonth}>{formatMonth(viewMonth)}</Text>
+              {/* 다음 달도 열어둔다 — 할부를 나눠 적거나 미리 적은 지출은 미래 달에 있다 (점검 B2) */}
               <TouchableOpacity
-                style={[styles.monthArrow, isThisMonth && styles.monthArrowOff]}
+                style={styles.monthArrow}
                 activeOpacity={0.7}
-                disabled={isThisMonth}
                 onPress={() => setViewMonth(shiftMonth(viewMonth, 1))}>
-                <FontAwesome name="chevron-right" size={14} color={isThisMonth ? '#D4CFC6' : '#4A8C6F'} />
+                <FontAwesome name="chevron-right" size={14} color="#4A8C6F" />
               </TouchableOpacity>
             </View>
+            {!isThisMonth && (
+              <TouchableOpacity style={styles.todayChip} activeOpacity={0.7} onPress={() => setViewMonth(monthOf(todayISO()))}>
+                <Text style={styles.todayChipText}>이번 달로 돌아가기</Text>
+              </TouchableOpacity>
+            )}
 
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
@@ -735,7 +772,7 @@ function FinanceScreen() {
             </View>
 
             {/* 예산 */}
-            <TouchableOpacity style={styles.budgetRow} activeOpacity={0.7} onPress={() => setShowBudget(true)}>
+            <TouchableOpacity style={styles.budgetRow} activeOpacity={0.7} onPress={openBudget}>
               {budget ? (
                 <>
                   <View style={styles.budgetTop}>
@@ -846,7 +883,9 @@ function FinanceScreen() {
             </ScrollView>
           )}
 
-          {grouped.length === 0 ? (
+          {grouped.length === 0 && !ready ? (
+            <LoadingRows />
+          ) : grouped.length === 0 ? (
             <View style={styles.emptyState}>
               <FontAwesome name="inbox" size={36} color="#E0D8C8" />
               <Text style={styles.emptyText}>
@@ -918,10 +957,11 @@ function FinanceScreen() {
           </View>
         )}
 
-        {/* 예산 설정 */}
+        {/* 예산 설정 — 적는 동안은 화면에만 두고, '다 정했어요'를 누를 때 한 번에 저장한다
+            (예전엔 한 글자마다 DB에 썼다: 50만 원 = 6번 저장. 점검 B4) */}
         <Modal visible={showBudget} transparent statusBarTranslucent animationType="fade">
           <View style={styles.centerWrap}>
-            <Pressable style={styles.centerBg} onPress={() => setShowBudget(false)} />
+            <Pressable style={styles.centerBg} onPress={commitBudget} />
             <View style={styles.centerSheet}>
               <Text style={styles.centerTitle}>예산 정하기</Text>
               <Text style={styles.centerDesc}>
@@ -934,8 +974,8 @@ function FinanceScreen() {
                   placeholder="0"
                   placeholderTextColor="#CFC7BA"
                   keyboardType="numeric"
-                  value={settings.budgets.total ? comma(settings.budgets.total) : ''}
-                  onChangeText={(v) => settings.setBudgetTotal(parseAmount(v))}
+                  value={draftTotal}
+                  onChangeText={(v) => setDraftTotal(parseAmount(v) ? comma(parseAmount(v)) : '')}
                 />
                 <Text style={styles.amountWon}>원</Text>
               </View>
@@ -952,13 +992,13 @@ function FinanceScreen() {
                       placeholder="0"
                       placeholderTextColor="#CFC7BA"
                       keyboardType="numeric"
-                      value={settings.budgets.byCategory[c.name] ? comma(settings.budgets.byCategory[c.name]) : ''}
-                      onChangeText={(v) => settings.setCategoryBudget(c.name, parseAmount(v))}
+                      value={draftByCat[c.name] ?? ''}
+                      onChangeText={(v) => setDraftByCat((d) => ({ ...d, [c.name]: parseAmount(v) ? comma(parseAmount(v)) : '' }))}
                     />
                   </View>
                 ))}
               </ScrollView>
-              <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={() => setShowBudget(false)}>
+              <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={commitBudget}>
                 <Text style={styles.createSubmitText}>다 정했어요</Text>
               </TouchableOpacity>
             </View>
@@ -1081,7 +1121,8 @@ const styles = StyleSheet.create({
     width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center',
     backgroundColor: '#EFF6F1',
   },
-  monthArrowOff: { backgroundColor: '#F4F2EE' },
+  todayChip: { alignSelf: 'center', backgroundColor: '#EFF6F1', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 5, marginTop: -8, marginBottom: 14 },
+  todayChipText: { fontSize: 12, color: '#2D5A3F', fontFamily: 'PretendardBold' },
   summaryMonth: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', textAlign: 'center', fontFamily: 'PretendardBold', letterSpacing: -0.3, minWidth: 130 },
   summaryRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
   summaryItem: { flex: 1, alignItems: 'center' },

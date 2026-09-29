@@ -8,15 +8,14 @@
  * - 반복 거래 (월급·관리비처럼 매달 같은 항목)
  * - 예산 (전체 / 카테고리별)
  *
- * 저장 위치: 웹은 localStorage, 네이티브는 아직 메모리.
- * 이 값들은 사실 "가족 공유 설정"이라 Supabase를 붙일 때 DB로 옮기는 게 맞다.
- * 그때까지의 임시 보관소다.
+ * 저장 위치: 가족이 연결돼 있으면 DB(가족 공유), 아니면 이 기기(lib/storage.ts — 웹·휴대폰 공용).
  */
 import { create } from 'zustand';
 import { fetchFinanceSettings, saveFinanceSettings } from '@core/supabase';
 import { showAlert } from '../components/AppAlert';
 import type { ColumnKey } from './statementImport';
 import { normalizeMerchant } from './finance';
+import { getSync, setSync } from '../lib/storage';
 
 const KEY = 'familog.finance.settings.v1';
 
@@ -86,10 +85,10 @@ const EMPTY: FinanceSettingsData = {
 };
 
 // ── 저장소 ────────────────────────────────────────────────
-/** localStorage가 막힌 환경(네이티브·시크릿 모드)에서도 죽지 않게 감싼다. */
+/** 이 기기에 남긴 값. 없거나 깨졌으면 기본값 */
 function load(): FinanceSettingsData {
   try {
-    const raw = globalThis.localStorage?.getItem(KEY);
+    const raw = getSync(KEY);
     if (!raw) return EMPTY;
     return { ...EMPTY, ...JSON.parse(raw) };
   } catch {
@@ -128,11 +127,7 @@ function save(s: FinanceSettingsData) {
     });
     return;
   }
-  try {
-    globalThis.localStorage?.setItem(KEY, JSON.stringify(data));
-  } catch {
-    /* 저장 못 해도 앱은 계속 돌아간다 */
-  }
+  setSync(KEY, JSON.stringify(data));
 }
 
 type SettingsStore = FinanceSettingsData & {

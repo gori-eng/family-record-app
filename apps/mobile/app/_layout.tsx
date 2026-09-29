@@ -10,6 +10,8 @@ import type { Session } from '@supabase/supabase-js';
 import { StatusBar } from 'react-native';
 import 'react-native-reanimated';
 import { AlertHost } from '../components/AppAlert';
+// ⚠️ 맨 먼저 — 휴대폰용 로그인 저장소를 끼워 넣는다 (lib/storage.ts 참조)
+import { hydrateStorage } from '../lib/storage';
 import { useRecordsStore } from '../store/records';
 import { useEventsStore } from '../store/events';
 import { attachFinanceSettings, detachFinanceSettings } from '../store/financeSettings';
@@ -53,7 +55,6 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     Pretendard: require('../assets/fonts/Pretendard-Regular.otf'),
     PretendardBold: require('../assets/fonts/Pretendard-Bold.otf'),
     GaeguBold: require('../assets/fonts/GaeguBold.ttf'),
@@ -67,13 +68,16 @@ export default function RootLayout() {
   }, [error]);
 
   useEffect(() => {
-    // Check initial session
-    getSession().then((s) => {
-      setSession(s);
-      setIsLoading(false);
-    }).catch(() => {
-      setIsLoading(false);
-    });
+    // 휴대폰 서랍(AsyncStorage)을 메모리에 올린 **뒤에** 로그인 정보를 읽는다.
+    // 순서가 바뀌면 '마지막에 본 가족' 같은 값이 아직 없는 채로 판단한다
+    hydrateStorage()
+      .then(() => getSession())
+      .then((s) => {
+        setSession(s);
+        setIsLoading(false);
+      }).catch(() => {
+        setIsLoading(false);
+      });
 
     // Listen for auth changes
     const { data: { subscription } } = onAuthStateChange((_event, session) => {
@@ -194,7 +198,7 @@ function RootLayoutNav() {
 
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFDF0" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F9F8F5" />
       <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />

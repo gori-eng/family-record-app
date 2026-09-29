@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, TextInput, ScrollView, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, StyleSheet, Platform, Share } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -161,8 +161,15 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
       } catch {
         /* 복사가 막힌 브라우저도 있다 — 아래 안내로 넘어간다 */
       }
+      showAlert('초대 코드', madeFamily.invite_code);
+      return;
     }
-    showAlert('초대 코드', madeFamily.invite_code);
+    // 휴대폰 — 공유 시트로 카톡·문자에 바로 보낸다 (예전엔 웹 전용 복사라 알림창만 떴다, 점검 B12)
+    try {
+      await Share.share({ message: `familog 초대 코드: ${madeFamily.invite_code}` + String.fromCharCode(10) + "앱에서 '초대 코드로 들어가기'에 넣어주세요." });
+    } catch {
+      showAlert('초대 코드', madeFamily.invite_code);
+    }
   };
 
   // ── 가족을 만든 직후 — 초대 코드를 건네는 화면 ──────────

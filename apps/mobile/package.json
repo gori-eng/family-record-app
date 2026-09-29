@@ -41,7 +41,10 @@
     "zod": "^3.25.7",
     "@core/supabase": "workspace:*",
     "expo-document-picker": "~14.0.8",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "expo-sharing": "~14.0.8",
+    "expo-file-system": "~19.0.21"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",

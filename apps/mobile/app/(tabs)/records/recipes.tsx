@@ -5,6 +5,7 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
 import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
+import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
 import { say, DIFFICULTY_LABEL } from '../../../constants/labels';
 
@@ -23,6 +24,7 @@ const DIFF_COLOR: Record<string, string> = { '쉬움': '#4AA86B', '보통': '#E6
 
 export default function RecipesScreen() {
   const { askDelete, undoBar } = useRecordDelete('레시피');
+  const ready = useRecordsReady();
   const CURRENT_USER = useMe();
   const { openTitle } = useLocalSearchParams<{ openTitle?: string }>();
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -46,10 +48,13 @@ export default function RecipesScreen() {
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
 
+  /** 홈에서 넘어온 제목은 **한 번만** 연다 — 예전엔 목록이 바뀔 때마다 상세가 다시 열렸다 (점검 B5) */
+  const openedFor = useRef<string | null>(null);
   useEffect(() => {
-    if (openTitle) {
+    if (openTitle && openedFor.current !== openTitle) {
       const match = recipes.find(r => r.title === openTitle);
       if (match) {
+        openedFor.current = openTitle;
         setSelectedItem({ ...match.data, id: match.id });
         Animated.parallel([
           Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -149,22 +154,26 @@ export default function RecipesScreen() {
                 <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 560 }}>
                   <View style={s.modalContent}>
                     <Text style={s.modalTitle}>{selectedItem.name}</Text>
+                    {selectedItem.origin ? (
+                      <View style={s.modalRow}>
+                        <Text style={s.modalLabel}>유래</Text>
+                        <Text style={s.modalValue}>{selectedItem.origin}</Text>
+                      </View>
+                    ) : null}
                     <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>유래</Text>
-                      <Text style={s.modalValue}>{selectedItem.origin}</Text>
-                    </View>
-                    <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>기록자</Text>
-                      <Text style={s.modalValue}>{selectedItem.author}</Text>
+                      <Text style={s.modalLabel}>적은 사람</Text>
+                      <Text style={s.modalValue}>{selectedItem.author}{selectedItem.author === CURRENT_USER ? ' (나)' : ''}</Text>
                     </View>
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>난이도</Text>
                       <Text style={[s.modalValue, { color: DIFF_COLOR[selectedItem.difficulty], fontWeight: '600' }]}>{say(DIFFICULTY_LABEL, selectedItem.difficulty)}</Text>
                     </View>
-                    <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>조리시간</Text>
-                      <Text style={s.modalValue}>{selectedItem.time}</Text>
-                    </View>
+                    {selectedItem.time ? (
+                      <View style={s.modalRow}>
+                        <Text style={s.modalLabel}>걸리는 시간</Text>
+                        <Text style={s.modalValue}>{selectedItem.time}</Text>
+                      </View>
+                    ) : null}
 
                     <View style={s.sectionDivider} />
                     <View style={s.sectionHeader}>
@@ -234,7 +243,7 @@ export default function RecipesScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              <Text style={s.createLabel}>조리시간</Text>
+              <Text style={s.createLabel}>걸리는 시간</Text>
               <TextInput style={s.createInput} placeholder="예: 30분" placeholderTextColor="#BFAE99"
                 value={formTime} onChangeText={setFormTime} />
               <Text style={s.createLabel}>재료</Text>
@@ -292,12 +301,16 @@ export default function RecipesScreen() {
                 </View>
                 <View style={s.info}>
                   <Text style={s.name}>{r.name}</Text>
-                  <Text style={s.origin}>{r.origin}</Text>
+                  {r.origin ? <Text style={s.origin}>{r.origin}</Text> : null}
                   <View style={s.meta}>
                     <Text style={[s.difficulty, { color: DIFF_COLOR[r.difficulty] }]}>{say(DIFFICULTY_LABEL, r.difficulty)}</Text>
-                    <Text style={s.dot}>·</Text>
-                    <FontAwesome name="clock-o" size={11} color="#9C8B75" />
-                    <Text style={s.time}>{r.time}</Text>
+                    {r.time ? (
+                      <>
+                        <Text style={s.dot}>·</Text>
+                        <FontAwesome name="clock-o" size={11} color="#9C8B75" />
+                        <Text style={s.time}>{r.time}</Text>
+                      </>
+                    ) : null}
                     <Text style={s.dot}>·</Text>
                     <Text style={s.author}>{r.author}</Text>
                   </View>
@@ -306,7 +319,8 @@ export default function RecipesScreen() {
               </TouchableOpacity>
               );
             })}
-            {recipes.length === 0 && (
+            {recipes.length === 0 && !ready && <LoadingRows />}
+            {recipes.length === 0 &&  ready && (
               <View style={s.empty}>
                 <FontAwesome name="cutlery" size={32} color="#CFC7BA" />
                 <Text style={s.emptyText}>아직 적어둔 레시피가 없어요</Text>

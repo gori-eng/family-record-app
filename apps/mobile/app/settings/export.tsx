@@ -10,6 +10,7 @@ import {
   categoryLabel, type BackupFile, type BackupSummary, type RestoreMode,
 } from '../../store/backup';
 import { saveTextFile, pickTextFile } from '../../lib/saveFile';
+import { useSession } from '../../store/session';
 
 /** '2026-09-28T07:12:00.000Z' → '2026년 9월 28일 오후 4:12' */
 function formatMoment(iso: string): string {
@@ -25,6 +26,8 @@ function formatMoment(iso: string): string {
 export default function ExportScreen() {
   const records = useRecordsStore((s) => s.records);
   const events = useEventsStore((s) => s.events);
+  /** '파일 그대로 되돌리기'는 남의 기록까지 지우므로 관리자만 (2026-09-29 점검 A7) */
+  const isAdmin = useSession((s) => s.me?.role === 'admin');
 
   /** 지금 갖고 있는 것 — 내보내기 전에 몇 개가 담기는지 보여준다 */
   const mine = useMemo(() => {
@@ -55,19 +58,21 @@ export default function ExportScreen() {
   };
 
   // ── 내보내기 ────────────────────────────────────────────
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!records.length && !events.length) {
       showAlert('아직 내보낼 기록이 없어요', '기록을 하나 남기고 다시 와주세요.');
       return;
     }
     const backup = buildBackup();
     const name = backupFileName();
-    const result = saveTextFile(name, backupToText(backup));
+    const result = await saveTextFile(name, backupToText(backup));
     if (result.ok) {
       showAlert(
         '기록을 파일로 담았어요',
         `${name}\n\n기록 ${backup.records.length}개 · 일정 ${backup.events.length}개가 들어 있어요.\n` +
-          '이 파일만 있으면 언제든 되살릴 수 있으니, 다른 곳에도 한 부 두세요.'
+          (result.how === 'share'
+            ? '파일 앱이나 메일에 두면 휴대폰을 바꿔도 되살릴 수 있어요.'
+            : '이 파일만 있으면 언제든 되살릴 수 있으니, 다른 곳에도 한 부 두세요.')
       );
     } else {
       showAlert('파일로 담지 못했어요', result.reason);
@@ -87,13 +92,13 @@ export default function ExportScreen() {
   };
 
   const handlePick = async () => {
-    if (Platform.OS !== 'web') {
-      showAlert('아직 웹에서만 돼요', '휴대폰에서 백업 파일을 고르는 건 준비 중이에요.');
-      return;
+    try {
+      const picked = await pickTextFile();
+      if (!picked) return;
+      loadText(picked.name, picked.text);
+    } catch (e: any) {
+      showAlert('파일을 읽지 못했어요', String(e?.message ?? e));
     }
-    const picked = await pickTextFile();
-    if (!picked) return;
-    loadText(picked.name, picked.text);
   };
 
   /** 웹에서는 내려받은 백업을 화면에 끌어다 놓기만 해도 된다. */
@@ -218,17 +223,23 @@ export default function ExportScreen() {
                     </View>
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={s.choice} activeOpacity={0.7} onPress={() => runRestore('replace')}>
-                    <View style={[s.choiceIcon, { backgroundColor: '#FFF0F0' }]}>
-                      <FontAwesome name="refresh" size={14} color="#D94040" />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={s.choiceLabel}>파일 그대로 되돌리기</Text>
-                      <Text style={s.choiceDesc}>
-                        지금 기록을 모두 지우고 파일 내용으로 바꿉니다. 기기를 새로 쓸 때 쓰세요.
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
+                  {isAdmin ? (
+                    <TouchableOpacity style={s.choice} activeOpacity={0.7} onPress={() => runRestore('replace')}>
+                      <View style={[s.choiceIcon, { backgroundColor: '#FFF0F0' }]}>
+                        <FontAwesome name="refresh" size={14} color="#D94040" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={s.choiceLabel}>파일 그대로 되돌리기</Text>
+                        <Text style={s.choiceDesc}>
+                          지금 기록을 모두 지우고 파일 내용으로 바꿔요. 가족 전체의 기록이 바뀌니 신중하게요.
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ) : (
+                    <Text style={s.adminNote}>
+                      가족 전체 기록을 파일로 통째로 바꾸는 건 관리자만 할 수 있어요.
+                    </Text>
+                  )}
                 </ScrollView>
               </>
             )}
@@ -329,7 +340,6 @@ export default function ExportScreen() {
           <Text style={s.infoText}>
             담은 파일은 특정 기기나 프로그램에 묶이지 않는 표준 형식(JSON)이에요.
             메모장으로 열어도 읽을 수 있고, 다른 프로그램으로 옮길 수도 있어요.
-            {Platform.OS === 'web' ? '' : '\n\n휴대폰에서 파일로 담는 기능은 아직 준비 중이에요. 지금은 웹에서 해주세요.'}
           </Text>
         </View>
       </ScrollView>
@@ -391,4 +401,5 @@ const s = StyleSheet.create({
   choiceIcon: { width: 34, height: 34, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   choiceLabel: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
   choiceDesc: { fontSize: 12, color: '#7A6B55', marginTop: 3, lineHeight: 18, fontFamily: 'Pretendard' },
+  adminNote: { fontSize: 12, color: '#9C8B75', fontFamily: 'Pretendard', lineHeight: 18, paddingVertical: 6 },
 });

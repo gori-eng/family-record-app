@@ -2,11 +2,12 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, M
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useRecentRecords, CATEGORY_LABELS, relativeDay, type RecordCategory } from '../../store/records';
+import { useRecentRecords, useRecordsStore, CATEGORY_LABELS, relativeDay, type RecordCategory } from '../../store/records';
 import { useMe, useFamilyInfo, useCanSee } from '../../store/family';
-import { useMyFamilies } from '../../store/session';
-import { useTodayEvents, formatTime, membersLabel } from '../../store/events';
+import { useMyFamilies, useSession } from '../../store/session';
+import { useTodayEvents, useEventsStore, formatTime, membersLabel } from '../../store/events';
 import { useFamilyNews, type NewsItem } from '../../store/news';
+import { LoadingRows, useRecordsReady, useEventsReady } from '../../components/Loading';
 import { useState, useCallback, useRef, useEffect } from 'react';
 
 /*
@@ -43,6 +44,8 @@ export default function HomeScreen() {
   const familyCount = useMyFamilies().length;
   // 오늘 일정 — 캘린더와 **같은 보관소**를 본다
   const todayEvents = useTodayEvents();
+  const recordsReady = useRecordsReady();
+  const eventsReady = useEventsReady();
   const [refreshing, setRefreshing] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -63,9 +66,21 @@ export default function HomeScreen() {
     ]).start();
   }, []);
 
-  const onRefresh = useCallback(() => {
+  /** 당겨서 새로고침 — 가족·기록·일정을 실제로 다시 불러온다 (예전엔 1초 빙글 돌고 끝이었다, 점검 B1) */
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
+    try {
+      const s = useSession.getState();
+      const fid = s.family?.id;
+      const uid = s.userId;
+      await Promise.all([
+        s.refresh(),
+        fid && uid ? useRecordsStore.getState().load(fid, uid) : Promise.resolve(),
+        fid && uid ? useEventsStore.getState().load(fid, uid) : Promise.resolve(),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
   }, []);
 
   const hour = today.getHours();
@@ -183,7 +198,9 @@ export default function HomeScreen() {
               <FontAwesome name="arrow-right" size={11} color="#4A8C6F" />
             </TouchableOpacity>
           </View>
-          {todayEvents.length === 0 ? (
+          {todayEvents.length === 0 && !eventsReady ? (
+            <LoadingRows label="오늘 일정을 보는 중이에요" />
+          ) : todayEvents.length === 0 ? (
             <TouchableOpacity style={s.emptyState} activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')}>
               <FontAwesome name="calendar-o" size={32} color="#D0D0D0" />
               <Text style={s.emptyTitle}>오늘은 일정이 없어요</Text>
@@ -250,7 +267,9 @@ export default function HomeScreen() {
               <FontAwesome name="arrow-right" size={11} color="#4A8C6F" />
             </TouchableOpacity>
           </View>
-          {recent.length === 0 ? (
+          {recent.length === 0 && !recordsReady ? (
+            <LoadingRows label="기록을 꺼내오는 중이에요" />
+          ) : recent.length === 0 ? (
             <TouchableOpacity style={s.emptyState} activeOpacity={0.7} onPress={() => router.push('/(tabs)/records')}>
               <FontAwesome name="pencil-square-o" size={32} color="#D0D0D0" />
               <Text style={s.emptyTitle}>아직 기록이 없어요</Text>

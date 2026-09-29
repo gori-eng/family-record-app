@@ -18,7 +18,7 @@ import {
   snapshotFinanceSettings, restoreFinanceSettings,
   type FinanceSettingsData,
 } from './financeSettings';
-import { FAMILY_MEMBERS, CURRENT_USER } from '../constants/family';
+import { useSession } from './session';
 
 /**
  * 백업 파일의 모양.
@@ -66,12 +66,14 @@ export function buildBackup(): BackupFile {
   for (const r of records) counts[r.category] = (counts[r.category] ?? 0) + 1;
   counts['일정'] = events.length;
 
+  // 진짜 가족 — 예전엔 예시 상수('지수'·김민준…)를 담아 백업에 남의 이름이 적혔다 (2026-09-29 점검 A6)
+  const session = useSession.getState();
   return {
     app: 'familog',
     formatVersion: 1,
     exportedAt: new Date().toISOString(),
-    exportedBy: CURRENT_USER,
-    members: FAMILY_MEMBERS.map((m) => ({ display: m.display, full: m.full })),
+    exportedBy: session.me?.display_name ?? '',
+    members: session.members.map((m) => ({ display: m.display_name, full: m.full_name || m.display_name })),
     counts,
     records,
     events,

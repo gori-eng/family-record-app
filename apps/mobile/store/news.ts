@@ -4,6 +4,7 @@ import { useSession } from './session';
 import { useRecordsStore, CATEGORY_LABELS, relativeDay, type RecordCategory } from './records';
 import { useEventsStore, formatTime } from './events';
 import { toISO } from './finance';
+import { getSync, setSync } from '../lib/storage';
 
 /**
  * 가족 소식 — 홈의 종(🔔)에 뜨는 것.
@@ -25,16 +26,14 @@ import { toISO } from './finance';
 const WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 const seenKey = (userId: string, familyId: string) => `familog.newsSeen.${userId}.${familyId}`;
-const readSeen = (key: string): number => {
-  try { return Number(globalThis.localStorage?.getItem(key) ?? 0) || 0; } catch { return 0; }
-};
+const readSeen = (key: string): number => Number(getSync(key) ?? 0) || 0;
 
 /** 종을 연 시각. 화면 여러 곳이 같은 값을 보도록 작은 보관소에 둔다 */
 const useSeen = create<{ seen: Record<string, number>; mark: (key: string) => void }>((set, get) => ({
   seen: {},
   mark: (key) => {
     const now = Date.now();
-    try { globalThis.localStorage?.setItem(key, String(now)); } catch { /* 없어도 된다 */ }
+    setSync(key, String(now));
     set({ seen: { ...get().seen, [key]: now } });
   },
 }));

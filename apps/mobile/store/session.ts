@@ -13,6 +13,7 @@ import {
   fetchMyFamilies, fetchMembers,
   type Family, type FamilyMember,
 } from '@core/supabase';
+import { getSync, setSync } from '../lib/storage';
 
 /**
  * 마지막에 보던 가족 — 다음에 앱을 열어도 그 가족으로 연다.
@@ -20,12 +21,9 @@ import {
  * 저장이 막힌 환경이면 그냥 첫 가족으로 연다.
  */
 const lastFamilyKey = (userId: string) => `familog.currentFamily.${userId}`;
-const rememberFamily = (userId: string, familyId: string) => {
-  try { globalThis.localStorage?.setItem(lastFamilyKey(userId), familyId); } catch { /* 없어도 된다 */ }
-};
-const recallFamily = (userId: string): string | null => {
-  try { return globalThis.localStorage?.getItem(lastFamilyKey(userId)) ?? null; } catch { return null; }
-};
+// 웹·휴대폰 공용 서랍 (lib/storage.ts) — 예전엔 localStorage라 휴대폰에선 안 남았다
+const rememberFamily = (userId: string, familyId: string) => setSync(lastFamilyKey(userId), familyId);
+const recallFamily = (userId: string): string | null => getSync(lastFamilyKey(userId));
 
 type SessionState = {
   /** 로그인한 계정의 id. 없으면 로그아웃 상태 */

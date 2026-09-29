@@ -4,11 +4,15 @@ import { useState, useRef, useEffect } from 'react';
 import { showAlert } from '../../components/AppAlert';
 import { useFamilyMembers, useMe, useCanDelete } from '../../store/family';
 import { eulreul } from '../../lib/korean';
+import { parseLooseDate } from '../../lib/dates';
+import { LoadingRows, useEventsReady } from '../../components/Loading';
 import {
   useEventsStore, useEventsOn, useEventDaysInMonth,
   EVENT_COLORS, formatTime, formatEventDate, membersLabel, normalizeTime, todayISO,
   type CalendarEvent,
 } from '../../store/events';
+
+const tomorrowISO = () => { const d = new Date(); d.setDate(d.getDate() + 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
 /** 시간 입력을 한 번에 채우는 버튼 — 자주 쓰는 시간대 */
 const TIME_CHIPS = ['09:00', '12:00', '15:00', '18:00', '20:00'];
@@ -16,6 +20,7 @@ const TIME_CHIPS = ['09:00', '12:00', '15:00', '18:00', '20:00'];
 export default function CalendarScreen() {
   // 지우기는 적은 사람과 관리자만 (store/family.ts · DB 정책 00008)
   const canDelete = useCanDelete();
+  const ready = useEventsReady();
   /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
   const MEMBERS = useFamilyMembers();
   const CURRENT_USER = useMe();
@@ -41,6 +46,8 @@ export default function CalendarScreen() {
 
   // 폼 입력값
   const [fTitle, setFTitle] = useState('');
+  /** 일정 날짜 — 새 일정은 고른 날, 고칠 땐 그 일정의 날. 여기서 바꿀 수 있다 (점검 B8) */
+  const [fDate, setFDate] = useState(todayISO());
   const [fTime, setFTime] = useState('');
   const [fLocation, setFLocation] = useState('');
   const [fMembers, setFMembers] = useState<string[]>([]);
@@ -75,11 +82,12 @@ export default function CalendarScreen() {
   };
 
   /** 새 일정 — 지금 고른 날짜에 넣는다 */
-  const openCreate = () => { setEditing(null); resetForm(); setShowForm(true); runOpen(); };
+  const openCreate = () => { setEditing(null); resetForm(); setFDate(selectedDate); setShowForm(true); runOpen(); };
 
   /** 고치기 — 새 일정 폼을 그대로 재사용해 값이 채워진 채로 연다 */
   const openEdit = (event: CalendarEvent) => {
     setEditing(event);
+    setFDate(event.date);
     setFTitle(event.title);
     setFTime(event.time);
     setFLocation(event.location ?? '');
@@ -100,8 +108,18 @@ export default function CalendarScreen() {
       showAlert('일정 이름을 적어주세요', '무슨 일인지 한 줄만 있으면 충분해요.');
       return;
     }
+    const date = parseLooseDate(fDate);
+    if (!date) {
+      showAlert('날짜를 한 번 봐주세요', '2026.10.3처럼 적어주세요. 위의 오늘·내일 버튼을 눌러도 돼요.');
+      return;
+    }
+    // "저녁" 같은 말은 시간으로 못 알아듣는다 — 조용히 하루 종일로 바꾸지 말고 물어본다
+    if (fTime.trim() && !normalizeTime(fTime)) {
+      showAlert('몇 시인지 못 알아들었어요', "'오후 6시'나 '18:00'처럼 적어주세요. 시간이 없으면 비워두면 하루 종일이 돼요.");
+      return;
+    }
     const payload = {
-      date: editing ? editing.date : selectedDate,
+      date,
       time: normalizeTime(fTime),
       title,
       location: fLocation.trim() || undefined,
@@ -112,6 +130,10 @@ export default function CalendarScreen() {
     };
     if (editing) updateEvent(editing.id, payload);
     else addEvent(payload);
+    // 고른 날짜도 그 일정의 날로 따라간다 — 저장한 게 바로 보이게
+    setSelectedDate(date);
+    setCurrentYear(Number(date.slice(0, 4)));
+    setCurrentMonth(Number(date.slice(5, 7)) - 1);
     closeModal();
     resetForm();
   };
@@ -224,15 +246,6 @@ export default function CalendarScreen() {
                   </View>
                 </View>
 
-                <View style={styles.aiHint}>
-                  <FontAwesome name="magic" size={12} color="#2D5A3F" />
-                  <Text style={styles.aiHintText}>
-                    {showDetail.location
-                      ? `"${showDetail.location}" 근처 갈 만한 곳도 찾아드릴까요?`
-                      : '가족에게 이 일정을 알려드릴까요?'}
-                  </Text>
-                </View>
-
                 <View style={styles.detailActions}>
                   <TouchableOpacity style={styles.detailBtn} activeOpacity={0.7} onPress={() => openEdit(showDetail)}>
                     <FontAwesome name="pencil" size={14} color="#2D5A3F" />
@@ -257,9 +270,21 @@ export default function CalendarScreen() {
                     <FontAwesome name="times" size={20} color="#4A4A4A" />
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.addDate}>{formatEventDate(editing ? editing.date : selectedDate)}</Text>
+                <Text style={styles.addDate}>{parseLooseDate(fDate) ? formatEventDate(parseLooseDate(fDate)!) : '날짜를 적어주세요'}</Text>
 
                 <ScrollView style={{ maxHeight: 460 }} showsVerticalScrollIndicator={false}>
+                  <Text style={styles.addLabel}>언제</Text>
+                  <View style={styles.chipRow}>
+                    {([['고른 날', selectedDate], ['오늘', todayISO()], ['내일', tomorrowISO()]] as const).map(([label, iso]) => (
+                      <TouchableOpacity key={label} style={[styles.chip, fDate === iso && styles.chipOn]}
+                        activeOpacity={0.7} onPress={() => setFDate(iso)}>
+                        <Text style={[styles.chipText, fDate === iso && styles.chipTextOn]}>{label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  <TextInput style={styles.addInput} placeholder="2026-10-03" placeholderTextColor="#A0A0A0"
+                    value={fDate} onChangeText={setFDate} />
+
                   <Text style={styles.addLabel}>무슨 일인가요</Text>
                   <TextInput style={styles.addInput} placeholder="예: 가족 저녁 식사" placeholderTextColor="#A0A0A0"
                     value={fTitle} onChangeText={setFTitle} />
@@ -374,20 +399,13 @@ export default function CalendarScreen() {
           })}
         </View>
 
-        <View style={styles.aiCalHint}>
-          <FontAwesome name="magic" size={12} color="#2D5A3F" />
-          <Text style={styles.aiCalHintText}>
-            {selectedEvents.length > 0
-              ? `이 날 일정이 ${selectedEvents.length}개예요. 이동 시간까지 생각하면 조금 여유 있게 나서면 좋겠어요.`
-              : '이 날은 비어 있어요. 가족이 함께할 일을 하나 적어볼까요?'}
-          </Text>
-        </View>
-
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {formatEventDate(selectedDate)}{selectedDate === todayISO() ? ' · 오늘' : ''}
           </Text>
-          {selectedEvents.length === 0 ? (
+          {selectedEvents.length === 0 && !ready ? (
+            <LoadingRows label="일정을 보는 중이에요" />
+          ) : selectedEvents.length === 0 ? (
             <TouchableOpacity style={styles.emptyState} activeOpacity={0.7} onPress={openCreate}>
               <FontAwesome name="calendar-plus-o" size={32} color="#D4C8B0" />
               <Text style={styles.emptyText}>아직 적어둔 일정이 없어요</Text>

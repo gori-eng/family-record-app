@@ -1,29 +1,41 @@
 /**
- * 만든 파일을 사용자 손에 넘긴다.
+ * 만든 파일을 사용자 손에 넘긴다 / 사용자가 고른 파일을 읽어온다.
  *
  * 이 일만 플랫폼마다 다르다. 백업 내용을 만드는 일(`store/backup.ts`)과
  * 떼어놓은 이유가 그것이다 — 내용 만들기는 어디서나 같고, 건네는 방법만 다르다.
  *
- * ⚠️ **지금은 웹만 된다.** 휴대폰에서 파일을 저장·공유하려면
- *    `expo-file-system` + `expo-sharing`이 필요한데,
- *    - `expo-sharing`이 아직 설치돼 있지 않고
- *    - 이 프로젝트는 의존성 설치가 자주 실패한다 (CLAUDE.md 가져오기 2차 참조)
- *    - 애초에 휴대폰에 설치할 수 있는 빌드(EAS)가 아직 없다
- *    그래서 EAS 빌드를 붙이는 작업과 함께 채운다. 그때 아래 native 쪽만 고치면 된다.
+ * - 웹: 보이지 않는 `<a download>`를 눌러 내려받기 / `<input type=file>`로 고르기
+ * - 휴대폰: 임시 폴더에 파일을 쓰고 **공유 시트**를 띄운다(파일 앱·카톡·메일로 보낼 수 있다) /
+ *   문서 고르기 대화상자로 파일을 받아 읽는다 (2026-09-29 전체 점검에서 채움)
  */
 import { Platform } from 'react-native';
+import { File, Paths } from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import * as DocumentPicker from 'expo-document-picker';
 
 export type SaveResult =
-  | { ok: true; how: 'download' }
+  | { ok: true; how: 'download' | 'share' }
   | { ok: false; reason: string };
 
 /** 글자로 된 파일(JSON·CSV 등)을 내려준다. */
-export function saveTextFile(fileName: string, text: string, mimeType = 'application/json'): SaveResult {
+export async function saveTextFile(
+  fileName: string,
+  text: string,
+  mimeType = 'application/json'
+): Promise<SaveResult> {
   if (Platform.OS !== 'web') {
-    return {
-      ok: false,
-      reason: '휴대폰에서 파일로 저장하는 건 아직 준비 중이에요. 지금은 웹에서 내보내주세요.',
-    };
+    try {
+      const file = new File(Paths.cache, fileName);
+      if (file.exists) file.delete();
+      file.write(text);
+      if (!(await Sharing.isAvailableAsync())) {
+        return { ok: false, reason: '이 기기에서는 파일을 내보낼 방법이 없어요.' };
+      }
+      await Sharing.shareAsync(file.uri, { mimeType, dialogTitle: '백업 파일을 어디에 둘까요?', UTI: 'public.json' });
+      return { ok: true, how: 'share' };
+    } catch (e: unknown) {
+      return { ok: false, reason: `파일을 만들지 못했어요. (${String((e as Error)?.message ?? e)})` };
+    }
   }
 
   try {
@@ -46,9 +58,20 @@ export function saveTextFile(fileName: string, text: string, mimeType = 'applica
   }
 }
 
-/** 웹에서 파일 하나를 고르게 하고 글자로 읽어온다. 고르지 않으면 null */
-export function pickTextFile(accept = '.json,application/json'): Promise<{ name: string; text: string } | null> {
-  if (Platform.OS !== 'web') return Promise.resolve(null);
+/** 파일 하나를 고르게 하고 글자로 읽어온다. 고르지 않으면 null */
+export async function pickTextFile(
+  accept = '.json,application/json'
+): Promise<{ name: string; text: string } | null> {
+  if (Platform.OS !== 'web') {
+    const res = await DocumentPicker.getDocumentAsync({
+      type: ['application/json', 'text/plain', '*/*'],
+      copyToCacheDirectory: true,
+    });
+    if (res.canceled || !res.assets?.length) return null;
+    const asset = res.assets[0];
+    const text = await new File(asset.uri).text();
+    return { name: asset.name ?? '백업.json', text };
+  }
 
   return new Promise((resolve) => {
     const input = document.createElement('input');

@@ -5,6 +5,7 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
 import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
+import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { say, READING_LABEL } from '../../../constants/labels';
 
@@ -36,6 +37,7 @@ function StarRating({ rating }: { rating: number }) {
 
 export default function ReadingScreen() {
   const { askDelete, undoBar } = useRecordDelete('책');
+  const ready = useRecordsReady();
   /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
   const MEMBERS = useFamilyMembers();
   const CURRENT_USER = useMe();
@@ -69,10 +71,13 @@ export default function ReadingScreen() {
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
 
+  /** 홈에서 넘어온 제목은 **한 번만** 연다 — 예전엔 목록이 바뀔 때마다 상세가 다시 열렸다 (점검 B5) */
+  const openedFor = useRef<string | null>(null);
   useEffect(() => {
-    if (openTitle) {
+    if (openTitle && openedFor.current !== openTitle) {
       const match = books.find(b => b.title === openTitle);
       if (match) {
+        openedFor.current = openTitle;
         setSelectedId(match.id);
         setEditProgress(match.data.progress ?? 0);
         setEditNotes(match.data.notes ?? '');
@@ -208,7 +213,8 @@ export default function ReadingScreen() {
                       }]}>{say(READING_LABEL, selectedItem.status)}</Text>
                     </View>
                   </View>
-                  {selectedItem.rating && (
+                  {/* ⚠️ `rating && …`로 쓰면 0일 때 숫자 0이 글자로 그려져 휴대폰이 죽는다 (글자는 Text 안에만) */}
+                  {!!selectedItem.rating && (
                     <View style={styles.modalRow}>
                       <Text style={styles.modalLabel}>평점</Text>
                       <StarRating rating={selectedItem.rating} />
@@ -432,13 +438,13 @@ export default function ReadingScreen() {
                   <View style={styles.bookMeta}>
                     <View style={[styles.readerDot, { backgroundColor: book.color }]} />
                     <Text style={styles.readerName}>{book.reader}</Text>
-                    {book.rating && <StarRating rating={book.rating} />}
-                    {book.progress && (
+                    {!!book.rating && <StarRating rating={book.rating} />}
+                    {book.status === '읽는 중' && (
                       <View style={styles.progressRow}>
                         <View style={styles.progressBarBg}>
-                          <View style={[styles.progressBar, { width: `${book.progress}%` }]} />
+                          <View style={[styles.progressBar, { width: `${book.progress ?? 0}%` }]} />
                         </View>
-                        <Text style={styles.progressText}>{book.progress}%</Text>
+                        <Text style={styles.progressText}>{book.progress ?? 0}%</Text>
                       </View>
                     )}
                   </View>
@@ -447,7 +453,8 @@ export default function ReadingScreen() {
               </TouchableOpacity>
               );
             })}
-            {filtered.length === 0 && (
+            {filtered.length === 0 && !ready && <LoadingRows />}
+            {filtered.length === 0 &&  ready && (
               <View style={styles.empty}>
                 <FontAwesome name="book" size={32} color="#CFC7BA" />
                 <Text style={styles.emptyText}>

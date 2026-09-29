@@ -5,7 +5,8 @@ import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
 import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
-import { useMe } from '../../../store/family';
+import { LoadingRows, useRecordsReady } from '../../../components/Loading';
+import { useFamilyMembers, useMe } from '../../../store/family';
 import { say, TRAVEL_LABEL } from '../../../constants/labels';
 
 /** 필터를 골랐는데 비어 있을 때 — 재촉 대신 권유로 (§9) */
@@ -16,9 +17,13 @@ const EMPTY_BY_FILTER: Record<string, string> = {
 };
 
 type Trip = {
-  dest: string; country: string; status: string; date: string;
-  color: string; icon: string; members: string;
-  highlight: string; budget: string; journal: string;
+  dest: string; status: string; date: string;
+  color: string; icon: string;
+  /** 함께 간 사람들. 비어 있으면 가족 전체. 옛 기록은 '전체' 같은 글자일 수 있다 */
+  members: string[] | string;
+  highlight: string; journal: string;
+  /** 옛 기록에만 있는 칸 — 폼에서 받지 않는다 */
+  country?: string; budget?: string;
 };
 
 /** 새로 추가하는 여행 카드에 돌아가며 입히는 색 */
@@ -30,8 +35,16 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   '가고 싶은': { bg: '#F3E5F5', text: '#7B1FA2' },
 };
 
+/** 함께 간 사람을 한 줄로 — 안 고르면 '가족 전체' */
+const membersLabel = (m: string[] | string | undefined) => {
+  if (Array.isArray(m)) return m.length ? m.join(', ') : '가족 전체';
+  return m && m !== '전체' ? m : '가족 전체';
+};
+
 export default function TravelScreen() {
   const { askDelete, undoBar } = useRecordDelete('여행 기록');
+  const ready = useRecordsReady();
+  const MEMBERS = useFamilyMembers();
   const CURRENT_USER = useMe();
   const [filter, setFilter] = useState('전체');
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -47,6 +60,9 @@ export default function TravelScreen() {
   const [formHighlight, setFormHighlight] = useState('');
   const [formJournal, setFormJournal] = useState('');
   const [formStatus, setFormStatus] = useState('다녀옴');
+  const [formMembers, setFormMembers] = useState<string[]>([]);
+  const toggleMember = (m: string) =>
+    setFormMembers((prev) => (prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]));
 
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
@@ -60,6 +76,7 @@ export default function TravelScreen() {
     setFormHighlight('');
     setFormJournal('');
     setFormStatus('다녀옴');
+    setFormMembers([]);
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -85,14 +102,12 @@ export default function TravelScreen() {
       recordedBy: CURRENT_USER,
       data: {
         dest,
-        country: '',
         status: formStatus,
         date: formDate.trim(),
         color: NEW_TRIP_COLORS[trips.length % NEW_TRIP_COLORS.length],
         icon: 'map-marker',
-        members: '전체',
+        members: formMembers,
         highlight: formHighlight.trim(),
-        budget: '',
         journal: formJournal.trim(),
       },
     });
@@ -141,33 +156,44 @@ export default function TravelScreen() {
                   <View style={s.modalContent}>
                     <Text style={s.modalTitle}>{selectedItem.dest}</Text>
                     <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>국가</Text>
-                      <Text style={s.modalValue}>{selectedItem.country}</Text>
-                    </View>
-                    <View style={s.modalRow}>
                       <Text style={s.modalLabel}>상태</Text>
                       <View style={[s.statusBadge, { backgroundColor: (STATUS_COLORS[selectedItem.status] ?? { bg: '#EFEFEF' }).bg }]}>
                         <Text style={[s.statusText, { color: (STATUS_COLORS[selectedItem.status] ?? { text: '#4A4A4A' }).text }]}>{say(TRAVEL_LABEL, selectedItem.status)}</Text>
                       </View>
                     </View>
+                    {/* 안 적은 항목은 줄 자체를 두지 않는다 (예전엔 늘 빈 '국가·예산' 줄이 있었다, 점검 B7) */}
                     {selectedItem.date ? (
                       <View style={s.modalRow}>
-                        <Text style={s.modalLabel}>시기</Text>
+                        <Text style={s.modalLabel}>언제</Text>
                         <Text style={s.modalValue}>{selectedItem.date}</Text>
                       </View>
                     ) : null}
+                    {selectedItem.country ? (
+                      <View style={s.modalRow}>
+                        <Text style={s.modalLabel}>나라</Text>
+                        <Text style={s.modalValue}>{selectedItem.country}</Text>
+                      </View>
+                    ) : null}
                     <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>참여</Text>
-                      <Text style={s.modalValue}>{selectedItem.members}</Text>
+                      <Text style={s.modalLabel}>누구랑</Text>
+                      <Text style={s.modalValue}>{membersLabel(selectedItem.members)}</Text>
                     </View>
+                    {selectedItem.budget ? (
+                      <View style={s.modalRow}>
+                        <Text style={s.modalLabel}>예산</Text>
+                        <Text style={s.modalValue}>{selectedItem.budget}</Text>
+                      </View>
+                    ) : null}
                     <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>예산</Text>
-                      <Text style={s.modalValue}>{selectedItem.budget}</Text>
+                      <Text style={s.modalLabel}>적은 사람</Text>
+                      <Text style={s.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
                     </View>
-                    <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>하이라이트</Text>
-                      <Text style={s.modalValue}>{selectedItem.highlight}</Text>
-                    </View>
+                    {selectedItem.highlight ? (
+                      <View style={s.modalRow}>
+                        <Text style={s.modalLabel}>한 줄로</Text>
+                        <Text style={s.modalValue}>{selectedItem.highlight}</Text>
+                      </View>
+                    ) : null}
                     {selectedItem.journal ? (
                       <>
                         <View style={s.divider} />
@@ -197,7 +223,7 @@ export default function TravelScreen() {
               <View style={s.modalHandle} />
               <Text style={s.modalTitle}>새 여행 기록</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
-              <Text style={s.createLabel}>목적지</Text>
+              <Text style={s.createLabel}>어디로</Text>
               <TextInput
                 style={s.createInput}
                 placeholder="예: 제주도, 오사카"
@@ -217,7 +243,7 @@ export default function TravelScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              <Text style={s.createLabel}>여행일자</Text>
+              <Text style={s.createLabel}>언제</Text>
               <TextInput
                 style={s.createInput}
                 placeholder="예: 2026.7.10 ~ 7.13"
@@ -225,7 +251,18 @@ export default function TravelScreen() {
                 value={formDate}
                 onChangeText={setFormDate}
               />
-              <Text style={s.createLabel}>여행 한 줄 소감</Text>
+              <Text style={s.createLabel}>누구랑 (안 고르면 가족 전체)</Text>
+              <View style={s.memberRow}>
+                {MEMBERS.map((m) => {
+                  const on = formMembers.includes(m);
+                  return (
+                    <TouchableOpacity key={m} style={[s.chip, on && s.chipActive]} activeOpacity={0.7} onPress={() => toggleMember(m)}>
+                      <Text style={[s.chipText, on && s.chipTextActive]}>{m}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              <Text style={s.createLabel}>한 줄 소감</Text>
               <TextInput
                 style={s.createInput}
                 placeholder="이번 여행을 한 문장으로"
@@ -236,7 +273,7 @@ export default function TravelScreen() {
               <Text style={s.createLabel}>여행 일지</Text>
               <TextInput
                 style={[s.createInput, { height: 160, textAlignVertical: 'top' }]}
-                placeholder={'다녀온 코스, 인상 깊었던 순간, 다음에 갈 때 챙길 점 등을 자유롭게 적어주세요.'}
+                placeholder={'다녀온 코스, 인상 깊었던 순간, 다음에 갈 때 챙길 점을 자유롭게'}
                 placeholderTextColor="#BFAE99"
                 multiline
                 value={formJournal}
@@ -273,7 +310,7 @@ export default function TravelScreen() {
               <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
                 onPress={() => openDetail({ ...t, id: record.id, recordedBy: record.recordedBy })}>
                 <View style={[s.destIcon, { backgroundColor: t.color }]}>
-                  <FontAwesome name={t.icon as any} size={22} color="#FFFFFF" />
+                  <FontAwesome name={(t.icon || 'map-marker') as any} size={22} color="#FFFFFF" />
                 </View>
                 <View style={s.info}>
                   <View style={s.topRow}>
@@ -291,14 +328,14 @@ export default function TravelScreen() {
                   ) : null}
                   <View style={s.bottomRow}>
                     <FontAwesome name="users" size={10} color="#9C8B75" />
-                    <Text style={s.members}>{t.members}</Text>
-                    {t.budget ? <Text style={s.budget}>{t.budget}</Text> : null}
+                    <Text style={s.members}>{membersLabel(t.members)}</Text>
                   </View>
                 </View>
               </TouchableOpacity>
               );
             })}
-            {filtered.length === 0 && (
+            {filtered.length === 0 && !ready && <LoadingRows />}
+            {filtered.length === 0 &&  ready && (
               <View style={s.empty}>
                 <FontAwesome name="plane" size={32} color="#CFC7BA" />
                 <Text style={s.emptyText}>
@@ -330,19 +367,19 @@ const s = StyleSheet.create({
   chipActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
   chipText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
   chipTextActive: { color: '#FFFFFF' },
+  memberRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   list: { paddingHorizontal: 20 },
   card: { flexDirection: 'row', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   destIcon: { width: 56, height: 56, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
-  destName: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
+  destName: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3, flexShrink: 1 },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
-  statusText: { fontSize: 11, fontWeight: '700' },
+  statusText: { fontSize: 11, fontWeight: '700', fontFamily: 'PretendardBold' },
   country: { fontSize: 12, color: '#A0A0A0', marginBottom: 4, fontFamily: 'Pretendard' },
   highlight: { fontSize: 13, color: '#5C4A32', marginBottom: 6, fontFamily: 'Pretendard' },
   bottomRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  members: { fontSize: 11, color: '#9C8B75', flex: 1 },
-  budget: { fontSize: 12, fontWeight: '600', color: '#4A8C6F' },
+  members: { fontSize: 11, color: '#9C8B75', flex: 1, fontFamily: 'Pretendard' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
@@ -351,7 +388,7 @@ const s = StyleSheet.create({
   modalContent: {},
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
-  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
+  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 64, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
@@ -361,7 +398,7 @@ const s = StyleSheet.create({
   journalHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
   journalTitle: { fontSize: 14, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   journalText: { fontSize: 14, color: '#1F1F1F', lineHeight: 22, fontFamily: 'Pretendard' },
-  statusPicker: { flexDirection: 'row', gap: 8, marginBottom: 4 },
+  statusPicker: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   emptySub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },

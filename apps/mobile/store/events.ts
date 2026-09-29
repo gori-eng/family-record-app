@@ -67,6 +67,10 @@ let seq = 0;
 const tempId = () => `tmp-${Date.now().toString(36)}-${(seq++).toString(36)}`;
 const isTemp = (id: string) => id.startsWith('tmp-');
 
+/** 저장 응답 전에 지우거나 고친 일정 — 진짜 id가 오면 보낸다 (기록 보관소와 같은 이유, B10) */
+const pendingDeletes = new Set<string>();
+const pendingPatches = new Map<string, Partial<NewEvent>>();
+
 function failed(action: string, e: unknown) {
   const msg = String((e as Error)?.message ?? e);
   showAlert(
@@ -128,9 +132,20 @@ export const useEventsStore = create<EventsState>((set, get) => ({
     const { familyId, userId } = get();
     if (!familyId || !userId) return event;   // 둘러보기 — 화면에만 남는다
     insertEvent(familyId, userId, input)
-      .then((saved) => set((state) => ({
-        events: state.events.map((e) => (e.id === event.id ? (saved as CalendarEvent) : e)),
-      })))
+      .then((saved) => {
+        const real = saved as CalendarEvent;
+        if (pendingDeletes.has(event.id)) {
+          pendingDeletes.delete(event.id);
+          pendingPatches.delete(event.id);
+          dbDelete(real.id).catch((e) => failed('일정 삭제를', e));
+          return;
+        }
+        const late = pendingPatches.get(event.id);
+        pendingPatches.delete(event.id);
+        const merged = late ? { ...real, ...late } : real;
+        set((state) => ({ events: state.events.map((e) => (e.id === event.id ? merged : e)) }));
+        if (late) dbUpdate(real.id, late).catch((e) => failed('고친 일정을', e));
+      })
       .catch((e) => {
         set((state) => ({ events: state.events.filter((x) => x.id !== event.id) }));
         failed('일정을', e);
@@ -143,7 +158,11 @@ export const useEventsStore = create<EventsState>((set, get) => ({
     set((state) => ({
       events: state.events.map((e) => (e.id === id ? { ...e, ...patch } : e)),
     }));
-    if (!get().familyId || isTemp(id)) return;
+    if (!get().familyId) return;
+    if (isTemp(id)) {
+      pendingPatches.set(id, { ...(pendingPatches.get(id) ?? {}), ...patch });
+      return;
+    }
     dbUpdate(id, patch).catch((e) => {
       if (before) set((state) => ({ events: state.events.map((x) => (x.id === id ? before : x)) }));
       failed('고친 일정을', e);
@@ -153,7 +172,11 @@ export const useEventsStore = create<EventsState>((set, get) => ({
   removeEvent: (id) => {
     const before = get().events.find((e) => e.id === id);
     set((state) => ({ events: state.events.filter((e) => e.id !== id) }));
-    if (!get().familyId || isTemp(id)) return;
+    if (!get().familyId) return;
+    if (isTemp(id)) {
+      pendingDeletes.add(id);
+      return;
+    }
     dbDelete(id).catch((e) => {
       if (before) set((state) => ({ events: [...state.events, before] }));
       failed('일정 삭제를', e);
@@ -167,11 +190,18 @@ export const useEventsStore = create<EventsState>((set, get) => ({
   },
 
   setEvents: (events) => {
+    const previous = get().events;
     set({ events });
     const { familyId, userId } = get();
     if (!familyId || !userId) return;
     (async () => {
-      await deleteAllEvents(familyId);
+      // 관리자가 아니면 남의 일정은 남는다 — 그 위에 넣으면 두 배 (기록 보관소와 같은 안전장치, A7)
+      const before = await fetchEvents(familyId);
+      const deleted = await deleteAllEvents(familyId);
+      if (deleted < before.length) {
+        set({ events: previous });
+        throw new Error('다른 가족이 적은 일정은 관리자만 지울 수 있어서, 전부 바꾸지 못했어요.');
+      }
       for (const e of events) {
         const { id: _id, ...rest } = e;
         await insertEvent(familyId, userId, rest);

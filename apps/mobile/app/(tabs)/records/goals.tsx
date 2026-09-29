@@ -3,33 +3,53 @@ import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
-import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
+import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
 import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
+import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
 import { say, GOAL_LABEL } from '../../../constants/labels';
 
 /** 해냈는지 — 상태를 '달성'으로 바꿨거나 진행률을 다 채웠으면. 요약·목록·상세가 같은 기준을 쓴다 */
 const isReached = (g: { status?: string; progress?: number }) => g.status === '달성' || (g.progress ?? 0) >= 100;
 
+type Milestone = { label: string; done: boolean };
 type Goal = {
   title: string; desc: string; progress: number; target: string;
   icon: string; color: string; status: string;
-  milestones: { label: string; done: boolean }[];
+  milestones: Milestone[];
   notes: string;
 };
 
 /** 새로 추가하는 목표 카드에 돌아가며 입히는 색 */
 const NEW_GOAL_COLORS = ['#81C784', '#4FC3F7', '#FFD54F', '#CE93D8'];
 
+/**
+ * 마일스톤이 있으면 진행률은 **체크한 개수에서** 나온다 (손으로 따로 올리지 않는다).
+ * 없으면 진행률을 직접 올린다.
+ */
+const progressOf = (g: Goal) => {
+  const ms = g.milestones ?? [];
+  if (!ms.length) return Math.max(0, Math.min(100, g.progress ?? 0));
+  return Math.round((ms.filter((m) => m.done).length / ms.length) * 100);
+};
+
 export default function GoalsScreen() {
   const { askDelete, undoBar } = useRecordDelete('목표');
+  const ready = useRecordsReady();
   const CURRENT_USER = useMe();
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 
   // 창고에서 가족 목표만 최신순으로 꺼낸다.
   const goals = useRecordsByCategory<Goal>('goals');
   const addRecord = useRecordsStore((s) => s.addRecord);
+  const patchRecordData = useRecordsStore((s) => s.patchRecordData);
+
+  // 순번이 아니라 id로 지목한다 — 체크할 때마다 목록이 바뀌어도 같은 목표를 본다
+  const selected: FamilyRecord<Goal> | null = useMemo(
+    () => goals.find((g) => g.id === selectedId) ?? null,
+    [goals, selectedId]
+  );
 
   // 작성 폼 입력값
   const [formTitle, setFormTitle] = useState('');
@@ -88,8 +108,31 @@ export default function GoalsScreen() {
     closeCreate();
   };
 
-  const openDetail = (item: any) => {
-    setSelectedItem(item);
+  /**
+   * 진행 상황 고치기 (2026-09-29 전체 점검 A8 — 예전엔 만든 뒤 진행률을 바꿀 방법이 없었다).
+   * 마일스톤을 누르면 체크가 바뀌고 진행률은 그에 따라 계산된다.
+   * 100%가 되면 상태도 '달성'으로, 다시 내려가면 '진행 중'으로 함께 바꾼다.
+   */
+  const toggleMilestone = (record: FamilyRecord<Goal>, index: number) => {
+    const milestones = (record.data.milestones ?? []).map((m, i) => (i === index ? { ...m, done: !m.done } : m));
+    const progress = progressOf({ ...record.data, milestones });
+    patchRecordData(record.id, { milestones, progress, status: progress >= 100 ? '달성' : '진행 중' });
+  };
+  const bumpProgress = (record: FamilyRecord<Goal>, delta: number) => {
+    const progress = Math.max(0, Math.min(100, progressOf(record.data) + delta));
+    patchRecordData(record.id, { progress, status: progress >= 100 ? '달성' : '진행 중' });
+  };
+  const markReached = (record: FamilyRecord<Goal>) => {
+    const milestones = (record.data.milestones ?? []).map((m) => ({ ...m, done: true }));
+    patchRecordData(record.id, { milestones, progress: 100, status: '달성' });
+  };
+  const reopen = (record: FamilyRecord<Goal>) => {
+    const hasMs = (record.data.milestones ?? []).length > 0;
+    patchRecordData(record.id, { status: '진행 중', progress: hasMs ? progressOf(record.data) : 90 });
+  };
+
+  const openDetail = (id: string) => {
+    setSelectedId(id);
     Animated.parallel([
       Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
       Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
@@ -99,7 +142,7 @@ export default function GoalsScreen() {
     Animated.parallel([
       Animated.timing(modalBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
-    ]).start(() => setSelectedItem(null));
+    ]).start(() => setSelectedId(null));
   };
 
   // 상단 요약 — 박아둔 숫자가 아니라 실제 목표에서 센다.
@@ -108,85 +151,123 @@ export default function GoalsScreen() {
     return { total: goals.length, done, ongoing: goals.length - done };
   }, [goals]);
 
+  const sel = selected?.data ?? null;
+  const selProgress = sel ? progressOf(sel) : 0;
+  const selReached = sel ? isReached({ ...sel, progress: selProgress }) : false;
+
   return (
     <>
       <Stack.Screen options={{ title: '가족 목표' }} />
       <View style={s.container}>
-        <Modal visible={!!selectedItem} transparent statusBarTranslucent animationType="none">
+        <Modal visible={!!selected} transparent statusBarTranslucent animationType="none">
           <View style={s.modalWrap}>
             <Animated.View style={[s.modalBg, { opacity: modalBg }]}>
               <Pressable style={{ flex: 1 }} onPress={closeDetail} />
             </Animated.View>
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: modalSlide }] }]}>
               <View style={s.modalHandle} />
-              {selectedItem && (
+              {selected && sel && (
                 <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 560 }}>
                   <View style={s.modalContent}>
-                    <Text style={s.modalTitle}>{selectedItem.title}</Text>
-                    <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>설명</Text>
-                      <Text style={s.modalValue}>{selectedItem.desc}</Text>
-                    </View>
+                    <Text style={s.modalTitle}>{sel.title}</Text>
+                    {sel.desc ? (
+                      <View style={s.modalRow}>
+                        <Text style={s.modalLabel}>설명</Text>
+                        <Text style={s.modalValue}>{sel.desc}</Text>
+                      </View>
+                    ) : null}
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>달성률</Text>
                       <View style={{ flex: 1 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                           <View style={{ flex: 1, height: 8, backgroundColor: '#EAEAEA', borderRadius: 4 }}>
-                            <View style={{ height: 8, borderRadius: 4, width: `${selectedItem.progress}%`, backgroundColor: selectedItem.progress === 100 ? '#4AA86B' : selectedItem.color }} />
+                            <View style={{ height: 8, borderRadius: 4, width: `${selProgress}%`, backgroundColor: selReached ? '#4AA86B' : sel.color }} />
                           </View>
-                          <Text style={{ fontSize: 15, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' }}>{selectedItem.progress}%</Text>
+                          <Text style={s.pctText}>{selProgress}%</Text>
                         </View>
                       </View>
                     </View>
-                    <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>목표일</Text>
-                      <Text style={s.modalValue}>{selectedItem.target}</Text>
-                    </View>
+                    {sel.target ? (
+                      <View style={s.modalRow}>
+                        <Text style={s.modalLabel}>목표일</Text>
+                        <Text style={s.modalValue}>{sel.target}</Text>
+                      </View>
+                    ) : null}
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>상태</Text>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        {isReached(selectedItem) && <FontAwesome name="check-circle" size={16} color="#4AA86B" />}
-                        <Text style={[s.modalValue, { color: isReached(selectedItem) ? '#4AA86B' : '#4A8C6F', fontWeight: '600' }]}>{say(GOAL_LABEL, isReached(selectedItem) ? '달성' : selectedItem.status)}</Text>
+                        {selReached && <FontAwesome name="check-circle" size={16} color="#4AA86B" />}
+                        <Text style={[s.modalValue, { color: selReached ? '#4AA86B' : '#4A8C6F', fontWeight: '600' }]}>
+                          {say(GOAL_LABEL, selReached ? '달성' : sel.status)}
+                        </Text>
                       </View>
                     </View>
 
-                    {selectedItem.milestones && selectedItem.milestones.length > 0 ? (
+                    {(sel.milestones ?? []).length > 0 ? (
                       <>
                         <View style={s.divider} />
                         <View style={s.subHeader}>
                           <FontAwesome name="check-square-o" size={13} color="#4A8C6F" />
                           <Text style={s.subTitle}>
-                            세부 마일스톤 ({selectedItem.milestones.filter((m: any) => m.done).length}/{selectedItem.milestones.length})
+                            세부 마일스톤 ({sel.milestones.filter((m) => m.done).length}/{sel.milestones.length}) · 눌러서 체크
                           </Text>
                         </View>
-                        {selectedItem.milestones.map((m: any, i: number) => (
-                          <View key={i} style={s.msRow}>
+                        {sel.milestones.map((m, i) => (
+                          <TouchableOpacity key={i} style={s.msRow} activeOpacity={0.7} onPress={() => toggleMilestone(selected, i)}>
                             <FontAwesome
                               name={m.done ? 'check-circle' : 'circle-o'}
-                              size={16}
+                              size={20}
                               color={m.done ? '#4AA86B' : '#C8C8C8'}
                             />
                             <Text style={[s.msText, m.done && s.msTextDone]}>{m.label}</Text>
-                          </View>
+                          </TouchableOpacity>
                         ))}
                       </>
-                    ) : null}
+                    ) : (
+                      <>
+                        <View style={s.divider} />
+                        <View style={s.subHeader}>
+                          <FontAwesome name="line-chart" size={13} color="#4A8C6F" />
+                          <Text style={s.subTitle}>어디까지 왔나요</Text>
+                        </View>
+                        <View style={s.stepRow}>
+                          <TouchableOpacity style={s.stepBtn} activeOpacity={0.7} onPress={() => bumpProgress(selected, -10)}>
+                            <FontAwesome name="minus" size={12} color="#4A8C6F" />
+                          </TouchableOpacity>
+                          <Text style={s.stepText}>{selProgress}%</Text>
+                          <TouchableOpacity style={s.stepBtn} activeOpacity={0.7} onPress={() => bumpProgress(selected, 10)}>
+                            <FontAwesome name="plus" size={12} color="#4A8C6F" />
+                          </TouchableOpacity>
+                        </View>
+                      </>
+                    )}
 
-                    {selectedItem.notes ? (
+                    {selReached ? (
+                      <TouchableOpacity style={s.reopenBtn} activeOpacity={0.7} onPress={() => reopen(selected)}>
+                        <Text style={s.reopenText}>다시 진행 중으로</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity style={s.doneBtn} activeOpacity={0.7} onPress={() => markReached(selected)}>
+                        <FontAwesome name="trophy" size={13} color="#FFFFFF" />
+                        <Text style={s.doneText}>해냈어요!</Text>
+                      </TouchableOpacity>
+                    )}
+
+                    {sel.notes ? (
                       <>
                         <View style={s.divider} />
                         <View style={s.subHeader}>
                           <FontAwesome name="sticky-note-o" size={13} color="#4A8C6F" />
                           <Text style={s.subTitle}>메모</Text>
                         </View>
-                        <Text style={s.notesText}>{selectedItem.notes}</Text>
+                        <Text style={s.notesText}>{sel.notes}</Text>
                       </>
                     ) : null}
                   </View>
                 </ScrollView>
               )}
-              {selectedItem && (
-                <DeleteRecordRow id={selectedItem.id} onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
+              {selected && (
+                <DeleteRecordRow id={selected.id} onPress={() => askDelete(selected.id, { after: closeDetail })} />
               )}
             </Animated.View>
           </View>
@@ -210,12 +291,12 @@ export default function GoalsScreen() {
               <Text style={s.createLabel}>목표 시점</Text>
               <TextInput style={s.createInput} placeholder="예: 2027.12" placeholderTextColor="#BFAE99"
                 value={formTarget} onChangeText={setFormTarget} />
-              <Text style={s.createLabel}>세부 마일스톤</Text>
+              <Text style={s.createLabel}>세부 마일스톤 — 적어두면 하나씩 체크하며 채워요</Text>
               <TextInput
                 style={[s.createInput, { height: 110, textAlignVertical: 'top' }]}
                 value={formMilestones}
                 onChangeText={setFormMilestones}
-                placeholder={'한 줄에 하나씩 적어주세요\n예) 1분기 달성 항목\n2분기 달성 항목'}
+                placeholder={'한 줄에 하나씩 적어주세요\n예) 봄 여행\n여름 여행\n가을 여행'}
                 placeholderTextColor="#BFAE99"
                 multiline
               />
@@ -255,32 +336,37 @@ export default function GoalsScreen() {
           <View style={s.list}>
             {goals.map((record) => {
               const g = record.data;
+              const p = progressOf(g);
+              const reached = isReached({ ...g, progress: p });
               return (
               <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
-                onPress={() => openDetail({ ...g, id: record.id, recordedBy: record.recordedBy })}>
+                onPress={() => openDetail(record.id)}>
                 <View style={s.cardHeader}>
                   <View style={[s.goalIcon, { backgroundColor: g.color }]}>
                     <FontAwesome name={g.icon as any} size={18} color="#FFFFFF" />
                   </View>
                   <View style={s.cardInfo}>
                     <Text style={s.goalTitle}>{g.title}</Text>
-                    <Text style={s.goalDesc}>{g.desc}</Text>
+                    {g.desc ? <Text style={s.goalDesc}>{g.desc}</Text> : null}
                   </View>
-                  {isReached(g) && <FontAwesome name="check-circle" size={20} color="#4AA86B" />}
+                  {reached && <FontAwesome name="check-circle" size={20} color="#4AA86B" />}
                 </View>
                 <View style={s.progressSection}>
                   <View style={s.progressBarBg}>
-                    <View style={[s.progressBar, { width: `${g.progress}%`, backgroundColor: g.progress === 100 ? '#4AA86B' : g.color }]} />
+                    <View style={[s.progressBar, { width: `${p}%`, backgroundColor: reached ? '#4AA86B' : g.color }]} />
                   </View>
                   <View style={s.progressMeta}>
-                    <Text style={s.progressPct}>{g.progress}%</Text>
-                    <Text style={s.targetDate}>목표: {g.target}</Text>
+                    <Text style={s.progressPct}>
+                      {p}%{(g.milestones ?? []).length ? ` · ${g.milestones.filter((m) => m.done).length}/${g.milestones.length}` : ''}
+                    </Text>
+                    {g.target ? <Text style={s.targetDate}>목표: {g.target}</Text> : null}
                   </View>
                 </View>
               </TouchableOpacity>
               );
             })}
-            {goals.length === 0 && (
+            {goals.length === 0 && !ready && <LoadingRows />}
+            {goals.length === 0 &&  ready && (
               <View style={s.empty}>
                 <FontAwesome name="trophy" size={32} color="#CFC7BA" />
                 <Text style={s.emptyText}>아직 가족 목표가 없어요</Text>
@@ -321,6 +407,7 @@ const s = StyleSheet.create({
   progressMeta: { flexDirection: 'row', justifyContent: 'space-between' },
   progressPct: { fontSize: 13, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
   targetDate: { fontSize: 12, color: '#A0A0A0', fontFamily: 'Pretendard' },
+  pctText: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
@@ -338,8 +425,15 @@ const s = StyleSheet.create({
   divider: { height: 1, backgroundColor: '#EAEAEA', marginVertical: 14 },
   subHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
   subTitle: { fontSize: 14, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
-  msRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
+  msRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 },
   msText: { fontSize: 14, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   msTextDone: { color: '#888', textDecorationLine: 'line-through' },
+  stepRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 6 },
+  stepBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#EFF6F1', justifyContent: 'center', alignItems: 'center' },
+  stepText: { fontSize: 20, color: '#1F1F1F', fontFamily: 'PretendardBold', minWidth: 60, textAlign: 'center' },
+  doneBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 13, marginTop: 14 },
+  doneText: { color: '#FFFFFF', fontSize: 15, fontFamily: 'PretendardBold' },
+  reopenBtn: { alignItems: 'center', paddingVertical: 12, marginTop: 8 },
+  reopenText: { color: '#888', fontSize: 13, fontFamily: 'Pretendard' },
   notesText: { fontSize: 14, color: '#1F1F1F', lineHeight: 22, fontFamily: 'Pretendard' },
 });
