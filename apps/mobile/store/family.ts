@@ -62,9 +62,16 @@ export type MemberCard = {
   isMe: boolean;
 };
 
-/** DB의 역할 값을 화면에 쓰는 말로 (CLAUDE.md 2026-04-28 항목) */
+/**
+ * DB의 역할 값을 화면에 쓰는 말로.
+ *
+ * ⚠️ **부/모를 여기서 지어내면 안 된다.** DB의 `role`은 `admin/parent/child/elder/guest`뿐이고
+ *    **아빠인지 엄마인지 구분하는 정보가 아예 없다.** 예전에 `admin`을 '모'로 매핑해뒀더니
+ *    가족을 만든 사람에게 엉뚱한 역할이 붙었다. `admin`은 역할이 아니라 **권한**이다.
+ *    부/모 구분이 필요하면 DB에 칸을 먼저 만들고 사용자가 고르게 해야 한다.
+ */
 const ROLE_LABEL: Record<string, string> = {
-  admin: '모', parent: '부', elder: '조부모', child: '자녀', guest: '손님',
+  admin: '관리자', parent: '부모', elder: '조부모', child: '자녀', guest: '손님',
 };
 
 /** 구성원 목록 화면이 쓰는 모양 — 이름·전체이름·색·역할 */

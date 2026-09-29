@@ -16,10 +16,13 @@ import { ro } from '../../lib/korean';
  *    DB의 `family_members`에는 이메일 칸이 아예 없다. 그래서 지웠다.
  */
 const ROLE_BADGE: Record<string, { bg: string; fg: string }> = {
+  '관리자': { bg: '#EFF6F1', fg: '#2D5A3F' },
+  '부모': { bg: '#E3F0FA', fg: '#2D6FA8' },
   '부': { bg: '#E3F0FA', fg: '#2D6FA8' },
   '모': { bg: '#FCE4EC', fg: '#AD3A5A' },
   '자녀': { bg: '#E8F5E9', fg: '#2E7D32' },
   '조부모': { bg: '#F3E8F5', fg: '#7B3FA0' },
+  '손님': { bg: '#F4F2EE', fg: '#7A6B55' },
 };
 
 export default function MembersScreen() {
