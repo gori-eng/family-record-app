@@ -122,20 +122,24 @@ export async function joinFamilyByCode(
 }
 
 /**
- * 내 이름 바꾸기.
+ * 내 프로필 고치기 — 이름과 얼굴(아바타).
  *
  * ⚠️ 짧은 이름(display_name)을 바꾸면 **이미 쌓인 기록과 어긋난다.**
  *    기록은 이름 문자열로 사람을 가리키기 때문이다(`recordedBy` / `ownerMember`).
  *    바꿀 때는 기존 기록도 함께 고쳐야 한다 — 아직 구현하지 않았다.
- *    full_name만 바꾸는 것은 안전하다.
+ *    full_name · avatar만 바꾸는 것은 안전하다.
+ *
+ * `avatarUrl`에는 지금 **이모지 글자**를 그대로 담는다('🌿'). 사진을 붙이면 URL이 들어간다.
+ * 역할(role)은 여기서 못 바꾼다 — DB가 칸 단위로 막는다(00009).
  */
 export async function updateMyName(
   memberId: string,
-  patch: { displayName?: string; fullName?: string }
+  patch: { displayName?: string; fullName?: string; avatarUrl?: string | null }
 ): Promise<void> {
-  const row: { display_name?: string; full_name?: string } = {};
+  const row: { display_name?: string; full_name?: string; avatar_url?: string | null } = {};
   if (patch.displayName !== undefined) row.display_name = patch.displayName.trim();
   if (patch.fullName !== undefined) row.full_name = patch.fullName.trim();
+  if (patch.avatarUrl !== undefined) row.avatar_url = patch.avatarUrl;
   if (!Object.keys(row).length) return;
 
   const { error } = await supabase.from('family_members').update(row).eq('id', memberId);

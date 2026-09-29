@@ -330,7 +330,7 @@ export default function FinanceImportScreen() {
 
             {/* 카드 → 쓴 사람 */}
             <View style={s.card}>
-              <Text style={s.cardTitle}>카드별로 쓴 사람을 지정하세요</Text>
+              <Text style={s.cardTitle}>카드마다 누가 썼는지 골라주세요</Text>
               <Text style={s.cardDesc}>
                 파일에 카드 {cards.length}장이 들어 있어요. 한 번 지정하면 다음부터 자동으로 붙어요.
               </Text>

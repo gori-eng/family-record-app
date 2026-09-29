@@ -107,7 +107,7 @@ export default function ParentingScreen() {
     }
     const title = formTitle.trim();
     if (!title) {
-      showAlert('제목을 입력해주세요', '오늘의 한 줄 제목을 적어주세요.');
+      showAlert('오늘의 제목을 적어주세요', '"첫 걸음마"처럼 짧게 한 줄이면 돼요.');
       return;
     }
     addRecord({
@@ -250,7 +250,7 @@ export default function ParentingScreen() {
               <Text style={styles.createLabel}>제목</Text>
               <TextInput
                 style={styles.createInput}
-                placeholder="제목을 입력하세요"
+                placeholder="예) 첫 걸음마"
                 placeholderTextColor="#BFAE99"
                 value={formTitle}
                 onChangeText={setFormTitle}
@@ -258,7 +258,7 @@ export default function ParentingScreen() {
               <Text style={styles.createLabel}>내용</Text>
               <TextInput
                 style={[styles.createInput, { height: 100, textAlignVertical: 'top' }]}
-                placeholder="내용을 입력하세요"
+                placeholder="오늘 있었던 일을 편하게 적어주세요"
                 placeholderTextColor="#BFAE99"
                 multiline
                 numberOfLines={4}

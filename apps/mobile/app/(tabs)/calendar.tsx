@@ -3,6 +3,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
 import { showAlert } from '../../components/AppAlert';
 import { useFamilyMembers, useMe, useCanDelete } from '../../store/family';
+import { eulreul } from '../../lib/korean';
 import {
   useEventsStore, useEventsOn, useEventDaysInMonth,
   EVENT_COLORS, formatTime, formatEventDate, membersLabel, normalizeTime, todayISO,
@@ -116,7 +117,7 @@ export default function CalendarScreen() {
   };
 
   const handleDelete = (event: CalendarEvent) => {
-    showAlert('이 일정을 지울까요?', `'${event.title}'을 캘린더에서 뺍니다. 바로 되돌릴 수 있어요.`, [
+    showAlert('이 일정을 지울까요?', `'${event.title}'${eulreul(event.title)} 캘린더에서 뺍니다. 바로 되돌릴 수 있어요.`, [
       { text: '그냥 둘게요', style: 'cancel' },
       {
         text: '지우기',

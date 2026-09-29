@@ -26,11 +26,13 @@ export default function SettingsScreen() {
   };
   const me = useMe();
   const myFullName = useFullName(me);
+  /** 프로필에서 고른 이모지 (없으면 사람 아이콘) */
+  const myAvatar = useSession((st) => st.me?.avatar_url ?? null);
   const clearSession = useSession((s) => s.clear);
 
   const handleSignOut = () => {
-    showAlert('로그아웃', '정말 로그아웃하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
+    showAlert('로그아웃할까요?', '기록은 그대로 남아 있어요. 다시 로그인하면 이어서 볼 수 있어요.', [
+      { text: '그냥 있을게요', style: 'cancel' },
       {
         text: '로그아웃',
         style: 'destructive',
@@ -57,7 +59,7 @@ export default function SettingsScreen() {
     try {
       await Share.share({ message: `familog에 초대합니다! 초대 코드: ${family.inviteCode}` });
     } catch {
-      showAlert('초대 코드', family.inviteCode);
+      showAlert('초대 코드', `${family.inviteCode}\n\n이 코드를 가족에게 보내주세요.`);
     }
   };
 
@@ -76,13 +78,13 @@ export default function SettingsScreen() {
     {
       title: '내 정보',
       items: [
-        { icon: 'user', label: '프로필 수정', action: () => router.push('/settings/profile') },
-        { icon: 'bell', label: '알림 설정', action: () => router.push('/settings/notifications') },
-        { icon: 'lock', label: '개인정보 보호', action: () => router.push('/settings/privacy') },
+        { icon: 'user', label: '내 프로필', action: () => router.push('/settings/profile') },
+        { icon: 'bell', label: '알림', subtitle: '준비 중', action: () => router.push('/settings/notifications') },
+        { icon: 'lock', label: '개인정보 보호', subtitle: '무엇이 지켜지나요', action: () => router.push('/settings/privacy') },
       ],
     },
     {
-      title: '데이터',
+      title: '기록 지키기',
       items: [
         // ⚠️ 여기 있던 '백업 관리'는 아무것도 하지 않으면서 "마지막 백업: 4월 4일",
         //    "백업이 완료되었습니다"를 띄웠다. **기록이 안전하다고 거짓으로 알려주는**
@@ -139,7 +141,9 @@ export default function SettingsScreen() {
 
       <TouchableOpacity style={styles.profileCard} activeOpacity={0.7} onPress={() => router.push('/settings/profile')}>
         <View style={styles.avatar}>
-          <FontAwesome name="user" size={28} color="#4A8C6F" />
+          {myAvatar
+            ? <Text style={styles.avatarEmoji}>{myAvatar}</Text>
+            : <FontAwesome name="user" size={28} color="#4A8C6F" />}
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.profileName}>{myFullName}</Text>
@@ -252,6 +256,7 @@ const styles = StyleSheet.create({
     width: 56, height: 56, borderRadius: 28,
     backgroundColor: '#E8D0C0', justifyContent: 'center', alignItems: 'center',
   },
+  avatarEmoji: { fontSize: 30 },
   profileName: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   profileRole: { fontSize: 13, color: '#888', marginTop: 2, fontFamily: 'Pretendard' },
   editProfileButton: {

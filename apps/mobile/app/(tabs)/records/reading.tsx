@@ -130,11 +130,11 @@ export default function ReadingScreen() {
         return;
       }
       patchRecordData(selectedId, { status: '완독', progress: 100, rating: editRating, notes: editNotes });
-      showAlert('완독 처리 완료', `평점 ${editRating}점으로 완독 처리되었어요.`);
+      showAlert('다 읽었어요!', `별 ${editRating}개로 남겨뒀어요.`);
     } else {
       const clamped = Math.max(0, Math.min(99, Math.round(editProgress)));
       patchRecordData(selectedId, { status: '읽는 중', progress: clamped, notes: editNotes });
-      showAlert('저장 완료', '진척도와 메모가 업데이트되었어요.');
+      showAlert('저장했어요', '어디까지 읽었는지와 메모를 남겨뒀어요.');
     }
     closeDetail();
   };
@@ -142,7 +142,7 @@ export default function ReadingScreen() {
   const handleCreate = () => {
     const title = formTitle.trim();
     if (!title) {
-      showAlert('책 제목을 입력해주세요', '어떤 책인지 알려주세요.');
+      showAlert('책 제목을 적어주세요', '어떤 책인지 한 줄이면 돼요.');
       return;
     }
     addRecord({
@@ -321,7 +321,7 @@ export default function ReadingScreen() {
               <Text style={styles.createLabel}>책 제목</Text>
               <TextInput
                 style={styles.createInput}
-                placeholder="책 제목을 입력하세요"
+                placeholder="어떤 책인가요?"
                 placeholderTextColor="#BFAE99"
                 value={formTitle}
                 onChangeText={setFormTitle}
@@ -329,7 +329,7 @@ export default function ReadingScreen() {
               <Text style={styles.createLabel}>저자</Text>
               <TextInput
                 style={styles.createInput}
-                placeholder="저자를 입력하세요"
+                placeholder="누가 썼나요?"
                 placeholderTextColor="#BFAE99"
                 value={formAuthor}
                 onChangeText={setFormAuthor}

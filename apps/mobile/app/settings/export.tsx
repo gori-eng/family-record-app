@@ -213,7 +213,7 @@ export default function ExportScreen() {
                     <View style={{ flex: 1 }}>
                       <Text style={s.choiceLabel}>없는 것만 더하기</Text>
                       <Text style={s.choiceDesc}>
-                        지금 기록은 하나도 건드리지 않아요. 파일에만 있는 것을 채워 넣습니다. 안전한 쪽이에요.
+                        지금 기록은 하나도 건드리지 않아요. 파일에만 있는 것을 채워 넣어요. 안전한 쪽이에요.
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -239,7 +239,7 @@ export default function ExportScreen() {
       <ScrollView style={s.container} contentContainerStyle={{ paddingBottom: 40 }}>
         <Text style={s.subtitle}>
           가족이 남긴 기록은 familog 안에만 있어서는 안 돼요.{'\n'}
-          파일로 한 부 담아 손에 쥐고 있으면 무슨 일이 있어도 남습니다.
+          파일로 한 부 담아 손에 쥐고 있으면 무슨 일이 있어도 남아요.
         </Text>
 
         {/* 지금 갖고 있는 것 */}
@@ -289,7 +289,7 @@ export default function ExportScreen() {
             <View style={s.info}>
               <Text style={s.cardTitle}>백업 파일에서 되살리기</Text>
               <Text style={s.cardDesc}>
-                담아둔 파일을 골라 기록을 되살려요. 무엇이 들었는지 먼저 보여드리고, 확인을 받고 나서 넣습니다.
+                담아둔 파일을 골라 기록을 되살려요. 무엇이 들었는지 먼저 보여드리고, 확인을 받고 나서 넣어요.
               </Text>
             </View>
             <FontAwesome name="chevron-right" size={12} color="#B0A590" />

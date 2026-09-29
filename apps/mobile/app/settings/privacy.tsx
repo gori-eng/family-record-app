@@ -1,59 +1,85 @@
-import { View, Text, Switch, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
-import { useState } from 'react';
+
+/**
+ * 개인정보 보호 — **지금 실제로 지켜지는 것만** 말한다.
+ *
+ * ── 예전 화면은 거짓말이었다 (2026-09-29) ─────────────────
+ * "민감한 정보는 역할에 따라 접근이 제한됩니다" + '가계부 자녀에게 숨기기' 스위치가 있었다.
+ * 스위치는 어디에도 저장되지 않았고, **역할별 제한은 DB에 아예 없다**(CLAUDE.md §11).
+ * 그 말을 믿고 아이를 초대하면 아이가 가계부를 그대로 본다. 개인정보 약속은 틀리면 안 된다.
+ *
+ * 여기 적힌 것은 전부 DB 정책(RLS·칸 권한)이 막고 있는 것이다. 새로 막으면 여기에 더하고,
+ * '아직 안 되는 것'에서 뺀다.
+ */
+
+const PROTECTED = [
+  { icon: 'home', title: '우리 가족 기록은 우리 가족만 봐요', desc: '다른 가족은 우리 기록을 볼 수도, 고칠 수도 없어요.' },
+  { icon: 'trash-o', title: '지우기는 쓴 사람과 관리자만', desc: '아이가 실수로 부모의 기록을 지우는 일이 없어요.' },
+  { icon: 'user-secret', title: '역할은 스스로 바꿀 수 없어요', desc: '관리자는 가족을 만든 사람뿐이에요.' },
+  { icon: 'key', title: '초대 코드가 있어야 들어와요', desc: '코드를 모르면 우리 가족에 들어올 수 없어요.' },
+];
+
+const NOT_YET = [
+  { title: '아이에게 가계부·건강 기록 숨기기', desc: '지금은 가족 모두가 모든 기록을 함께 봐요.' },
+  { title: '나만 보는 기록', desc: '지금은 쓴 기록이 가족 모두에게 보여요.' },
+];
 
 export default function PrivacyScreen() {
-  const [hideFinance, setHideFinance] = useState(true);
-  const [hideHealth, setHideHealth] = useState(true);
-  const [shareReading, setShareReading] = useState(true);
-
   return (
     <>
       <Stack.Screen options={{ title: '개인정보 보호' }} />
-      <ScrollView style={s.container}>
-        <View style={s.infoBox}>
-          <FontAwesome name="shield" size={16} color="#4AA86B" />
-          <Text style={s.infoText}>가족 내에서도 민감한 정보는 역할에 따라 접근이 제한됩니다.</Text>
-        </View>
+      <ScrollView style={s.container} contentContainerStyle={s.content}>
+        <Text style={s.sectionTitle}>지금 지켜지고 있어요</Text>
+        {PROTECTED.map((p) => (
+          <View key={p.title} style={s.row}>
+            <View style={s.iconWrap}>
+              <FontAwesome name={p.icon as any} size={15} color="#4A8C6F" />
+            </View>
+            <View style={s.info}>
+              <Text style={s.label}>{p.title}</Text>
+              <Text style={s.desc}>{p.desc}</Text>
+            </View>
+          </View>
+        ))}
 
-        <Text style={s.sectionTitle}>데이터 공개 범위</Text>
-        <View style={s.row}>
-          <View style={s.info}>
-            <Text style={s.label}>가계부 자녀에게 숨기기</Text>
-            <Text style={s.desc}>자녀 계정에서 가계부 데이터를 볼 수 없음</Text>
+        <Text style={[s.sectionTitle, s.sectionGap]}>아직 준비 중이에요</Text>
+        {NOT_YET.map((p) => (
+          <View key={p.title} style={[s.row, s.rowMuted]}>
+            <View style={[s.iconWrap, s.iconMuted]}>
+              <FontAwesome name="clock-o" size={15} color="#A0A0A0" />
+            </View>
+            <View style={s.info}>
+              <Text style={[s.label, s.labelMuted]}>{p.title}</Text>
+              <Text style={s.desc}>{p.desc}</Text>
+            </View>
           </View>
-          <Switch value={hideFinance} onValueChange={setHideFinance}
-            trackColor={{ false: '#E8E0D0', true: '#F5C0B0' }} thumbColor={hideFinance ? '#C85A4A' : '#BFAE99'} />
-        </View>
-        <View style={s.row}>
-          <View style={s.info}>
-            <Text style={s.label}>건강 기록 부/모만 열람</Text>
-            <Text style={s.desc}>건강 기록은 부/모 역할만 열람 가능</Text>
-          </View>
-          <Switch value={hideHealth} onValueChange={setHideHealth}
-            trackColor={{ false: '#E8E0D0', true: '#F5C0B0' }} thumbColor={hideHealth ? '#C85A4A' : '#BFAE99'} />
-        </View>
-        <View style={s.row}>
-          <View style={s.info}>
-            <Text style={s.label}>독서/영화 기록 공유</Text>
-            <Text style={s.desc}>모든 가족이 독서/영화 기록을 볼 수 있음</Text>
-          </View>
-          <Switch value={shareReading} onValueChange={setShareReading}
-            trackColor={{ false: '#E8E0D0', true: '#F5C0B0' }} thumbColor={shareReading ? '#C85A4A' : '#BFAE99'} />
-        </View>
+        ))}
+        <Text style={s.note}>
+          아이를 초대하기 전에 이 부분을 알아두세요. 준비되면 이곳에서 켤 수 있게 할게요.
+        </Text>
       </ScrollView>
     </>
   );
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDF0', padding: 20 },
-  infoBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: '#E8F5E9', borderRadius: 12, padding: 14, marginBottom: 24 },
-  infoText: { flex: 1, fontSize: 13, color: '#2E7D32', lineHeight: 20 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#9C8B75', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
-  row: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16, marginBottom: 8, borderWidth: 1, borderColor: '#F0E8D8' },
+  container: { flex: 1, backgroundColor: '#F9F8F5' },
+  content: { padding: 20, paddingBottom: 40 },
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#888888', marginBottom: 10, fontFamily: 'PretendardBold' },
+  sectionGap: { marginTop: 20 },
+  row: {
+    flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14,
+    padding: 16, marginBottom: 8, borderWidth: 1, borderColor: '#EAEAEA',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.03, shadowRadius: 4, elevation: 1,
+  },
+  rowMuted: { backgroundColor: '#F4F3EF', shadowOpacity: 0, elevation: 0 },
+  iconWrap: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#EFF6F1', justifyContent: 'center', alignItems: 'center' },
+  iconMuted: { backgroundColor: '#EAEAEA' },
   info: { flex: 1 },
-  label: { fontSize: 15, fontWeight: '600', color: '#2D2D2D' },
-  desc: { fontSize: 12, color: '#9C8B75', marginTop: 2 },
+  label: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', fontFamily: 'PretendardBold' },
+  labelMuted: { color: '#4A4A4A' },
+  desc: { fontSize: 12, color: '#888888', marginTop: 3, lineHeight: 17, fontFamily: 'Pretendard' },
+  note: { fontSize: 12, color: '#888888', marginTop: 8, lineHeight: 18, fontFamily: 'Pretendard' },
 });

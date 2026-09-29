@@ -15,9 +15,9 @@ export default function RegisterScreen() {
   const router = useRouter();
 
   const handleRegister = async () => {
-    if (!email || !password) { showAlert('알림', '이메일과 비밀번호를 입력해주세요.'); return; }
-    if (password !== confirmPassword) { showAlert('알림', '비밀번호가 일치하지 않습니다.'); return; }
-    if (password.length < 6) { showAlert('알림', '비밀번호는 6자 이상이어야 합니다.'); return; }
+    if (!email || !password) { showAlert('이메일과 비밀번호를 적어주세요', '둘 다 있어야 가입할 수 있어요.'); return; }
+    if (password !== confirmPassword) { showAlert('비밀번호가 서로 달라요', '확인 칸에 같은 비밀번호를 한 번 더 적어주세요.'); return; }
+    if (password.length < 6) { showAlert('비밀번호를 조금만 더 길게', '6자 이상이면 돼요.'); return; }
     setLoading(true);
     try {
       const data = await signUpWithEmail(email.trim(), password);
@@ -52,7 +52,7 @@ export default function RegisterScreen() {
 
           <Text style={s.label}>비밀번호</Text>
           <View style={s.passwordRow}>
-            <TextInput style={s.passwordInput} placeholder="6자 이상 입력하세요" placeholderTextColor="#B0B0B0"
+            <TextInput style={s.passwordInput} placeholder="6자 이상이면 돼요" placeholderTextColor="#B0B0B0"
               value={password} onChangeText={setPassword} secureTextEntry={!showPassword} />
             <TouchableOpacity style={s.eyeBtn} onPress={() => setShowPassword(!showPassword)} activeOpacity={0.7}>
               <FontAwesome name={showPassword ? 'eye' : 'eye-slash'} size={18} color="#B0B0B0" />
@@ -61,7 +61,7 @@ export default function RegisterScreen() {
 
           <Text style={s.label}>비밀번호 확인</Text>
           <View style={s.passwordRow}>
-            <TextInput style={s.passwordInput} placeholder="비밀번호를 다시 입력하세요" placeholderTextColor="#B0B0B0"
+            <TextInput style={s.passwordInput} placeholder="한 번 더 적어주세요" placeholderTextColor="#B0B0B0"
               value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry={!showPassword} />
           </View>
 

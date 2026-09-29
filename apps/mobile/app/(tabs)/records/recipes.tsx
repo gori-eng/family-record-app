@@ -97,7 +97,7 @@ export default function RecipesScreen() {
   const handleSave = () => {
     const name = formName.trim();
     if (!name) {
-      showAlert('레시피 이름을 입력해주세요', '어떤 요리인지 알려주세요.');
+      showAlert('요리 이름을 적어주세요', '"할머니 장조림"처럼요.');
       return;
     }
     addRecord({
@@ -216,7 +216,7 @@ export default function RecipesScreen() {
               <Text style={s.modalTitle}>새 레시피</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>레시피 이름</Text>
-              <TextInput style={s.createInput} placeholder="레시피 이름을 입력하세요" placeholderTextColor="#BFAE99"
+              <TextInput style={s.createInput} placeholder="예) 할머니 장조림" placeholderTextColor="#BFAE99"
                 value={formName} onChangeText={setFormName} />
               <Text style={s.createLabel}>유래 / 출처</Text>
               <TextInput style={s.createInput} placeholder="예: 할머니로부터 전수" placeholderTextColor="#BFAE99"
@@ -240,7 +240,7 @@ export default function RecipesScreen() {
               <Text style={s.createLabel}>재료</Text>
               <TextInput
                 style={[s.createInput, { height: 110, textAlignVertical: 'top' }]}
-                placeholder={'재료를 한 줄에 하나씩 입력하세요\n예) 묵은지 1/4포기\n돼지고기 200g'}
+                placeholder={'재료를 한 줄에 하나씩 적어주세요\n예) 묵은지 1/4포기\n돼지고기 200g'}
                 placeholderTextColor="#BFAE99"
                 multiline
                 value={formIngredients}
@@ -249,7 +249,7 @@ export default function RecipesScreen() {
               <Text style={s.createLabel}>조리 순서</Text>
               <TextInput
                 style={[s.createInput, { height: 140, textAlignVertical: 'top' }]}
-                placeholder={'조리 순서를 한 줄에 하나씩 입력하세요\n예) 들기름에 묵은지를 볶는다\n돼지고기를 넣고 함께 볶는다'}
+                placeholder={'만드는 순서를 한 줄에 하나씩 적어주세요\n예) 들기름에 묵은지를 볶는다\n돼지고기를 넣고 함께 볶는다'}
                 placeholderTextColor="#BFAE99"
                 multiline
                 value={formSteps}
@@ -274,7 +274,7 @@ export default function RecipesScreen() {
 
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.header}>
-            <Text style={s.subtitle}>가족만의 손맛을 기록하세요</Text>
+            <Text style={s.subtitle}>우리 집 손맛을 모아둬요</Text>
             <View style={s.statsRow}>
               <View style={s.stat}><Text style={s.statNum}>{recipes.length}</Text><Text style={s.statLabel}>총 레시피</Text></View>
               <View style={s.stat}><Text style={s.statNum}>{inheritedCount}</Text><Text style={s.statLabel}>세대 전수</Text></View>

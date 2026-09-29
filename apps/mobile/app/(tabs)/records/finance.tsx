@@ -142,11 +142,11 @@ export default function FinanceScreen() {
   const handleSave = () => {
     const amount = parseAmount(formAmount);
     if (amount <= 0) {
-      showAlert('금액을 입력해주세요', '0보다 큰 금액을 입력해야 저장할 수 있어요.');
+      showAlert('금액을 입력해주세요', '얼마였는지 적어주면 저장할게요.');
       return;
     }
     if (!isISODate(formDate)) {
-      showAlert('날짜 형식을 확인해주세요', '2026-09-22 형식으로 입력해주세요.');
+      showAlert('날짜를 한 번 봐주세요', '2026-09-22처럼 적어주세요. 오늘·어제 버튼을 눌러도 돼요.');
       return;
     }
     const desc = formDesc.trim() || formCategory;
@@ -182,9 +182,9 @@ export default function FinanceScreen() {
       undoTimer.current = setTimeout(() => setUndoItem(null), 10000);
     };
     showAlert(
-      '이 거래를 삭제할까요?',
-      `${record.data.desc} · ${formatAmount(record.data.amount, record.data.type)}`,
-      [{ text: '취소', style: 'cancel' }, { text: '삭제', style: 'destructive', onPress: doDelete }]
+      '이 거래 지울까요?',
+      `${record.data.desc} · ${formatAmount(record.data.amount, record.data.type)}\n지워도 바로 되돌릴 수 있어요.`,
+      [{ text: '그냥 둘게요', style: 'cancel' }, { text: '지우기', style: 'destructive', onPress: doDelete }]
     );
   };
 

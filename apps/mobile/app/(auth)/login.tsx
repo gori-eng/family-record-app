@@ -15,7 +15,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      showAlert('알림', '이메일과 비밀번호를 입력해주세요.');
+      showAlert('이메일과 비밀번호를 적어주세요', '둘 다 있어야 들어갈 수 있어요.');
       return;
     }
     setLoading(true);
@@ -62,7 +62,7 @@ export default function LoginScreen() {
           <View style={s.passwordRow}>
             <TextInput
               style={s.passwordInput}
-              placeholder="비밀번호를 입력하세요"
+              placeholder="비밀번호"
               placeholderTextColor="#B0B0B0"
               value={password}
               onChangeText={setPassword}
@@ -92,12 +92,12 @@ export default function LoginScreen() {
           {/* Social */}
           <View style={s.socialRow}>
             <TouchableOpacity style={s.socialBtn} activeOpacity={0.7}
-              onPress={() => showAlert('준비 중', 'Google 로그인은 곧 지원될 예정이에요.')}>
+              onPress={() => showAlert('구글 로그인은 준비 중이에요', '지금은 이메일로 들어와 주세요.')}>
               <FontAwesome name="google" size={18} color="#4285F4" />
               <Text style={s.socialText}>Google</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[s.socialBtn, s.appleBtn]} activeOpacity={0.7}
-              onPress={() => showAlert('준비 중', 'Apple 로그인은 곧 지원될 예정이에요.')}>
+              onPress={() => showAlert('Apple 로그인은 준비 중이에요', '지금은 이메일로 들어와 주세요.')}>
               <FontAwesome name="apple" size={18} color="#FFFFFF" />
               <Text style={s.appleText}>Apple</Text>
             </TouchableOpacity>

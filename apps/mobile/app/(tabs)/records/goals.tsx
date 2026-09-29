@@ -64,7 +64,7 @@ export default function GoalsScreen() {
   const handleSave = () => {
     const title = formTitle.trim();
     if (!title) {
-      showAlert('목표 제목을 입력해주세요', '무엇을 이루고 싶은지 알려주세요.');
+      showAlert('어떤 목표인지 적어주세요', '함께 이루고 싶은 걸 한 줄로요.');
       return;
     }
     addRecord({
@@ -202,10 +202,10 @@ export default function GoalsScreen() {
               <Text style={s.modalTitle}>새 가족 목표</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>목표 제목</Text>
-              <TextInput style={s.createInput} placeholder="목표 제목을 입력하세요" placeholderTextColor="#BFAE99"
+              <TextInput style={s.createInput} placeholder="예) 올해 가족 여행 세 번 가기" placeholderTextColor="#BFAE99"
                 value={formTitle} onChangeText={setFormTitle} />
               <Text style={s.createLabel}>설명</Text>
-              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="목표에 대한 설명을 입력하세요" placeholderTextColor="#BFAE99" multiline
+              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="왜 하고 싶은지, 어떻게 할지 적어도 좋아요" placeholderTextColor="#BFAE99" multiline
                 value={formDesc} onChangeText={setFormDesc} />
               <Text style={s.createLabel}>목표 시점</Text>
               <TextInput style={s.createInput} placeholder="예: 2027.12" placeholderTextColor="#BFAE99"

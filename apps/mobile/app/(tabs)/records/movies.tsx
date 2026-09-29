@@ -81,7 +81,7 @@ export default function MoviesScreen() {
   const handleSave = () => {
     const title = formTitle.trim();
     if (!title) {
-      showAlert('영화 제목을 입력해주세요', '어떤 영화를 봤는지 알려주세요.');
+      showAlert('영화 제목을 적어주세요', '어떤 영화를 봤는지 한 줄이면 돼요.');
       return;
     }
     addRecord({
@@ -197,7 +197,7 @@ export default function MoviesScreen() {
               <Text style={s.createLabel}>영화 제목</Text>
               <TextInput
                 style={s.createInput}
-                placeholder="영화 제목을 입력하세요"
+                placeholder="어떤 영화를 봤나요?"
                 placeholderTextColor="#BFAE99"
                 value={formTitle}
                 onChangeText={setFormTitle}

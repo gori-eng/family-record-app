@@ -71,6 +71,8 @@ export type MemberCard = {
   role: string;
   /** 로그인한 나 자신인지 */
   isMe: boolean;
+  /** 프로필에서 고른 이모지. 없으면 이름 첫 글자를 보여준다 */
+  avatar: string | null;
 };
 
 /**
@@ -81,7 +83,7 @@ export type MemberCard = {
  *    가족을 만든 사람에게 엉뚱한 역할이 붙었다. `admin`은 역할이 아니라 **권한**이다.
  *    부/모 구분이 필요하면 DB에 칸을 먼저 만들고 사용자가 고르게 해야 한다.
  */
-const ROLE_LABEL: Record<string, string> = {
+export const ROLE_LABEL: Record<string, string> = {
   admin: '관리자', parent: '부모', elder: '조부모', child: '자녀', guest: '손님',
 };
 
@@ -100,6 +102,7 @@ export function useMemberCards(): MemberCard[] {
         color: m.color,
         role: sampleRoles[i] ?? '가족',
         isMe: m.display === SAMPLE_ME,
+        avatar: null,
       }));
     }
     return members.map((m, i) => ({
@@ -108,6 +111,7 @@ export function useMemberCards(): MemberCard[] {
       color: MEMBER_COLORS[m.display_name] ?? FALLBACK_COLORS[i % FALLBACK_COLORS.length],
       role: ROLE_LABEL[m.role] ?? '가족',
       isMe: !!me && m.id === me.id,
+      avatar: m.avatar_url,
     }));
   }, [members, me]);
 }

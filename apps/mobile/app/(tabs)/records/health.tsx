@@ -70,7 +70,7 @@ export default function HealthScreen() {
   const handleSave = () => {
     const type = formType.trim();
     if (!type) {
-      showAlert('검진 유형을 입력해주세요', '어떤 검진인지 알려주세요.');
+      showAlert('어떤 검진이었는지 적어주세요', '건강검진, 치과, 예방접종처럼요.');
       return;
     }
     addRecord({
@@ -192,7 +192,7 @@ export default function HealthScreen() {
               <TextInput style={s.createInput} placeholder="예: 2026.4.26" placeholderTextColor="#BFAE99"
                 value={formDate} onChangeText={setFormDate} />
               <Text style={s.createLabel}>결과 요약</Text>
-              <TextInput style={s.createInput} placeholder="검진 결과를 입력하세요" placeholderTextColor="#BFAE99"
+              <TextInput style={s.createInput} placeholder="예) 정상, 충치 1개" placeholderTextColor="#BFAE99"
                 value={formResult} onChangeText={setFormResult} />
               <Text style={s.createLabel}>메모</Text>
               <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="메모를 남겨보세요" placeholderTextColor="#BFAE99" multiline

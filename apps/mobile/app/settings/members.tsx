@@ -70,12 +70,14 @@ export default function MembersScreen() {
           <TouchableOpacity key={m.display} style={s.card} activeOpacity={0.7}
             onPress={() => showAlert(
               m.full,
-              `기록에는 '${m.display}'로 남아요.\n역할: ${m.role}` +
+              `기록에는 '${m.display}'${ro(m.display)} 남아요.\n역할: ${m.role}` +
               (m.isMe ? '\n\n나예요.' : '') +
               '\n\n역할 바꾸기는 아직 준비 중이에요.'
             )}>
             <View style={[s.avatar, { backgroundColor: m.color }]}>
-              <Text style={s.initial}>{m.display.slice(0, 1)}</Text>
+              {m.avatar
+                ? <Text style={s.avatarEmoji}>{m.avatar}</Text>
+                : <Text style={s.initial}>{m.display.slice(0, 1)}</Text>}
             </View>
             <View style={s.info}>
               <View style={s.nameRow}>
@@ -122,6 +124,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: '#EAEAEA',
   },
   avatar: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
+  avatarEmoji: { fontSize: 22 },
   initial: { fontSize: 17, fontWeight: '700', color: '#4A4A4A', fontFamily: 'PretendardBold' },
   info: { flex: 1 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },

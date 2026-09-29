@@ -76,7 +76,7 @@ export default function TravelScreen() {
   const handleSave = () => {
     const dest = formDest.trim();
     if (!dest) {
-      showAlert('목적지를 입력해주세요', '어디로 가는 여행인지 알려주세요.');
+      showAlert('어디로 가는지 적어주세요', '목적지만 있어도 충분해요.');
       return;
     }
     addRecord({

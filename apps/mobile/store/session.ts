@@ -52,6 +52,8 @@ type SessionState = {
   switchFamily: (familyId: string) => Promise<void>;
   /** 가족을 막 만들었거나 합류했을 때 — 목록에 넣고 그 가족으로 바꾼다 */
   setFamily: (family: Family, members: FamilyMember[]) => void;
+  /** 내 프로필을 DB에 저장한 뒤 화면에도 바로 반영한다 (다시 불러오지 않고) */
+  patchMe: (patch: Partial<Pick<FamilyMember, 'full_name' | 'avatar_url'>>) => void;
   clear: () => void;
 };
 
@@ -125,6 +127,13 @@ export const useSession = create<SessionState>((set, get) => ({
       me: members.find((m) => m.user_id === userId) ?? null,
       ready: true,
     });
+  },
+
+  patchMe: (patch) => {
+    const me = get().me;
+    if (!me) return;
+    const next = { ...me, ...patch };
+    set({ me: next, members: get().members.map((m) => (m.id === me.id ? next : m)) });
   },
 
   clear: () => set({ userId: null, families: [], family: null, members: [], me: null, ready: true }),

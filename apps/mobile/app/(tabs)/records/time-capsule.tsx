@@ -58,7 +58,7 @@ export default function TimeCapsuleScreen() {
   const handleSave = () => {
     const title = formTitle.trim();
     if (!title) {
-      showAlert('제목을 입력해주세요', '어떤 캡슐인지 알려주세요.');
+      showAlert('캡슐 이름을 적어주세요', '"첫째 스무 살 생일에"처럼요.');
       return;
     }
     const today = new Date();
@@ -158,10 +158,10 @@ export default function TimeCapsuleScreen() {
               <Text style={s.modalTitle}>새 타임캡슐</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>제목</Text>
-              <TextInput style={s.createInput} placeholder="타임캡슐 제목을 입력하세요" placeholderTextColor="#BFAE99"
+              <TextInput style={s.createInput} placeholder="예) 첫째 스무 살 생일에" placeholderTextColor="#BFAE99"
                 value={formTitle} onChangeText={setFormTitle} />
               <Text style={s.createLabel}>메시지 내용</Text>
-              <TextInput style={[s.createInput, { height: 120, textAlignVertical: 'top' }]} placeholder="미래의 가족에게 전할 메시지를 작성하세요" placeholderTextColor="#BFAE99" multiline numberOfLines={5}
+              <TextInput style={[s.createInput, { height: 120, textAlignVertical: 'top' }]} placeholder="몇 년 뒤의 우리에게 하고 싶은 말" placeholderTextColor="#BFAE99" multiline numberOfLines={5}
                 value={formMessage} onChangeText={setFormMessage} />
               <Text style={s.createLabel}>개봉일</Text>
               <TextInput style={s.createInput} placeholder="예: 2036.5.15" placeholderTextColor="#BFAE99"
