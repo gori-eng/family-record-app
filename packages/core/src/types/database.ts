@@ -68,23 +68,30 @@ export type RecordRow<T = Record<string, unknown>> = {
   updated_at: string;
 }
 
+/**
+ * 일정 한 줄 (00007에서 앱 모양에 맞춰 다시 만들었다).
+ * 날짜·시각은 **달력에 적힌 그대로** 둔다 — 시간대 변환을 끼우지 않는다.
+ */
 export type CalendarEvent = {
   id: string;
   family_id: string;
+  /** 'YYYY-MM-DD' */
+  event_date: string;
+  /** 'HH:MM'. 빈 문자열이면 하루 종일 */
+  event_time: string;
   title: string;
-  description: string | null;
   location: string | null;
-  start_time: string;
-  end_time: string;
-  all_day: boolean;
-  color: string | null;
-  /** 누구 일정인지. '전체'면 가족 공통 */
-  member: string;
+  /** 함께하는 사람의 짧은 이름들. 비면 가족 전체 */
+  members: string[];
+  memo: string | null;
+  color: string;
   created_by: string;
+  /** 화면에 뜨는 "적어둔 사람" */
+  created_by_name: string;
   google_event_id: string | null;
   created_at: string;
   updated_at: string;
-}
+};
 
 /** 가계부 설정 — 가족당 한 줄. 앱의 financeSettings와 같은 내용. */
 export type FinanceSettingsRow = {
@@ -138,15 +145,15 @@ export type RecordInsert = {
 
 export type CalendarEventInsert = {
   family_id: string;
+  event_date: string;
+  event_time?: string;
   title: string;
-  start_time: string;
-  end_time: string;
-  created_by: string;
-  description?: string | null;
   location?: string | null;
-  all_day?: boolean;
-  color?: string | null;
-  member?: string;
+  members?: string[];
+  memo?: string | null;
+  color?: string;
+  created_by: string;
+  created_by_name: string;
   google_event_id?: string | null;
 };
 

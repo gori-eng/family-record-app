@@ -11,6 +11,7 @@ import { StatusBar } from 'react-native';
 import 'react-native-reanimated';
 import { AlertHost } from '../components/AppAlert';
 import { useRecordsStore } from '../store/records';
+import { useEventsStore } from '../store/events';
 import { useSession } from '../store/session';
 import { decideRoute, whereFrom, REQUIRE_AUTH } from '../lib/authGate';
 
@@ -137,10 +138,17 @@ function RootLayoutNav() {
   const familyId = useSession((s) => s.family?.id ?? null);
   const loadRecords = useRecordsStore((s) => s.load);
   const clearRecords = useRecordsStore((s) => s.clear);
+  const loadEvents = useEventsStore((s) => s.load);
+  const clearEvents = useEventsStore((s) => s.clear);
   useEffect(() => {
     const userId = session?.user?.id;
-    if (familyId && userId) loadRecords(familyId, userId);
-    else clearRecords();
+    if (familyId && userId) {
+      loadRecords(familyId, userId);
+      loadEvents(familyId, userId);
+    } else {
+      clearRecords();
+      clearEvents();
+    }
   }, [familyId, session?.user?.id]);
 
   // 길 안내 — 무엇을 어디로 보낼지는 lib/authGate.ts가 정한다 (Node에서 검증됨)

@@ -24,6 +24,15 @@ export {
 } from './supabase/records';
 export type { AppRecord } from './supabase/records';
 export {
+  fetchEvents,
+  insertEvent,
+  updateEvent,
+  deleteEvent,
+  deleteAllEvents,
+  toAppEvent,
+} from './supabase/events';
+export type { AppEvent } from './supabase/events';
+export {
   canView,
   canEdit,
   canDelete,

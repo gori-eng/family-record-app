@@ -1141,6 +1141,40 @@ onPress 안에서 또 `showAlert`를 불러도 괜찮다 (닫힘 → 새 알림�
 > 틈이 없다. 게다가 `await setTimeout`도 늦춰져 CDP가 45초 타임아웃을 낸다.
 > **누르기 하나 = 도구 호출 하나**로 나눠야 한다. 호출 사이에 React가 그린다.
 
+### 2026-09-29 일정(캘린더)을 DB로 — 코드 완료, SQL 적용 대기
+
+**`calendar_events`가 앱 모양과 세 군데 어긋나 있었다** (00002는 캘린더 화면을 만들기 전에 짐작으로 설계했다)
+
+| DB (예전) | 앱 (`store/events.ts`) |
+|---|---|
+| `start_time` / `end_time` | `date` + `time` (빈 값 = 하루 종일) |
+| `member TEXT` **한 명** | `members string[]` **여러 명** |
+| `created_by` UUID만 | `createdBy '지수'` (화면에 뜨는 이름) |
+
+참여자가 한 칸이라 "지우·지수 둘 다"를 담을 수 없다. 끼워 맞추면 정보가 샌다.
+
+**`00007_reshape_calendar_events.sql`**
+- 날짜·시각을 **타임스탬프가 아니라 따로** 둔다(`event_date DATE` + `event_time TEXT`).
+  "9월 29일 오후 6시 저녁"은 그 집 달력에 적힌 날짜다. 타임스탬프로 바꾸면 시간대 변환이
+  끼어들어 **자정 무렵 일정이 하루 밀리는** 전형적인 버그가 생긴다. 구글 캘린더를 붙일 때 그때 변환한다
+- `members TEXT[]`, `memo`, `created_by_name`
+- **안전장치 두 개** — ① 이미 새 모양이면 건너뛴다(여러 번 실행해도 안전)
+  ② 옛 모양인데 일정이 한 건이라도 있으면 멈춘다(데이터를 날리지 않는다)
+  > 처음엔 ②만 넣었는데, 그러면 나중에 `APPLY_LATEST.sql`을 다시 돌릴 때 일정이 있으면
+  > 오류로 멈춘다. "여러 번 실행해도 안전"이라는 약속을 지키려면 ①이 필요했다
+
+**코드**
+- `packages/core/src/supabase/events.ts` 신규 — 기록과 같은 역할(snake ↔ camel 한 곳에서)
+- `store/events.ts` 안쪽을 DB로. **화면은 손대지 않았다.** 쓰기 방식도 기록과 같다
+- `_layout.tsx` — 가족이 정해지면 기록과 일정을 **함께** 불러온다
+- 백업 되살리기도 일정까지 DB에 넣는다
+
+**검증 (SQL 적용 전)**
+- 타입 오류 0건
+- **SQL을 적용하기 전에도 앱이 멀쩡하다** — 새 칸을 못 찾으면 조회만 실패하고
+  캘린더는 "아직 비어 있어요"로 뜬다. 코드를 먼저 내보내도 안전하다는 확인
+- ⏳ SQL 적용 후: 일정 저장 → 새로고침해도 남는지 확인할 것
+
 ### TODO — 다음 스프린트 (Supabase 연동)
 - [ ] **운영자 작업:** Supabase 프로젝트 생성 → URL·**Publishable 키**를 `apps/mobile/.env`에 기입
       - Connect 창: `https://supabase.com/dashboard/project/_?showConnect=true` (`_`는 내 프로젝트로 자동 연결)
@@ -1171,8 +1205,7 @@ onPress 안에서 또 `showAlert`를 불러도 괜찮다 (닫힘 → 새 알림�
 - [ ] 가계부 설정을 localStorage → DB로 이전
 - [x] 인증 가드 — `lib/authGate.ts`로 구현·검증 완료. **`REQUIRE_AUTH` 스위치가 아직 `false`** (위 체크리스트)
 - [x] 기록 CRUD 실제 데이터 저장/수정/삭제 (기록 9종). **일정은 아직** — 아래 참조
-- [ ] **일정(캘린더)을 DB로** — `calendar_events` 스키마가 앱 모양과 다르다
-      (DB는 `start_time`/`end_time`/`member` 단수, 앱은 `date`/`time`/`members` 복수). 마이그레이션 필요
+- [~] **일정(캘린더)을 DB로** — 코드 완료. **`APPLY_LATEST.sql`(00007 포함) 적용 대기**
 - [x] **기록 삭제 기능 8개 화면에 추가** (2026-09-29)
 - [x] 온보딩 — 가족 만들기 / 초대 코드 합류 구현. **실제 계정으로의 확인은 운영자 몫** (위 체크리스트)
 
