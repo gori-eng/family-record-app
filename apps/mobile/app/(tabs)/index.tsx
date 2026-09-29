@@ -8,7 +8,7 @@ import { useMyFamilies, useSession } from '../../store/session';
 import { useTodayEvents, useEventsStore, formatTime, membersLabel } from '../../store/events';
 import { useFamilyNews, type NewsItem } from '../../store/news';
 import { LoadingRows, useRecordsReady, useEventsReady } from '../../components/Loading';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 
 /*
  * 알림(🔔) — store/news.ts가 모은 **진짜 가족 소식**을 보여준다 (2026-09-29).
@@ -87,6 +87,23 @@ export default function HomeScreen() {
   const greeting = hour < 6 ? '새벽이네요' : hour < 12 ? '좋은 아침이에요' : hour < 18 ? '좋은 오후예요' : '좋은 저녁이에요';
   const news = useFamilyNews();
   const unreadCount = news.unread;
+
+  /**
+   * "그때 오늘" — 지난해(들) 같은 월·일에 남긴 기록. 가족 기록장의 재미 중 하나다.
+   * (2026-09-23 전체 점검에서 떠오른 아이디어 → 2026-09-29 C단계에서 구현)
+   */
+  const allRecords = useRecordsStore((s) => s.records);
+  const yearsAgo = useMemo(() => {
+    const now = new Date();
+    const out: { rec: typeof allRecords[number]; years: number }[] = [];
+    for (const rec of allRecords) {
+      const d = new Date(rec.createdAt);
+      if (d.getMonth() === now.getMonth() && d.getDate() === now.getDate() && d.getFullYear() < now.getFullYear()) {
+        out.push({ rec, years: now.getFullYear() - d.getFullYear() });
+      }
+    }
+    return out.sort((a, b) => a.years - b.years).slice(0, 3);
+  }, [allRecords]);
 
   /** 소식을 누르면 그 기록(또는 캘린더)으로 간다 */
   const openNews = (n: NewsItem) => {
@@ -171,8 +188,9 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4A8C6F" colors={['#4A8C6F']} />}
       >
-        {/* Header — 알림만 */}
+        {/* Header — 로고 + 알림 (§7) */}
         <View style={s.header}>
+          <Text style={s.logo}>familog</Text>
           <View style={{ flex: 1 }} />
           <TouchableOpacity activeOpacity={0.7} onPress={openNotif} style={s.headerIcon}>
             <FontAwesome name="bell-o" size={20} color="#1F1F1F" />
@@ -233,6 +251,38 @@ export default function HomeScreen() {
           </View>
           )}
         </View>
+
+        {/* N년 전 오늘 — 같은 날짜에 남긴 지난해 기록. 없으면 아예 안 보인다 */}
+        {yearsAgo.length > 0 && (
+          <View style={s.section}>
+            <View style={s.sectionHeader}>
+              <View>
+                <Text style={s.sectionTitle}>그때 오늘</Text>
+                <Text style={s.sectionSub}>같은 날, 지난해에 남긴 기록</Text>
+              </View>
+            </View>
+            {yearsAgo.map(({ rec, years }) => {
+              const ui = CATEGORY_UI[rec.category];
+              return (
+                <TouchableOpacity key={rec.id} style={s.memoryRow} activeOpacity={0.7}
+                  onPress={() => {
+                    const path = `/(tabs)/records/${ui.screen}`;
+                    if (ui.deepLink) router.push({ pathname: path as any, params: { openTitle: rec.title } });
+                    else router.push(path as any);
+                  }}>
+                  <View style={[s.memoryIcon, { backgroundColor: ui.bg }]}>
+                    <FontAwesome name={ui.icon as any} size={14} color="#5C4A32" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.memoryTitle} numberOfLines={1}>{rec.title}</Text>
+                    <Text style={s.memoryMeta}>{years}년 전 오늘 · {CATEGORY_LABELS[rec.category]} · {rec.recordedBy}</Text>
+                  </View>
+                  <FontAwesome name="chevron-right" size={11} color="#D4C8B0" />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
 
         {/* 빠른 기록 */}
         <View style={s.quickSection}>
@@ -319,7 +369,12 @@ const s = StyleSheet.create({
 
   // Header — 2. 프로필 우측
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 4, paddingBottom: 4, gap: 10 },
+  logo: { fontSize: 24, color: '#2D5A3F', fontFamily: 'GaeguBold', transform: [{ rotate: '-2deg' }] },
   headerIcon: { padding: 8 },
+  memoryRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#EAEAEA' },
+  memoryIcon: { width: 34, height: 34, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  memoryTitle: { fontSize: 14, color: '#1F1F1F', fontFamily: 'PretendardBold' },
+  memoryMeta: { fontSize: 11, color: '#A0A0A0', marginTop: 2, fontFamily: 'Pretendard' },
   badge: { position: 'absolute', top: 2, right: 2, backgroundColor: '#4A8C6F', borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4 },
   badgeText: { color: '#FFF', fontSize: 9, fontWeight: '700' },
 

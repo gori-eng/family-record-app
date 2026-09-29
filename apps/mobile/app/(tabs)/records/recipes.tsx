@@ -3,8 +3,8 @@ import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
-import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
+import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
+import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
 import { say, DIFFICULTY_LABEL } from '../../../constants/labels';
@@ -34,6 +34,9 @@ export default function RecipesScreen() {
   // 창고에서 레시피만 최신순으로 꺼낸다.
   const recipes = useRecordsByCategory<Recipe>('recipes');
   const addRecord = useRecordsStore((s) => s.addRecord);
+  const updateRecord = useRecordsStore((s) => s.updateRecord);
+  /** null이면 새 레시피, id가 있으면 그 레시피를 고치는 중 */
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // 작성 폼 입력값
   const [formName, setFormName] = useState('');
@@ -64,14 +67,17 @@ export default function RecipesScreen() {
     }
   }, [openTitle, recipes]);
 
-  const openCreate = () => {
-    setFormName('');
-    setFormOrigin('');
-    setFormTime('');
-    setFormIngredients('');
-    setFormSteps('');
-    setFormTip('');
-    setCreateDifficulty('보통');
+  /** 폼 열기 — `edit`을 주면 그 레시피를 값이 채워진 채로 연다 */
+  const openCreate = (edit?: FamilyRecord<Recipe>) => {
+    const d = edit?.data;
+    setEditingId(edit?.id ?? null);
+    setFormName(d?.name ?? edit?.title ?? '');
+    setFormOrigin(d?.origin ?? '');
+    setFormTime(d?.time ?? '');
+    setFormIngredients((d?.ingredients ?? []).join(String.fromCharCode(10)));
+    setFormSteps((d?.steps ?? []).join(String.fromCharCode(10)));
+    setFormTip(d?.tip ?? '');
+    setCreateDifficulty(d?.difficulty ?? '보통');
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -82,7 +88,13 @@ export default function RecipesScreen() {
     Animated.parallel([
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
-    ]).start(() => { setShowCreate(false); setCreateDifficulty('보통'); });
+    ]).start(() => { setShowCreate(false); setEditingId(null); });
+  };
+  const startEdit = () => {
+    const record = recipes.find((r) => r.id === selectedItem?.id);
+    if (!record) return;
+    closeDetail();
+    setTimeout(() => openCreate(record), 260);
   };
 
   // "세대 전수" — 윗세대에서 물려받은 레시피 수.
@@ -105,23 +117,32 @@ export default function RecipesScreen() {
       showAlert('요리 이름을 적어주세요', '"할머니 장조림"처럼요.');
       return;
     }
-    addRecord({
-      category: 'recipes',
-      title: name,
-      recordedBy: CURRENT_USER,
-      data: {
-        name,
-        origin: formOrigin.trim(),
-        author: CURRENT_USER,
-        difficulty: createDifficulty,
-        time: formTime.trim(),
-        color: NEW_RECIPE_COLORS[recipes.length % NEW_RECIPE_COLORS.length],
-        icon: 'cutlery',
-        ingredients: toLines(formIngredients),
-        steps: toLines(formSteps),
-        tip: formTip.trim() || undefined,
-      },
-    });
+    const fields = {
+      name,
+      origin: formOrigin.trim(),
+      difficulty: createDifficulty,
+      time: formTime.trim(),
+      ingredients: toLines(formIngredients),
+      steps: toLines(formSteps),
+      tip: formTip.trim() || undefined,
+    };
+    const existing = editingId ? recipes.find((r) => r.id === editingId) : null;
+    if (existing) {
+      // 색·아이콘·처음 적은 사람은 그대로 두고 내용만 바꾼다
+      updateRecord(existing.id, { title: name, data: { ...existing.data, ...fields } });
+    } else {
+      addRecord({
+        category: 'recipes',
+        title: name,
+        recordedBy: CURRENT_USER,
+        data: {
+          ...fields,
+          author: CURRENT_USER,
+          color: NEW_RECIPE_COLORS[recipes.length % NEW_RECIPE_COLORS.length],
+          icon: 'cutlery',
+        },
+      });
+    }
     closeCreate();
   };
 
@@ -209,7 +230,10 @@ export default function RecipesScreen() {
                 </ScrollView>
               )}
               {selectedItem && (
-                <DeleteRecordRow id={selectedItem.id} onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
+                <>
+                  <EditRecordRow onPress={startEdit} />
+                  <DeleteRecordRow id={selectedItem.id} onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
+                </>
               )}
             </Animated.View>
           </View>
@@ -222,7 +246,7 @@ export default function RecipesScreen() {
             </Animated.View>
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
-              <Text style={s.modalTitle}>새 레시피</Text>
+              <Text style={s.modalTitle}>{editingId ? '레시피 고치기' : '새 레시피'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>레시피 이름</Text>
               <TextInput style={s.createInput} placeholder="예) 할머니 장조림" placeholderTextColor="#BFAE99"
@@ -274,7 +298,7 @@ export default function RecipesScreen() {
                 onChangeText={setFormTip}
               />
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
-                <Text style={s.createSubmitText}>저장하기</Text>
+                <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
               </TouchableOpacity>
               </ScrollView>
             </Animated.View>
@@ -330,7 +354,7 @@ export default function RecipesScreen() {
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
-        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={openCreate}>
+        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => openCreate()}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
         {undoBar}

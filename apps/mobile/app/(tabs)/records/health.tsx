@@ -3,8 +3,8 @@ import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
-import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
-import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
+import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
+import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { withGrownupsOnly } from '../../../components/GrownupsOnly';
@@ -48,6 +48,8 @@ function HealthScreen() {
   // 창고에서 건강 기록만 최신순으로 꺼낸다.
   const records = useRecordsByCategory<HealthRecord>('health');
   const addRecord = useRecordsStore((s) => s.addRecord);
+  const updateRecord = useRecordsStore((s) => s.updateRecord);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // 작성 폼 입력값
   const [formType, setFormType] = useState('');
@@ -72,13 +74,16 @@ function HealthScreen() {
       .slice(0, 2);
   }, [records]);
 
-  const openCreate = () => {
-    setCreateMember(CURRENT_USER);
-    setFormType('');
-    setFormDate('');
-    setFormResult('');
-    setFormNotes('');
-    setFormNext('');
+  /** 폼 열기 — `edit`을 주면 그 기록을 값이 채워진 채로 연다 */
+  const openCreate = (edit?: FamilyRecord<HealthRecord>) => {
+    const d = edit?.data;
+    setEditingId(edit?.id ?? null);
+    setCreateMember(d?.member ?? CURRENT_USER);
+    setFormType(d?.type ?? '');
+    setFormDate(d?.date ?? '');
+    setFormResult(d?.result ?? '');
+    setFormNotes(d?.notes ?? '');
+    setFormNext(d?.nextDate ?? '');
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -89,7 +94,13 @@ function HealthScreen() {
     Animated.parallel([
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
-    ]).start(() => setShowCreate(false));
+    ]).start(() => { setShowCreate(false); setEditingId(null); });
+  };
+  const startEdit = () => {
+    const record = records.find((r) => r.id === selectedItem?.id);
+    if (!record) return;
+    closeDetail();
+    setTimeout(() => openCreate(record), 260);
   };
 
   const handleSave = () => {
@@ -109,22 +120,22 @@ function HealthScreen() {
       showAlert('다음 검진일을 한 번 봐주세요', '2026.10.26처럼 적어주세요. 비워도 괜찮아요.');
       return;
     }
-    addRecord({
-      category: 'health',
-      title: `${createMember} ${type}`,
-      recordedBy: CURRENT_USER,
-      data: {
-        member: createMember,
+    const fields = {
+      member: createMember, type, date: date || todayISO(),
+      result: formResult.trim(), notes: formNotes.trim(), nextDate: nextDate || '',
+      color: nameColor(createMember),
+    };
+    const existing = editingId ? records.find((r) => r.id === editingId) : null;
+    if (existing) {
+      updateRecord(existing.id, { title: `${createMember} ${type}`, data: { ...existing.data, ...fields } });
+    } else {
+      addRecord({
+        category: 'health',
+        title: `${createMember} ${type}`,
         recordedBy: CURRENT_USER,
-        type,
-        date: date || todayISO(),
-        result: formResult.trim(),
-        notes: formNotes.trim(),
-        nextDate: nextDate || '',
-        color: nameColor(createMember),
-        icon: 'medkit',
-      },
-    });
+        data: { ...fields, recordedBy: CURRENT_USER, icon: 'medkit' },
+      });
+    }
     closeCreate();
   };
 
@@ -196,7 +207,10 @@ function HealthScreen() {
                 </View>
               )}
               {selectedItem && (
-                <DeleteRecordRow id={selectedItem.id} onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
+                <>
+                  <EditRecordRow onPress={startEdit} />
+                  <DeleteRecordRow id={selectedItem.id} onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
+                </>
               )}
             </Animated.View>
           </View>
@@ -209,7 +223,7 @@ function HealthScreen() {
             </Animated.View>
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
-              <Text style={s.modalTitle}>새 건강 기록</Text>
+              <Text style={s.modalTitle}>{editingId ? '건강 기록 고치기' : '새 건강 기록'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>누구의 기록인가요</Text>
               <View style={s.memberRow}>
@@ -241,7 +255,7 @@ function HealthScreen() {
               <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="처방, 주의할 점, 의사 선생님 말씀" placeholderTextColor="#BFAE99" multiline
                 value={formNotes} onChangeText={setFormNotes} />
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
-                <Text style={s.createSubmitText}>저장하기</Text>
+                <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
               </TouchableOpacity>
             </ScrollView>
             </Animated.View>
@@ -309,7 +323,7 @@ function HealthScreen() {
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
-        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={openCreate}>
+        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => openCreate()}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
         {undoBar}

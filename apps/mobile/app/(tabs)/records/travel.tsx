@@ -3,8 +3,8 @@ import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
-import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
-import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
+import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
+import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { say, TRAVEL_LABEL } from '../../../constants/labels';
@@ -53,6 +53,8 @@ export default function TravelScreen() {
   // 창고에서 여행 기록만 최신순으로 꺼낸다.
   const trips = useRecordsByCategory<Trip>('travel');
   const addRecord = useRecordsStore((s) => s.addRecord);
+  const updateRecord = useRecordsStore((s) => s.updateRecord);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // 작성 폼에 사용자가 입력한 값을 담아둘 칸들
   const [formDest, setFormDest] = useState('');
@@ -69,14 +71,16 @@ export default function TravelScreen() {
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
 
-  const openCreate = () => {
-    // 폼을 열 때마다 지난번에 쓰던 내용을 비운다.
-    setFormDest('');
-    setFormDate('');
-    setFormHighlight('');
-    setFormJournal('');
-    setFormStatus('다녀옴');
-    setFormMembers([]);
+  /** 폼 열기 — `edit`을 주면 그 여행을 값이 채워진 채로 연다 */
+  const openCreate = (edit?: FamilyRecord<Trip>) => {
+    const d = edit?.data;
+    setEditingId(edit?.id ?? null);
+    setFormDest(d?.dest ?? '');
+    setFormDate(d?.date ?? '');
+    setFormHighlight(d?.highlight ?? '');
+    setFormJournal(d?.journal ?? '');
+    setFormStatus(d?.status ?? '다녀옴');
+    setFormMembers(Array.isArray(d?.members) ? d!.members as string[] : []);
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -87,7 +91,13 @@ export default function TravelScreen() {
     Animated.parallel([
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
-    ]).start(() => setShowCreate(false));
+    ]).start(() => { setShowCreate(false); setEditingId(null); });
+  };
+  const startEdit = () => {
+    const record = trips.find((t) => t.id === selectedItem?.id);
+    if (!record) return;
+    closeDetail();
+    setTimeout(() => openCreate(record), 260);
   };
 
   const handleSave = () => {
@@ -96,21 +106,25 @@ export default function TravelScreen() {
       showAlert('어디로 가는지 적어주세요', '목적지만 있어도 충분해요.');
       return;
     }
-    addRecord({
-      category: 'travel',
-      title: dest,
-      recordedBy: CURRENT_USER,
-      data: {
-        dest,
-        status: formStatus,
-        date: formDate.trim(),
-        color: NEW_TRIP_COLORS[trips.length % NEW_TRIP_COLORS.length],
-        icon: 'map-marker',
-        members: formMembers,
-        highlight: formHighlight.trim(),
-        journal: formJournal.trim(),
-      },
-    });
+    const fields = {
+      dest, status: formStatus, date: formDate.trim(), members: formMembers,
+      highlight: formHighlight.trim(), journal: formJournal.trim(),
+    };
+    const existing = editingId ? trips.find((t) => t.id === editingId) : null;
+    if (existing) {
+      updateRecord(existing.id, { title: dest, data: { ...existing.data, ...fields } });
+    } else {
+      addRecord({
+        category: 'travel',
+        title: dest,
+        recordedBy: CURRENT_USER,
+        data: {
+          ...fields,
+          color: NEW_TRIP_COLORS[trips.length % NEW_TRIP_COLORS.length],
+          icon: 'map-marker',
+        },
+      });
+    }
     closeCreate();
   };
 
@@ -208,7 +222,10 @@ export default function TravelScreen() {
                 </ScrollView>
               )}
               {selectedItem && (
-                <DeleteRecordRow id={selectedItem.id} onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
+                <>
+                  <EditRecordRow onPress={startEdit} />
+                  <DeleteRecordRow id={selectedItem.id} onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
+                </>
               )}
             </Animated.View>
           </View>
@@ -221,7 +238,7 @@ export default function TravelScreen() {
             </Animated.View>
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
-              <Text style={s.modalTitle}>새 여행 기록</Text>
+              <Text style={s.modalTitle}>{editingId ? '여행 기록 고치기' : '새 여행 기록'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>어디로</Text>
               <TextInput
@@ -280,7 +297,7 @@ export default function TravelScreen() {
                 onChangeText={setFormJournal}
               />
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
-                <Text style={s.createSubmitText}>저장하기</Text>
+                <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
               </TouchableOpacity>
               </ScrollView>
             </Animated.View>
@@ -347,7 +364,7 @@ export default function TravelScreen() {
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
-        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={openCreate}>
+        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => openCreate()}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
         {undoBar}

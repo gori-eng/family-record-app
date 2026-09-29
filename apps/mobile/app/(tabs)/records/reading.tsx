@@ -3,8 +3,8 @@ import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
-import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
+import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
+import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { say, READING_LABEL } from '../../../constants/labels';
@@ -46,6 +46,8 @@ export default function ReadingScreen() {
   const books = useRecordsByCategory<Book>('reading');
   const addRecord = useRecordsStore((s) => s.addRecord);
   const patchRecordData = useRecordsStore((s) => s.patchRecordData);
+  const updateRecord = useRecordsStore((s) => s.updateRecord);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [activeStatus, setActiveStatus] = useState('전체');
   // 순번(index)이 아니라 기록의 id로 지목한다. 목록 순서가 바뀌어도 엉뚱한 책을 고치지 않는다.
@@ -91,11 +93,14 @@ export default function ReadingScreen() {
     }
   }, [openTitle, books]);
 
-  const openCreate = () => {
-    setFormTitle('');
-    setFormAuthor('');
-    setCreateReader(CURRENT_USER);
-    setCreateStatus('읽고 싶은');
+  /** 폼 열기 — `edit`을 주면 그 책을 값이 채워진 채로 연다 */
+  const openCreate = (edit?: FamilyRecord<Book>) => {
+    const d = edit?.data;
+    setEditingId(edit?.id ?? null);
+    setFormTitle(edit?.title ?? '');
+    setFormAuthor(d?.author ?? '');
+    setCreateReader(d?.reader ?? CURRENT_USER);
+    setCreateStatus(d?.status ?? '읽고 싶은');
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -106,7 +111,13 @@ export default function ReadingScreen() {
     Animated.parallel([
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
-    ]).start(() => { setShowCreate(false); setCreateStatus('읽고 싶은'); });
+    ]).start(() => { setShowCreate(false); setCreateStatus('읽고 싶은'); setEditingId(null); });
+  };
+  const startEdit = () => {
+    const record = selectedRecord;
+    if (!record) return;
+    closeDetail();
+    setTimeout(() => openCreate(record), 260);
   };
 
   const openDetail = (record: { id: string; data: Book }) => {
@@ -150,19 +161,36 @@ export default function ReadingScreen() {
       showAlert('책 제목을 적어주세요', '어떤 책인지 한 줄이면 돼요.');
       return;
     }
-    addRecord({
-      category: 'reading',
-      title,
-      recordedBy: CURRENT_USER,
-      data: {
-        author: formAuthor.trim(),
-        reader: createReader,
-        status: createStatus,
-        color: NEW_BOOK_COLORS[books.length % NEW_BOOK_COLORS.length],
-        notes: '',
-        ...(createStatus === '읽는 중' ? { progress: 0 } : {}),
-      },
-    });
+    const existing = editingId ? books.find((b) => b.id === editingId) : null;
+    if (existing) {
+      // 상태를 바꾸면 진행률·별점도 상태에 맞춘다
+      const statusChanged = existing.data.status !== createStatus;
+      updateRecord(existing.id, {
+        title,
+        data: {
+          ...existing.data,
+          author: formAuthor.trim(),
+          reader: createReader,
+          status: createStatus,
+          ...(statusChanged && createStatus === '읽는 중' ? { progress: 0 } : {}),
+          ...(statusChanged && createStatus === '완독' ? { progress: 100 } : {}),
+        },
+      });
+    } else {
+      addRecord({
+        category: 'reading',
+        title,
+        recordedBy: CURRENT_USER,
+        data: {
+          author: formAuthor.trim(),
+          reader: createReader,
+          status: createStatus,
+          color: NEW_BOOK_COLORS[books.length % NEW_BOOK_COLORS.length],
+          notes: '',
+          ...(createStatus === '읽는 중' ? { progress: 0 } : {}),
+        },
+      });
+    }
     closeCreate();
   };
 
@@ -309,7 +337,10 @@ export default function ReadingScreen() {
                 </ScrollView>
               )}
               {selectedId && (
-                <DeleteRecordRow id={selectedId} onPress={() => askDelete(selectedId, { after: closeDetail })} label="이 책 지우기" />
+                <>
+                  <EditRecordRow onPress={startEdit} label="제목·저자·상태 고치기" />
+                  <DeleteRecordRow id={selectedId} onPress={() => askDelete(selectedId, { after: closeDetail })} label="이 책 지우기" />
+                </>
               )}
             </Animated.View>
           </View>
@@ -322,7 +353,7 @@ export default function ReadingScreen() {
             </Animated.View>
             <Animated.View style={[styles.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>새 도서 등록</Text>
+              <Text style={styles.modalTitle}>{editingId ? '책 정보 고치기' : '새 책'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={styles.createLabel}>책 제목</Text>
               <TextInput
@@ -368,7 +399,7 @@ export default function ReadingScreen() {
                 ))}
               </View>
               <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={handleCreate}>
-                <Text style={styles.createSubmitText}>저장하기</Text>
+                <Text style={styles.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
               </TouchableOpacity>
             </ScrollView>
             </Animated.View>
@@ -471,7 +502,7 @@ export default function ReadingScreen() {
         <TouchableOpacity
           style={styles.fab}
           activeOpacity={0.8}
-          onPress={openCreate}
+          onPress={() => openCreate()}
         >
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>

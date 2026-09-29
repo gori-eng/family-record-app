@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
-import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
+import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
 import { parseLooseDate, formatKoreanDate, daysUntil } from '../../../lib/dates';
@@ -61,6 +61,8 @@ export default function TimeCapsuleScreen() {
   const capsules = useRecordsByCategory<Capsule>('time-capsule');
   const addRecord = useRecordsStore((s) => s.addRecord);
   const patchRecordData = useRecordsStore((s) => s.patchRecordData);
+  const updateRecord = useRecordsStore((s) => s.updateRecord);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // 순번이 아니라 id로 지목한다 — 목록이 바뀌어도(미리 열기 등) 엉뚱한 캡슐을 보지 않는다
   const selected: FamilyRecord<Capsule> | null = useMemo(
@@ -78,11 +80,14 @@ export default function TimeCapsuleScreen() {
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
 
-  const openCreate = () => {
-    setFormTitle('');
-    setFormMessage('');
-    setFormTarget('');
-    setFormType('');
+  /** 폼 열기 — `edit`을 주면 그 캡슐을 값이 채워진 채로 연다 */
+  const openCreate = (edit?: FamilyRecord<Capsule>) => {
+    const d = edit?.data;
+    setEditingId(edit?.id ?? null);
+    setFormTitle(d?.title ?? '');
+    setFormMessage(d?.message ?? '');
+    setFormTarget(d?.targetISO ? formatKoreanDate(d.targetISO) : (d?.target ?? ''));
+    setFormType(d?.type ?? '');
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -93,7 +98,11 @@ export default function TimeCapsuleScreen() {
     Animated.parallel([
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
-    ]).start(() => setShowCreate(false));
+    ]).start(() => { setShowCreate(false); setEditingId(null); });
+  };
+  const startEdit = (record: FamilyRecord<Capsule>) => {
+    closeDetail();
+    setTimeout(() => openCreate(record), 260);
   };
 
   const handleSave = () => {
@@ -113,6 +122,15 @@ export default function TimeCapsuleScreen() {
     }
     if (targetISO <= todayISO()) {
       showAlert('개봉일이 오늘이거나 지난 날이에요', '봉인해 두려면 내일 이후 날짜로 적어주세요.');
+      return;
+    }
+    const existing = editingId ? capsules.find((c) => c.id === editingId) : null;
+    if (existing) {
+      updateRecord(existing.id, {
+        title,
+        data: { ...existing.data, title, message: formMessage.trim(), targetISO, target: formKoreanTarget(targetISO), type: formType.trim() || '기념일' },
+      });
+      closeCreate();
       return;
     }
     const today = new Date();
@@ -230,7 +248,11 @@ export default function TimeCapsuleScreen() {
                 </ScrollView>
               )}
               {selected && (
-                <DeleteRecordRow id={selected.id} onPress={() => askDelete(selected.id, { after: closeDetail })} />
+                <>
+                  {/* 봉인 중엔 쓴 사람만 고친다 — 남이 남의 편지를 미리 읽으면 안 되니까 */}
+                  {(!selOpen && sel?.author === CURRENT_USER) && <EditRecordRow onPress={() => startEdit(selected)} />}
+                  <DeleteRecordRow id={selected.id} onPress={() => askDelete(selected.id, { after: closeDetail })} />
+                </>
               )}
             </Animated.View>
           </View>
@@ -243,7 +265,7 @@ export default function TimeCapsuleScreen() {
             </Animated.View>
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
-              <Text style={s.modalTitle}>새 타임캡슐</Text>
+              <Text style={s.modalTitle}>{editingId ? '캡슐 고치기' : '새 타임캡슐'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>제목</Text>
               <TextInput style={s.createInput} placeholder="예) 첫째 스무 살 생일에" placeholderTextColor="#BFAE99"
@@ -258,7 +280,7 @@ export default function TimeCapsuleScreen() {
               <TextInput style={s.createInput} placeholder="예: 성인식, 생일, 결혼기념일" placeholderTextColor="#BFAE99"
                 value={formType} onChangeText={setFormType} />
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
-                <Text style={s.createSubmitText}>봉인하기</Text>
+                <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '봉인하기'}</Text>
               </TouchableOpacity>
             </ScrollView>
             </Animated.View>
@@ -310,7 +332,7 @@ export default function TimeCapsuleScreen() {
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
-        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={openCreate}>
+        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => openCreate()}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
         {undoBar}

@@ -97,7 +97,28 @@ export function DeleteRecordRow({
   );
 }
 
+/**
+ * 상세 모달의 '고치기' 줄 — 지우기 줄 바로 위에 놓는다.
+ * 2026-09-29 전체 점검 C단계: 7개 화면에 지우기만 있고 고치기가 없었다. 오타 하나도 지우고
+ * 다시 써야 했다. 작성 폼을 값이 채워진 채로 다시 여는 방식이라(가계부·캘린더와 같다)
+ * 편집 전용 폼을 따로 만들지 않는다.
+ */
+export function EditRecordRow({ onPress, label = '고치기' }: { onPress: () => void; label?: string }) {
+  return (
+    <TouchableOpacity style={s.editRow} activeOpacity={0.7} onPress={onPress}>
+      <FontAwesome name="pencil" size={13} color="#2D5A3F" />
+      <Text style={s.editRowText}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
 const s = StyleSheet.create({
+  editRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7,
+    backgroundColor: '#EFF6F1', borderRadius: 12, paddingVertical: 13,
+    marginTop: 18, marginBottom: -10,
+  },
+  editRowText: { fontSize: 14, fontWeight: '600', color: '#2D5A3F', fontFamily: 'PretendardBold' },
   row: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7,
     backgroundColor: '#FFF0F0', borderRadius: 12, paddingVertical: 13,

@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
-import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
+import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { say, MOVIE_FILTER_LABEL } from '../../../constants/labels';
@@ -57,6 +57,8 @@ export default function MoviesScreen() {
   const movies = useRecordsByCategory<Movie>('movies');
   const addRecord = useRecordsStore((s) => s.addRecord);
   const patchRecordData = useRecordsStore((s) => s.patchRecordData);
+  const updateRecord = useRecordsStore((s) => s.updateRecord);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // 순번이 아니라 id로 지목한다 — 별점을 매겨도 같은 영화를 본다
   const selected: FamilyRecord<Movie> | null = useMemo(
@@ -78,14 +80,17 @@ export default function MoviesScreen() {
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
 
-  const openCreate = () => {
-    setFormTitle('');
-    setFormGenre('');
-    setFormDate('');
-    setFormRating(5);
-    setFormReview('');
-    setFormWatched(true);
-    setCreateWith([CURRENT_USER]);
+  /** 폼 열기 — `edit`을 주면 그 영화를 값이 채워진 채로 연다 */
+  const openCreate = (edit?: FamilyRecord<Movie>) => {
+    const d = edit?.data;
+    setEditingId(edit?.id ?? null);
+    setFormTitle(d?.title ?? '');
+    setFormGenre(d?.genre ?? '');
+    setFormDate(d?.date ? formatKoreanDate(d.date) || d.date : '');
+    setFormRating(d?.rating || 5);
+    setFormReview(d?.review ?? '');
+    setFormWatched(d ? d.rating > 0 : true);
+    setCreateWith(d?.watchedWith?.length ? d.watchedWith : [CURRENT_USER]);
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -96,7 +101,11 @@ export default function MoviesScreen() {
     Animated.parallel([
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
-    ]).start(() => setShowCreate(false));
+    ]).start(() => { setShowCreate(false); setEditingId(null); });
+  };
+  const startEdit = (record: FamilyRecord<Movie>) => {
+    closeDetail();
+    setTimeout(() => openCreate(record), 260);
   };
 
   const handleSave = () => {
@@ -114,20 +123,25 @@ export default function MoviesScreen() {
       }
       date = parsed;
     }
-    addRecord({
-      category: 'movies',
+    const fields = {
       title,
-      recordedBy: CURRENT_USER,
-      data: {
+      genre: formGenre.trim(),
+      date,
+      rating: formWatched ? formRating : 0,
+      watchedWith: formWatched ? createWith : [],
+      review: formWatched ? formReview.trim() : '',
+    };
+    const existing = editingId ? movies.find((m) => m.id === editingId) : null;
+    if (existing) {
+      updateRecord(existing.id, { title, data: { ...existing.data, ...fields } });
+    } else {
+      addRecord({
+        category: 'movies',
         title,
-        genre: formGenre.trim(),
-        date,
-        rating: formWatched ? formRating : 0,
-        watchedWith: formWatched ? createWith : [],
-        review: formWatched ? formReview.trim() : '',
-        color: NEW_MOVIE_COLORS[movies.length % NEW_MOVIE_COLORS.length],
-      },
-    });
+        recordedBy: CURRENT_USER,
+        data: { ...fields, color: NEW_MOVIE_COLORS[movies.length % NEW_MOVIE_COLORS.length] },
+      });
+    }
     closeCreate();
   };
 
@@ -251,7 +265,10 @@ export default function MoviesScreen() {
                 </View>
               )}
               {selected && (
-                <DeleteRecordRow id={selected.id} onPress={() => askDelete(selected.id, { after: closeDetail })} />
+                <>
+                  <EditRecordRow onPress={() => startEdit(selected)} />
+                  <DeleteRecordRow id={selected.id} onPress={() => askDelete(selected.id, { after: closeDetail })} />
+                </>
               )}
             </Animated.View>
           </View>
@@ -264,7 +281,7 @@ export default function MoviesScreen() {
             </Animated.View>
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
-              <Text style={s.modalTitle}>새 영화 기록</Text>
+              <Text style={s.modalTitle}>{editingId ? '영화 기록 고치기' : '새 영화 기록'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>영화 제목</Text>
               <TextInput
@@ -339,7 +356,7 @@ export default function MoviesScreen() {
                 <Text style={s.authorHint}>'보고 싶어요' 목록에 담아둘게요. 보고 나서 별점을 매기면 본 영화가 돼요.</Text>
               )}
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
-                <Text style={s.createSubmitText}>{formWatched ? '저장하기' : '보고 싶은 영화로 담기'}</Text>
+                <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : formWatched ? '저장하기' : '보고 싶은 영화로 담기'}</Text>
               </TouchableOpacity>
             </ScrollView>
             </Animated.View>
@@ -410,7 +427,7 @@ export default function MoviesScreen() {
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
-        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={openCreate}>
+        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => openCreate()}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
         {undoBar}

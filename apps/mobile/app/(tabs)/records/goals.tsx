@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
-import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
+import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
 import { say, GOAL_LABEL } from '../../../constants/labels';
@@ -44,6 +44,8 @@ export default function GoalsScreen() {
   const goals = useRecordsByCategory<Goal>('goals');
   const addRecord = useRecordsStore((s) => s.addRecord);
   const patchRecordData = useRecordsStore((s) => s.patchRecordData);
+  const updateRecord = useRecordsStore((s) => s.updateRecord);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // 순번이 아니라 id로 지목한다 — 체크할 때마다 목록이 바뀌어도 같은 목표를 본다
   const selected: FamilyRecord<Goal> | null = useMemo(
@@ -62,12 +64,15 @@ export default function GoalsScreen() {
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
 
-  const openCreate = () => {
-    setFormTitle('');
-    setFormDesc('');
-    setFormTarget('');
-    setFormMilestones('');
-    setFormNotes('');
+  /** 폼 열기 — `edit`을 주면 그 목표를 값이 채워진 채로 연다 (체크 상태는 지킨다) */
+  const openCreate = (edit?: FamilyRecord<Goal>) => {
+    const d = edit?.data;
+    setEditingId(edit?.id ?? null);
+    setFormTitle(d?.title ?? '');
+    setFormDesc(d?.desc ?? '');
+    setFormTarget(d?.target ?? '');
+    setFormMilestones((d?.milestones ?? []).map((m) => m.label).join(String.fromCharCode(10)));
+    setFormNotes(d?.notes ?? '');
     setShowCreate(true);
     Animated.parallel([
       Animated.timing(createBg, { toValue: 1, duration: 300, useNativeDriver: true }),
@@ -78,7 +83,11 @@ export default function GoalsScreen() {
     Animated.parallel([
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
-    ]).start(() => setShowCreate(false));
+    ]).start(() => { setShowCreate(false); setEditingId(null); });
+  };
+  const startEdit = (record: FamilyRecord<Goal>) => {
+    closeDetail();
+    setTimeout(() => openCreate(record), 260);
   };
 
   const handleSave = () => {
@@ -87,24 +96,34 @@ export default function GoalsScreen() {
       showAlert('어떤 목표인지 적어주세요', '함께 이루고 싶은 걸 한 줄로요.');
       return;
     }
-    addRecord({
-      category: 'goals',
-      title,
-      recordedBy: CURRENT_USER,
-      data: {
+    const labels = formMilestones.split('\n').map((l) => l.trim()).filter(Boolean);
+    const existing = editingId ? goals.find((g) => g.id === editingId) : null;
+    if (existing) {
+      // 이미 체크한 마일스톤은 이름이 같으면 체크를 지킨다
+      const doneSet = new Set((existing.data.milestones ?? []).filter((m) => m.done).map((m) => m.label));
+      const milestones = labels.map((label) => ({ label, done: doneSet.has(label) }));
+      const next = { ...existing.data, title, desc: formDesc.trim(), target: formTarget.trim(), milestones, notes: formNotes.trim() };
+      const progress = progressOf(next);
+      updateRecord(existing.id, { title, data: { ...next, progress, status: progress >= 100 ? '달성' : '진행 중' } });
+    } else {
+      addRecord({
+        category: 'goals',
         title,
-        desc: formDesc.trim(),
-        progress: 0,
-        target: formTarget.trim(),
-        icon: 'flag',
-        color: NEW_GOAL_COLORS[goals.length % NEW_GOAL_COLORS.length],
-        status: '진행 중',
-        // 한 줄에 하나씩 적은 마일스톤을 체크리스트로 (처음엔 전부 미완료)
-        milestones: formMilestones.split('\n').map((l) => l.trim()).filter(Boolean)
-          .map((label) => ({ label, done: false })),
-        notes: formNotes.trim(),
-      },
-    });
+        recordedBy: CURRENT_USER,
+        data: {
+          title,
+          desc: formDesc.trim(),
+          progress: 0,
+          target: formTarget.trim(),
+          icon: 'flag',
+          color: NEW_GOAL_COLORS[goals.length % NEW_GOAL_COLORS.length],
+          status: '진행 중',
+          // 한 줄에 하나씩 적은 마일스톤을 체크리스트로 (처음엔 전부 미완료)
+          milestones: labels.map((label) => ({ label, done: false })),
+          notes: formNotes.trim(),
+        },
+      });
+    }
     closeCreate();
   };
 
@@ -267,7 +286,10 @@ export default function GoalsScreen() {
                 </ScrollView>
               )}
               {selected && (
-                <DeleteRecordRow id={selected.id} onPress={() => askDelete(selected.id, { after: closeDetail })} />
+                <>
+                  <EditRecordRow onPress={() => startEdit(selected)} />
+                  <DeleteRecordRow id={selected.id} onPress={() => askDelete(selected.id, { after: closeDetail })} />
+                </>
               )}
             </Animated.View>
           </View>
@@ -280,7 +302,7 @@ export default function GoalsScreen() {
             </Animated.View>
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
-              <Text style={s.modalTitle}>새 가족 목표</Text>
+              <Text style={s.modalTitle}>{editingId ? '목표 고치기' : '새 가족 목표'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={s.createLabel}>목표 제목</Text>
               <TextInput style={s.createInput} placeholder="예) 올해 가족 여행 세 번 가기" placeholderTextColor="#BFAE99"
@@ -310,7 +332,7 @@ export default function GoalsScreen() {
                 multiline
               />
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
-                <Text style={s.createSubmitText}>저장하기</Text>
+                <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
               </TouchableOpacity>
               </ScrollView>
             </Animated.View>
@@ -376,7 +398,7 @@ export default function GoalsScreen() {
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
-        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={openCreate}>
+        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => openCreate()}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
         {undoBar}

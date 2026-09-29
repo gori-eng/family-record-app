@@ -1148,7 +1148,8 @@ const styles = StyleSheet.create({
   memberChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#F9F8F5', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6 },
   memberName: { fontSize: 12, color: '#4A4A4A', fontFamily: 'PretendardBold' },
   memberAmount: { fontSize: 12, color: '#888888', fontFamily: 'Pretendard' },
-  emptyState: { alignItems: 'center' as const, paddingVertical: 48, gap: 6 },
+  // 오른쪽 아래 + 버튼과 글자가 겹치지 않게 양옆을 비운다
+  emptyState: { alignItems: 'center' as const, paddingVertical: 48, paddingHorizontal: 56, gap: 6 },
   emptyText: { fontSize: 15, color: '#4A4A4A', marginTop: 8, fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   emptySubtext: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
   filterScroll: { marginBottom: 8 },
