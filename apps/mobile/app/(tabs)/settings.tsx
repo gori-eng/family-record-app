@@ -90,7 +90,11 @@ export default function SettingsScreen() {
         <View style={{ flex: 1 }}>
           <Text style={styles.profileName}>{myFullName}</Text>
           <Text style={styles.profileRole}>
-            {family.isReal ? family.name : '아직 로그인하지 않았어요'}
+            {family.isReal
+              ? family.name
+              : family.signedIn
+                ? '아직 가족을 만들지 않았어요'
+                : '아직 로그인하지 않았어요'}
           </Text>
         </View>
         <View style={styles.editProfileButton}>
@@ -103,8 +107,17 @@ export default function SettingsScreen() {
           onPress={() => router.replace('/onboarding')}>
           <FontAwesome name="info-circle" size={14} color="#7A6B55" />
           <Text style={styles.sampleText}>
-            지금 보이는 가족은 <Text style={styles.sampleStrong}>예시</Text>예요.
-            로그인하고 가족을 만들면 우리 가족 것으로 바뀌어요.
+            {family.signedIn ? (
+              <>
+                로그인은 됐어요. 이제 <Text style={styles.sampleStrong}>가족을 만들면</Text>{' '}
+                여기가 우리 가족 것으로 바뀌어요.
+              </>
+            ) : (
+              <>
+                지금 보이는 가족은 <Text style={styles.sampleStrong}>예시</Text>예요.
+                로그인하고 가족을 만들면 우리 가족 것으로 바뀌어요.
+              </>
+            )}
           </Text>
           <FontAwesome name="chevron-right" size={11} color="#B0A590" />
         </TouchableOpacity>

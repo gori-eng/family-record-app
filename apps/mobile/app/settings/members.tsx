@@ -55,7 +55,9 @@ export default function MembersScreen() {
             onPress={() => router.replace('/onboarding')}>
             <FontAwesome name="info-circle" size={14} color="#7A6B55" />
             <Text style={s.sampleText}>
-              아직 로그인 전이라 <Text style={s.sampleStrong}>예시 가족</Text>이 보여요.
+              {family.signedIn
+                ? '아직 가족을 만들지 않아서 예시 가족이 보여요.'
+                : '아직 로그인 전이라 예시 가족이 보여요.'}
             </Text>
             <FontAwesome name="chevron-right" size={11} color="#B0A590" />
           </TouchableOpacity>

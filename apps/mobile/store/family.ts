@@ -94,6 +94,8 @@ export function useMemberCards(): MemberCard[] {
 }
 
 export type FamilyInfo = {
+  /** 로그인은 했는지. **가족이 없는 것과 로그인을 안 한 것은 다른 상태다** */
+  signedIn: boolean;
   /** 가족 이름. 진짜가 없으면 '우리 가족' */
   name: string;
   /** 초대 코드. 진짜가 없으면 null — 화면은 이걸로 "아직 없음"을 판단한다 */
@@ -112,10 +114,18 @@ export type FamilyInfo = {
 export function useFamilyInfo(): FamilyInfo {
   const family = useSession((s) => s.family);
   const members = useSession((s) => s.members);
+  const signedIn = useSession((s) => !!s.userId);
   if (!family) {
-    return { name: '우리 가족', inviteCode: null, memberCount: SAMPLE_MEMBERS.length, isReal: false };
+    return {
+      signedIn,
+      name: '우리 가족',
+      inviteCode: null,
+      memberCount: SAMPLE_MEMBERS.length,
+      isReal: false,
+    };
   }
   return {
+    signedIn,
     name: family.name,
     inviteCode: family.invite_code,
     memberCount: members.length,
