@@ -215,7 +215,7 @@ export type Database = {
         Returns: { family_id: string; member_id: string; invite_code: string }[];
       };
       join_family_by_code: {
-        Args: { p_invite_code: string; p_display_name: string; p_full_name?: string };
+        Args: { p_invite_code: string; p_display_name: string; p_full_name?: string; p_role?: string };
         Returns: { family_id: string; member_id: string }[];
       };
       /** RLS 재귀를 피하려고 만든 함수. 정책 안에서만 쓴다 */

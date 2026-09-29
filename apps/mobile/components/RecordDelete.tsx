@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { showAlert } from './AppAlert';
 import { useRecordsStore, type FamilyRecord } from '../store/records';
 import { eulreul } from '../lib/korean';
+import { useCanDelete } from '../store/family';
 
 /**
  * 기록 지우기 — 화면 여덟 곳이 같이 쓴다.
@@ -69,8 +70,25 @@ export function useRecordDelete(what = '기록') {
   return { askDelete, undoBar };
 }
 
-/** 상세 모달 맨 아래에 놓는 지우기 줄. 화면마다 스타일을 또 만들지 않아도 된다 */
-export function DeleteRecordRow({ onPress, label = '이 기록 지우기' }: { onPress: () => void; label?: string }) {
+/**
+ * 상세 모달 맨 아래에 놓는 지우기 줄.
+ *
+ * `id`를 주면 **지울 수 있는지 스스로 확인한다.** 못 지우는 기록이면 버튼 대신
+ * 이유를 보여준다 — 버튼이 아예 없으면 "왜 나만 못 지우지?"가 된다.
+ */
+export function DeleteRecordRow({
+  onPress, id, label = '이 기록 지우기',
+}: { onPress: () => void; id?: string; label?: string }) {
+  const canDelete = useCanDelete();
+  const authorId = useRecordsStore((st) => (id ? st.records.find((r) => r.id === id)?.authorId : undefined));
+  if (id && !canDelete(authorId)) {
+    return (
+      <View style={s.noRow}>
+        <FontAwesome name="lock" size={12} color="#9C8B75" />
+        <Text style={s.noRowText}>지우기는 쓴 사람과 관리자만 할 수 있어요</Text>
+      </View>
+    );
+  }
   return (
     <TouchableOpacity style={s.row} activeOpacity={0.7} onPress={onPress}>
       <FontAwesome name="trash-o" size={14} color="#D94040" />
@@ -86,6 +104,11 @@ const s = StyleSheet.create({
     marginTop: 18, marginBottom: 4,
   },
   rowText: { fontSize: 14, fontWeight: '600', color: '#D94040', fontFamily: 'Pretendard' },
+  noRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    paddingVertical: 12, marginTop: 18, marginBottom: 4,
+  },
+  noRowText: { fontSize: 12, color: '#9C8B75', fontFamily: 'Pretendard' },
 
   undoBar: {
     position: 'absolute', bottom: 20, left: 20, right: 88, zIndex: 11,

@@ -18,6 +18,8 @@ export type AppRecord<T = Record<string, unknown>> = {
   createdAt: number;
   recordedBy: string;
   data: T;
+  /** 쓴 사람의 계정 id — 지우기 권한을 가르는 데 쓴다 */
+  authorId?: string;
 };
 
 /** DB 행 → 앱 모양 */
@@ -29,6 +31,7 @@ export function toApp<T>(row: RecordRow<T>): AppRecord<T> {
     createdAt: new Date(row.created_at).getTime(),
     recordedBy: row.recorded_by,
     data: row.data,
+    authorId: row.created_by,
   };
 }
 
@@ -130,7 +133,17 @@ export async function updateRecord(
   if (error) throw error;
 }
 
+/**
+ * 기록 지우기.
+ *
+ * ⚠️ 정책(RLS)에 걸려 못 지우면 DELETE는 **오류 없이 0건**을 지운다.
+ *    그대로 두면 화면에서는 사라졌다가 새로고침하면 되살아난다.
+ *    그래서 실제로 지워진 줄을 돌려받아 확인한다.
+ */
 export async function deleteRecord(id: string): Promise<void> {
-  const { error } = await supabase.from('records').delete().eq('id', id);
+  const { data, error } = await supabase.from('records').delete().eq('id', id).select('id');
   if (error) throw error;
+  if (!data || data.length === 0) {
+    throw new Error('이 기록은 쓴 사람이나 관리자만 지울 수 있어요.');
+  }
 }

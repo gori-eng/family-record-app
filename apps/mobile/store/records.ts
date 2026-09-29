@@ -65,6 +65,8 @@ export type FamilyRecord<T = Record<string, any>> = {
   /** 작성자 이름 */
   recordedBy: string;
   data: T;
+  /** 쓴 사람의 계정 id — 지우기 권한을 가르는 데 쓴다. 저장 전이면 없다 */
+  authorId?: string;
 };
 
 /** 새 기록을 넣을 때 호출부가 채워야 하는 값. id와 createdAt은 보관소가 붙여준다. */

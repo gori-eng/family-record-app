@@ -46,6 +46,8 @@ export type CalendarEvent = {
   color: string;
   /** 일정을 넣은 사람 */
   createdBy: string;
+  /** 적은 사람의 계정 id — 지우기 권한을 가르는 데 쓴다. 저장 전이면 없다 */
+  authorId?: string;
 };
 
 export type NewEvent = Omit<CalendarEvent, 'id'>;

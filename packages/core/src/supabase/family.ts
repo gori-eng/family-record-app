@@ -77,12 +77,15 @@ export async function createFamily(
 export async function joinFamilyByCode(
   inviteCode: string,
   displayName: string,
-  fullName?: string
+  fullName?: string,
+  /** 부모·자녀·조부모. 관리자는 고를 수 없다(DB가 막는다) — 00008 */
+  role: 'parent' | 'child' | 'elder' = 'parent'
 ): Promise<{ family: Family; member: FamilyMember }> {
   const { data, error } = await supabase.rpc('join_family_by_code', {
     p_invite_code: inviteCode.trim(),
     p_display_name: displayName.trim(),
     p_full_name: fullName?.trim() || displayName.trim(),
+    p_role: role,
   });
   if (error) throw error;
 

@@ -34,6 +34,12 @@ export default function OnboardingScreen() {
   const [display, setDisplay] = useState('');
   /** 프로필에 뜰 이름 (김지수) */
   const [full, setFull] = useState('');
+  /**
+   * 합류할 때 고르는 역할 (2026-09-29 운영자 결정).
+   * 관리자는 목록에 없다 — 고를 수 있으면 누구나 관리자가 되어 지우기 권한이 무너진다.
+   * 관리자는 가족을 만든 사람뿐이다. (DB도 막는다 — 00008)
+   */
+  const [role, setRole] = useState<'parent' | 'child' | 'elder'>('parent');
 
   /** 가족을 막 만든 뒤 보여줄 초대 코드 */
   const [madeFamily, setMadeFamily] = useState<Family | null>(null);
@@ -58,6 +64,7 @@ export default function OnboardingScreen() {
 
     // ── 사람이 고칠 수 있는 것들 ─────────────────────────
     if (msg.includes('이름이 이미 있어요')) return msg;
+    if (msg.includes('역할은')) return msg;
     if (msg.includes('로그인이 필요해요')) {
       return '로그인 정보가 확인되지 않았어요. 다시 로그인해주세요.';
     }
@@ -127,7 +134,7 @@ export default function OnboardingScreen() {
 
     setBusy(true);
     try {
-      const { family } = await joinFamilyByCode(inviteCode.trim(), display.trim(), full.trim() || undefined);
+      const { family } = await joinFamilyByCode(inviteCode.trim(), display.trim(), full.trim() || undefined, role);
       const members: FamilyMember[] = await fetchMembers(family.id);
       setFamily(family, members);
       showAlert('가족에 들어왔어요', `이제 ${family.name}의 기록을 함께 볼 수 있어요.`, [
@@ -246,6 +253,25 @@ export default function OnboardingScreen() {
         </>
       )}
 
+      {!creating && (
+        <>
+          <Text style={s.label}>나는 이 가족에서</Text>
+          <View style={s.roleRow}>
+            {([
+              ['parent', '부모'],
+              ['child', '자녀'],
+              ['elder', '조부모'],
+            ] as const).map(([value, label]) => (
+              <TouchableOpacity key={value} activeOpacity={0.7}
+                style={[s.roleChip, role === value && s.roleChipOn]}
+                onPress={() => setRole(value)}>
+                <Text style={[s.roleText, role === value && s.roleTextOn]}>{label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </>
+      )}
+
       <Text style={s.label}>기록에 뜰 이름</Text>
       <TextInput style={s.input} placeholder="예: 지수" placeholderTextColor="#A0A0A0"
         value={display} onChangeText={setDisplay} />
@@ -292,6 +318,11 @@ const s = StyleSheet.create({
   input: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
   codeInput: { letterSpacing: 2, fontFamily: 'PretendardBold' },
   hint: { fontSize: 12, color: '#9C8B75', fontFamily: 'Pretendard', marginTop: 6, lineHeight: 17 },
+  roleRow: { flexDirection: 'row', gap: 8 },
+  roleChip: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' },
+  roleChipOn: { borderColor: '#4A8C6F', backgroundColor: '#EFF6F1' },
+  roleText: { fontSize: 14, color: '#7A6B55', fontFamily: 'Pretendard' },
+  roleTextOn: { color: '#2D5A3F', fontWeight: '700' },
 
   primaryBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, marginTop: 28 },
   primaryBtnOff: { backgroundColor: '#A8C4B4' },

@@ -37,7 +37,7 @@ export type { AppFinanceSettings } from './supabase/financeSettings';
 export {
   canView,
   canEdit,
-  canDelete,
+  canDeleteRecord,
   canManageFamily,
   canInviteMembers,
 } from './utils/permissions';

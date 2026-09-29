@@ -295,7 +295,7 @@ export default function ReadingScreen() {
                 </ScrollView>
               )}
               {selectedId && (
-                <DeleteRecordRow onPress={() => askDelete(selectedId, { after: closeDetail })} label="이 책 지우기" />
+                <DeleteRecordRow id={selectedId} onPress={() => askDelete(selectedId, { after: closeDetail })} label="이 책 지우기" />
               )}
             </Animated.View>
           </View>

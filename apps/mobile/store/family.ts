@@ -15,7 +15,8 @@
  * ⚠️ Supabase 연동이 끝나고 `REQUIRE_AUTH`를 켜면 예시 쪽은 쓸 일이 없어진다.
  *    그때 `constants/family.ts`와 이 파일의 폴백을 함께 지우면 된다.
  */
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
+import { canDeleteRecord } from '@core/supabase';
 import { useSession } from './session';
 import { REQUIRE_AUTH } from '../lib/authGate';
 
@@ -154,3 +155,16 @@ export function useFamilyInfo(): FamilyInfo {
 /** 훅 밖(이벤트 핸들러 등)에서 지금 나의 이름이 필요할 때 */
 export const meName = (): string =>
   useSession.getState().me?.display_name ?? (USE_SAMPLE ? SAMPLE_ME : '');
+
+/**
+ * 이 기록을 내가 지울 수 있는지 — **쓴 사람과 관리자만** (2026-09-29 운영자 결정).
+ * 규칙 자체는 `canDeleteRecord`(core)에 있고, DB 정책(00008)도 같은 규칙이다.
+ */
+export function useCanDelete(): (authorId?: string) => boolean {
+  const userId = useSession((s) => s.userId);
+  const role = useSession((s) => s.me?.role ?? null);
+  return useCallback(
+    (authorId?: string) => canDeleteRecord({ authorId, myUserId: userId, myRole: role }),
+    [userId, role]
+  );
+}

@@ -5,7 +5,7 @@ import { Stack, useRouter } from 'expo-router';
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
 import { useFinanceSettings, recurringDateIn, type RecurringItem } from '../../../store/financeSettings';
-import { useFamilyMembers, useMe } from '../../../store/family';
+import { useFamilyMembers, useMe, useCanDelete } from '../../../store/family';
 import {
   type Transaction,
   EXPENSE_CATEGORIES, INCOME_CATEGORIES, PAYMENT_METHODS, metaOf,
@@ -15,6 +15,8 @@ import {
 } from '../../../store/finance';
 
 export default function FinanceScreen() {
+  // 지우기는 쓴 사람과 관리자만 (store/family.ts · DB 정책 00008)
+  const canDelete = useCanDelete();
   /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
   const MEMBERS = useFamilyMembers();
   const CURRENT_USER = useMe();
@@ -442,13 +444,15 @@ export default function FinanceScreen() {
                       <FontAwesome name="repeat" size={13} color="#2D5A3F" />
                       <Text style={styles.actionText}>매달</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.actionBtn, styles.actionBtnDanger]}
-                      activeOpacity={0.7}
-                      onPress={() => handleDelete(selectedRecord)}>
-                      <FontAwesome name="trash-o" size={13} color="#D94040" />
-                      <Text style={[styles.actionText, { color: '#D94040' }]}>삭제</Text>
-                    </TouchableOpacity>
+                    {canDelete(selectedRecord.authorId) && (
+                      <TouchableOpacity
+                        style={[styles.actionBtn, styles.actionBtnDanger]}
+                        activeOpacity={0.7}
+                        onPress={() => handleDelete(selectedRecord)}>
+                        <FontAwesome name="trash-o" size={13} color="#D94040" />
+                        <Text style={[styles.actionText, { color: '#D94040' }]}>삭제</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 </View>
               )}

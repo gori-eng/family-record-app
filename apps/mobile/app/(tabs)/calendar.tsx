@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, Modal,
 import { FontAwesome } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
 import { showAlert } from '../../components/AppAlert';
-import { useFamilyMembers, useMe } from '../../store/family';
+import { useFamilyMembers, useMe, useCanDelete } from '../../store/family';
 import {
   useEventsStore, useEventsOn, useEventDaysInMonth,
   EVENT_COLORS, formatTime, formatEventDate, membersLabel, normalizeTime, todayISO,
@@ -13,6 +13,8 @@ import {
 const TIME_CHIPS = ['09:00', '12:00', '15:00', '18:00', '20:00'];
 
 export default function CalendarScreen() {
+  // 지우기는 적은 사람과 관리자만 (store/family.ts · DB 정책 00008)
+  const canDelete = useCanDelete();
   /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
   const MEMBERS = useFamilyMembers();
   const CURRENT_USER = useMe();
@@ -235,10 +237,12 @@ export default function CalendarScreen() {
                     <FontAwesome name="pencil" size={14} color="#2D5A3F" />
                     <Text style={styles.detailBtnText}>고치기</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.detailBtn, styles.detailBtnDanger]} activeOpacity={0.7} onPress={() => handleDelete(showDetail)}>
-                    <FontAwesome name="trash-o" size={14} color="#D94040" />
-                    <Text style={[styles.detailBtnText, { color: '#D94040' }]}>지우기</Text>
-                  </TouchableOpacity>
+                  {canDelete(showDetail.authorId) && (
+                    <TouchableOpacity style={[styles.detailBtn, styles.detailBtnDanger]} activeOpacity={0.7} onPress={() => handleDelete(showDetail)}>
+                      <FontAwesome name="trash-o" size={14} color="#D94040" />
+                      <Text style={[styles.detailBtnText, { color: '#D94040' }]}>지우기</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </>
             )}

@@ -210,7 +210,7 @@ export default function ParentingScreen() {
                 </View>
               )}
               {selectedItem && (
-                <DeleteRecordRow onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
+                <DeleteRecordRow id={selectedItem.id} onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
               )}
             </Animated.View>
           </View>
