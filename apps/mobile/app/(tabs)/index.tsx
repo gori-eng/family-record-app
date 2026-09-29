@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useRecentRecords, CATEGORY_LABELS, relativeDay, type RecordCategory } from '../../store/records';
+import { useMe } from '../../store/family';
 import { useTodayEvents, formatTime, membersLabel } from '../../store/events';
 import { useState, useCallback, useRef, useEffect } from 'react';
 
@@ -31,6 +32,8 @@ export default function HomeScreen() {
   const router = useRouter();
   // 창고에서 최근에 쓴 기록 4개 — 카테고리 상관없이
   const recent = useRecentRecords(4);
+  // 로그인한 사람의 짧은 이름 (없으면 예시 가족의 '지수') — store/family.ts
+  const me = useMe();
   // 오늘 일정 — 캘린더와 **같은 보관소**를 본다
   const todayEvents = useTodayEvents();
   const [refreshing, setRefreshing] = useState(false);
@@ -133,7 +136,7 @@ export default function HomeScreen() {
 
         {/* 1. Hero — 한 줄 인사 */}
         <Animated.View style={[s.hero, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-          <Text style={s.greetingLine}>지수님, {greeting}</Text>
+          <Text style={s.greetingLine}>{me}님, {greeting}</Text>
           <Text style={s.dateText}>{dateStr} {dayName}</Text>
         </Animated.View>
 
