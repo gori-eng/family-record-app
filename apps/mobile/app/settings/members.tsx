@@ -4,8 +4,10 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { useMemberCards, useFamilyInfo, type MemberCard } from '../../store/family';
 import { useSession } from '../../store/session';
-import { setMemberRole } from '@core/supabase';
-import { ro } from '../../lib/korean';
+import { setMemberRole, removeMember } from '@core/supabase';
+import { ro, eulreul } from '../../lib/korean';
+import { dbErrorText } from '../../lib/dbErrors';
+import { useRecordsStore } from '../../store/records';
 
 /**
  * 가족 구성원 목록.
@@ -33,6 +35,7 @@ export default function MembersScreen() {
   const family = useFamilyInfo();
   const isAdmin = useSession((st) => st.me?.role === 'admin');
   const refresh = useSession((st) => st.refresh);
+  const records = useRecordsStore((st) => st.records);
 
   /**
    * 관리자가 역할을 바로잡는다 (00010).
@@ -63,6 +66,38 @@ export default function MembersScreen() {
     );
   };
 
+  /**
+   * 관리자가 구성원 내보내기 (00011).
+   * 그 사람이 쓴 기록은 **가족에 남는다** — 가족이 함께 쌓은 기록이라서. 몇 개가 남는지 말해준다.
+   * 다시 들어오려면 초대 코드로 합류하면 되고, 같은 짧은 이름으로 들어오면 옛 기록과 다시 이어진다.
+   */
+  const confirmRemove = (m: MemberCard) => {
+    const left = records.filter((r) => r.recordedBy === m.display).length;
+    showAlert(
+      `${m.display}님을 가족에서 내보낼까요?`,
+      `${m.display}님은 더 이상 ${family.name}의 기록을 볼 수 없어요.
+` +
+        (left ? `${m.display}님이 쓴 기록 ${left}개는 가족에 그대로 남아요.
+` : '') +
+        `
+다시 함께하려면 초대 코드로 들어오면 돼요.`,
+      [
+        { text: '그냥 둘게요', style: 'cancel' },
+        { text: '내보내기', style: 'destructive', onPress: () => doRemove(m) },
+      ]
+    );
+  };
+  const doRemove = async (m: MemberCard) => {
+    if (!m.memberId) return;
+    try {
+      await removeMember(m.memberId);
+      await refresh();
+      showAlert(`${m.display}님이 가족에서 빠졌어요`, '쓴 기록은 그대로 남아 있어요.');
+    } catch (e) {
+      showAlert(`${m.display}님${eulreul(m.display + '님')} 내보내지 못했어요`, dbErrorText(e));
+    }
+  };
+
   const openMember = (m: MemberCard) => {
     const info = `기록에는 '${m.display}'${ro(m.display)} 남아요.\n역할: ${m.role}`;
     // 관리자는 다른 사람의 역할을 바로잡을 수 있다. 나 자신·예시 가족은 보기만
@@ -82,6 +117,7 @@ export default function MembersScreen() {
     showAlert(m.full, info + '\n\n자녀는 가계부·건강 기록을 볼 수 없어요.', [
       ...options,
       { text: '관리자 넘기기', onPress: () => confirmHandOver(m) },
+      { text: '가족에서 내보내기', style: 'destructive', onPress: () => confirmRemove(m) },
       { text: '그냥 둘게요', style: 'cancel' },
     ]);
   };
