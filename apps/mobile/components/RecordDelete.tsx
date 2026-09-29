@@ -5,6 +5,7 @@ import { showAlert } from './AppAlert';
 import { useRecordsStore, type FamilyRecord } from '../store/records';
 import { eulreul } from '../lib/korean';
 import { useCanDelete } from '../store/family';
+import { removePhotoFiles, photosOf } from '../lib/photos';
 
 /**
  * 기록 지우기 — 화면 여덟 곳이 같이 쓴다.
@@ -25,7 +26,14 @@ export function useRecordDelete(what = '기록') {
 
   const [undoItem, setUndoItem] = useState<FamilyRecord | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  /** 되돌릴 수 있는 동안 기다리는 기록 — 시간이 지나면 그 기록의 사진을 창고에서 치운다 */
+  const pending = useRef<FamilyRecord | null>(null);
+  const finish = () => {
+    if (pending.current) removePhotoFiles(photosOf(pending.current.data));
+    pending.current = null;
+  };
+  // 화면을 떠나면 되돌리기도 끝난 것이다
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); finish(); }, []);
 
   /** 확인을 받고 지운다. `after`는 상세 모달을 닫는 데 쓴다 */
   const askDelete = (id: string, opts?: { after?: () => void }) => {
@@ -41,9 +49,12 @@ export function useRecordDelete(what = '기록') {
         onPress: () => {
           removeRecord(id);
           opts?.after?.();
+          // 앞서 지운 게 아직 기다리고 있으면 그건 이제 끝낸다 (되돌리기 바는 하나뿐이다)
+          finish();
+          pending.current = record;
           setUndoItem(record);
           if (timer.current) clearTimeout(timer.current);
-          timer.current = setTimeout(() => setUndoItem(null), 10000);
+          timer.current = setTimeout(() => { setUndoItem(null); finish(); }, 10000);
         },
       },
     ]);
@@ -53,6 +64,7 @@ export function useRecordDelete(what = '기록') {
     if (!undoItem) return;
     // 되돌리면 DB에 다시 넣는다. id는 새로 받지만 내용은 그대로다
     addRecordsRaw([undoItem]);
+    pending.current = null;   // 되살렸으니 사진도 그대로 둔다
     setUndoItem(null);
     if (timer.current) clearTimeout(timer.current);
   };

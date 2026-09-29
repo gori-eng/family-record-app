@@ -38,7 +38,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "가족 기록에 사진을 붙이려고 사진첩을 열어요. 고른 사진만 우리 가족에게 보여요.",
+          "cameraPermission": "가족 기록에 넣을 사진을 바로 찍으려고 카메라를 써요.",
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

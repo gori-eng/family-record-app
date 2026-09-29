@@ -5,6 +5,8 @@ import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
 import { useOpenParam } from '../../../lib/useOpenParam';
+import { usePhotoDraft, PhotoPickerRow, PhotoGallery } from '../../../components/Photos';
+import { photosOf } from '../../../lib/photos';
 import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
@@ -13,6 +15,8 @@ import { parseLooseDate, formatKoreanDate } from '../../../lib/dates';
 import { todayISO } from '../../../store/finance';
 
 type Movie = {
+  /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
+  photos?: string[];
   title: string; genre: string;
   /** 본 날 'YYYY-MM-DD'. 옛 기록은 자유 글자, 아직 안 본 영화는 '' */
   date: string;
@@ -82,7 +86,10 @@ export default function MoviesScreen() {
   const createSlide = useRef(new Animated.Value(500)).current;
 
   /** 폼 열기 — `edit`을 주면 그 영화를 값이 채워진 채로 연다 */
+  /** 폼의 사진 — 고르는 순간 올라가고, 저장하지 않고 닫으면 치운다 (components/Photos) */
+  const photoDraft = usePhotoDraft();
   const openCreate = (edit?: FamilyRecord<Movie>) => {
+    photoDraft.reset(photosOf(edit?.data));
     const d = edit?.data;
     setEditingId(edit?.id ?? null);
     setFormTitle(d?.title ?? '');
@@ -99,6 +106,7 @@ export default function MoviesScreen() {
     ]).start();
   };
   const closeCreate = () => {
+    photoDraft.discard();   // 저장했으면 commit이 먼저 비워둬서 아무 일도 안 한다
     Animated.parallel([
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
@@ -131,6 +139,7 @@ export default function MoviesScreen() {
       rating: formWatched ? formRating : 0,
       watchedWith: formWatched ? createWith : [],
       review: formWatched ? formReview.trim() : '',
+      photos: photoDraft.photos,
     };
     const existing = editingId ? movies.find((m) => m.id === editingId) : null;
     if (existing) {
@@ -143,6 +152,7 @@ export default function MoviesScreen() {
         data: { ...fields, color: NEW_MOVIE_COLORS[movies.length % NEW_MOVIE_COLORS.length] },
       });
     }
+    photoDraft.commit();
     closeCreate();
   };
 
@@ -218,6 +228,7 @@ export default function MoviesScreen() {
               {selected && sel && (
                 <View style={s.modalContent}>
                   <Text style={s.modalTitle}>{sel.title}</Text>
+                  <PhotoGallery photos={photosOf(sel)} />
                   {sel.genre ? (
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>장르</Text>
@@ -303,6 +314,8 @@ export default function MoviesScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
+              <Text style={s.createLabel}>사진 (선택) — 티켓, 포스터, 함께 본 날</Text>
+              <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>장르</Text>
               <TextInput
                 style={s.createInput}

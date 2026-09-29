@@ -5,6 +5,8 @@ import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
 import { useOpenParam } from '../../../lib/useOpenParam';
+import { usePhotoDraft, PhotoPickerRow, PhotoGallery, PhotoThumb } from '../../../components/Photos';
+import { photosOf } from '../../../lib/photos';
 import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
@@ -18,6 +20,8 @@ const EMPTY_BY_FILTER: Record<string, string> = {
 };
 
 type Trip = {
+  /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
+  photos?: string[];
   dest: string; status: string; date: string;
   color: string; icon: string;
   /** 함께 간 사람들. 비어 있으면 가족 전체. 옛 기록은 '전체' 같은 글자일 수 있다 */
@@ -73,7 +77,10 @@ export default function TravelScreen() {
   const createSlide = useRef(new Animated.Value(500)).current;
 
   /** 폼 열기 — `edit`을 주면 그 여행을 값이 채워진 채로 연다 */
+  /** 폼의 사진 — 고르는 순간 올라가고, 저장하지 않고 닫으면 치운다 (components/Photos) */
+  const photoDraft = usePhotoDraft();
   const openCreate = (edit?: FamilyRecord<Trip>) => {
+    photoDraft.reset(photosOf(edit?.data));
     const d = edit?.data;
     setEditingId(edit?.id ?? null);
     setFormDest(d?.dest ?? '');
@@ -89,6 +96,7 @@ export default function TravelScreen() {
     ]).start();
   };
   const closeCreate = () => {
+    photoDraft.discard();   // 저장했으면 commit이 먼저 비워둬서 아무 일도 안 한다
     Animated.parallel([
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
@@ -110,6 +118,7 @@ export default function TravelScreen() {
     const fields = {
       dest, status: formStatus, date: formDate.trim(), members: formMembers,
       highlight: formHighlight.trim(), journal: formJournal.trim(),
+      photos: photoDraft.photos,
     };
     const existing = editingId ? trips.find((t) => t.id === editingId) : null;
     if (existing) {
@@ -126,6 +135,7 @@ export default function TravelScreen() {
         },
       });
     }
+    photoDraft.commit();
     closeCreate();
   };
 
@@ -173,6 +183,7 @@ export default function TravelScreen() {
                 <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 560 }}>
                   <View style={s.modalContent}>
                     <Text style={s.modalTitle}>{selectedItem.dest}</Text>
+                    <PhotoGallery photos={photosOf(selectedItem)} />
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>상태</Text>
                       <View style={[s.statusBadge, { backgroundColor: (STATUS_COLORS[selectedItem.status] ?? { bg: '#EFEFEF' }).bg }]}>
@@ -283,6 +294,8 @@ export default function TravelScreen() {
                   );
                 })}
               </View>
+              <Text style={s.createLabel}>사진 (선택)</Text>
+              <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>한 줄 소감</Text>
               <TextInput
                 style={s.createInput}
@@ -330,9 +343,12 @@ export default function TravelScreen() {
               return (
               <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
                 onPress={() => openDetail({ ...t, id: record.id, recordedBy: record.recordedBy })}>
-                <View style={[s.destIcon, { backgroundColor: t.color }]}>
-                  <FontAwesome name={(t.icon || 'map-marker') as any} size={22} color="#FFFFFF" />
-                </View>
+                {/* 사진이 있으면 첫 사진, 없으면 색 동그라미 */}
+                {photosOf(t).length ? <PhotoThumb photos={photosOf(t)} size={56} /> : (
+                  <View style={[s.destIcon, { backgroundColor: t.color }]}>
+                    <FontAwesome name={(t.icon || 'map-marker') as any} size={22} color="#FFFFFF" />
+                  </View>
+                )}
                 <View style={s.info}>
                   <View style={s.topRow}>
                     <Text style={s.destName}>{t.dest}</Text>

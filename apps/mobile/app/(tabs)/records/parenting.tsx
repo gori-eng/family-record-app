@@ -5,6 +5,8 @@ import { Stack } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
 import { useOpenParam } from '../../../lib/useOpenParam';
+import { usePhotoDraft, PhotoPickerRow, PhotoGallery, PhotoThumb } from '../../../components/Photos';
+import { photosOf } from '../../../lib/photos';
 import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
@@ -13,6 +15,8 @@ import { parseLooseDate, formatKoreanDate } from '../../../lib/dates';
 import { todayISO, daysAgoISO } from '../../../store/finance';
 
 type ParentingEntry = {
+  /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
+  photos?: string[];
   /** 'YYYY-MM-DD'. 옛 기록은 '2026년 9월 22일' 같은 글자일 수 있다 */
   date: string;
   child: string; content: string;
@@ -85,7 +89,10 @@ export default function ParentingScreen() {
 
 
   /** 폼 열기 — `edit`을 주면 그 일기를 값이 채워진 채로 연다 (편집 전용 폼을 따로 두지 않는다) */
+  /** 폼의 사진 — 고르는 순간 올라가고, 저장하지 않고 닫으면 치운다 (components/Photos) */
+  const photoDraft = usePhotoDraft();
   const openForm = (edit?: FamilyRecord<ParentingEntry>) => {
+    photoDraft.reset(photosOf(edit?.data));
     const d = edit?.data;
     setEditingId(edit?.id ?? null);
     setFormChild(d?.child ?? children[0] ?? '');
@@ -96,7 +103,10 @@ export default function ParentingScreen() {
     setShowForm(true);
     runOpen(createBg, createSlide);
   };
-  const closeForm = () => runClose(createBg, createSlide, () => { setShowForm(false); setEditingId(null); });
+  const closeForm = () => {
+    photoDraft.discard();   // 저장했으면 commit이 먼저 비워둬서 아무 일도 안 한다
+    runClose(createBg, createSlide, () => { setShowForm(false); setEditingId(null); });
+  };
 
   const startEdit = (record: FamilyRecord<ParentingEntry>) => {
     closeDetail();
@@ -126,6 +136,7 @@ export default function ParentingScreen() {
       // "첫 자전거, 생일" 처럼 쉼표로 나눠 적은 걸 배열로
       milestones: formMilestones.split(',').map((m) => m.trim()).filter(Boolean),
       mood: 'smile-o',
+      photos: photoDraft.photos,
     };
     if (editingId) {
       updateRecord(editingId, { title, data });
@@ -139,6 +150,7 @@ export default function ParentingScreen() {
         createdAt: date === todayISO() ? undefined : new Date(`${date}T12:00:00`).getTime(),
       });
     }
+    photoDraft.commit();
     closeForm();
   };
 
@@ -185,6 +197,7 @@ export default function ParentingScreen() {
                 <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 560 }}>
                 <View style={styles.modalContent}>
                   <Text style={styles.modalTitle}>{selected.title}</Text>
+                  <PhotoGallery photos={photosOf(sel)} />
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>날짜</Text>
                     <Text style={styles.modalValue}>{showDate(sel.date)}</Text>
@@ -296,6 +309,8 @@ export default function ParentingScreen() {
                 value={formContent}
                 onChangeText={setFormContent}
               />
+              <Text style={styles.createLabel}>사진 (선택)</Text>
+              <PhotoPickerRow draft={photoDraft} />
               <Text style={styles.createLabel}>마일스톤 태그</Text>
               <TextInput
                 style={styles.createInput}
@@ -370,6 +385,9 @@ export default function ParentingScreen() {
                   </View>
                   <Text style={styles.entryTitle}>{record.title}</Text>
                   {entry.content ? <Text style={styles.entryText} numberOfLines={2}>{entry.content}</Text> : null}
+                  {photosOf(entry).length ? (
+                    <View style={styles.entryPhoto}><PhotoThumb photos={photosOf(entry)} /></View>
+                  ) : null}
                   {(entry.milestones ?? []).length > 0 && (
                     <View style={styles.entryFooter}>
                       {(entry.milestones ?? []).map((ms, mi) => (
@@ -414,6 +432,7 @@ export default function ParentingScreen() {
 }
 
 const styles = StyleSheet.create({
+  entryPhoto: { marginTop: 8 },
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },

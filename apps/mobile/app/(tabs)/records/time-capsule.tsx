@@ -5,6 +5,8 @@ import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
 import { useOpenParam } from '../../../lib/useOpenParam';
+import { usePhotoDraft, PhotoPickerRow, PhotoGallery } from '../../../components/Photos';
+import { photosOf } from '../../../lib/photos';
 import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
@@ -21,6 +23,8 @@ import { todayISO } from '../../../store/finance';
  *   쓴 사람은 그 전에도 '미리 열어보기'로 봉인을 풀 수 있다(실수로 잘못 적었을 때).
  */
 type Capsule = {
+  /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
+  photos?: string[];
   title: string;
   /** 사람이 적은 개봉일 (보여줄 때만) */
   target: string;
@@ -82,7 +86,10 @@ export default function TimeCapsuleScreen() {
   const createSlide = useRef(new Animated.Value(500)).current;
 
   /** 폼 열기 — `edit`을 주면 그 캡슐을 값이 채워진 채로 연다 */
+  /** 폼의 사진 — 고르는 순간 올라가고, 저장하지 않고 닫으면 치운다 (components/Photos) */
+  const photoDraft = usePhotoDraft();
   const openCreate = (edit?: FamilyRecord<Capsule>) => {
+    photoDraft.reset(photosOf(edit?.data));
     const d = edit?.data;
     setEditingId(edit?.id ?? null);
     setFormTitle(d?.title ?? '');
@@ -96,6 +103,7 @@ export default function TimeCapsuleScreen() {
     ]).start();
   };
   const closeCreate = () => {
+    photoDraft.discard();   // 저장했으면 commit이 먼저 비워둬서 아무 일도 안 한다
     Animated.parallel([
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
@@ -129,8 +137,9 @@ export default function TimeCapsuleScreen() {
     if (existing) {
       updateRecord(existing.id, {
         title,
-        data: { ...existing.data, title, message: formMessage.trim(), targetISO, target: formKoreanTarget(targetISO), type: formType.trim() || '기념일' },
+        data: { ...existing.data, title, message: formMessage.trim(), targetISO, target: formKoreanTarget(targetISO), type: formType.trim() || '기념일', photos: photoDraft.photos },
       });
+      photoDraft.commit();
       closeCreate();
       return;
     }
@@ -151,8 +160,10 @@ export default function TimeCapsuleScreen() {
         icon: 'envelope',
         color: NEW_CAPSULE_COLORS[capsules.length % NEW_CAPSULE_COLORS.length],
         message: formMessage.trim(),
+        photos: photoDraft.photos,
       },
     });
+    photoDraft.commit();
     closeCreate();
   };
 
@@ -234,6 +245,8 @@ export default function TimeCapsuleScreen() {
                       <View style={s.letter}>
                         <FontAwesome name="envelope-open-o" size={14} color="#7A6B55" />
                         <Text style={s.letterText}>{sel.message || '(편지 내용이 비어 있어요)'}</Text>
+                        {/* 사진도 편지처럼 열린 뒤에만 보인다 */}
+                        <PhotoGallery photos={photosOf(sel)} />
                       </View>
                     ) : (
                       <View style={s.sealedBox}>
@@ -277,6 +290,8 @@ export default function TimeCapsuleScreen() {
               <Text style={s.createLabel}>편지</Text>
               <TextInput style={[s.createInput, { height: 140, textAlignVertical: 'top' }]} placeholder="몇 년 뒤의 우리에게 하고 싶은 말" placeholderTextColor="#BFAE99" multiline numberOfLines={5}
                 value={formMessage} onChangeText={setFormMessage} />
+              <Text style={s.createLabel}>사진 (선택) — 편지와 함께 잠들어요</Text>
+              <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>개봉일 — 이날이 되면 저절로 열려요</Text>
               <TextInput style={s.createInput} placeholder="예: 2036.5.15" placeholderTextColor="#BFAE99"
                 value={formTarget} onChangeText={setFormTarget} />

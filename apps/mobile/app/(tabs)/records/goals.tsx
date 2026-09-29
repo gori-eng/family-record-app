@@ -5,6 +5,8 @@ import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
 import { useOpenParam } from '../../../lib/useOpenParam';
+import { usePhotoDraft, PhotoPickerRow, PhotoGallery } from '../../../components/Photos';
+import { photosOf } from '../../../lib/photos';
 import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
@@ -15,6 +17,8 @@ const isReached = (g: { status?: string; progress?: number }) => g.status === '�
 
 type Milestone = { label: string; done: boolean };
 type Goal = {
+  /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
+  photos?: string[];
   title: string; desc: string; progress: number; target: string;
   icon: string; color: string; status: string;
   milestones: Milestone[];
@@ -66,7 +70,10 @@ export default function GoalsScreen() {
   const createSlide = useRef(new Animated.Value(500)).current;
 
   /** 폼 열기 — `edit`을 주면 그 목표를 값이 채워진 채로 연다 (체크 상태는 지킨다) */
+  /** 폼의 사진 — 고르는 순간 올라가고, 저장하지 않고 닫으면 치운다 (components/Photos) */
+  const photoDraft = usePhotoDraft();
   const openCreate = (edit?: FamilyRecord<Goal>) => {
+    photoDraft.reset(photosOf(edit?.data));
     const d = edit?.data;
     setEditingId(edit?.id ?? null);
     setFormTitle(d?.title ?? '');
@@ -81,6 +88,7 @@ export default function GoalsScreen() {
     ]).start();
   };
   const closeCreate = () => {
+    photoDraft.discard();   // 저장했으면 commit이 먼저 비워둬서 아무 일도 안 한다
     Animated.parallel([
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
@@ -103,7 +111,7 @@ export default function GoalsScreen() {
       // 이미 체크한 마일스톤은 이름이 같으면 체크를 지킨다
       const doneSet = new Set((existing.data.milestones ?? []).filter((m) => m.done).map((m) => m.label));
       const milestones = labels.map((label) => ({ label, done: doneSet.has(label) }));
-      const next = { ...existing.data, title, desc: formDesc.trim(), target: formTarget.trim(), milestones, notes: formNotes.trim() };
+      const next = { ...existing.data, title, desc: formDesc.trim(), target: formTarget.trim(), milestones, notes: formNotes.trim(), photos: photoDraft.photos };
       const progress = progressOf(next);
       updateRecord(existing.id, { title, data: { ...next, progress, status: progress >= 100 ? '달성' : '진행 중' } });
     } else {
@@ -122,9 +130,11 @@ export default function GoalsScreen() {
           // 한 줄에 하나씩 적은 마일스톤을 체크리스트로 (처음엔 전부 미완료)
           milestones: labels.map((label) => ({ label, done: false })),
           notes: formNotes.trim(),
+          photos: photoDraft.photos,
         },
       });
     }
+    photoDraft.commit();
     closeCreate();
   };
 
@@ -193,6 +203,7 @@ export default function GoalsScreen() {
                 <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 560 }}>
                   <View style={s.modalContent}>
                     <Text style={s.modalTitle}>{sel.title}</Text>
+                    <PhotoGallery photos={photosOf(sel)} />
                     {sel.desc ? (
                       <View style={s.modalRow}>
                         <Text style={s.modalLabel}>설명</Text>
@@ -326,6 +337,8 @@ export default function GoalsScreen() {
                 placeholderTextColor="#BFAE99"
                 multiline
               />
+              <Text style={s.createLabel}>사진 (선택)</Text>
+              <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>메모</Text>
               <TextInput
                 style={[s.createInput, { height: 80, textAlignVertical: 'top' }]}

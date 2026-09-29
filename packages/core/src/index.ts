@@ -40,6 +40,7 @@ export {
 } from './supabase/events';
 export type { AppEvent } from './supabase/events';
 export { fetchFinanceSettings, saveFinanceSettings } from './supabase/financeSettings';
+export { uploadPhoto, signedPhotoUrls, deletePhotos, PHOTO_BUCKET, SIGNED_URL_TTL } from './supabase/photos';
 export type { AppFinanceSettings } from './supabase/financeSettings';
 export {
   canView,
