@@ -2,11 +2,25 @@
  * 기록 공용 보관소.
  *
  * 9개 기록 카테고리와 홈 화면이 같은 데이터를 보도록 한곳에 모아둔다.
- * 지금은 앱 메모리에만 남지만(새로고침하면 사라짐), Supabase를 붙일 때
- * 이 파일 안쪽만 바꾸면 화면 쪽 코드는 손대지 않아도 된다.
+ *
+ * ── 2026-09-29: 메모리 → Supabase ─────────────────────
+ * 예전에는 앱 메모리에만 있어서 **새로고침하면 사라졌다.** 이제 DB에 저장된다.
+ * **바뀐 것은 이 파일 안쪽뿐이고, 화면 13곳은 한 줄도 고치지 않았다.**
+ * 9월에 화면마다 흩어져 있던 데이터를 이 보관소 하나로 모아둔 덕이다.
+ *
+ * ── 쓰기 방식: 먼저 화면에 보여주고, 뒤에서 저장한다 ──
+ * 저장을 기다렸다가 화면을 바꾸면 누를 때마다 멈칫거린다. 그래서 화면에는 바로
+ * 넣고 DB에는 뒤따라 보낸다. **실패하면 넣었던 것을 도로 빼고 알린다** —
+ * 저장되지 않았는데 저장된 것처럼 보이는 게 가장 나쁘기 때문이다.
  */
 import { useMemo } from 'react';
 import { create } from 'zustand';
+import {
+  fetchRecords, insertRecord, updateRecord as dbUpdate,
+  deleteRecord as dbDelete, deleteAllRecords,
+  type AppRecord,
+} from '@core/supabase';
+import { showAlert } from '../components/AppAlert';
 
 export const RECORD_CATEGORIES = [
   'parenting',
@@ -59,88 +73,207 @@ export type NewRecord<T = Record<string, any>> = {
   title: string;
   recordedBy: string;
   data: T;
-  /** 과거 날짜로 넣고 싶을 때만 지정 (시드 데이터용) */
+  /** 과거 날짜로 넣고 싶을 때만 지정 */
   createdAt?: number;
 };
 
+/**
+ * 저장되기 전 잠깐 쓰는 id.
+ * DB가 진짜 id(UUID)를 돌려주면 바로 갈아끼운다.
+ */
 let seq = 0;
-const nextId = () => `${Date.now().toString(36)}-${(seq++).toString(36)}`;
+const tempId = () => `tmp-${Date.now().toString(36)}-${(seq++).toString(36)}`;
+const isTemp = (id: string) => id.startsWith('tmp-');
+
+/** 가계부는 `data.importKey`가 중복 방지 지문이다. DB는 별도 칸에 받는다. */
+const importKeyOf = (data: Record<string, any>): string | undefined => {
+  const k = data?.importKey;
+  return typeof k === 'string' && k ? k : undefined;
+};
 
 type RecordsState = {
   records: FamilyRecord[];
+  /** 지금 보고 있는 가족. 바뀌면 다시 불러온다 */
+  familyId: string | null;
+  /** 로그인한 사람 (DB에 `created_by`로 남는다) */
+  userId: string | null;
+  /** 첫 조회가 끝났는지 — 끝나기 전의 빈 목록을 "기록 없음"으로 착각하면 안 된다 */
+  ready: boolean;
+  loading: boolean;
+  error: string | null;
+
+  /** 가족이 정해지면 불러온다 */
+  load: (familyId: string, userId: string) => Promise<void>;
+  /** 로그아웃 등으로 볼 것이 없어졌을 때 */
+  clear: () => void;
+
   addRecord: (input: NewRecord) => FamilyRecord;
   updateRecord: (id: string, patch: Partial<Omit<FamilyRecord, 'id' | 'category'>>) => void;
   /** data 안쪽 필드만 골라 고칠 때 */
   patchRecordData: (id: string, dataPatch: Record<string, any>) => void;
   removeRecord: (id: string) => void;
-  /** 시드 데이터를 한 번에 밀어넣을 때 (같은 카테고리가 이미 있으면 건너뜀) */
-  seedCategory: (category: RecordCategory, items: NewRecord[]) => void;
 
   // ── 백업 되살리기용 ──────────────────────────────────
-  /**
-   * 있는 걸 전부 버리고 주어진 것으로 바꾼다. 백업 "전부 바꾸기"에서만 쓴다.
-   * 되돌릴 수 없으므로 화면에서 반드시 확인을 받을 것.
-   */
+  /** 있는 걸 전부 버리고 주어진 것으로 바꾼다. 되돌릴 수 없다 */
   setRecords: (records: FamilyRecord[]) => void;
-  /**
-   * id를 **그대로 두고** 넣는다. `addRecord`는 새 id를 붙이지만,
-   * 백업을 되살릴 때는 파일에 적힌 id를 지켜야 같은 기록을 두 번 넣지 않는다.
-   */
+  /** 없는 것만 더한다 */
   addRecordsRaw: (records: FamilyRecord[]) => void;
 };
 
+/** DB가 돌려준 모양을 앱 모양으로 (이름은 이미 core에서 맞춰서 온다) */
+const fromDb = (r: AppRecord): FamilyRecord => r as FamilyRecord;
+
+/** 저장에 실패했을 때 — 넣었던 것을 도로 빼고 알린다 */
+function failed(action: string, e: unknown) {
+  const msg = String((e as Error)?.message ?? e);
+  showAlert(
+    `${action} 저장하지 못했어요`,
+    /fetch|network/i.test(msg)
+      ? '인터넷 연결을 확인하고 다시 해주세요.'
+      : `방금 한 건 저장되지 않았어요.\n\n${msg}`
+  );
+}
+
 export const useRecordsStore = create<RecordsState>((set, get) => ({
   records: [],
+  familyId: null,
+  userId: null,
+  ready: false,
+  loading: false,
+  error: null,
+
+  load: async (familyId, userId) => {
+    set({ familyId, userId, loading: true, error: null });
+    try {
+      const rows = await fetchRecords(familyId);
+      set({ records: rows.map(fromDb), ready: true, loading: false });
+    } catch (e: any) {
+      set({ error: String(e?.message ?? e), ready: true, loading: false });
+    }
+  },
+
+  clear: () => set({ records: [], familyId: null, userId: null, ready: false, error: null }),
 
   addRecord: (input) => {
     const record: FamilyRecord = {
-      id: nextId(),
+      id: tempId(),
       category: input.category,
       title: input.title,
       createdAt: input.createdAt ?? Date.now(),
       recordedBy: input.recordedBy,
       data: input.data,
     };
+    // 1) 화면에 바로 보여준다
     set((state) => ({ records: [record, ...state.records] }));
+
+    // 2) 뒤에서 저장한다
+    const { familyId, userId } = get();
+    if (!familyId || !userId) {
+      // 가족이 없으면 둘러보기 상태다 — 화면에만 남고 새로고침하면 사라진다
+      return record;
+    }
+    insertRecord({
+      familyId, userId,
+      category: input.category,
+      title: input.title,
+      recordedBy: input.recordedBy,
+      data: input.data,
+      importKey: importKeyOf(input.data),
+      createdAt: input.createdAt,
+    })
+      .then((saved) => {
+        set((state) => ({
+          records: saved
+            // 임시 id를 진짜 id로 갈아끼운다
+            ? state.records.map((r) => (r.id === record.id ? fromDb(saved) : r))
+            // null = 이미 있는 거래(중복). 조용히 빼면 된다
+            : state.records.filter((r) => r.id !== record.id),
+        }));
+      })
+      .catch((e) => {
+        set((state) => ({ records: state.records.filter((r) => r.id !== record.id) }));
+        failed('기록을', e);
+      });
+
     return record;
   },
 
   updateRecord: (id, patch) => {
+    const before = get().records.find((r) => r.id === id);
     set((state) => ({
       records: state.records.map((r) => (r.id === id ? { ...r, ...patch } : r)),
     }));
+    if (!get().familyId || isTemp(id)) return;
+    dbUpdate(id, { title: patch.title, data: patch.data }).catch((e) => {
+      if (before) {
+        set((state) => ({ records: state.records.map((r) => (r.id === id ? before : r)) }));
+      }
+      failed('고친 내용을', e);
+    });
   },
 
   patchRecordData: (id, dataPatch) => {
+    const before = get().records.find((r) => r.id === id);
+    const merged = before ? { ...before.data, ...dataPatch } : dataPatch;
     set((state) => ({
-      records: state.records.map((r) =>
-        r.id === id ? { ...r, data: { ...r.data, ...dataPatch } } : r
-      ),
+      records: state.records.map((r) => (r.id === id ? { ...r, data: merged } : r)),
     }));
+    if (!get().familyId || isTemp(id)) return;
+    dbUpdate(id, { data: merged }).catch((e) => {
+      if (before) {
+        set((state) => ({ records: state.records.map((r) => (r.id === id ? before : r)) }));
+      }
+      failed('고친 내용을', e);
+    });
   },
 
   removeRecord: (id) => {
+    const before = get().records.find((r) => r.id === id);
     set((state) => ({ records: state.records.filter((r) => r.id !== id) }));
+    if (!get().familyId || isTemp(id)) return;
+    dbDelete(id).catch((e) => {
+      // 지우지 못했으면 도로 살려둔다 — 지워진 줄 알았는데 남아 있는 게 낫다
+      if (before) set((state) => ({ records: [before, ...state.records] }));
+      failed('삭제를', e);
+    });
   },
 
-  setRecords: (records) => set({ records }),
+  setRecords: (records) => {
+    set({ records });
+    const { familyId, userId } = get();
+    if (!familyId || !userId) return;
+    // 전부 바꾸기 — DB도 비우고 새로 넣는다
+    (async () => {
+      await deleteAllRecords(familyId);
+      for (const r of records) {
+        await insertRecord({
+          familyId, userId,
+          category: r.category, title: r.title, recordedBy: r.recordedBy,
+          data: r.data, importKey: importKeyOf(r.data), createdAt: r.createdAt,
+        });
+      }
+      // 진짜 id를 받아오려고 한 번 다시 읽는다
+      const rows = await fetchRecords(familyId);
+      set({ records: rows.map(fromDb) });
+    })().catch((e) => failed('되살린 기록을', e));
+  },
 
   addRecordsRaw: (records) => {
     if (!records.length) return;
     set((state) => ({ records: [...records, ...state.records] }));
-  },
-
-  seedCategory: (category, items) => {
-    if (get().records.some((r) => r.category === category)) return;
-    const seeded: FamilyRecord[] = items.map((item) => ({
-      id: nextId(),
-      category,
-      title: item.title,
-      createdAt: item.createdAt ?? Date.now(),
-      recordedBy: item.recordedBy,
-      data: item.data,
-    }));
-    set((state) => ({ records: [...seeded, ...state.records] }));
+    const { familyId, userId } = get();
+    if (!familyId || !userId) return;
+    (async () => {
+      for (const r of records) {
+        await insertRecord({
+          familyId, userId,
+          category: r.category, title: r.title, recordedBy: r.recordedBy,
+          data: r.data, importKey: importKeyOf(r.data), createdAt: r.createdAt,
+        });
+      }
+      const rows = await fetchRecords(familyId);
+      set({ records: rows.map(fromDb) });
+    })().catch((e) => failed('되살린 기록을', e));
   },
 }));
 

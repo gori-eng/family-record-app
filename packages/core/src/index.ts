@@ -19,6 +19,7 @@ export {
   insertRecords,
   updateRecord,
   deleteRecord,
+  deleteAllRecords,
   toApp,
 } from './supabase/records';
 export type { AppRecord } from './supabase/records';

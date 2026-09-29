@@ -87,31 +87,33 @@ export async function insertRecord(input: InsertInput): Promise<AppRecord | null
   return toApp(data as RecordRow);
 }
 
-/** 여러 건을 한 번에 (명세서 가져오기용). 중복은 건너뛰고 들어간 것만 돌려준다. */
+/**
+ * 여러 건을 한 번에 (명세서 가져오기·백업 되살리기용).
+ * 중복(`import_key`)은 건너뛰고 **실제로 들어간 것만** 돌려준다.
+ *
+ * ⚠️ 한 번의 `upsert`로 처리하지 않는 이유:
+ *    중복 방지 인덱스가 **부분 유니크**(`WHERE import_key IS NOT NULL`)라
+ *    `ON CONFLICT (family_id, import_key)`가 그 인덱스를 집지 못하고
+ *    "no unique or exclusion constraint matching" 오류가 난다.
+ *    그렇다고 평범한 묶음 INSERT를 쓰면 **한 줄만 중복이어도 전부 실패한다.**
+ *    건수가 많지 않으므로(명세서 한 장 수십 건) 한 줄씩 넣고 중복만 건너뛴다.
+ */
 export async function insertRecords(inputs: InsertInput[]): Promise<AppRecord[]> {
-  if (!inputs.length) return [];
-  const rows: RecordInsert[] = inputs.map((input) => {
-    const row: RecordInsert = {
-      family_id: input.familyId,
-      created_by: input.userId,
-      category: input.category,
-      title: input.title,
-      recorded_by: input.recordedBy,
-      data: input.data,
-    };
-    if (input.importKey) row.import_key = input.importKey;
-    if (input.createdAt) row.created_at = new Date(input.createdAt).toISOString();
-    return row;
-  });
+  const saved: AppRecord[] = [];
+  for (const input of inputs) {
+    const row = await insertRecord(input);
+    if (row) saved.push(row);
+  }
+  return saved;
+}
 
-  // 중복이 섞여 있어도 나머지는 넣는다
-  const { data, error } = await supabase
-    .from('records')
-    .upsert(rows, { onConflict: 'family_id,import_key', ignoreDuplicates: true })
-    .select();
-
+/**
+ * 한 가족의 기록을 **전부 지운다.** 백업 '파일 그대로 되돌리기'에서만 쓴다.
+ * 되돌릴 수 없으므로 화면에서 반드시 확인을 받을 것.
+ */
+export async function deleteAllRecords(familyId: string): Promise<void> {
+  const { error } = await supabase.from('records').delete().eq('family_id', familyId);
   if (error) throw error;
-  return (data ?? []).map((r) => toApp(r as RecordRow));
 }
 
 /** 기록 수정. `data` 안쪽만 바꿀 때도 통째로 넘긴다(부분 갱신은 호출부에서 합쳐서). */

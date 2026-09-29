@@ -9,14 +9,10 @@ import { onAuthStateChange, getSession } from '@core/supabase';
 import type { Session } from '@supabase/supabase-js';
 import { StatusBar } from 'react-native';
 import 'react-native-reanimated';
-import { seedRecords } from '../store/seed';
 import { AlertHost } from '../components/AppAlert';
+import { useRecordsStore } from '../store/records';
 import { useSession } from '../store/session';
 import { decideRoute, whereFrom, REQUIRE_AUTH } from '../lib/authGate';
-
-// 앱이 켜질 때 기록 창고에 예시 데이터를 한 번 채운다.
-// 기록을 Supabase에서 읽어오게 되면 이 줄과 store/seed.ts를 함께 지운다.
-seedRecords();
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -133,6 +129,19 @@ function RootLayoutNav() {
     setUserId(userId);
     refresh();
   }, [session?.user?.id]);
+
+  /**
+   * 가족이 정해지면 그 가족의 기록을 불러온다.
+   * 가족이 없어지면(로그아웃) 비운다 — 남겨두면 다음 사람에게 남의 기록이 보인다.
+   */
+  const familyId = useSession((s) => s.family?.id ?? null);
+  const loadRecords = useRecordsStore((s) => s.load);
+  const clearRecords = useRecordsStore((s) => s.clear);
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (familyId && userId) loadRecords(familyId, userId);
+    else clearRecords();
+  }, [familyId, session?.user?.id]);
 
   // 길 안내 — 무엇을 어디로 보낼지는 lib/authGate.ts가 정한다 (Node에서 검증됨)
   useEffect(() => {
