@@ -17,6 +17,16 @@
  */
 import { useMemo } from 'react';
 import { useSession } from './session';
+import { REQUIRE_AUTH } from '../lib/authGate';
+
+/**
+ * 예시 가족을 보여줄지.
+ *
+ * 가드(`REQUIRE_AUTH`)가 켜져 있으면 로그인한 사람만 앱에 들어온다. 그런데 앱을 열면
+ * 가족을 불러오는 **잠깐 사이**가 있고, 그때 예시로 채우면 **'지수님'이 번쩍 보였다가
+ * '륜호님'으로 바뀐다.** 남의 이름이 스치는 것이다. 그래서 가드가 켜져 있으면 비워둔다.
+ */
+const USE_SAMPLE = !REQUIRE_AUTH;
 import {
   FAMILY_MEMBERS, MEMBERS as SAMPLE_MEMBERS, CURRENT_USER as SAMPLE_ME,
   MEMBER_COLORS, fullNameOf as sampleFullNameOf,
@@ -32,7 +42,7 @@ const FALLBACK_COLORS = ['#E8D0C0', '#B0C8D8', '#F0B8B8', '#B8D8C0', '#D8CDB8', 
 export function useFamilyMembers(): string[] {
   const members = useSession((s) => s.members);
   return useMemo(
-    () => (members.length ? members.map((m) => m.display_name) : SAMPLE_MEMBERS),
+    () => (members.length ? members.map((m) => m.display_name) : USE_SAMPLE ? SAMPLE_MEMBERS : []),
     [members]
   );
 }
@@ -40,7 +50,7 @@ export function useFamilyMembers(): string[] {
 /** 지금 나의 짧은 이름. 예전 `CURRENT_USER` 상수를 대신한다. */
 export function useMe(): string {
   const me = useSession((s) => s.me);
-  return me?.display_name ?? SAMPLE_ME;
+  return me?.display_name ?? (USE_SAMPLE ? SAMPLE_ME : '');
 }
 
 /** 짧은 이름 → 프로필에 쓸 전체 이름 */
@@ -80,6 +90,7 @@ export function useMemberCards(): MemberCard[] {
   const me = useSession((s) => s.me);
   return useMemo(() => {
     if (!members.length) {
+      if (!USE_SAMPLE) return [];
       // 예시 가족 — 역할은 constants에 없으므로 순서대로 넣는다
       const sampleRoles = ['모', '부', '자녀', '자녀'];
       return FAMILY_MEMBERS.map((m, i) => ({
@@ -127,7 +138,7 @@ export function useFamilyInfo(): FamilyInfo {
       signedIn,
       name: '우리 가족',
       inviteCode: null,
-      memberCount: SAMPLE_MEMBERS.length,
+      memberCount: USE_SAMPLE ? SAMPLE_MEMBERS.length : 0,
       isReal: false,
     };
   }
@@ -142,4 +153,4 @@ export function useFamilyInfo(): FamilyInfo {
 
 /** 훅 밖(이벤트 핸들러 등)에서 지금 나의 이름이 필요할 때 */
 export const meName = (): string =>
-  useSession.getState().me?.display_name ?? SAMPLE_ME;
+  useSession.getState().me?.display_name ?? (USE_SAMPLE ? SAMPLE_ME : '');

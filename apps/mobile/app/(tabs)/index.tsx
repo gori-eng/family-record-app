@@ -156,7 +156,7 @@ export default function HomeScreen() {
 
         {/* 1. Hero — 한 줄 인사 */}
         <Animated.View style={[s.hero, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-          <Text style={s.greetingLine}>{me}님, {greeting}</Text>
+          <Text style={s.greetingLine}>{me ? `${me}님, ${greeting}` : greeting}</Text>
           <Text style={s.dateText}>{dateStr} {dayName}</Text>
         </Animated.View>
 

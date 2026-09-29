@@ -24,7 +24,8 @@
  * 순서를 어기고 켜면 **로그인 화면에서 앱으로 들어갈 수 없게 된다.**
  * 그때는 이 값을 다시 `false`로 바꾸면 원래대로 돌아온다.
  */
-export const REQUIRE_AUTH = false;
+// 2026-09-29 켰다 — 마이그레이션 적용·로그인·가족 만들기·기록 DB 저장까지 확인한 뒤
+export const REQUIRE_AUTH = true;
 
 /** 지금 보고 있는 화면이 어느 묶음인지 */
 export type Where = 'auth' | 'onboarding' | 'app';
