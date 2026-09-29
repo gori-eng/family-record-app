@@ -11,6 +11,7 @@ import {
 } from '../../store/backup';
 import { saveTextFile, pickTextFile } from '../../lib/saveFile';
 import { useSession } from '../../store/session';
+import { BookSheet } from '../../components/BookSheet';
 
 /** '2026-09-28T07:12:00.000Z' → '2026년 9월 28일 오후 4:12' */
 function formatMoment(iso: string): string {
@@ -39,6 +40,8 @@ export default function ExportScreen() {
   // 되살리기 — 파일을 읽어 확인받기까지
   const [pending, setPending] = useState<{ fileName: string; data: BackupFile; summary: BackupSummary } | null>(null);
   const [dragging, setDragging] = useState(false);
+  /** 기록책(PDF) 만들기 창 */
+  const [showBook, setShowBook] = useState(false);
   const dropRef = useRef<any>(null);
 
   const modalBg = useRef(new Animated.Value(0)).current;
@@ -286,6 +289,7 @@ export default function ExportScreen() {
             <Text style={s.cardTitle}>파일로 담기 (JSON)</Text>
             <Text style={s.cardDesc}>
               기록·일정·가계부 설정을 파일 한 장에 담아 내려받아요. familog가 없어도 열어볼 수 있는 형식이에요.
+              사진은 가족 창고에 그대로 두고, 파일에는 어느 사진인지만 적어요.
             </Text>
           </View>
           <FontAwesome name="chevron-right" size={12} color="#B0A590" />
@@ -312,18 +316,23 @@ export default function ExportScreen() {
           )}
         </View>
 
-        {/* 아직 안 되는 것 — 되는 척하지 않는다 */}
-        <Text style={s.sectionLabel}>아직 준비 중</Text>
-
-        <View style={[s.card, s.cardMuted]}>
-          <View style={[s.icon, { backgroundColor: '#F4F2EE' }]}>
-            <FontAwesome name="file-pdf-o" size={20} color="#9C8B75" />
+        {/* 기록책 — 표지·차례가 있는 책으로 엮어 PDF로 (2026-09-30) */}
+        <TouchableOpacity style={s.card} activeOpacity={0.8} onPress={() => {
+          if (!records.length) { showAlert('아직 책으로 엮을 기록이 없어요', '기록을 하나 남기고 다시 와주세요.'); return; }
+          setShowBook(true);
+        }}>
+          <View style={[s.icon, { backgroundColor: '#EFF6F1' }]}>
+            <FontAwesome name="book" size={20} color="#2D5A3F" />
           </View>
           <View style={s.info}>
-            <Text style={[s.cardTitle, s.mutedText]}>보기 좋은 문서로 (PDF)</Text>
-            <Text style={s.cardDesc}>사진과 글이 함께 든 책처럼 뽑아내는 기능이에요. 만드는 중이에요.</Text>
+            <Text style={s.cardTitle}>기록책으로 뽑기 (PDF)</Text>
+            <Text style={s.cardDesc}>표지와 차례가 있는 책으로 엮어요. 사진도 함께 넣고, 인쇄해서 부모님께 드릴 수도 있어요.</Text>
           </View>
-        </View>
+          <FontAwesome name="chevron-right" size={12} color="#B0A590" />
+        </TouchableOpacity>
+
+        {/* 아직 안 되는 것 — 되는 척하지 않는다 */}
+        <Text style={s.sectionLabel}>아직 준비 중</Text>
 
         <View style={[s.card, s.cardMuted]}>
           <View style={[s.icon, { backgroundColor: '#F4F2EE' }]}>
@@ -331,7 +340,7 @@ export default function ExportScreen() {
           </View>
           <View style={s.info}>
             <Text style={[s.cardTitle, s.mutedText]}>사진·영상 모아 담기</Text>
-            <Text style={s.cardDesc}>사진 올리기 기능이 먼저 생기면 이어서 만들어요.</Text>
+            <Text style={s.cardDesc}>사진은 가족 창고에 안전하게 있어요. 한꺼번에 내려받는 기능은 만드는 중이에요.</Text>
           </View>
         </View>
 
@@ -343,6 +352,8 @@ export default function ExportScreen() {
           </Text>
         </View>
       </ScrollView>
+
+      <BookSheet visible={showBook} onClose={() => setShowBook(false)} />
     </>
   );
 }

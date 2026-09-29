@@ -169,3 +169,28 @@ export function removePhotoFiles(paths: string[] | undefined) {
 /** 기록 data에서 사진 경로 목록 꺼내기 — 옛 기록엔 없다 */
 export const photosOf = (data: Record<string, any> | undefined): string[] =>
   Array.isArray(data?.photos) ? data!.photos.filter((p: unknown) => typeof p === 'string') : [];
+
+/**
+ * 여러 사진의 보여줄 주소를 한 번에 (기록책 PDF용 — 훅 밖에서 쓴다).
+ * 이미 받아둔 건 그대로 쓰고, 없는 것만 묻는다. 못 받은 사진은 빠진다.
+ */
+export async function photoUrlsFor(paths: string[]): Promise<Record<string, string>> {
+  const out: Record<string, string> = {};
+  const missing: string[] = [];
+  for (const p of new Set(paths)) {
+    const u = fresh(p);
+    if (u) out[p] = u;
+    else missing.push(p);
+  }
+  // 한 번에 너무 많이 묻지 않게 100장씩
+  for (let i = 0; i < missing.length; i += 100) {
+    try {
+      const urls = await signedPhotoUrls(missing.slice(i, i + 100));
+      const exp = Date.now() + (SIGNED_URL_TTL - 300) * 1000;
+      for (const [p, url] of Object.entries(urls)) { cache.set(p, { url, exp }); out[p] = url; }
+    } catch {
+      // 못 받은 사진은 책에서 빠진다 — 글은 그대로 나간다
+    }
+  }
+  return out;
+}
