@@ -12,6 +12,7 @@ import 'react-native-reanimated';
 import { AlertHost } from '../components/AppAlert';
 import { useRecordsStore } from '../store/records';
 import { useEventsStore } from '../store/events';
+import { attachFinanceSettings, detachFinanceSettings } from '../store/financeSettings';
 import { useSession } from '../store/session';
 import { decideRoute, whereFrom, REQUIRE_AUTH } from '../lib/authGate';
 
@@ -145,9 +146,11 @@ function RootLayoutNav() {
     if (familyId && userId) {
       loadRecords(familyId, userId);
       loadEvents(familyId, userId);
+      attachFinanceSettings(familyId);
     } else {
       clearRecords();
       clearEvents();
+      detachFinanceSettings();
     }
   }, [familyId, session?.user?.id]);
 

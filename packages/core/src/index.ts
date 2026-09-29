@@ -32,6 +32,8 @@ export {
   toAppEvent,
 } from './supabase/events';
 export type { AppEvent } from './supabase/events';
+export { fetchFinanceSettings, saveFinanceSettings } from './supabase/financeSettings';
+export type { AppFinanceSettings } from './supabase/financeSettings';
 export {
   canView,
   canEdit,

@@ -13,6 +13,8 @@
  * 그때까지의 임시 보관소다.
  */
 import { create } from 'zustand';
+import { fetchFinanceSettings, saveFinanceSettings } from '@core/supabase';
+import { showAlert } from '../components/AppAlert';
 import type { ColumnKey } from './statementImport';
 import { normalizeMerchant } from './finance';
 
@@ -94,9 +96,40 @@ function load(): FinanceSettingsData {
     return EMPTY;
   }
 }
+/**
+ * 지금 연결된 가족.
+ * 있으면 **가족 공유 설정(DB)**에, 없으면(로그인 전) 이 기기(localStorage)에 저장한다.
+ */
+let attachedFamily: string | null = null;
+
+/**
+ * 스토어에는 함수도 섞여 있다(`{ ...get(), cardOwners }`로 부르므로).
+ * DB에는 값만 보내야 하므로 골라 담는다.
+ */
+function pickData(s: FinanceSettingsData): FinanceSettingsData {
+  return {
+    cardOwners: s.cardOwners,
+    savedProfiles: s.savedProfiles,
+    categoryOverrides: s.categoryOverrides,
+    installmentPolicy: s.installmentPolicy,
+    recurring: s.recurring,
+    budgets: s.budgets,
+  };
+}
+
 function save(s: FinanceSettingsData) {
+  const data = pickData(s);
+  if (attachedFamily) {
+    saveFinanceSettings(attachedFamily, data).catch((e) => {
+      showAlert(
+        '가계부 설정을 저장하지 못했어요',
+        `방금 바꾼 설정이 가족에게 전해지지 않았어요.\n\n${String((e as Error)?.message ?? e)}`
+      );
+    });
+    return;
+  }
   try {
-    globalThis.localStorage?.setItem(KEY, JSON.stringify(s));
+    globalThis.localStorage?.setItem(KEY, JSON.stringify(data));
   } catch {
     /* 저장 못 해도 앱은 계속 돌아간다 */
   }
@@ -228,4 +261,31 @@ export function restoreFinanceSettings(data: Partial<FinanceSettingsData>) {
   const next: FinanceSettingsData = { ...EMPTY, ...data };
   useFinanceSettings.setState(next);
   save(next);
+}
+
+// ── 가족과 연결 ────────────────────────────────────────────
+/**
+ * 가족이 정해지면 부른다. 그때부터 설정은 **가족이 함께 쓴다.**
+ *
+ * 가족 설정이 아직 없으면(처음) **이 기기에 있던 설정을 가족 설정으로 올린다.**
+ * 로그인 전에 정해둔 예산·반복 거래·카드 주인을 다시 입력하지 않아도 되게.
+ */
+export async function attachFinanceSettings(familyId: string) {
+  attachedFamily = familyId;
+  try {
+    const remote = await fetchFinanceSettings(familyId);
+    if (remote) {
+      useFinanceSettings.setState({ ...EMPTY, ...(remote as Partial<FinanceSettingsData>) });
+    } else {
+      await saveFinanceSettings(familyId, pickData(useFinanceSettings.getState()));
+    }
+  } catch {
+    /* 불러오지 못하면 지금 값을 그대로 쓴다 — 다음 저장 때 올라간다 */
+  }
+}
+
+/** 로그아웃 등으로 가족이 없어졌을 때 — 이 기기에 있던 값으로 돌아간다 */
+export function detachFinanceSettings() {
+  attachedFamily = null;
+  useFinanceSettings.setState(load());
 }
