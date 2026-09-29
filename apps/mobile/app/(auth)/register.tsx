@@ -94,7 +94,7 @@ const s = StyleSheet.create({
   passwordRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 14, marginBottom: 16 },
   passwordInput: { flex: 1, paddingHorizontal: 16, paddingVertical: 15, fontSize: 16, color: '#1F1F1F', fontFamily: 'Pretendard' },
   eyeBtn: { paddingHorizontal: 14, paddingVertical: 14 },
-  submitBtn: { backgroundColor: '#1F1F1F', borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
+  submitBtn: { backgroundColor: '#4A8C6F', borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
   submitBtnDisabled: { opacity: 0.5 },
   submitBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
   loginRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },

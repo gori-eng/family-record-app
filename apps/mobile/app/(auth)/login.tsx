@@ -144,8 +144,9 @@ const s = StyleSheet.create({
   },
   passwordInput: { flex: 1, paddingHorizontal: 16, paddingVertical: 15, fontSize: 16, color: '#1F1F1F', fontFamily: 'Pretendard' },
   eyeBtn: { paddingHorizontal: 14, paddingVertical: 14 },
+  // 주 버튼은 §9 Primary(세이지 그린). 검은색이면 바로 아래 Apple 버튼과 구분되지 않았다
   loginBtn: {
-    backgroundColor: '#1F1F1F', borderRadius: 14,
+    backgroundColor: '#4A8C6F', borderRadius: 14,
     paddingVertical: 16, alignItems: 'center',
   },
   loginBtnDisabled: { opacity: 0.5 },
