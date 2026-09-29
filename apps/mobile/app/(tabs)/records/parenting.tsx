@@ -12,14 +12,23 @@ type ParentingEntry = {
   milestones: string[]; mood: string;
 };
 
-const CHILD_NAMES = ['전체', '지우', '서준'];
-const CHILDREN = ['지우', '서준'];
 /** 오늘 날짜를 '2026년 9월 22일' 형식으로 */
 const todayLabel = () => {
   const d = new Date();
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
 };
-const CHILD_COLORS: Record<string, string> = { '지우': '#F0B8B8', '서준': '#B0C8D8' };
+/**
+ * 아이 이름 → 색.
+ *
+ * 예전에는 `{ 지우: 분홍, 서준: 파랑 }`으로 박혀 있었다. 이제 아이 이름은 가족마다
+ * 다르므로, 이름에서 색을 **늘 같게** 뽑는다(같은 이름은 언제나 같은 색).
+ */
+const CHILD_PALETTE = ['#F0B8B8', '#B0C8D8', '#B8D8C0', '#E8D0C0', '#D8CDB8', '#C8B8E0'];
+const childColor = (name: string) => {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return CHILD_PALETTE[h % CHILD_PALETTE.length];
+};
 
 export default function ParentingScreen() {
   const { askDelete, undoBar } = useRecordDelete('육아 일기');
@@ -33,8 +42,23 @@ export default function ParentingScreen() {
   const entries = useRecordsByCategory<ParentingEntry>('parenting');
   const addRecord = useRecordsStore((s) => s.addRecord);
 
+  /**
+   * 우리 집 아이들 — **이미 쓴 육아일기에서 모은다.** 많이 쓴 순서.
+   *
+   * 가족 구성원(계정)에서 가져오지 않는 이유: 세 살 아이가 이메일로 가입하지는 않는다.
+   * 처음 쓸 때는 목록이 비어 있고, 이름을 한 번 적으면 다음부터 버튼으로 뜬다.
+   */
+  const children = useMemo(() => {
+    const count = new Map<string, number>();
+    for (const e of entries) {
+      const c = e.data.child?.trim();
+      if (c) count.set(c, (count.get(c) ?? 0) + 1);
+    }
+    return [...count.entries()].sort((a, b) => b[1] - a[1]).map(([n]) => n);
+  }, [entries]);
+
   // 작성 폼 입력값
-  const [formChild, setFormChild] = useState(CHILDREN[0]);
+  const [formChild, setFormChild] = useState('');
   const [formTitle, setFormTitle] = useState('');
   const [formContent, setFormContent] = useState('');
   const [formMilestones, setFormMilestones] = useState('');
@@ -58,7 +82,7 @@ export default function ParentingScreen() {
   }, [openTitle, entries]);
 
   const openCreate = () => {
-    setFormChild(CHILDREN[0]);
+    setFormChild(children[0] ?? '');
     setFormTitle('');
     setFormContent('');
     setFormMilestones('');
@@ -76,6 +100,11 @@ export default function ParentingScreen() {
   };
 
   const handleSave = () => {
+    const child = formChild.trim();
+    if (!child) {
+      showAlert('누구 이야기인가요?', '아이 이름을 적어주세요. 한 번 적으면 다음부터 버튼으로 골라요.');
+      return;
+    }
     const title = formTitle.trim();
     if (!title) {
       showAlert('제목을 입력해주세요', '오늘의 한 줄 제목을 적어주세요.');
@@ -87,7 +116,7 @@ export default function ParentingScreen() {
       recordedBy: CURRENT_USER,
       data: {
         date: todayLabel(),
-        child: formChild,
+        child,
         content: formContent.trim(),
         // "첫 자전거, 생일" 처럼 쉼표로 나눠 적은 걸 배열로
         milestones: formMilestones.split(',').map((m) => m.trim()).filter(Boolean),
@@ -119,6 +148,23 @@ export default function ParentingScreen() {
     () => entries.reduce((sum, e) => sum + (e.data.milestones?.length ?? 0), 0),
     [entries]
   );
+  /** 아이별 마일스톤 — 예전에는 '지우: 7개 / 서준: 5개'가 박혀 있었다 */
+  const milestoneByChild = useMemo(() => {
+    const byChild = new Map<string, number>();
+    for (const e of entries) {
+      const n = e.data.milestones?.length ?? 0;
+      if (n) byChild.set(e.data.child, (byChild.get(e.data.child) ?? 0) + n);
+    }
+    return [...byChild.entries()].map(([c, n]) => `${c}: ${n}개`).join(String.fromCharCode(10));
+  }, [entries]);
+  /** 이번 달 쓴 일기 수 — 예전 자리에는 가짜 '사진 156'이 있었다(사진 기능은 아직 없다) */
+  const thisMonthCount = useMemo(() => {
+    const now = new Date();
+    return entries.filter((e) => {
+      const d = new Date(e.createdAt);
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }).length;
+  }, [entries]);
 
   return (
     <>
@@ -140,7 +186,7 @@ export default function ParentingScreen() {
                   </View>
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>아이</Text>
-                    <View style={[styles.childBadge, { backgroundColor: selectedItem.child === '지우' ? '#F0B8B8' : '#B0C8D8' }]}>
+                    <View style={[styles.childBadge, { backgroundColor: childColor(selectedItem.child) }]}>
                       <Text style={styles.childBadgeText}>{selectedItem.child}</Text>
                     </View>
                   </View>
@@ -180,18 +226,27 @@ export default function ParentingScreen() {
               <Text style={styles.modalTitle}>새 육아 일기</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
               <Text style={styles.createLabel}>아이</Text>
-              <View style={styles.childPicker}>
-                {CHILDREN.map((name) => (
-                  <TouchableOpacity
-                    key={name}
-                    style={[styles.filterChip, formChild === name && styles.filterChipActive]}
-                    activeOpacity={0.7}
-                    onPress={() => setFormChild(name)}>
-                    <View style={[styles.filterDot, { backgroundColor: CHILD_COLORS[name] }]} />
-                    <Text style={[styles.filterText, formChild === name && styles.filterTextActive]}>{name}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+              {children.length > 0 && (
+                <View style={styles.childPicker}>
+                  {children.map((name) => (
+                    <TouchableOpacity
+                      key={name}
+                      style={[styles.filterChip, formChild === name && styles.filterChipActive]}
+                      activeOpacity={0.7}
+                      onPress={() => setFormChild(name)}>
+                      <View style={[styles.filterDot, { backgroundColor: childColor(name) }]} />
+                      <Text style={[styles.filterText, formChild === name && styles.filterTextActive]}>{name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+              <TextInput
+                style={styles.createInput}
+                placeholder={children.length ? '다른 아이면 이름을 적어주세요' : '아이 이름 (예: 지우)'}
+                placeholderTextColor="#BFAE99"
+                value={formChild}
+                onChangeText={setFormChild}
+              />
               <Text style={styles.createLabel}>제목</Text>
               <TextInput
                 style={styles.createInput}
@@ -234,28 +289,28 @@ export default function ParentingScreen() {
               <Text style={styles.statNumber}>{entries.length}</Text>
               <Text style={styles.statLabel}>총 기록</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.statCard} onPress={() => showAlert('마일스톤', '지우: 7개\n서준: 5개\n\n마일스톤 관리 기능이 곧 추가됩니다.')} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.statCard} onPress={() => showAlert('마일스톤', milestoneByChild || '아직 마일스톤이 없어요.')} activeOpacity={0.7}>
               <FontAwesome name="trophy" size={18} color="#E6A817" />
               <Text style={styles.statNumber}>{milestoneCount}</Text>
               <Text style={styles.statLabel}>마일스톤</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.statCard} onPress={() => showAlert('사진 앨범', '저장된 사진 156장\n\n사진 앨범 기능이 곧 추가됩니다.')} activeOpacity={0.7}>
-              <FontAwesome name="camera" size={18} color="#4A90C8" />
-              <Text style={styles.statNumber}>156</Text>
-              <Text style={styles.statLabel}>사진</Text>
-            </TouchableOpacity>
+            <View style={styles.statCard}>
+              <FontAwesome name="calendar" size={18} color="#4A90C8" />
+              <Text style={styles.statNumber}>{thisMonthCount}</Text>
+              <Text style={styles.statLabel}>이번 달</Text>
+            </View>
           </View>
 
           {/* Child Filter */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterContainer}>
-            {CHILD_NAMES.map((name, i) => (
+            {['전체', ...children].map((name, i) => (
               <TouchableOpacity
                 key={i}
                 style={[styles.filterChip, activeChild === name && styles.filterChipActive]}
                 onPress={() => setActiveChild(name)}
                 activeOpacity={0.7}
               >
-                {CHILD_COLORS[name] && <View style={[styles.filterDot, { backgroundColor: CHILD_COLORS[name] }]} />}
+                {name !== '전체' && <View style={[styles.filterDot, { backgroundColor: childColor(name) }]} />}
                 <Text style={[styles.filterText, activeChild === name && styles.filterTextActive]}>{name}</Text>
               </TouchableOpacity>
             ))}
@@ -272,13 +327,13 @@ export default function ParentingScreen() {
                 activeOpacity={0.7}
                 onPress={() => openDetail({ ...entry, id: record.id, recordedBy: record.recordedBy })}>
                 <View style={styles.timelineLine}>
-                  <View style={[styles.timelineDot, { backgroundColor: entry.child === '지우' ? '#F0B8B8' : '#B0C8D8' }]} />
+                  <View style={[styles.timelineDot, { backgroundColor: childColor(entry.child) }]} />
                   {i < filteredEntries.length - 1 && <View style={styles.timelineConnector} />}
                 </View>
                 <View style={styles.entryContent}>
                   <View style={styles.entryHeader}>
                     <Text style={styles.entryDate}>{entry.date}</Text>
-                    <View style={[styles.childBadge, { backgroundColor: entry.child === '지우' ? '#F0B8B8' : '#B0C8D8' }]}>
+                    <View style={[styles.childBadge, { backgroundColor: childColor(entry.child) }]}>
                       <Text style={styles.childBadgeText}>{entry.child}</Text>
                     </View>
                   </View>
