@@ -17,6 +17,8 @@ export {
   setMemberRole,
   leaveFamily,
   deleteFamily,
+  renameMe,
+  removeMember,
 } from './supabase/family';
 export {
   fetchRecords,

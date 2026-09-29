@@ -233,6 +233,16 @@ export type Database = {
         Args: { p_family_id: string };
         Returns: undefined;
       };
+      /** 내 짧은 이름 바꾸기 + 옛 이름이 적힌 기록·일정·설정까지 함께 (00011) */
+      rename_me: {
+        Args: { p_family_id: string; p_new_name: string };
+        Returns: undefined;
+      };
+      /** 관리자가 구성원 내보내기. 기록은 남는다 (00011) */
+      remove_member: {
+        Args: { p_member_id: string };
+        Returns: undefined;
+      };
       /** RLS 재귀를 피하려고 만든 함수. 정책 안에서만 쓴다 */
       my_family_ids: {
         Args: Record<string, never>;

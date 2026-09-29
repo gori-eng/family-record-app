@@ -124,20 +124,17 @@ export async function joinFamilyByCode(
 /**
  * 내 프로필 고치기 — 이름과 얼굴(아바타).
  *
- * ⚠️ 짧은 이름(display_name)을 바꾸면 **이미 쌓인 기록과 어긋난다.**
- *    기록은 이름 문자열로 사람을 가리키기 때문이다(`recordedBy` / `ownerMember`).
- *    바꿀 때는 기존 기록도 함께 고쳐야 한다 — 아직 구현하지 않았다.
- *    full_name · avatar만 바꾸는 것은 안전하다.
+ * 짧은 이름(display_name)은 여기서 못 바꾼다 — 기록이 이름 글자로 사람을 가리키므로
+ * 옛 기록까지 함께 고치는 `renameMe()`를 쓴다. DB도 이 칸을 직접 못 고치게 막는다(00011).
  *
  * `avatarUrl`에는 지금 **이모지 글자**를 그대로 담는다('🌿'). 사진을 붙이면 URL이 들어간다.
  * 역할(role)은 여기서 못 바꾼다 — DB가 칸 단위로 막는다(00009).
  */
 export async function updateMyName(
   memberId: string,
-  patch: { displayName?: string; fullName?: string; avatarUrl?: string | null }
+  patch: { fullName?: string; avatarUrl?: string | null }
 ): Promise<void> {
-  const row: { display_name?: string; full_name?: string; avatar_url?: string | null } = {};
-  if (patch.displayName !== undefined) row.display_name = patch.displayName.trim();
+  const row: { full_name?: string; avatar_url?: string | null } = {};
   if (patch.fullName !== undefined) row.full_name = patch.fullName.trim();
   if (patch.avatarUrl !== undefined) row.avatar_url = patch.avatarUrl;
   if (!Object.keys(row).length) return;
@@ -174,5 +171,23 @@ export async function leaveFamily(familyId: string): Promise<void> {
  */
 export async function deleteFamily(familyId: string): Promise<void> {
   const { error } = await supabase.rpc('delete_family', { p_family_id: familyId });
+  if (error) throw error;
+}
+
+/**
+ * 내 짧은 이름 바꾸기 (00011).
+ * 그 가족 안에서 옛 이름이 적힌 자리(기록의 쓴 사람, 가계부 돈 쓴 사람·거래 지문, 일정 참여자,
+ * 카드 주인…)를 **한 번에 함께** 고친다. 한 트랜잭션이라 중간에 실패하면 아무것도 안 바뀐다.
+ */
+export async function renameMe(familyId: string, newName: string): Promise<void> {
+  const { error } = await supabase.rpc('rename_me', { p_family_id: familyId, p_new_name: newName });
+  if (error) throw error;
+}
+
+/**
+ * 구성원 내보내기 — **관리자만** (00011). 그 사람이 쓴 기록은 가족에 남는다.
+ */
+export async function removeMember(memberId: string): Promise<void> {
+  const { error } = await supabase.rpc('remove_member', { p_member_id: memberId });
   if (error) throw error;
 }
