@@ -4,6 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
+import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
 import { useMe } from '../../../store/family';
 
 type Goal = {
@@ -17,6 +18,7 @@ type Goal = {
 const NEW_GOAL_COLORS = ['#81C784', '#4FC3F7', '#FFD54F', '#CE93D8'];
 
 export default function GoalsScreen() {
+  const { askDelete, undoBar } = useRecordDelete('목표');
   const CURRENT_USER = useMe();
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -179,6 +181,9 @@ export default function GoalsScreen() {
                   </View>
                 </ScrollView>
               )}
+              {selectedItem && (
+                <DeleteRecordRow onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
+              )}
             </Animated.View>
           </View>
         </Modal>
@@ -284,6 +289,7 @@ export default function GoalsScreen() {
         <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={openCreate}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
+        {undoBar}
       </View>
     </>
   );

@@ -4,6 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
+import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
 import { useMe } from '../../../store/family';
 
 type Recipe = {
@@ -20,6 +21,7 @@ const NEW_RECIPE_COLORS = ['#FF8A65', '#81C784', '#FFD54F', '#CE93D8'];
 const DIFF_COLOR: Record<string, string> = { '쉬움': '#4AA86B', '보통': '#E6A817', '어려움': '#4A8C6F' };
 
 export default function RecipesScreen() {
+  const { askDelete, undoBar } = useRecordDelete('레시피');
   const CURRENT_USER = useMe();
   const { openTitle } = useLocalSearchParams<{ openTitle?: string }>();
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -196,6 +198,9 @@ export default function RecipesScreen() {
                   </View>
                 </ScrollView>
               )}
+              {selectedItem && (
+                <DeleteRecordRow onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
+              )}
             </Animated.View>
           </View>
         </Modal>
@@ -313,6 +318,7 @@ export default function RecipesScreen() {
         <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={openCreate}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
+        {undoBar}
       </View>
     </>
   );

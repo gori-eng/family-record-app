@@ -4,6 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
+import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
 import { useMe } from '../../../store/family';
 
 type ParentingEntry = {
@@ -21,6 +22,7 @@ const todayLabel = () => {
 const CHILD_COLORS: Record<string, string> = { '지우': '#F0B8B8', '서준': '#B0C8D8' };
 
 export default function ParentingScreen() {
+  const { askDelete, undoBar } = useRecordDelete('육아 일기');
   const CURRENT_USER = useMe();
   const { openTitle } = useLocalSearchParams<{ openTitle?: string }>();
   const [activeChild, setActiveChild] = useState('전체');
@@ -160,6 +162,9 @@ export default function ParentingScreen() {
                     </View>
                   )}
                 </View>
+              )}
+              {selectedItem && (
+                <DeleteRecordRow onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
               )}
             </Animated.View>
           </View>
@@ -315,6 +320,7 @@ export default function ParentingScreen() {
         >
           <FontAwesome name="pencil" size={20} color="#FFFFFF" />
         </TouchableOpacity>
+        {undoBar}
       </View>
     </>
   );

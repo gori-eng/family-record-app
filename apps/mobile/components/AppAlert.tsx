@@ -64,8 +64,16 @@ export function AlertHost() {
 
   const press = (b: AlertButton) => {
     close();
-    // 닫는 애니메이션 없이 즉시 실행해도 되지만, 상태 갱신이 겹치지 않게 한 틱 미룬다
-    if (b.onPress) setTimeout(b.onPress, 0);
+    /**
+     * 바로 실행한다.
+     *
+     * ⚠️ 예전에는 `setTimeout(b.onPress, 0)`으로 한 틱 미뤘다. 그런데 브라우저는
+     *    **가려진 탭의 타이머를 크게 늦춘다**(Chrome은 최대 1분에 한 번). 그래서
+     *    '지우기'를 누르고 바로 다른 탭으로 넘어가면 삭제가 한참 뒤에야 일어났다.
+     *    미룰 이유도 없다 — React가 `close()`와 `onPress` 안의 상태 변경을 한 번에 묶어준다.
+     *    onPress 안에서 다시 `showAlert`를 불러도 괜찮다(닫힘 → 새 알림으로 한 번에 바뀐다).
+     */
+    b.onPress?.();
   };
 
   return (

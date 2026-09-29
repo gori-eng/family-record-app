@@ -4,6 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
+import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
 import { useMe } from '../../../store/family';
 
 type Capsule = {
@@ -16,6 +17,7 @@ type Capsule = {
 const NEW_CAPSULE_COLORS = ['#CE93D8', '#4FC3F7', '#FFB74D', '#81C784'];
 
 export default function TimeCapsuleScreen() {
+  const { askDelete, undoBar } = useRecordDelete('타임캡슐');
   const CURRENT_USER = useMe();
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -138,6 +140,9 @@ export default function TimeCapsuleScreen() {
                   </View>
                 </View>
               )}
+              {selectedItem && (
+                <DeleteRecordRow onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
+              )}
             </Animated.View>
           </View>
         </Modal>
@@ -216,6 +221,7 @@ export default function TimeCapsuleScreen() {
         <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={openCreate}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
+        {undoBar}
       </View>
     </>
   );

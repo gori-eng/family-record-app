@@ -4,6 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
+import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
 import { useMe } from '../../../store/family';
 
 type Trip = {
@@ -22,6 +23,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
 };
 
 export default function TravelScreen() {
+  const { askDelete, undoBar } = useRecordDelete('여행 기록');
   const CURRENT_USER = useMe();
   const [filter, setFilter] = useState('전체');
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -171,6 +173,9 @@ export default function TravelScreen() {
                   </View>
                 </ScrollView>
               )}
+              {selectedItem && (
+                <DeleteRecordRow onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
+              )}
             </Animated.View>
           </View>
         </Modal>
@@ -300,6 +305,7 @@ export default function TravelScreen() {
         <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={openCreate}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
+        {undoBar}
       </View>
     </>
   );

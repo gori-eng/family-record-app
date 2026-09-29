@@ -4,6 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
+import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
 import { useFamilyMembers, useMe } from '../../../store/family';
 
 type Book = {
@@ -26,6 +27,7 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function ReadingScreen() {
+  const { askDelete, undoBar } = useRecordDelete('책');
   /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
   const MEMBERS = useFamilyMembers();
   const CURRENT_USER = useMe();
@@ -292,6 +294,9 @@ export default function ReadingScreen() {
                 </View>
                 </ScrollView>
               )}
+              {selectedId && (
+                <DeleteRecordRow onPress={() => askDelete(selectedId, { after: closeDetail })} label="이 책 지우기" />
+              )}
             </Animated.View>
           </View>
         </Modal>
@@ -455,6 +460,7 @@ export default function ReadingScreen() {
         >
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
+        {undoBar}
       </View>
     </>
   );
