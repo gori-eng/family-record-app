@@ -42,8 +42,8 @@ export type NewsItem = {
   id: string;
   kind: 'record' | 'event';
   category?: RecordCategory;
-  /** 기록이면 기록 제목 — 눌렀을 때 그 기록을 열 때 쓴다 */
-  recordTitle?: string;
+  /** 기록이면 기록 id — 눌렀을 때 그 기록을 바로 연다 */
+  recordId?: string;
   title: string;
   desc: string;
   author: string;
@@ -73,7 +73,7 @@ export function useFamilyNews(): { items: NewsItem[]; unread: number; markSeen: 
         id: `r-${r.id}`,
         kind: 'record',
         category: r.category,
-        recordTitle: r.title,
+        recordId: r.id,
         title: `${r.recordedBy}님이 ${CATEGORY_LABELS[r.category]}에 남겼어요`,
         desc: r.title,
         author: r.recordedBy,

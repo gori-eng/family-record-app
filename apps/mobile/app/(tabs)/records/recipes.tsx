@@ -1,9 +1,10 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
+import { useOpenParam } from '../../../lib/useOpenParam';
 import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
@@ -26,7 +27,6 @@ export default function RecipesScreen() {
   const { askDelete, undoBar } = useRecordDelete('레시피');
   const ready = useRecordsReady();
   const CURRENT_USER = useMe();
-  const { openTitle } = useLocalSearchParams<{ openTitle?: string }>();
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [createDifficulty, setCreateDifficulty] = useState('보통');
@@ -51,21 +51,6 @@ export default function RecipesScreen() {
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
 
-  /** 홈에서 넘어온 제목은 **한 번만** 연다 — 예전엔 목록이 바뀔 때마다 상세가 다시 열렸다 (점검 B5) */
-  const openedFor = useRef<string | null>(null);
-  useEffect(() => {
-    if (openTitle && openedFor.current !== openTitle) {
-      const match = recipes.find(r => r.title === openTitle);
-      if (match) {
-        openedFor.current = openTitle;
-        setSelectedItem({ ...match.data, id: match.id });
-        Animated.parallel([
-          Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
-          Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
-        ]).start();
-      }
-    }
-  }, [openTitle, recipes]);
 
   /** 폼 열기 — `edit`을 주면 그 레시피를 값이 채워진 채로 연다 */
   const openCreate = (edit?: FamilyRecord<Recipe>) => {
@@ -159,6 +144,9 @@ export default function RecipesScreen() {
       Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
     ]).start(() => setSelectedItem(null));
   };
+
+  // 홈·가족 소식·통합 검색에서 '이 기록 열어줘'를 싣고 오면 상세를 한 번 열어준다
+  useOpenParam(recipes, (r) => openDetail({ ...r.data, id: r.id }));
 
   return (
     <>

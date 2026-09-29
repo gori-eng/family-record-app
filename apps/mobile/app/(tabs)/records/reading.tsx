@@ -1,9 +1,10 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
+import { useOpenParam } from '../../../lib/useOpenParam';
 import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
@@ -41,7 +42,6 @@ export default function ReadingScreen() {
   /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
   const MEMBERS = useFamilyMembers();
   const CURRENT_USER = useMe();
-  const { openTitle } = useLocalSearchParams<{ openTitle?: string }>();
   // 창고에서 독서 기록만 최신순으로 꺼낸다.
   const books = useRecordsByCategory<Book>('reading');
   const addRecord = useRecordsStore((s) => s.addRecord);
@@ -73,25 +73,6 @@ export default function ReadingScreen() {
   const createBg = useRef(new Animated.Value(0)).current;
   const createSlide = useRef(new Animated.Value(500)).current;
 
-  /** 홈에서 넘어온 제목은 **한 번만** 연다 — 예전엔 목록이 바뀔 때마다 상세가 다시 열렸다 (점검 B5) */
-  const openedFor = useRef<string | null>(null);
-  useEffect(() => {
-    if (openTitle && openedFor.current !== openTitle) {
-      const match = books.find(b => b.title === openTitle);
-      if (match) {
-        openedFor.current = openTitle;
-        setSelectedId(match.id);
-        setEditProgress(match.data.progress ?? 0);
-        setEditNotes(match.data.notes ?? '');
-        setEditStatus((match.data.status === '완독' ? '완독' : '읽는 중') as '읽는 중' | '완독');
-        setEditRating(match.data.rating ?? 0);
-        Animated.parallel([
-          Animated.timing(modalBg, { toValue: 1, duration: 300, useNativeDriver: true }),
-          Animated.spring(modalSlide, { toValue: 0, tension: 65, friction: 11, useNativeDriver: true }),
-        ]).start();
-      }
-    }
-  }, [openTitle, books]);
 
   /** 폼 열기 — `edit`을 주면 그 책을 값이 채워진 채로 연다 */
   const openCreate = (edit?: FamilyRecord<Book>) => {
@@ -203,6 +184,9 @@ export default function ReadingScreen() {
     done: books.filter((b) => b.data.status === '완독').length,
     reading: books.filter((b) => b.data.status === '읽는 중').length,
   }), [books]);
+
+  // 홈·가족 소식·통합 검색에서 '이 기록 열어줘'를 싣고 오면 상세를 한 번 열어준다
+  useOpenParam(books, (r) => openDetail(r));
 
   return (
     <>

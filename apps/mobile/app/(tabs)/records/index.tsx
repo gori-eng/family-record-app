@@ -38,6 +38,13 @@ export default function RecordsScreen() {
           가족만의 특별한 이야기와 기록 · 총 {totalRecords}개
         </Text>
 
+        {/* 통합 검색 입구 — 눌러서 검색 화면으로 (여기서 바로 치게 하면 결과를 보여줄 자리가 없다) */}
+        <TouchableOpacity style={styles.searchEntry} activeOpacity={0.7} onPress={() => router.push('/(tabs)/records/search' as any)}
+          accessibilityLabel="기록 찾기">
+          <FontAwesome name="search" size={14} color="#888888" />
+          <Text style={styles.searchEntryText}>모든 기록에서 찾기</Text>
+        </TouchableOpacity>
+
         <View style={styles.grid}>
           {visible.map((cat, index) => (
             <TouchableOpacity
@@ -65,7 +72,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   scrollView: { flex: 1, paddingHorizontal: 20 },
   title: { fontSize: 26, fontWeight: '700', color: '#1F1F1F', marginBottom: 6, fontFamily: 'PretendardBold', letterSpacing: -0.5, marginTop: 16 },
-  subtitle: { fontSize: 13, color: '#A0A0A0', marginBottom: 28, fontFamily: 'Pretendard', lineHeight: 18 },
+  subtitle: { fontSize: 13, color: '#A0A0A0', marginBottom: 16, fontFamily: 'Pretendard', lineHeight: 18 },
+  searchEntry: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, height: 46, paddingHorizontal: 14, marginBottom: 20,
+    backgroundColor: '#FFFFFF', borderRadius: 14, borderWidth: 1, borderColor: '#EAEAEA',
+  },
+  searchEntryText: { fontSize: 14, color: '#A0A0A0', fontFamily: 'Pretendard' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
   card: {
     width: '47%', backgroundColor: '#FFFFFF',

@@ -4,6 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
+import { useOpenParam } from '../../../lib/useOpenParam';
 import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
@@ -173,6 +174,9 @@ export default function GoalsScreen() {
   const sel = selected?.data ?? null;
   const selProgress = sel ? progressOf(sel) : 0;
   const selReached = sel ? isReached({ ...sel, progress: selProgress }) : false;
+
+  // 홈·가족 소식·통합 검색에서 '이 기록 열어줘'를 싣고 오면 상세를 한 번 열어준다
+  useOpenParam(goals, (r) => openDetail(r.id));
 
   return (
     <>

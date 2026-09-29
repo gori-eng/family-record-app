@@ -1,9 +1,10 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
+import { useOpenParam } from '../../../lib/useOpenParam';
 import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
@@ -25,7 +26,6 @@ export default function ParentingScreen() {
   const { askDelete, undoBar } = useRecordDelete('육아 일기');
   const ready = useRecordsReady();
   const CURRENT_USER = useMe();
-  const { openTitle } = useLocalSearchParams<{ openTitle?: string }>();
   const [activeChild, setActiveChild] = useState('전체');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -83,17 +83,6 @@ export default function ParentingScreen() {
   const openDetail = (id: string) => { setSelectedId(id); runOpen(modalBg, modalSlide); };
   const closeDetail = () => runClose(modalBg, modalSlide, () => setSelectedId(null));
 
-  /** 홈에서 넘어온 제목은 **한 번만** 연다 — 예전엔 목록이 바뀔 때마다 상세가 다시 열렸다 (점검 B5) */
-  const openedFor = useRef<string | null>(null);
-  useEffect(() => {
-    if (openTitle && openedFor.current !== openTitle) {
-      const match = entries.find(e => e.title === openTitle);
-      if (match) {
-        openedFor.current = openTitle;
-        openDetail(match.id);
-      }
-    }
-  }, [openTitle, entries]);
 
   /** 폼 열기 — `edit`을 주면 그 일기를 값이 채워진 채로 연다 (편집 전용 폼을 따로 두지 않는다) */
   const openForm = (edit?: FamilyRecord<ParentingEntry>) => {
@@ -177,6 +166,9 @@ export default function ParentingScreen() {
   }, [entries]);
 
   const sel = selected?.data ?? null;
+
+  // 홈·가족 소식·통합 검색에서 '이 기록 열어줘'를 싣고 오면 상세를 한 번 열어준다
+  useOpenParam(entries, (r) => openDetail(r.id));
 
   return (
     <>

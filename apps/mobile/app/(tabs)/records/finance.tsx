@@ -4,6 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
+import { useOpenParam } from '../../../lib/useOpenParam';
 import { useFinanceSettings, recurringDateIn, type RecurringItem } from '../../../store/financeSettings';
 import { useFamilyMembers, useMe, useCanDelete } from '../../../store/family';
 import {
@@ -396,6 +397,13 @@ function FinanceScreen() {
   const activeCategories = formType === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
   const diff = summary.expense - prevExpense;
   const sel = selectedRecord?.data;
+
+  // 홈·가족 소식·통합 검색에서 '이 기록 열어줘'를 싣고 오면 상세를 한 번 열어준다
+  useOpenParam(records, (r) => {
+    // 그 거래가 있는 달로 화면도 옮긴다 — 상세를 닫았을 때 목록에 그 거래가 보이게
+    if (r.data.date) setViewMonth(monthOf(r.data.date));
+    openDetail(r.id);
+  });
 
   return (
     <>

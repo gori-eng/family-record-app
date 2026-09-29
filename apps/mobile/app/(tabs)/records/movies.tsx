@@ -4,6 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
+import { useOpenParam } from '../../../lib/useOpenParam';
 import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
@@ -199,6 +200,9 @@ export default function MoviesScreen() {
   const [emptyTitle, emptySub] = movies.length
     ? (emptyByFilter[FILTERS[activeFilter]?.label] ?? ['아직 영화 기록이 없어요', '함께 본 영화를 하나 남겨볼까요?'])
     : ['아직 영화 기록이 없어요', '함께 본 영화를 하나 남겨볼까요?'];
+
+  // 홈·가족 소식·통합 검색에서 '이 기록 열어줘'를 싣고 오면 상세를 한 번 열어준다
+  useOpenParam(movies, (r) => openDetail(r.id));
 
   return (
     <>

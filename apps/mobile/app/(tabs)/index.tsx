@@ -8,6 +8,7 @@ import { useMyFamilies, useSession } from '../../store/session';
 import { useTodayEvents, useEventsStore, formatTime, membersLabel } from '../../store/events';
 import { useFamilyNews, type NewsItem } from '../../store/news';
 import { LoadingRows, useRecordsReady, useEventsReady } from '../../components/Loading';
+import { CATEGORY_UI } from '../../constants/categoryUi';
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 
 /*
@@ -19,18 +20,6 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
  *    확인할 게 있다고 믿게 만들었다. 그래서 비워뒀다가 이제 진짜로 채웠다.
  */
 
-/** 홈 카드에 쓸 카테고리별 아이콘·색, 그리고 눌렀을 때 갈 화면 */
-const CATEGORY_UI: Record<RecordCategory, { icon: string; bg: string; screen: string; deepLink: boolean }> = {
-  parenting:      { icon: 'child',     bg: '#F0B8B8', screen: 'parenting',    deepLink: true },
-  reading:        { icon: 'book',      bg: '#B8D8C0', screen: 'reading',      deepLink: true },
-  finance:        { icon: 'money',     bg: '#E8D8C0', screen: 'finance',      deepLink: false },
-  movies:         { icon: 'film',      bg: '#B0C8D8', screen: 'movies',       deepLink: false },
-  travel:         { icon: 'plane',     bg: '#E8D8C0', screen: 'travel',       deepLink: false },
-  recipes:        { icon: 'cutlery',   bg: '#E8D0C0', screen: 'recipes',      deepLink: true },
-  goals:          { icon: 'trophy',    bg: '#D8CDB8', screen: 'goals',        deepLink: false },
-  health:         { icon: 'heartbeat', bg: '#E0B0B0', screen: 'health',       deepLink: false },
-  'time-capsule': { icon: 'clock-o',   bg: '#D8D4B0', screen: 'time-capsule', deepLink: false },
-};
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -105,6 +94,13 @@ export default function HomeScreen() {
     return out.sort((a, b) => a.years - b.years).slice(0, 3);
   }, [allRecords]);
 
+  /** 그 기록 화면으로 가서 상세까지 바로 연다 (9개 화면 모두 `openId`를 받는다 — lib/useOpenParam) */
+  const openRecord = (category: RecordCategory, id?: string) => {
+    const path = `/(tabs)/records/${CATEGORY_UI[category].screen}`;
+    if (id) router.push({ pathname: path as any, params: { openId: id } });
+    else router.push(path as any);
+  };
+
   /** 소식을 누르면 그 기록(또는 캘린더)으로 간다 */
   const openNews = (n: NewsItem) => {
     closeNotif();
@@ -112,10 +108,7 @@ export default function HomeScreen() {
       router.push('/(tabs)/calendar');
       return;
     }
-    const ui = CATEGORY_UI[n.category];
-    const path = `/(tabs)/records/${ui.screen}`;
-    if (ui.deepLink && n.recordTitle) router.push({ pathname: path as any, params: { openTitle: n.recordTitle } });
-    else router.push(path as any);
+    openRecord(n.category, n.recordId);
   };
 
   // 7. 모달 열기/닫기 애니메이션
@@ -191,7 +184,11 @@ export default function HomeScreen() {
         {/* Header — 로고 + 알림 (§7) */}
         <View style={s.header}>
           <Text style={s.logo}>familog</Text>
-          <View style={{ flex: 1 }} />
+          <View style={s.headerSpacer} />
+          <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/records/search' as any)} style={s.headerIcon}
+            accessibilityLabel="기록 찾기">
+            <FontAwesome name="search" size={19} color="#1F1F1F" />
+          </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.7} onPress={openNotif} style={s.headerIcon}>
             <FontAwesome name="bell-o" size={20} color="#1F1F1F" />
             {unreadCount > 0 && <View style={s.badge}><Text style={s.badgeText}>{unreadCount}</Text></View>}
@@ -265,11 +262,7 @@ export default function HomeScreen() {
               const ui = CATEGORY_UI[rec.category];
               return (
                 <TouchableOpacity key={rec.id} style={s.memoryRow} activeOpacity={0.7}
-                  onPress={() => {
-                    const path = `/(tabs)/records/${ui.screen}`;
-                    if (ui.deepLink) router.push({ pathname: path as any, params: { openTitle: rec.title } });
-                    else router.push(path as any);
-                  }}>
+                  onPress={() => openRecord(rec.category, rec.id)}>
                   <View style={[s.memoryIcon, { backgroundColor: ui.bg }]}>
                     <FontAwesome name={ui.icon as any} size={14} color="#5C4A32" />
                   </View>
@@ -331,15 +324,7 @@ export default function HomeScreen() {
               const ui = CATEGORY_UI[rec.category];
               return (
               <TouchableOpacity key={rec.id} style={[s.recordCard, i === 0 && s.recordCardLarge]} activeOpacity={0.85}
-                onPress={() => {
-                  const path = `/(tabs)/records/${ui.screen}`;
-                  // 상세 모달까지 바로 열 수 있는 화면은 제목을 넘겨준다
-                  if (ui.deepLink) {
-                    router.push({ pathname: path as any, params: { openTitle: rec.title } });
-                  } else {
-                    router.push(path as any);
-                  }
-                }}>
+                onPress={() => openRecord(rec.category, rec.id)}>
                 <View style={[s.recordInner, { backgroundColor: ui.bg }]}>
                   {/* 아이콘 우측 중앙 */}
                   <View style={s.recordIconWrap}>
@@ -369,6 +354,7 @@ const s = StyleSheet.create({
 
   // Header — 2. 프로필 우측
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 4, paddingBottom: 4, gap: 10 },
+  headerSpacer: { flex: 1 },
   logo: { fontSize: 24, color: '#2D5A3F', fontFamily: 'GaeguBold', transform: [{ rotate: '-2deg' }] },
   headerIcon: { padding: 8 },
   memoryRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#EAEAEA' },

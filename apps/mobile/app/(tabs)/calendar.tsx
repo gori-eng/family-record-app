@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, Modal, Animated, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
+import { useLocalSearchParams } from 'expo-router';
 import { showAlert } from '../../components/AppAlert';
 import { useFamilyMembers, useMe, useCanDelete } from '../../store/family';
 import { eulreul } from '../../lib/korean';
@@ -72,17 +73,23 @@ export default function CalendarScreen() {
     Animated.parallel([
       Animated.timing(modalBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(modalSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
-    ]).start(() => { setShowDetail(null); setShowForm(false); setEditing(null); });
+    ]).start(({ finished }) => {
+      // 닫히는 도중에 다른 창을 열면(검색에서 바로 넘어오는 등) 이 닫힘은 중간에 끊긴다.
+      // 그때 비우면 **방금 연 창까지 닫힌다** — 끝까지 닫혔을 때만 비운다
+      if (!finished) return;
+      setShowDetail(null); setShowForm(false); setEditing(null);
+    });
   };
 
-  const openDetail = (event: CalendarEvent) => { setShowDetail(event); runOpen(); };
+  // 여는 쪽이 다른 창을 확실히 내린다 — 닫힘이 끊겼을 때 두 창이 겹쳐 보이지 않게
+  const openDetail = (event: CalendarEvent) => { setShowForm(false); setEditing(null); setShowDetail(event); runOpen(); };
 
   const resetForm = () => {
     setFTitle(''); setFTime(''); setFLocation(''); setFMembers([]); setFMemo(''); setFColor(EVENT_COLORS[0]);
   };
 
   /** 새 일정 — 지금 고른 날짜에 넣는다 */
-  const openCreate = () => { setEditing(null); resetForm(); setFDate(selectedDate); setShowForm(true); runOpen(); };
+  const openCreate = () => { setShowDetail(null); setEditing(null); resetForm(); setFDate(selectedDate); setShowForm(true); runOpen(); };
 
   /** 고치기 — 새 일정 폼을 그대로 재사용해 값이 채워진 채로 연다 */
   const openEdit = (event: CalendarEvent) => {
@@ -190,6 +197,21 @@ export default function CalendarScreen() {
 
   const isCurrentMonth = ym === todayISO().slice(0, 7);
   const monthEventCount = events.filter((e) => e.date.startsWith(ym)).length;
+
+  // 통합 검색에서 일정을 누르면 `openId`를 싣고 온다 — 그 날짜로 옮기고 상세를 한 번 연다
+  const { openId } = useLocalSearchParams<{ openId?: string }>();
+  const openedFor = useRef('');
+  useEffect(() => {
+    if (!openId || openedFor.current === openId) return;
+    const ev = events.find((e) => e.id === openId);
+    if (!ev) return;
+    openedFor.current = openId;
+    setSelectedDate(ev.date);
+    setCurrentYear(Number(ev.date.slice(0, 4)));
+    setCurrentMonth(Number(ev.date.slice(5, 7)) - 1);
+    openDetail(ev);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openId, events]);
 
   return (
     <View style={styles.container}>
