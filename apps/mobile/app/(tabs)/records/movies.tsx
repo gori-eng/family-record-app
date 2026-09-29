@@ -310,8 +310,9 @@ export default function MoviesScreen() {
             {visible.length === 0 && (
               <View style={s.empty}>
                 <FontAwesome name="film" size={32} color="#CFC7BA" />
-                <Text style={s.emptyText}>아직 영화 기록이 없어요</Text>
-                <Text style={s.emptySub}>아래 + 버튼으로 첫 기록을 남겨보세요</Text>
+                {/* 기록은 있는데 필터에서 빈 경우 — "기록이 없다"고 하면 틀린 말이 된다 */}
+                <Text style={s.emptyText}>{movies.length ? '보고 싶은 영화가 아직 없어요' : '아직 영화 기록이 없어요'}</Text>
+                <Text style={s.emptySub}>{movies.length ? '별점을 매기지 않은 영화가 여기 모여요' : '함께 본 영화를 하나 남겨볼까요?'}</Text>
               </View>
             )}
           </View>

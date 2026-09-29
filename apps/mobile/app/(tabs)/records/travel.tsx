@@ -304,7 +304,7 @@ export default function TravelScreen() {
                 <Text style={s.emptyText}>
                   {filter === '전체' ? '아직 여행 기록이 없어요' : (EMPTY_BY_FILTER[filter] ?? '아직 여행 기록이 없어요')}
                 </Text>
-                <Text style={s.emptySub}>아래 + 버튼으로 첫 기록을 남겨보세요</Text>
+                <Text style={s.emptySub}>다녀온 곳도, 언젠가 가고 싶은 곳도 좋아요</Text>
               </View>
             )}
           </View>

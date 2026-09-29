@@ -284,7 +284,7 @@ export default function GoalsScreen() {
               <View style={s.empty}>
                 <FontAwesome name="trophy" size={32} color="#CFC7BA" />
                 <Text style={s.emptyText}>아직 가족 목표가 없어요</Text>
-                <Text style={s.emptySub}>아래 + 버튼으로 함께 이룰 목표를 세워보세요</Text>
+                <Text style={s.emptySub}>올해 가족이 함께 해보고 싶은 걸 하나 적어볼까요?</Text>
               </View>
             )}
           </View>

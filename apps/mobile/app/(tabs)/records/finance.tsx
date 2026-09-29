@@ -13,6 +13,7 @@ import {
   comma, formatAmount, parseAmount, fingerprint, frequentEntries, guessFromHistory,
   normalizeMerchant,
 } from '../../../store/finance';
+import { ro } from '../../../lib/korean';
 
 export default function FinanceScreen() {
   // 지우기는 쓴 사람과 관리자만 (store/family.ts · DB 정책 00008)
@@ -668,7 +669,7 @@ export default function FinanceScreen() {
                   ? `'${query.trim()}' 검색 결과 ${searchResults.length}건 · ${comma(
                       searchResults.filter((r) => r.data.type === 'expense').reduce((a, r) => a + r.data.amount, 0)
                     )}원`
-                  : `'${query.trim()}'로 찾은 기록이 없어요`}
+                  : `'${query.trim()}'${ro(query.trim())} 찾은 기록이 없어요`}
               </Text>
               {searchResults.map((record) => {
                 const t = record.data;
@@ -849,15 +850,15 @@ export default function FinanceScreen() {
               <FontAwesome name="inbox" size={36} color="#E0D8C8" />
               <Text style={styles.emptyText}>
                 {activeCategory === '전체'
-                  ? `${formatMonth(viewMonth)}에 기록된 거래가 없어요`
-                  : `'${activeCategory}' 거래가 없어요`}
+                  ? `${formatMonth(viewMonth)}엔 아직 적은 거래가 없어요`
+                  : `이 달엔 '${activeCategory}'${ro(activeCategory)} 쓴 게 없어요`}
               </Text>
               {activeCategory !== '전체' ? (
                 <TouchableOpacity activeOpacity={0.7} onPress={() => setActiveCategory('전체')}>
                   <Text style={styles.emptySubtext}>전체 보기로 돌아가기</Text>
                 </TouchableOpacity>
               ) : (
-                <Text style={styles.emptySubtext}>아래 + 버튼으로 첫 거래를 남겨보세요</Text>
+                <Text style={styles.emptySubtext}>오늘 쓴 것부터 하나 적어볼까요?</Text>
               )}
             </View>
           ) : (
@@ -973,7 +974,7 @@ export default function FinanceScreen() {
                 거래를 눌러 '매달'을 고르면 여기에 등록돼요. 새 달이 되면 한 번에 넣을 수 있어요.
               </Text>
               {settings.recurring.length === 0 ? (
-                <Text style={styles.recurEmpty}>아직 등록한 게 없어요</Text>
+                <Text style={styles.recurEmpty}>아직 매달 넣는 거래가 없어요</Text>
               ) : (
                 <ScrollView style={{ maxHeight: 300 }} showsVerticalScrollIndicator={false}>
                   {settings.recurring.map((item: RecurringItem) => (

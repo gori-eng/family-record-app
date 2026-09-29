@@ -359,7 +359,7 @@ export default function ParentingScreen() {
                 <Text style={styles.emptyText}>
                   {activeChild === '전체' ? '아직 육아 일기가 없어요' : `${activeChild}의 일기가 아직 없어요`}
                 </Text>
-                <Text style={styles.emptySub}>아래 연필 버튼으로 오늘을 기록해보세요</Text>
+                <Text style={styles.emptySub}>오늘 아이와 있었던 일, 한 줄이면 충분해요</Text>
               </View>
             )}
           </View>

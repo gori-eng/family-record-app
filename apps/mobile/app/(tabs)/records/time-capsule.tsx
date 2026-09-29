@@ -213,7 +213,7 @@ export default function TimeCapsuleScreen() {
               <View style={s.empty}>
                 <FontAwesome name="clock-o" size={32} color="#CFC7BA" />
                 <Text style={s.emptyText}>아직 타임캡슐이 없어요</Text>
-                <Text style={s.emptySub}>아래 + 버튼으로 미래의 가족에게 편지를 남겨보세요</Text>
+                <Text style={s.emptySub}>몇 년 뒤의 우리 가족에게 편지를 남겨볼까요?</Text>
               </View>
             )}
           </View>

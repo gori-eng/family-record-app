@@ -309,8 +309,8 @@ export default function RecipesScreen() {
             {recipes.length === 0 && (
               <View style={s.empty}>
                 <FontAwesome name="cutlery" size={32} color="#CFC7BA" />
-                <Text style={s.emptyText}>아직 등록한 레시피가 없어요</Text>
-                <Text style={s.emptySub}>아래 + 버튼으로 가족의 손맛을 남겨보세요</Text>
+                <Text style={s.emptyText}>아직 적어둔 레시피가 없어요</Text>
+                <Text style={s.emptySub}>우리 집 손맛, 잊기 전에 하나 남겨볼까요?</Text>
               </View>
             )}
           </View>

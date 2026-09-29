@@ -245,7 +245,7 @@ export default function HealthScreen() {
               <View style={s.empty}>
                 <FontAwesome name="heartbeat" size={32} color="#CFC7BA" />
                 <Text style={s.emptyText}>아직 건강 기록이 없어요</Text>
-                <Text style={s.emptySub}>아래 + 버튼으로 검진 결과를 남겨보세요</Text>
+                <Text style={s.emptySub}>검진 결과를 남겨두면 다음에 찾기 쉬워요</Text>
               </View>
             )}
           </View>

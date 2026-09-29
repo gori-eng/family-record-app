@@ -390,7 +390,7 @@ export default function CalendarScreen() {
             <TouchableOpacity style={styles.emptyState} activeOpacity={0.7} onPress={openCreate}>
               <FontAwesome name="calendar-plus-o" size={32} color="#D4C8B0" />
               <Text style={styles.emptyText}>아직 적어둔 일정이 없어요</Text>
-              <Text style={styles.emptySubtext}>눌러서 하나 넣어보세요</Text>
+              <Text style={styles.emptySubtext}>여기를 눌러 하나 적어볼까요?</Text>
             </TouchableOpacity>
           ) : (
             selectedEvents.map((ev) => (

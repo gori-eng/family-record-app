@@ -15,6 +15,13 @@ type Book = {
 
 const STATUS_OPTIONS = ['전체', '읽는 중', '완독', '읽고 싶은'];
 
+/** 필터를 골랐는데 비어 있을 때 — 저장값('완독')을 그대로 보여주지 않는다 */
+const EMPTY_BY_STATUS: Record<string, string> = {
+  '읽는 중': '지금 읽고 있는 책이 없어요',
+  '완독': '아직 다 읽은 책이 없어요',
+  '읽고 싶은': '읽고 싶은 책을 하나 담아둘까요?',
+};
+
 /** 새로 등록하는 책 표지에 돌아가며 입히는 색 */
 const NEW_BOOK_COLORS = ['#B8D8C0', '#F0B8B8', '#B0C8D8', '#D8CDB8'];
 function StarRating({ rating }: { rating: number }) {
@@ -444,9 +451,9 @@ export default function ReadingScreen() {
               <View style={styles.empty}>
                 <FontAwesome name="book" size={32} color="#CFC7BA" />
                 <Text style={styles.emptyText}>
-                  {activeStatus === '전체' ? '아직 등록한 책이 없어요' : `'${activeStatus}' 책이 없어요`}
+                  {activeStatus === '전체' ? '아직 담아둔 책이 없어요' : (EMPTY_BY_STATUS[activeStatus] ?? '아직 담아둔 책이 없어요')}
                 </Text>
-                <Text style={styles.emptySub}>아래 + 버튼으로 첫 책을 등록해보세요</Text>
+                <Text style={styles.emptySub}>요즘 읽는 책도, 읽고 싶은 책도 좋아요</Text>
               </View>
             )}
           </View>
