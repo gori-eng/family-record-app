@@ -218,6 +218,21 @@ export type Database = {
         Args: { p_invite_code: string; p_display_name: string; p_full_name?: string; p_role?: string };
         Returns: { family_id: string; member_id: string }[];
       };
+      /** 관리자가 구성원 역할을 바로잡는다. 'admin'이면 관리자 넘기기 (00010) */
+      set_member_role: {
+        Args: { p_member_id: string; p_role: string };
+        Returns: undefined;
+      };
+      /** 가족에서 나가기. 마지막 사람·관리자는 못 나간다 (00010) */
+      leave_family: {
+        Args: { p_family_id: string };
+        Returns: undefined;
+      };
+      /** 나 혼자 남은 가족 지우기. 관리자만 (00010) */
+      delete_family: {
+        Args: { p_family_id: string };
+        Returns: undefined;
+      };
       /** RLS 재귀를 피하려고 만든 함수. 정책 안에서만 쓴다 */
       my_family_ids: {
         Args: Record<string, never>;

@@ -1,7 +1,7 @@
 /**
  * 역할 기반 접근 규칙.
  *
- * ⚠️ 아직 앱에서 쓰이지 않는다. 인증을 붙인 뒤 화면과 RLS 양쪽에 적용한다.
+ * `canView`는 00010 RLS(`records_select`)와 **같은 규칙**이다. 바꿀 땐 둘 다 바꾼다.
  * (화면에서만 숨기면 진짜 차단이 아니다. DB 정책도 함께 걸어야 한다 —
  *  `supabase/migrations/` 참조)
  */
@@ -35,7 +35,6 @@ export function canEdit(feature: Feature, role: FamilyRole): boolean {
   return true;
 }
 
-/** 지우는 건 되돌리기 어려우므로 어른만 */
 /**
  * 기록·일정을 지울 수 있는지 — **쓴 사람과 관리자만** (2026-09-29 운영자 결정).
  *

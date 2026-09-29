@@ -145,3 +145,34 @@ export async function updateMyName(
   const { error } = await supabase.from('family_members').update(row).eq('id', memberId);
   if (error) throw error;
 }
+
+/**
+ * 구성원 역할 바로잡기 — **관리자만** (00010).
+ * 합류할 때 역할은 본인이 고르므로, 아이가 '부모'를 고르면 가계부가 보인다. 그걸 바로잡는다.
+ * `'admin'`을 주면 관리자를 넘기는 것이다 — 나는 부모가 된다(관리자는 늘 한 명).
+ */
+export async function setMemberRole(
+  memberId: string,
+  role: 'admin' | 'parent' | 'child' | 'elder'
+): Promise<void> {
+  const { error } = await supabase.rpc('set_member_role', { p_member_id: memberId, p_role: role });
+  if (error) throw error;
+}
+
+/**
+ * 가족에서 나가기 (00010). 내가 쓴 기록은 가족에 남는다.
+ * 마지막 한 사람이거나 관리자면 DB가 이유를 말하며 거절한다.
+ */
+export async function leaveFamily(familyId: string): Promise<void> {
+  const { error } = await supabase.rpc('leave_family', { p_family_id: familyId });
+  if (error) throw error;
+}
+
+/**
+ * 가족 지우기 (00010). **나 혼자 남은 가족만**, 관리자만.
+ * 기록·일정·가계부 설정이 함께 지워진다 — 부르기 전에 백업을 권할 것.
+ */
+export async function deleteFamily(familyId: string): Promise<void> {
+  const { error } = await supabase.rpc('delete_family', { p_family_id: familyId });
+  if (error) throw error;
+}

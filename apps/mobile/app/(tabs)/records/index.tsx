@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useRecordCounts, type RecordCategory } from '../../../store/records';
+import { useCanSee } from '../../../store/family';
 
 const CATEGORIES = [
   { icon: 'child', label: '육아 일기', color: '#F0B8B8', screen: 'parenting' },
@@ -20,6 +21,9 @@ export default function RecordsScreen() {
   const router = useRouter();
   // 박아둔 숫자가 아니라 실제 기록 수를 센다
   const counts = useRecordCounts();
+  // 아이에게는 가계부·건강 기록 칸을 보여주지 않는다 (DB도 내주지 않는다 — 00010)
+  const canSee = useCanSee();
+  const visible = CATEGORIES.filter((c) => canSee(c.screen));
   const totalRecords = Object.values(counts).reduce((sum, n) => sum + n, 0);
 
   const handlePress = (screen: string) => {
@@ -35,7 +39,7 @@ export default function RecordsScreen() {
         </Text>
 
         <View style={styles.grid}>
-          {CATEGORIES.map((cat, index) => (
+          {visible.map((cat, index) => (
             <TouchableOpacity
               key={index}
               style={styles.card}

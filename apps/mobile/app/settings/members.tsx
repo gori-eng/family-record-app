@@ -2,7 +2,9 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Share } from 'rea
 import { showAlert } from '../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
-import { useMemberCards, useFamilyInfo } from '../../store/family';
+import { useMemberCards, useFamilyInfo, type MemberCard } from '../../store/family';
+import { useSession } from '../../store/session';
+import { setMemberRole } from '@core/supabase';
 import { ro } from '../../lib/korean';
 
 /**
@@ -29,6 +31,60 @@ export default function MembersScreen() {
   const router = useRouter();
   const members = useMemberCards();
   const family = useFamilyInfo();
+  const isAdmin = useSession((st) => st.me?.role === 'admin');
+  const refresh = useSession((st) => st.refresh);
+
+  /**
+   * 관리자가 역할을 바로잡는다 (00010).
+   * 합류할 때 역할은 본인이 고르므로, 아이가 '부모'를 고르면 가계부가 보인다 — 그걸 고친다.
+   */
+  const changeRole = async (m: MemberCard, role: 'parent' | 'child' | 'elder' | 'admin') => {
+    if (!m.memberId) return;
+    try {
+      await setMemberRole(m.memberId, role);
+      await refresh();
+      showAlert(
+        role === 'admin' ? `${m.display}님이 관리자가 됐어요` : '역할을 바꿨어요',
+        role === 'admin' ? '이제 나는 부모예요.' : `${m.display}님이 앱을 다시 열면 바뀐 역할로 보여요.`
+      );
+    } catch (e: any) {
+      showAlert('역할을 바꾸지 못했어요', String(e?.message ?? e));
+    }
+  };
+
+  const confirmHandOver = (m: MemberCard) => {
+    showAlert(
+      `${m.display}님에게 관리자를 넘길까요?`,
+      '관리자는 한 명뿐이라, 넘기면 나는 부모가 돼요. 다시 받으려면 새 관리자가 넘겨줘야 해요.',
+      [
+        { text: '그냥 둘게요', style: 'cancel' },
+        { text: '넘기기', onPress: () => changeRole(m, 'admin') },
+      ]
+    );
+  };
+
+  const openMember = (m: MemberCard) => {
+    const info = `기록에는 '${m.display}'${ro(m.display)} 남아요.\n역할: ${m.role}`;
+    // 관리자는 다른 사람의 역할을 바로잡을 수 있다. 나 자신·예시 가족은 보기만
+    if (!isAdmin || m.isMe || !m.memberId) {
+      showAlert(
+        m.full,
+        info + (m.isMe ? '\n\n나예요.' : '') +
+          (isAdmin ? '' : '\n\n역할은 관리자가 바꿀 수 있어요.')
+      );
+      return;
+    }
+    const options = ([
+      ['parent', '부모로'], ['child', '자녀로'], ['elder', '조부모로'],
+    ] as const)
+      .filter(([key]) => key !== m.roleKey)
+      .map(([key, text]) => ({ text, onPress: () => changeRole(m, key) }));
+    showAlert(m.full, info + '\n\n자녀는 가계부·건강 기록을 볼 수 없어요.', [
+      ...options,
+      { text: '관리자 넘기기', onPress: () => confirmHandOver(m) },
+      { text: '그냥 둘게요', style: 'cancel' },
+    ]);
+  };
 
   const invite = async () => {
     if (!family.inviteCode) {
@@ -68,12 +124,7 @@ export default function MembersScreen() {
 
         {members.map((m) => (
           <TouchableOpacity key={m.display} style={s.card} activeOpacity={0.7}
-            onPress={() => showAlert(
-              m.full,
-              `기록에는 '${m.display}'${ro(m.display)} 남아요.\n역할: ${m.role}` +
-              (m.isMe ? '\n\n나예요.' : '') +
-              '\n\n역할 바꾸기는 아직 준비 중이에요.'
-            )}>
+            onPress={() => openMember(m)}>
             <View style={[s.avatar, { backgroundColor: m.color }]}>
               {m.avatar
                 ? <Text style={s.avatarEmoji}>{m.avatar}</Text>

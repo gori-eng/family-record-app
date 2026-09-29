@@ -14,8 +14,9 @@ import {
   normalizeMerchant,
 } from '../../../store/finance';
 import { ro } from '../../../lib/korean';
+import { withGrownupsOnly } from '../../../components/GrownupsOnly';
 
-export default function FinanceScreen() {
+function FinanceScreen() {
   // 지우기는 쓴 사람과 관리자만 (store/family.ts · DB 정책 00008)
   const canDelete = useCanDelete();
   /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
@@ -1219,3 +1220,6 @@ const styles = StyleSheet.create({
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 });
+
+// 아이 계정에는 보이지 않는다 (DB 00010과 같은 규칙)
+export default withGrownupsOnly('finance', FinanceScreen);

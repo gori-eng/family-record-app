@@ -4,9 +4,12 @@ import { showAlert } from '../../components/AppAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { signOut } from '@core/supabase';
+import { signOut, leaveFamily, deleteFamily } from '@core/supabase';
 import { useFamilyInfo, useMe, useFullName } from '../../store/family';
 import { useSession, useMyFamilies } from '../../store/session';
+import { useRecordsStore } from '../../store/records';
+import { useEventsStore } from '../../store/events';
+import { eulreul } from '../../lib/korean';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -29,6 +32,74 @@ export default function SettingsScreen() {
   /** 프로필에서 고른 이모지 (없으면 사람 아이콘) */
   const myAvatar = useSession((st) => st.me?.avatar_url ?? null);
   const clearSession = useSession((s) => s.clear);
+  const refreshSession = useSession((s) => s.refresh);
+  const isAdmin = useSession((st) => st.me?.role === 'admin');
+  const recordCount = useRecordsStore((st) => st.records.length);
+  const eventCount = useEventsStore((st) => st.events.length);
+
+  /**
+   * 가족에서 나가기 / 가족 지우기 (00010).
+   * - 나 혼자 남은 가족의 관리자 → **지우기**만 된다 (나갈 사람이 나뿐이다)
+   * - 그 밖에는 **나가기**. 내가 쓴 기록은 가족에 남는다
+   * 관리자가 다른 사람과 함께 있으면 DB가 "관리자를 먼저 넘겨주세요"라고 거절한다.
+   * 끝나면 가족 목록을 다시 불러온다 — 남은 가족이 없으면 가드가 온보딩으로 보낸다.
+   */
+  const soleAdmin = isAdmin && family.memberCount === 1;
+  const afterFamilyGone = async () => {
+    await refreshSession();
+    router.replace('/');
+  };
+
+  const handleLeave = () => {
+    showAlert(
+      `${family.name}에서 나갈까요?`,
+      '내가 쓴 기록은 가족에게 그대로 남아요. 다시 들어오려면 초대 코드가 필요해요.',
+      [
+        { text: '그냥 있을게요', style: 'cancel' },
+        {
+          text: '나가기',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await leaveFamily(currentFamilyId!);
+              await afterFamilyGone();
+            } catch (e: any) {
+              showAlert('나가지 못했어요', String(e?.message ?? e));
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const reallyDelete = () => {
+    showAlert('정말 지울까요?', '지운 가족은 되살릴 수 없어요.', [
+      { text: '그냥 둘게요', style: 'cancel' },
+      {
+        text: '지우기',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteFamily(currentFamilyId!);
+            await afterFamilyGone();
+          } catch (e: any) {
+            showAlert('지우지 못했어요', String(e?.message ?? e));
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleDelete = () => {
+    const what = recordCount || eventCount
+      ? `기록 ${recordCount}개와 일정 ${eventCount}개가 함께 지워져요.`
+      : '아직 쓴 기록은 없어요.';
+    showAlert(`${family.name}${eulreul(family.name)} 지울까요?`, `${what}\n먼저 파일로 담아두면 나중에 다른 가족에 되살릴 수 있어요.`, [
+      { text: '파일로 먼저 담기', onPress: () => router.push('/settings/export') },
+      { text: '지우기', style: 'destructive', onPress: reallyDelete },
+      { text: '그냥 둘게요', style: 'cancel' },
+    ]);
+  };
 
   const handleSignOut = () => {
     showAlert('로그아웃할까요?', '기록은 그대로 남아 있어요. 다시 로그인하면 이어서 볼 수 있어요.', [
@@ -73,6 +144,12 @@ export default function SettingsScreen() {
           action: () => router.push('/settings/members') },
         { icon: 'qrcode', label: '초대 코드', subtitle: family.inviteCode ?? '아직 없어요',
           action: handleShareInviteCode },
+        // 진짜 가족이 있을 때만. 혼자 남은 관리자는 지우기, 그 밖에는 나가기
+        ...(family.isReal && currentFamilyId
+          ? [soleAdmin
+              ? { icon: 'trash-o', label: '이 가족 지우기', subtitle: '나 혼자 남은 가족', action: handleDelete }
+              : { icon: 'sign-out', label: '이 가족에서 나가기', action: handleLeave }]
+          : []),
       ],
     },
     {

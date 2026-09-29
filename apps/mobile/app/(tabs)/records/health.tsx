@@ -6,6 +6,7 @@ import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
 import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
 import { useFamilyMembers, useMe } from '../../../store/family';
+import { withGrownupsOnly } from '../../../components/GrownupsOnly';
 
 type HealthRecord = {
   member: string; recordedBy: string; type: string; date: string;
@@ -25,7 +26,7 @@ const RESULT_COLOR: Record<string, { bg: string; text: string }> = {
   '충치 1개': { bg: '#FFF3E0', text: '#E65100' },
 };
 
-export default function HealthScreen() {
+function HealthScreen() {
   const { askDelete, undoBar } = useRecordDelete('건강 기록');
   /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
   const MEMBERS = useFamilyMembers();
@@ -300,3 +301,6 @@ const s = StyleSheet.create({
   memberPillTextActive: { color: '#FFFFFF' },
   authorHint: { fontSize: 12, color: '#888', marginBottom: 16, marginTop: -4, fontFamily: 'Pretendard' },
 });
+
+// 아이 계정에는 보이지 않는다 (DB 00010과 같은 규칙)
+export default withGrownupsOnly('health', HealthScreen);

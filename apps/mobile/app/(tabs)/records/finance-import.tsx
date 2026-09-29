@@ -21,6 +21,7 @@ import {
   cardsInFile, type ImportCandidate, type ColumnKey, type RawRow,
 } from '../../../store/statementImport';
 import { useFinanceSettings, headerSignatureOf } from '../../../store/financeSettings';
+import { withGrownupsOnly } from '../../../components/GrownupsOnly';
 
 /** 열 맞추기 화면에 보여줄 항목 — 앞의 3개는 없으면 가져올 수 없다. */
 const COLUMN_FIELDS: { key: ColumnKey; label: string; required: boolean }[] = [
@@ -34,7 +35,7 @@ const COLUMN_FIELDS: { key: ColumnKey; label: string; required: boolean }[] = [
   { key: 'installment', label: '할부(이용구분)', required: false },
 ];
 
-export default function FinanceImportScreen() {
+function FinanceImportScreen() {
   /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
   const MEMBERS = useFamilyMembers();
   const CURRENT_USER = useMe();
@@ -711,3 +712,6 @@ const s = StyleSheet.create({
   importBtnOff: { backgroundColor: '#CFC7BA' },
   importBtnText: { fontSize: 16, color: '#FFFFFF', fontFamily: 'PretendardBold' },
 });
+
+// 아이 계정에는 보이지 않는다 (DB 00010과 같은 규칙)
+export default withGrownupsOnly('finance', FinanceImportScreen);

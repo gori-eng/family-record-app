@@ -19,10 +19,10 @@ const PROTECTED = [
   { icon: 'trash-o', title: '지우기는 쓴 사람과 관리자만', desc: '아이가 실수로 부모의 기록을 지우는 일이 없어요.' },
   { icon: 'user-secret', title: '역할은 스스로 바꿀 수 없어요', desc: '관리자는 가족을 만든 사람뿐이에요.' },
   { icon: 'key', title: '초대 코드가 있어야 들어와요', desc: '코드를 모르면 우리 가족에 들어올 수 없어요.' },
+  { icon: 'child', title: '가계부·건강 기록은 어른만 봐요', desc: '자녀 역할인 가족에게는 이 두 가지가 보이지 않아요.' },
 ];
 
 const NOT_YET = [
-  { title: '아이에게 가계부·건강 기록 숨기기', desc: '지금은 가족 모두가 모든 기록을 함께 봐요.' },
   { title: '나만 보는 기록', desc: '지금은 쓴 기록이 가족 모두에게 보여요.' },
 ];
 
@@ -57,7 +57,8 @@ export default function PrivacyScreen() {
           </View>
         ))}
         <Text style={s.note}>
-          아이를 초대하기 전에 이 부분을 알아두세요. 준비되면 이곳에서 켤 수 있게 할게요.
+          역할은 가족에 들어올 때 스스로 골라요. 아이가 '부모'를 골랐다면 관리자가
+          설정 › 가족 구성원에서 '자녀'로 바로잡아 주세요.
         </Text>
       </ScrollView>
     </>

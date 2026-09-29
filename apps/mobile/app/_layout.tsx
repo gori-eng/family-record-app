@@ -158,13 +158,27 @@ function RootLayoutNav() {
     if (familyId && userId) {
       loadRecords(familyId, userId);
       loadEvents(familyId, userId);
-      attachFinanceSettings(familyId);
     } else {
       clearRecords();
       clearEvents();
-      detachFinanceSettings();
     }
   }, [familyId, session?.user?.id]);
+
+  /**
+   * 가계부 설정은 **어른일 때만** 가족 것에 연결한다 (00010 — 돈 이야기는 어른만).
+   * 아이 계정이 연결하면 DB가 거절하는데, 처음 연결 때 이 기기 설정을 올리려다 오류가 난다.
+   * 역할은 구성원을 불러온 뒤에야 알 수 있어서 따로 본다.
+   */
+  const myRole = useSession((s) => s.me?.role ?? null);
+  const grownup = myRole === 'admin' || myRole === 'parent' || myRole === 'elder';
+  useEffect(() => {
+    if (!familyId) { detachFinanceSettings(); return; }
+    // ⚠️ 가족을 바꾸는 사이엔 역할이 잠깐 '모름'(null)이 된다. 그때 떼었다 붙이면
+    //    '처음 연결'로 착각해 이 기기의 옛 설정을 새 가족에 올린다 → 모를 땐 그대로 둔다
+    if (!myRole) return;
+    if (grownup) attachFinanceSettings(familyId);
+    else detachFinanceSettings();
+  }, [familyId, myRole]);
 
   // 길 안내 — 무엇을 어디로 보낼지는 lib/authGate.ts가 정한다 (Node에서 검증됨)
   useEffect(() => {

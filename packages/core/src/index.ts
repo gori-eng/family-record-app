@@ -13,6 +13,9 @@ export {
   createFamily,
   joinFamilyByCode,
   updateMyName,
+  setMemberRole,
+  leaveFamily,
+  deleteFamily,
 } from './supabase/family';
 export {
   fetchRecords,

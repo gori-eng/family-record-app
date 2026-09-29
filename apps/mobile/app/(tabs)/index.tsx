@@ -3,31 +3,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useRecentRecords, CATEGORY_LABELS, relativeDay, type RecordCategory } from '../../store/records';
-import { useMe, useFamilyInfo } from '../../store/family';
+import { useMe, useFamilyInfo, useCanSee } from '../../store/family';
 import { useMyFamilies } from '../../store/session';
 import { useTodayEvents, formatTime, membersLabel } from '../../store/events';
+import { useFamilyNews, type NewsItem } from '../../store/news';
 import { useState, useCallback, useRef, useEffect } from 'react';
 
-type Notice = {
-  id: string;
-  icon: string;
-  color: string;
-  title: string;
-  desc: string;
-  time: string;
-  unread: boolean;
-  author: string;
-};
-
-/**
- * 알림 — **지금은 비어 있다.**
+/*
+ * 알림(🔔) — store/news.ts가 모은 **진짜 가족 소식**을 보여준다 (2026-09-29).
+ * 다른 가족이 최근 남긴 기록 + 오늘·내일 일정.
  *
- * ⚠️ 여기에는 가짜 알림 5개가 박혀 있었다("독서 기록을 추가했어요 — 서준" 등).
- *    예시 가족일 때는 그럴듯했지만, 진짜 가족으로 로그인하자 **없는 일을 알려주는
- *    알림**이 됐다. 벨에 '3'이 떠 있어 사용자는 확인해야 할 게 있다고 믿게 된다.
- *    진짜 알림(가족이 남긴 새 기록, 다가오는 일정 등)을 만들 때 이 배열을 채운다.
+ * ⚠️ 예전엔 가짜 알림 5개가 박혀 있었다("독서 기록을 추가했어요 — 서준" 등).
+ *    진짜 가족으로 로그인하자 **없는 일을 알려주는 알림**이 됐고, 벨의 '3'이
+ *    확인할 게 있다고 믿게 만들었다. 그래서 비워뒀다가 이제 진짜로 채웠다.
  */
-const NOTIFICATIONS: Notice[] = [];
 
 /** 홈 카드에 쓸 카테고리별 아이콘·색, 그리고 눌렀을 때 갈 화면 */
 const CATEGORY_UI: Record<RecordCategory, { icon: string; bg: string; screen: string; deepLink: boolean }> = {
@@ -48,6 +37,7 @@ export default function HomeScreen() {
   const recent = useRecentRecords(4);
   // 로그인한 사람의 짧은 이름 (없으면 예시 가족의 '지수') — store/family.ts
   const me = useMe();
+  const canSee = useCanSee();
   // 가족이 둘 이상이면 지금 어느 가족을 보고 있는지 날짜 옆에 적는다
   const familyInfo = useFamilyInfo();
   const familyCount = useMyFamilies().length;
@@ -80,7 +70,21 @@ export default function HomeScreen() {
 
   const hour = today.getHours();
   const greeting = hour < 6 ? '새벽이네요' : hour < 12 ? '좋은 아침이에요' : hour < 18 ? '좋은 오후예요' : '좋은 저녁이에요';
-  const unreadCount = NOTIFICATIONS.filter(n => n.unread).length;
+  const news = useFamilyNews();
+  const unreadCount = news.unread;
+
+  /** 소식을 누르면 그 기록(또는 캘린더)으로 간다 */
+  const openNews = (n: NewsItem) => {
+    closeNotif();
+    if (n.kind === 'event' || !n.category) {
+      router.push('/(tabs)/calendar');
+      return;
+    }
+    const ui = CATEGORY_UI[n.category];
+    const path = `/(tabs)/records/${ui.screen}`;
+    if (ui.deepLink && n.recordTitle) router.push({ pathname: path as any, params: { openTitle: n.recordTitle } });
+    else router.push(path as any);
+  };
 
   // 7. 모달 열기/닫기 애니메이션
   const openNotif = () => {
@@ -91,6 +95,8 @@ export default function HomeScreen() {
     ]).start();
   };
   const closeNotif = () => {
+    // 닫을 때 '다 봤다'로 적는다. 열 때 적으면 새 소식 점이 보이자마자 사라진다
+    news.markSeen();
     Animated.parallel([
       Animated.timing(modalBgAnim, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(modalSlideAnim, { toValue: 400, duration: 250, useNativeDriver: true }),
@@ -114,17 +120,18 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
-              {NOTIFICATIONS.length === 0 && (
+              {news.items.length === 0 && (
                 <View style={s.notifEmpty}>
                   <FontAwesome name="bell-o" size={28} color="#D0D0D0" />
                   <Text style={s.notifEmptyTitle}>아직 새 소식이 없어요</Text>
-                  <Text style={s.notifEmptySub}>가족 소식을 모아 보여주는 기능은 준비 중이에요</Text>
+                  <Text style={s.notifEmptySub}>가족이 기록을 남기거나 일정이 다가오면 여기 모여요</Text>
                 </View>
               )}
-              {NOTIFICATIONS.map(n => (
-                <TouchableOpacity key={n.id} style={[s.notifItem, n.unread && s.notifItemUnread]} activeOpacity={0.7}>
-                  <View style={[s.notifIcon, { backgroundColor: n.color }]}>
-                    <FontAwesome name={n.icon as any} size={14} color="#4A4A4A" />
+              {news.items.map(n => (
+                <TouchableOpacity key={n.id} style={[s.notifItem, n.unread && s.notifItemUnread]} activeOpacity={0.7}
+                  onPress={() => openNews(n)}>
+                  <View style={[s.notifIcon, { backgroundColor: n.category ? CATEGORY_UI[n.category].bg : '#B8D8C0' }]}>
+                    <FontAwesome name={(n.category ? CATEGORY_UI[n.category].icon : 'calendar') as any} size={14} color="#4A4A4A" />
                   </View>
                   <View style={s.notifContent}>
                     <Text style={s.notifItemTitle}>{n.title}</Text>
@@ -216,12 +223,12 @@ export default function HomeScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.quickScroll}>
             {[
               { icon: 'pencil', label: '일기', route: '/(tabs)/records/parenting' },
-              { icon: 'money', label: '가계부', route: '/(tabs)/records/finance' },
+              { icon: 'money', label: '가계부', route: '/(tabs)/records/finance', category: 'finance' },
               { icon: 'book', label: '독서', route: '/(tabs)/records/reading' },
               { icon: 'plane', label: '여행', route: '/(tabs)/records/travel' },
               { icon: 'cutlery', label: '레시피', route: '/(tabs)/records/recipes' },
               { icon: 'film', label: '영화', route: '/(tabs)/records/movies' },
-            ].map((q, i) => (
+            ].filter((q) => !q.category || canSee(q.category)).map((q, i) => (
               <TouchableOpacity key={i} style={s.quickChip} activeOpacity={0.7}
                 onPress={() => router.push(q.route as any)}>
                 <FontAwesome name={q.icon as any} size={15} color="#666" />

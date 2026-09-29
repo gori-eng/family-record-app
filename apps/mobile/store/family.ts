@@ -16,7 +16,7 @@
  *    그때 `constants/family.ts`와 이 파일의 폴백을 함께 지우면 된다.
  */
 import { useMemo, useCallback } from 'react';
-import { canDeleteRecord } from '@core/supabase';
+import { canDeleteRecord, canView } from '@core/supabase';
 import { useSession } from './session';
 import { REQUIRE_AUTH } from '../lib/authGate';
 
@@ -73,6 +73,10 @@ export type MemberCard = {
   isMe: boolean;
   /** 프로필에서 고른 이모지. 없으면 이름 첫 글자를 보여준다 */
   avatar: string | null;
+  /** DB 구성원 id — 관리자가 역할을 바로잡을 때 쓴다. 예시 가족이면 없다 */
+  memberId: string | null;
+  /** DB 역할 값 그대로 ('admin' | 'parent' …). `role`은 화면용 말 */
+  roleKey: string | null;
 };
 
 /**
@@ -103,6 +107,8 @@ export function useMemberCards(): MemberCard[] {
         role: sampleRoles[i] ?? '가족',
         isMe: m.display === SAMPLE_ME,
         avatar: null,
+        memberId: null,
+        roleKey: null,
       }));
     }
     return members.map((m, i) => ({
@@ -112,6 +118,8 @@ export function useMemberCards(): MemberCard[] {
       role: ROLE_LABEL[m.role] ?? '가족',
       isMe: !!me && m.id === me.id,
       avatar: m.avatar_url,
+      memberId: m.id,
+      roleKey: m.role,
     }));
   }, [members, me]);
 }
@@ -170,5 +178,20 @@ export function useCanDelete(): (authorId?: string) => boolean {
   return useCallback(
     (authorId?: string) => canDeleteRecord({ authorId, myUserId: userId, myRole: role }),
     [userId, role]
+  );
+}
+
+/**
+ * 이 카테고리를 내가 볼 수 있는지 — **돈(가계부)·몸(건강)은 어른만** (00010).
+ * 규칙은 core `canView`, DB 정책 `records_select`도 같은 규칙이다.
+ * 화면은 이걸로 메뉴를 숨기고, DB는 아이 계정에 그 기록을 아예 내주지 않는다.
+ *
+ * 가족 정보가 아직 없으면(로그인 전 둘러보기·불러오는 중) 보여준다 — 가려봐야 지킬 데이터가 없다.
+ */
+export function useCanSee(): (category: string) => boolean {
+  const role = useSession((s) => s.me?.role ?? null);
+  return useCallback(
+    (category: string) => (role ? canView(category as any, role) : true),
+    [role]
   );
 }
