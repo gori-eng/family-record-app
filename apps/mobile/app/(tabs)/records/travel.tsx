@@ -6,6 +6,14 @@ import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
 import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
 import { useMe } from '../../../store/family';
+import { say, TRAVEL_LABEL } from '../../../constants/labels';
+
+/** 필터를 골랐는데 비어 있을 때 — 재촉 대신 권유로 (§9) */
+const EMPTY_BY_FILTER: Record<string, string> = {
+  '다녀옴': '아직 다녀온 여행이 없어요',
+  '계획 중': '아직 잡아둔 여행이 없어요',
+  '가고 싶은': '가고 싶은 곳을 하나 적어볼까요?',
+};
 
 type Trip = {
   dest: string; country: string; status: string; date: string;
@@ -139,7 +147,7 @@ export default function TravelScreen() {
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>상태</Text>
                       <View style={[s.statusBadge, { backgroundColor: (STATUS_COLORS[selectedItem.status] ?? { bg: '#EFEFEF' }).bg }]}>
-                        <Text style={[s.statusText, { color: (STATUS_COLORS[selectedItem.status] ?? { text: '#4A4A4A' }).text }]}>{selectedItem.status}</Text>
+                        <Text style={[s.statusText, { color: (STATUS_COLORS[selectedItem.status] ?? { text: '#4A4A4A' }).text }]}>{say(TRAVEL_LABEL, selectedItem.status)}</Text>
                       </View>
                     </View>
                     {selectedItem.date ? (
@@ -205,7 +213,7 @@ export default function TravelScreen() {
                     style={[s.chip, formStatus === st && s.chipActive]}
                     activeOpacity={0.7}
                     onPress={() => setFormStatus(st)}>
-                    <Text style={[s.chipText, formStatus === st && s.chipTextActive]}>{st}</Text>
+                    <Text style={[s.chipText, formStatus === st && s.chipTextActive]}>{say(TRAVEL_LABEL, st)}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -245,14 +253,14 @@ export default function TravelScreen() {
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.statsRow}>
             <View style={s.stat}><Text style={s.statNum}>{counts['다녀옴']}</Text><Text style={s.statLabel}>다녀온 곳</Text></View>
-            <View style={s.stat}><Text style={s.statNum}>{counts['계획 중']}</Text><Text style={s.statLabel}>계획 중</Text></View>
-            <View style={s.stat}><Text style={s.statNum}>{counts['가고 싶은']}</Text><Text style={s.statLabel}>가고 싶은</Text></View>
+            <View style={s.stat}><Text style={s.statNum}>{counts['계획 중']}</Text><Text style={s.statLabel}>갈 곳</Text></View>
+            <View style={s.stat}><Text style={s.statNum}>{counts['가고 싶은']}</Text><Text style={s.statLabel}>가고 싶은 곳</Text></View>
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filterRow}>
             {filters.map((f, i) => (
               <TouchableOpacity key={i} style={[s.chip, filter === f && s.chipActive]} activeOpacity={0.7} onPress={() => setFilter(f)}>
-                <Text style={[s.chipText, filter === f && s.chipTextActive]}>{f}</Text>
+                <Text style={[s.chipText, filter === f && s.chipTextActive]}>{say(TRAVEL_LABEL, f)}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -271,7 +279,7 @@ export default function TravelScreen() {
                   <View style={s.topRow}>
                     <Text style={s.destName}>{t.dest}</Text>
                     <View style={[s.statusBadge, { backgroundColor: statusColor.bg }]}>
-                      <Text style={[s.statusText, { color: statusColor.text }]}>{t.status}</Text>
+                      <Text style={[s.statusText, { color: statusColor.text }]}>{say(TRAVEL_LABEL, t.status)}</Text>
                     </View>
                   </View>
                   {/* 안 적은 항목은 빈 줄을 남기지 않고 아예 숨긴다 */}
@@ -294,7 +302,7 @@ export default function TravelScreen() {
               <View style={s.empty}>
                 <FontAwesome name="plane" size={32} color="#CFC7BA" />
                 <Text style={s.emptyText}>
-                  {filter === '전체' ? '아직 여행 기록이 없어요' : `'${filter}' 여행이 없어요`}
+                  {filter === '전체' ? '아직 여행 기록이 없어요' : (EMPTY_BY_FILTER[filter] ?? '아직 여행 기록이 없어요')}
                 </Text>
                 <Text style={s.emptySub}>아래 + 버튼으로 첫 기록을 남겨보세요</Text>
               </View>

@@ -6,6 +6,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
 import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
 import { useFamilyMembers, useMe } from '../../../store/family';
+import { say, READING_LABEL } from '../../../constants/labels';
 
 type Book = {
   author: string; reader: string; status: string;
@@ -118,7 +119,7 @@ export default function ReadingScreen() {
     if (!selectedId) return;
     if (editStatus === '완독') {
       if (editRating === 0) {
-        showAlert('평점 필요', '완독으로 변경하려면 평점을 1~5점으로 남겨주세요.');
+        showAlert('별점을 하나 골라주세요', '다 읽은 책은 별 1~5개로 어땠는지 남겨두면 좋아요.');
         return;
       }
       patchRecordData(selectedId, { status: '완독', progress: 100, rating: editRating, notes: editNotes });
@@ -197,7 +198,7 @@ export default function ReadingScreen() {
                     }]}>
                       <Text style={[styles.statusText, {
                         color: selectedItem.status === '완독' ? '#4AA86B' : selectedItem.status === '읽는 중' ? '#E6A817' : '#9C27B0'
-                      }]}>{selectedItem.status}</Text>
+                      }]}>{say(READING_LABEL, selectedItem.status)}</Text>
                     </View>
                   </View>
                   {selectedItem.rating && (
@@ -221,7 +222,7 @@ export default function ReadingScreen() {
                               if (s === '완독' && editRating === 0) setEditRating(5);
                             }}
                           >
-                            <Text style={[styles.editStatusText, editStatus === s && styles.editStatusTextActive]}>{s}</Text>
+                            <Text style={[styles.editStatusText, editStatus === s && styles.editStatusTextActive]}>{say(READING_LABEL, s)}</Text>
                           </TouchableOpacity>
                         ))}
                       </View>
@@ -280,7 +281,7 @@ export default function ReadingScreen() {
                         multiline
                       />
                       <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={saveEdits}>
-                        <Text style={styles.createSubmitText}>{editStatus === '완독' ? '완독으로 저장' : '저장하기'}</Text>
+                        <Text style={styles.createSubmitText}>{editStatus === '완독' ? '다 읽은 책으로 저장' : '저장하기'}</Text>
                       </TouchableOpacity>
                     </>
                   ) : (
@@ -349,7 +350,7 @@ export default function ReadingScreen() {
                     activeOpacity={0.7}
                     onPress={() => setCreateStatus(label)}
                   >
-                    <Text style={[styles.pillText, createStatus === label && styles.pillTextActive]}>{label}</Text>
+                    <Text style={[styles.pillText, createStatus === label && styles.pillTextActive]}>{say(READING_LABEL, label)}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -367,17 +368,17 @@ export default function ReadingScreen() {
             <TouchableOpacity style={styles.statCard} onPress={() => setActiveStatus('전체')} activeOpacity={0.7}>
               <FontAwesome name="book" size={18} color="#4A8C6F" />
               <Text style={styles.statNumber}>{stats.total}</Text>
-              <Text style={styles.statLabel}>총 도서</Text>
+              <Text style={styles.statLabel}>모든 책</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.statCard} onPress={() => setActiveStatus('완독')} activeOpacity={0.7}>
               <FontAwesome name="check-circle" size={18} color="#4AA86B" />
               <Text style={styles.statNumber}>{stats.done}</Text>
-              <Text style={styles.statLabel}>완독</Text>
+              <Text style={styles.statLabel}>다 읽은 책</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.statCard} onPress={() => setActiveStatus('읽는 중')} activeOpacity={0.7}>
               <FontAwesome name="bookmark" size={18} color="#E6A817" />
               <Text style={styles.statNumber}>{stats.reading}</Text>
-              <Text style={styles.statLabel}>읽는 중</Text>
+              <Text style={styles.statLabel}>읽고 있는 책</Text>
             </TouchableOpacity>
           </View>
 
@@ -390,7 +391,7 @@ export default function ReadingScreen() {
                 onPress={() => setActiveStatus(label)}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.filterText, activeStatus === label && styles.filterTextActive]}>{label}</Text>
+                <Text style={[styles.filterText, activeStatus === label && styles.filterTextActive]}>{say(READING_LABEL, label)}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -417,7 +418,7 @@ export default function ReadingScreen() {
                     }]}>
                       <Text style={[styles.statusText, {
                         color: book.status === '완독' ? '#4AA86B' : book.status === '읽는 중' ? '#E6A817' : '#9C27B0'
-                      }]}>{book.status}</Text>
+                      }]}>{say(READING_LABEL, book.status)}</Text>
                     </View>
                   </View>
                   <Text style={styles.bookAuthor}>{book.author}</Text>

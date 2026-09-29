@@ -6,6 +6,10 @@ import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
 import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
 import { useMe } from '../../../store/family';
+import { say, GOAL_LABEL } from '../../../constants/labels';
+
+/** 해냈는지 — 상태를 '달성'으로 바꿨거나 진행률을 다 채웠으면. 요약·목록·상세가 같은 기준을 쓴다 */
+const isReached = (g: { status?: string; progress?: number }) => g.status === '달성' || (g.progress ?? 0) >= 100;
 
 type Goal = {
   title: string; desc: string; progress: number; target: string;
@@ -100,7 +104,7 @@ export default function GoalsScreen() {
 
   // 상단 요약 — 박아둔 숫자가 아니라 실제 목표에서 센다.
   const summary = useMemo(() => {
-    const done = goals.filter((g) => g.data.status === '달성' || g.data.progress >= 100).length;
+    const done = goals.filter((g) => isReached(g.data)).length;
     return { total: goals.length, done, ongoing: goals.length - done };
   }, [goals]);
 
@@ -141,8 +145,8 @@ export default function GoalsScreen() {
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>상태</Text>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        {selectedItem.status === '달성' && <FontAwesome name="check-circle" size={16} color="#4AA86B" />}
-                        <Text style={[s.modalValue, { color: selectedItem.status === '달성' ? '#4AA86B' : '#4A8C6F', fontWeight: '600' }]}>{selectedItem.status}</Text>
+                        {isReached(selectedItem) && <FontAwesome name="check-circle" size={16} color="#4AA86B" />}
+                        <Text style={[s.modalValue, { color: isReached(selectedItem) ? '#4AA86B' : '#4A8C6F', fontWeight: '600' }]}>{say(GOAL_LABEL, isReached(selectedItem) ? '달성' : selectedItem.status)}</Text>
                       </View>
                     </View>
 
@@ -240,11 +244,11 @@ export default function GoalsScreen() {
             </View>
             <View style={s.summaryCard}>
               <Text style={[s.summaryNum, { color: '#4AA86B' }]}>{summary.done}</Text>
-              <Text style={s.summaryLabel}>달성 완료</Text>
+              <Text style={s.summaryLabel}>해낸 목표</Text>
             </View>
             <View style={s.summaryCard}>
               <Text style={[s.summaryNum, { color: '#4A8C6F' }]}>{summary.ongoing}</Text>
-              <Text style={s.summaryLabel}>진행 중</Text>
+              <Text style={s.summaryLabel}>함께 가는 중</Text>
             </View>
           </View>
 
@@ -262,7 +266,7 @@ export default function GoalsScreen() {
                     <Text style={s.goalTitle}>{g.title}</Text>
                     <Text style={s.goalDesc}>{g.desc}</Text>
                   </View>
-                  {g.status === '달성' && <FontAwesome name="check-circle" size={20} color="#4AA86B" />}
+                  {isReached(g) && <FontAwesome name="check-circle" size={20} color="#4AA86B" />}
                 </View>
                 <View style={s.progressSection}>
                   <View style={s.progressBarBg}>

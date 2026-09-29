@@ -6,6 +6,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
 import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
 import { useMe } from '../../../store/family';
+import { say, DIFFICULTY_LABEL } from '../../../constants/labels';
 
 type Recipe = {
   name: string; origin: string; author: string; difficulty: string; time: string;
@@ -158,7 +159,7 @@ export default function RecipesScreen() {
                     </View>
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>난이도</Text>
-                      <Text style={[s.modalValue, { color: DIFF_COLOR[selectedItem.difficulty], fontWeight: '600' }]}>{selectedItem.difficulty}</Text>
+                      <Text style={[s.modalValue, { color: DIFF_COLOR[selectedItem.difficulty], fontWeight: '600' }]}>{say(DIFFICULTY_LABEL, selectedItem.difficulty)}</Text>
                     </View>
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>조리시간</Text>
@@ -229,7 +230,7 @@ export default function RecipesScreen() {
                     activeOpacity={0.7}
                     onPress={() => setCreateDifficulty(label)}
                   >
-                    <Text style={[s.pillText, createDifficulty === label && s.pillTextActive]}>{label}</Text>
+                    <Text style={[s.pillText, createDifficulty === label && s.pillTextActive]}>{say(DIFFICULTY_LABEL, label)}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -293,7 +294,7 @@ export default function RecipesScreen() {
                   <Text style={s.name}>{r.name}</Text>
                   <Text style={s.origin}>{r.origin}</Text>
                   <View style={s.meta}>
-                    <Text style={[s.difficulty, { color: DIFF_COLOR[r.difficulty] }]}>{r.difficulty}</Text>
+                    <Text style={[s.difficulty, { color: DIFF_COLOR[r.difficulty] }]}>{say(DIFFICULTY_LABEL, r.difficulty)}</Text>
                     <Text style={s.dot}>·</Text>
                     <FontAwesome name="clock-o" size={11} color="#9C8B75" />
                     <Text style={s.time}>{r.time}</Text>
@@ -341,7 +342,7 @@ const s = StyleSheet.create({
   info: { flex: 1 },
   name: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', marginBottom: 2, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   origin: { fontSize: 12, color: '#A0A0A0', marginBottom: 6, fontFamily: 'Pretendard' },
-  meta: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 4 },
   difficulty: { fontSize: 12, fontWeight: '600' },
   dot: { color: '#D4C8B0' },
   time: { fontSize: 11, color: '#7A6B55' },
@@ -358,7 +359,7 @@ const s = StyleSheet.create({
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
-  pillRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
+  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   pill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
   pillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
   pillText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },

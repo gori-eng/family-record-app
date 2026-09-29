@@ -6,6 +6,7 @@ import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
 import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
 import { useFamilyMembers, useMe } from '../../../store/family';
+import { say, MOVIE_FILTER_LABEL } from '../../../constants/labels';
 
 type Movie = {
   title: string; genre: string; date: string; rating: number;
@@ -270,7 +271,7 @@ export default function MoviesScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filterRow}>
             {FILTERS.map((f, i) => (
               <TouchableOpacity key={i} style={[s.chip, activeFilter === i && s.chipActive]} activeOpacity={0.7} onPress={() => setActiveFilter(i)}>
-                <Text style={[s.chipText, activeFilter === i && s.chipTextActive]}>{f.label}</Text>
+                <Text style={[s.chipText, activeFilter === i && s.chipTextActive]}>{say(MOVIE_FILTER_LABEL, f.label)}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>

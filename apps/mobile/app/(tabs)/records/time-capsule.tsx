@@ -6,6 +6,7 @@ import { useState, useRef } from 'react';
 import { useRecordsByCategory, useRecordsStore } from '../../../store/records';
 import { useRecordDelete, DeleteRecordRow } from '../../../components/RecordDelete';
 import { useMe } from '../../../store/family';
+import { capsuleLabel } from '../../../constants/labels';
 
 type Capsule = {
   title: string; target: string; type: string; author: string;
@@ -134,7 +135,7 @@ export default function TimeCapsuleScreen() {
                         color={selectedItem.locked ? '#4A8C6F' : '#4AA86B'}
                       />
                       <Text style={[s.modalValue, { color: selectedItem.locked ? '#4A8C6F' : '#4AA86B', fontWeight: '600' }]}>
-                        {selectedItem.locked ? '잠김' : '개봉 완료'}
+                        {capsuleLabel(selectedItem.locked)}
                       </Text>
                     </View>
                   </View>
@@ -200,7 +201,7 @@ export default function TimeCapsuleScreen() {
                   <View style={s.dateRow}>
                     <FontAwesome name={c.locked ? 'lock' : 'unlock'} size={11} color={c.locked ? '#4A8C6F' : '#4AA86B'} />
                     <Text style={[s.dateText, { color: c.locked ? '#4A8C6F' : '#4AA86B' }]}>
-                      {c.locked ? `${c.target} 개봉 예정` : '개봉 완료!'}
+                      {c.locked ? `${c.target}에 열어요` : '열어봤어요!'}
                     </Text>
                   </View>
                 </View>
