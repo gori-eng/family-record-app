@@ -114,8 +114,20 @@ function RootLayoutNav() {
   const setUserId = useSession((s) => s.setUserId);
   const refresh = useSession((s) => s.refresh);
   const clear = useSession((s) => s.clear);
-  const familyReady = useSession((s) => s.ready);
+  /**
+   * ⚠️ 조회에 **실패한 것**을 "가족이 없다"로 읽으면 안 된다.
+   *    인터넷이 잠깐 끊긴 채 앱을 열면 가족 조회가 실패한다. 그걸 "가족 없음"으로 보면
+   *    가드가 온보딩으로 보내고, 모르고 가족을 또 만들면 **가족이 둘로 쪼개진다.**
+   *    그래서 실패했을 때는 "아직 모른다"로 두고(가드가 기다린다) 잠시 뒤 다시 묻는다.
+   */
+  const familyReady = useSession((s) => s.ready && !s.error);
   const hasFamily = useSession((s) => !!s.family);
+  const sessionError = useSession((s) => s.error);
+  useEffect(() => {
+    if (!sessionError || !session?.user?.id) return;
+    const t = setTimeout(() => refresh(), 3000);
+    return () => clearTimeout(t);
+  }, [sessionError, session?.user?.id]);
 
   /**
    * 로그인한 사람이 바뀌면 그 사람의 가족·구성원을 다시 불러온다.
