@@ -17,6 +17,9 @@ import { useSession } from '../store/session';
  */
 type Mode = 'choose' | 'create' | 'join';
 
+/** 알림창에서 문단을 띄울 때 */
+const BR = String.fromCharCode(10, 10);
+
 export default function OnboardingScreen() {
   const router = useRouter();
   const userId = useSession((s) => s.userId);
@@ -41,18 +44,36 @@ export default function OnboardingScreen() {
    */
   const friendlyError = (e: unknown): string => {
     const msg = String((e as Error)?.message ?? e);
+    const code = String((e as { code?: string })?.code ?? '');
+
+    // ── 아직 DB에 없는 것들 ──────────────────────────────
+    if (msg.includes('create_family_with_me') || msg.includes('join_family_by_code') || code === 'PGRST202') {
+      return '가족을 만드는 기능이 아직 데이터베이스에 없어요.' + BR +
+        'Supabase 대시보드 > SQL Editor에서 supabase/APPLY_LATEST.sql 을 붙여넣고 Run 해주세요.';
+    }
     if (msg.includes('full_name')) {
-      return '아직 데이터베이스 준비가 안 됐어요.\n\nSupabase 대시보드 > SQL Editor에서 ' +
-        'supabase/APPLY_00004_00005.sql 을 붙여넣고 Run 해주세요.';
+      return '아직 데이터베이스 준비가 안 됐어요.' + BR +
+        'Supabase 대시보드 > SQL Editor에서 supabase/APPLY_LATEST.sql 을 붙여넣고 Run 해주세요.';
     }
-    if (msg.includes('join_family_by_code') || msg.includes('PGRST202')) {
-      return '초대 코드를 확인하는 기능이 아직 데이터베이스에 없어요.\n\n' +
-        'supabase/APPLY_00004_00005.sql 을 대시보드에서 Run 해주세요.';
-    }
-    if (msg.includes('row-level security') || msg.includes('JWT') || msg.includes('permission')) {
+
+    // ── 사람이 고칠 수 있는 것들 ─────────────────────────
+    if (msg.includes('이름이 이미 있어요')) return msg;
+    if (msg.includes('로그인이 필요해요')) {
       return '로그인 정보가 확인되지 않았어요. 다시 로그인해주세요.';
     }
-    if (msg.includes('이름이 이미 있어요')) return msg;
+    if (code === '23505' || msg.includes('duplicate key')) {
+      return '같은 이름이 이미 있어요. 다른 이름으로 해주세요.';
+    }
+    if (/fetch|network|failed to fetch/i.test(msg)) {
+      return '서버에 닿지 못했어요. 인터넷 연결을 확인해주세요.';
+    }
+
+    /**
+     * ⚠️ 모르는 오류는 **그대로 보여준다.**
+     *    예전에는 RLS 관련 문구를 전부 "다시 로그인해주세요"로 바꿨는데,
+     *    실제 원인은 정책이 막은 것이었다(닭과 달걀). 그래서 운영자가
+     *    멀쩡한 로그인을 몇 번이나 다시 했다. **틀린 안내는 없는 안내보다 나쁘다.**
+     */
     return msg;
   };
 

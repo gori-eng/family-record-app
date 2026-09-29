@@ -769,7 +769,7 @@ family_members / records / finance_settings → 200  (00001~00003은 적용됨)
 ```
 - 앱이 가진 publishable 키로는 **테이블 구조를 바꿀 수 없다**(그럴 수 있는 secret 키는
   애초에 앱에 두면 안 된다). 그래서 적용은 대시보드에서 운영자가 한다
-- **`supabase/APPLY_00004_00005.sql`** 을 만들어 뒀다 — SQL Editor에 통째로 붙여넣고 Run.
+- **`supabase/APPLY_LATEST.sql`** 을 만들어 뒀다 — SQL Editor에 통째로 붙여넣고 Run.
   `CREATE OR REPLACE` / `IF NOT EXISTS`뿐이라 여러 번 실행해도 안전하다
 
 **`lib/authGate.ts` 신규 — 길 안내 판단만 순수 함수로**
@@ -800,7 +800,7 @@ family_members / records / finance_settings → 200  (00001~00003은 적용됨)
 - **초대 코드로 들어가기** → 코드 + 이름 두 칸
 - 이름을 두 칸으로 받는다 — 기록에 뜰 짧은 이름(필수) / 프로필에 뜰 이름(선택, 비우면 짧은 이름)
 - **서버 오류를 사람 말로 바꾼다.** 특히 지금 이 프로젝트에서 실제로 마주칠 것들:
-  `full_name` 없음 → "supabase/APPLY_00004_00005.sql을 대시보드에서 Run 해주세요",
+  `full_name` 없음 → "supabase/APPLY_LATEST.sql을 대시보드에서 Run 해주세요",
   `PGRST202` → 같은 안내. 개발자용 영어 오류를 그대로 보여주지 않는다
 - 로그인 전에 누르면 "먼저 로그인이 필요해요" → 로그인 화면으로 보내준다
 - §2와 어긋나던 'AI 비서와 함께' 소개 문구와 옛 팔레트(`#FFDAB9`)도 함께 정리
@@ -818,7 +818,7 @@ family_members / records / finance_settings → 200  (00001~00003은 적용됨)
   내가 계정을 만들거나 로그인하지 않는다. 아래 체크리스트는 **운영자가** 해야 한다
 
 **운영자 체크리스트 (이 순서대로)**
-1. 대시보드 SQL Editor에 `supabase/APPLY_00004_00005.sql` 붙여넣고 Run
+1. 대시보드 SQL Editor에 `supabase/APPLY_LATEST.sql` 붙여넣고 Run
 2. 앱에서 회원가입 → (이메일 인증 설정이 켜져 있으면 메일 확인) → 로그인
 3. `/onboarding`에서 가족 만들기 → **초대 코드가 보이면 성공**
 4. 잘 되면 `lib/authGate.ts`의 `REQUIRE_AUTH`를 `true`로
@@ -987,6 +987,43 @@ auth: {
 **검증** — 운영자 Chrome에서 로그인 후: 세션 저장됨 · 새로고침 유지 · 설정이
 "아직 가족을 만들지 않았어요 / 로그인은 됐어요"로 정확히 표시. 다음은 가족 만들기.
 
+### 2026-09-29 🔴 가족 만들기가 막혀 있었다 — 또 닭과 달걀
+
+운영자가 폼을 채우고 눌렀더니 **"로그인 정보가 확인되지 않았어요. 다시 로그인해주세요."**
+로그인은 멀쩡했다. **원인도 안내도 둘 다 틀렸다.**
+
+**원인 — RLS 닭과 달걀 (두 번째)**
+```sql
+CREATE POLICY "families_select" ON families
+  FOR SELECT USING (id IN (SELECT my_family_ids()));   -- 내가 속한 가족만
+```
+`createFamily`는 `insert(...).select()`로 **넣고 바로 읽었다.** 그런데 그 순간에는
+아직 구성원이 아니다(구성원 등록은 그다음 줄이다). 그래서 방금 만든 자기 가족을
+**읽지 못하고** 실패했다. 가족이 있어야 구성원이 되고, 구성원이어야 가족이 보인다.
+
+> `join_family_by_code`(00004)에서 이미 똑같은 고리를 풀었는데, **가족 만들기에도
+> 같은 고리가 있다는 걸 못 봤다.** 한쪽에서 발견한 구조적 문제는 비슷한 자리를 전부 훑을 것.
+
+**`00006_create_family_with_me.sql`** — SECURITY DEFINER 함수가 두 줄을 넣는다.
+- 덤: **원자성.** 앱에서 두 번 나눠 넣으면 중간에 실패했을 때 "가족은 있는데 아무도
+  속하지 않은" 상태가 남고, RLS 때문에 만든 사람조차 볼 수 없어 손쓸 방법이 없다.
+  함수 안은 한 트랜잭션이라 그런 상태가 생기지 않는다 → 앱의 수동 되돌리기 코드 삭제
+
+**🔴 더 나쁜 것 — 내 오류 안내가 사람을 헛돌게 했다**
+`friendlyError`가 `row-level security` / `JWT` / `permission`이 들어간 오류를 **전부**
+"다시 로그인해주세요"로 바꿨다. 실제 원인은 정책이 막은 것이었는데, 운영자는
+멀쩡한 로그인을 몇 번이나 다시 했다.
+> **틀린 안내는 없는 안내보다 나쁘다.** 모르는 오류는 **그대로 보여준다.**
+> 바꿔 말하는 것은 **원인을 확실히 아는 것만**. (`lib/authErrors.ts`는 원래 그렇게 해뒀는데
+> 온보딩 쪽에서 그 원칙을 어겼다)
+
+- 확실히 아는 것만 번역: 함수 없음(PGRST202)·`full_name` 없음 → "APPLY_LATEST.sql을 Run",
+  중복 키(23505) → "같은 이름이 이미 있어요", 네트워크 → 연결 확인
+- 나머지는 원문 그대로
+
+**`supabase/APPLY_LATEST.sql`** — 00004·00005·00006을 합친 파일 하나로 통일
+(`APPLY_00004_00005.sql`은 삭제). 앞으로 마이그레이션이 늘면 이 파일만 갱신한다.
+
 ### TODO — 다음 스프린트 (Supabase 연동)
 - [ ] **운영자 작업:** Supabase 프로젝트 생성 → URL·**Publishable 키**를 `apps/mobile/.env`에 기입
       - Connect 창: `https://supabase.com/dashboard/project/_?showConnect=true` (`_`는 내 프로젝트로 자동 연결)
@@ -996,7 +1033,7 @@ auth: {
         `eyJ`로 시작하는 긴 JWT를 안내하는 글(과거 이 문서 포함)은 옛 방식이다
       - Secret 키(`sb_secret_...`)는 RLS를 우회하므로 앱에 절대 넣지 말 것
 - [x] 마이그레이션 `00001`~`00003` 적용 확인 (REST로 직접 확인)
-- [ ] **마이그레이션 `00004` · `00005` 적용** → `supabase/APPLY_00004_00005.sql` 붙여넣고 Run
+- [ ] **마이그레이션 `00004` · `00005` 적용** → `supabase/APPLY_LATEST.sql` 붙여넣고 Run
 - [x] **Supabase 연결 확인** — 프로젝트 생성·`.env` 기입·마이그레이션 적용 완료. 테이블 5개 응답 확인
 - [x] `packages/core/src/supabase/records.ts` — DB ↔ 앱 변환 계층 (snake_case ↔ camelCase)
 - [x] `packages/core/src/supabase/family.ts` — 가족 만들기 / 초대 코드 합류 / 조회

@@ -202,6 +202,11 @@ export type Database = {
     Views: Record<string, never>;
     Functions: {
       /** 초대 코드로 가족에 합류 (00004 마이그레이션) */
+      /** 가족 만들기 + 만든 사람을 첫 구성원으로 (00006) */
+      create_family_with_me: {
+        Args: { p_name: string; p_display_name: string; p_full_name?: string };
+        Returns: { family_id: string; member_id: string; invite_code: string }[];
+      };
       join_family_by_code: {
         Args: { p_invite_code: string; p_display_name: string; p_full_name?: string };
         Returns: { family_id: string; member_id: string }[];
