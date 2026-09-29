@@ -3,7 +3,7 @@
 > **이 문서의 역할:** 다른 PC에서 이 프로젝트를 처음 열었을 때 **큰 그림**을 잡는 문서.
 > 상세한 작업 일지·규칙·TODO는 [`CLAUDE.md`](./CLAUDE.md)에 있다. 여기서는 요약하고 가리킨다.
 >
-> 최종 갱신: **2026-09-22** (커밋 `87cee22` 기준)
+> 최종 갱신: **2026-09-29** (커밋 `d2b3bd7` 기준)
 
 ---
 
@@ -13,7 +13,9 @@
 
 - 가족 구성원이 각자 **육아일기·독서·가계부·영화·여행·레시피·가족목표·건강·타임캡슐** 9가지를 기록한다.
 - 기록이 **서로에게 공유되고**, 세대를 넘어 **계속 남는 것**이 목적. 그래서 내보내기·백업이 핵심 기능이다.
-- **하나의 코드로 Web / iOS / Android** 모두에서 돌아간다 (Expo).
+- **하나의 코드로 Web / iOS / Android** 모두에서 돌아간다 (Expo). **내보낼 곳은 휴대폰 앱(EAS)뿐** —
+  웹 배포는 하지 않기로 했다(2026-09-29 운영자 결정). 웹은 개발 중 확인용이다.
+- **Supabase에 진짜로 저장된다.** 로그인·가족(여러 개 가능)·기록 9종·일정·가계부 설정 전부. 인증 가드가 켜져 있다.
 - 지금 **가장 공들인 화면은 가계부**다. 운영자가 직접 매일 쓸 기능이라 다른 화면보다 높은 기준을 적용했다.
 
 **말투 원칙(중요):** 화면의 모든 글자는 시스템이 통보하는 말이 아니라 **가족이 서로에게 건네는 말**로 쓴다.
@@ -157,13 +159,18 @@ pnpm --filter mobile exec expo start --web
 | 가계부 관리 | 검색(달 무관), 반복 거래, 예산 + 초과 경고 |
 | **카드 명세서 가져오기** | 신한카드 실제 파일로 검증. 카드별 사용자 지정·중복 방지·열 맞추기·카테고리 학습 |
 
+| **Supabase 연동** (9/28~29) | 로그인 유지, 가족 만들기·초대 코드 합류·가족 여러 개 전환, 기록·일정·가계부 설정 DB 저장, 인증 가드 켬 |
+| **권한** | 지우기는 쓴 사람+관리자, 합류 시 역할 고르기, 관리자가 역할 바로잡기, 가계부·건강은 어른만(RLS), 칸 단위 UPDATE 권한 |
+| **가족 관리** | 나가기·지우기(혼자 남은 관리자만), 프로필(이름·이모지), 홈 종에 가족 소식 |
+| **말투 통일** | 분류 라벨·빈 상태·확인창·입력 안내 전부 §9 기준으로 |
+| **전체 점검 (9/29)** | 코드 전부 읽어 28건 발견·전부 수정 + 7개 화면 고치기 기능 + 휴대폰 저장소·백업 |
+
 ### 남은 것 (우선순위 순)
 
-1. **Supabase 연결** — 지금 기록은 **새로고침하면 사라진다.** 가장 시급
-   - ⚠️ `supabase/migrations/`의 SQL은 **지금 앱 구조와 어긋난다.** 기록 공용 창고(`data` JSON)와
-     가계부의 `ownerMember`/`source`/`importKey`가 반영돼 있지 않다. **스키마부터 다시 맞춰야 한다**
-2. **말투 통일 스프린트** — CLAUDE.md §9 기준으로 기존 문구 일괄 정리
-3. 데이터 내보내기(PDF/JSON), 이미지 업로드, EAS 빌드, 푸시 알림
+1. **앱 아이콘·스플래시 그림** — 지금은 Expo 기본 그림. 1024×1024 PNG 하나가 필요하다 (코드로 못 만든다)
+2. **EAS 빌드** — 개발자 계정(Apple $99/년, Google $25) 준비 후 `npx eas init` → `eas build --profile preview`
+3. 풍성하게: 통합 검색 · 사진 첨부(Supabase Storage) · 구성원 내보내기 · 짧은 이름 바꾸기 · PDF 내보내기
+4. 휴대폰 푸시 알림·구글 로그인·확인 메일 SMTP — EAS와 함께
 
 > 상세 체크리스트는 **CLAUDE.md §12 구현 현황 & TODO**.
 
@@ -171,7 +178,8 @@ pnpm --filter mobile exec expo start --web
 
 ## 7. 배포
 
-아직 배포한 적 없다. `(확인 필요)` — Vercel(웹)·EAS(앱 스토어)를 쓸 계획이지만 설정 전이다.
+**휴대폰 앱(EAS)으로만 낸다.** 웹 배포는 하지 않는다(2026-09-29 운영자 결정). 아직 빌드한 적은 없다.
+`app.json`은 준비됐다(이름 `familog`, 번들 ID `com.gorieng.familog`, 라이트 고정). 아이콘 그림과 개발자 계정이 남았다.
 
 ---
 
@@ -188,6 +196,7 @@ pnpm --filter mobile exec expo start --web
 | **폴더 이름을 바꾸면 앱이 안 켜짐** | `node_modules`가 옛 경로를 절대경로로 기억한다. `node_modules` 지우고 `pnpm install` 다시 |
 | **`expo start --clear`** | Windows에서 크래시(exit 3221226505). 캐시를 비우려면 `%TEMP%/metro-cache`를 직접 지울 것 |
 | **`xlsx`는 npm에서 받지 않는다** | npm 레지스트리는 0.18.5에서 멈췄고 취약점(CVE-2023-30533, CVE-2024-22363)이 남아 있다. `package.json`에 SheetJS **공식 CDN URL**로 박혀 있으니 건드리지 말 것 |
+| **pnpm이 파일을 못 씀** (9/29) | `pnpm add`가 `xxx_tmp_*` 폴더만 만들고(파일 0개) 끝난다. package.json에 직접 적고 `npm pack <pkg>@<ver>`로 받은 tgz를 `node_modules/<pkg>`에 `tar --force-local -xzf … --strip-components=1`로 풀어 넣으면 된다 |
 
 ### 코드 관련
 
@@ -197,7 +206,10 @@ pnpm --filter mobile exec expo start --web
 | **zustand 선택자에서 `filter` 금지** | 매번 새 배열이 생겨 무한 리렌더가 난다. `state.records`를 통째로 받고 `useMemo`로 거를 것 |
 | **목록을 순번(index)으로 지목하지 말 것** | 정렬이 바뀌면 엉뚱한 항목을 고친다. 반드시 `id`로 지목 |
 | **작성 폼은 `ScrollView`로 감쌀 것** | `maxHeight: 480~540`. 작은 화면(375x667)에서 저장 버튼에 손이 닿지 않는다 |
-| **날짜는 `YYYY-MM-DD`로 저장** | `'4월 1일'` 같은 표시용 문자열은 정렬도 월별 집계도 불가능하다. 표시 변환은 화면에서만 |
+| **날짜는 `YYYY-MM-DD`로 저장** | `'4월 1일'` 같은 표시용 문자열은 정렬도 월별 집계도 불가능하다. 사람이 적은 날짜는 `lib/dates.ts`의 `parseLooseDate`로 받는다 |
+| **`{숫자 && <JSX>}` 금지** | 0이면 "0"이 글자로 그려지고 **휴대폰은 Text 밖의 글자에서 죽는다.** `!!n &&` 또는 삼항으로. 웹은 관대해서 안 보인다 |
+| **`localStorage` 직접 사용 금지** | 휴대폰엔 없다. `lib/storage.ts`(`getSync/setSync`)를 쓴다. 로그인 저장소도 여기서 끼워 넣는다 |
+| **화면에서 숨기는 것은 차단이 아니다** | 아이에게 가계부를 숨기려면 RLS(00010)도 같이. 화면 약속과 DB 정책은 한 줄씩 맞춰볼 것 |
 
 ### 검증 관련 (특히 헷갈렸던 것)
 
@@ -219,8 +231,9 @@ pnpm --filter mobile exec expo start --web
 | CLAUDE.md / HANDOFF.md | **git** | 문서도 같이 따라온다 |
 | `node_modules` | ❌ PC별 로컬 | `pnpm install` 다시 |
 | `.env` (Supabase 키) | ❌ PC별 로컬 | git 제외. PC마다 직접 만들어야 함 |
-| **앱에 쌓인 기록** | ❌ 아무 데도 안 감 | **메모리에만 있다. 새로고침하면 사라진다** (Supabase 붙이면 해결) |
-| 가계부 설정(카드매핑·예산·반복거래) | ❌ 그 브라우저에만 | `localStorage`. 나중에 DB로 이전 예정 |
+| **앱에 쌓인 기록** | ✅ Supabase | 어느 PC·폰에서 로그인해도 같은 기록 |
+| 가계부 설정(카드매핑·예산·반복거래) | ✅ Supabase (가족 공유) | 로그인 전에 만든 값만 기기에 남는다 |
+| 마지막에 본 가족 · 소식 읽음 표시 | ❌ 기기별 | `lib/storage.ts` — 웹 localStorage / 휴대폰 AsyncStorage |
 
 ### 다른 PC에서 이어서 하려면
 
@@ -231,7 +244,10 @@ pnpm install
 pnpm --filter mobile exec expo start --web
 ```
 
-그 다음 **`CLAUDE.md` §12의 맨 아래 스프린트**부터 읽으면 "어디까지 했는지"가 바로 보인다.
+`.env`가 없는 PC면 `apps/mobile/.env.example`을 복사해 Supabase URL·Publishable 키를 넣는다.
+`pnpm install`이 `_tmp_` 폴더만 만들고 끝나면 §8 "pnpm이 파일을 못 씀"을 볼 것.
+
+그 다음 **`CLAUDE.md` §12의 "다음 세션에서 바로 할 일 (최신)"**부터 읽으면 "어디까지 했는지"가 바로 보인다.
 
 > 💡 **Claude Code로 이어서 작업할 때:** 프로젝트 폴더에서 세션을 시작하면 `CLAUDE.md`가 자동으로 읽힌다.
 > "지금까지 작업 상태 확인해줘"라고 하면 git 상태와 이 문서를 근거로 정리해준다.
@@ -242,4 +258,4 @@ pnpm --filter mobile exec expo start --web
 
 - 저장소: https://github.com/gori-eng/family-record-app
 - 상세 작업 일지: [`CLAUDE.md`](./CLAUDE.md)
-- Supabase (아직 프로젝트 생성 전): https://supabase.com
+- Supabase 대시보드: https://supabase.com/dashboard/project/_ (마이그레이션은 `supabase/APPLY_LATEST.sql`을 SQL Editor에서 Run)
