@@ -1,16 +1,29 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Share } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Share, Modal, Pressable } from 'react-native';
+import { useState } from 'react';
 import { showAlert } from '../../components/AppAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { signOut } from '@core/supabase';
 import { useFamilyInfo, useMe, useFullName } from '../../store/family';
-import { useSession } from '../../store/session';
+import { useSession, useMyFamilies } from '../../store/session';
 
 export default function SettingsScreen() {
   const router = useRouter();
   // 진짜 가족이 없으면 예시가 온다 — `isReal`로 구분한다 (store/family.ts)
   const family = useFamilyInfo();
+  /**
+   * 가족 바꾸기 — 구글 계정 전환처럼 (2026-09-29 운영자 결정).
+   * 친가 가족, 처가(시댁) 가족처럼 여럿에 속할 수 있고, 여기서 지금 볼 가족을 고른다.
+   */
+  const families = useMyFamilies();
+  const currentFamilyId = useSession((st) => st.family?.id ?? null);
+  const switchFamily = useSession((st) => st.switchFamily);
+  const [showFamilies, setShowFamilies] = useState(false);
+  const pickFamily = async (id: string) => {
+    setShowFamilies(false);
+    await switchFamily(id);
+  };
   const me = useMe();
   const myFullName = useFullName(me);
   const clearSession = useSession((s) => s.clear);
@@ -83,6 +96,47 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {family.signedIn && (
+        <TouchableOpacity style={styles.familySwitch} activeOpacity={0.7} onPress={() => setShowFamilies(true)}>
+          <FontAwesome name="home" size={15} color="#2D5A3F" />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.familySwitchLabel}>지금 보는 가족</Text>
+            <Text style={styles.familySwitchName}>{family.isReal ? family.name : '아직 없어요'}</Text>
+          </View>
+          <Text style={styles.familySwitchAction}>
+            {families.length > 1 ? `바꾸기 · ${families.length}` : '가족 더하기'}
+          </Text>
+          <FontAwesome name="chevron-down" size={11} color="#7A6B55" />
+        </TouchableOpacity>
+      )}
+
+      <Modal visible={showFamilies} transparent animationType="fade" onRequestClose={() => setShowFamilies(false)}>
+        <View style={styles.sheetWrap}>
+          <Pressable style={styles.sheetBackdrop} onPress={() => setShowFamilies(false)} />
+          <View style={styles.sheet}>
+            <Text style={styles.sheetTitle}>어느 가족을 볼까요?</Text>
+            {families.map((f) => {
+              const on = f.id === currentFamilyId;
+              return (
+                <TouchableOpacity key={f.id} style={[styles.sheetRow, on && styles.sheetRowOn]} activeOpacity={0.7}
+                  onPress={() => pickFamily(f.id)}>
+                  <View style={[styles.sheetDot, on && styles.sheetDotOn]}>
+                    <Text style={[styles.sheetInitial, on && styles.sheetInitialOn]}>{f.name.slice(0, 1)}</Text>
+                  </View>
+                  <Text style={[styles.sheetName, on && styles.sheetNameOn]}>{f.name}</Text>
+                  {on && <FontAwesome name="check" size={14} color="#2D5A3F" />}
+                </TouchableOpacity>
+              );
+            })}
+            <TouchableOpacity style={styles.sheetAdd} activeOpacity={0.7}
+              onPress={() => { setShowFamilies(false); router.push('/settings/add-family'); }}>
+              <FontAwesome name="plus" size={13} color="#2D5A3F" />
+              <Text style={styles.sheetAddText}>가족 더하기 — 새로 만들거나 초대 코드로</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <TouchableOpacity style={styles.profileCard} activeOpacity={0.7} onPress={() => router.push('/settings/profile')}>
         <View style={styles.avatar}>
           <FontAwesome name="user" size={28} color="#4A8C6F" />
@@ -165,6 +219,28 @@ const styles = StyleSheet.create({
   sampleStrong: { color: '#2D5A3F', fontWeight: '700' },
   safeArea: { flex: 1, backgroundColor: '#F9F8F5' },
   container: { flex: 1, backgroundColor: '#F9F8F5', padding: 20 },
+  familySwitch: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    marginHorizontal: 20, marginTop: 12, marginBottom: 4,
+    backgroundColor: '#EFF6F1', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12,
+  },
+  familySwitchLabel: { fontSize: 11, color: '#4A8C6F', fontFamily: 'Pretendard' },
+  familySwitchName: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginTop: 1 },
+  familySwitchAction: { fontSize: 12, color: '#2D5A3F', fontFamily: 'Pretendard' },
+  sheetWrap: { flex: 1, justifyContent: 'flex-end' },
+  sheetBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
+  sheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
+  sheetTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 14 },
+  sheetRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 12, borderRadius: 12, marginBottom: 4 },
+  sheetRowOn: { backgroundColor: '#EFF6F1' },
+  sheetDot: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#F4F2EE', justifyContent: 'center', alignItems: 'center' },
+  sheetDotOn: { backgroundColor: '#4A8C6F' },
+  sheetInitial: { fontSize: 15, fontWeight: '700', color: '#7A6B55', fontFamily: 'PretendardBold' },
+  sheetInitialOn: { color: '#FFFFFF' },
+  sheetName: { flex: 1, fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
+  sheetNameOn: { fontWeight: '700', color: '#2D5A3F' },
+  sheetAdd: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 14, paddingHorizontal: 12, marginTop: 6, borderTopWidth: 1, borderTopColor: '#F0EEE9' },
+  sheetAddText: { fontSize: 14, color: '#2D5A3F', fontFamily: 'Pretendard' },
   profileCard: {
     flexDirection: 'row', alignItems: 'center', gap: 16,
     backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20,

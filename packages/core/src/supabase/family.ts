@@ -8,11 +8,29 @@
 import { supabase } from './client';
 import type { Family, FamilyMember } from '../types/database';
 
-/** 내가 속한 가족. 아직 없으면 null. */
-export async function fetchMyFamily(): Promise<Family | null> {
-  const { data, error } = await supabase.from('families').select('*').limit(1);
+/**
+ * 내가 속한 가족 **전부** (먼저 들어간 순서).
+ *
+ * 한 사람이 여러 가족에 속할 수 있다 — 친가 가족, 처가(시댁) 가족처럼
+ * (2026-09-29 운영자 결정). RLS가 내가 속한 가족만 돌려준다.
+ *
+ * ⚠️ 예전에는 가족을 `limit(1)`로 **아무거나 하나** 가져왔다. 가족이 둘이 되면
+ *    어느 쪽이 올지 정해져 있지 않았다. 그 함수는 지웠다.
+ */
+export async function fetchMyFamilies(): Promise<Family[]> {
+  const { data, error } = await supabase
+    .from('families')
+    .select('*')
+    .order('created_at', { ascending: true });
   if (error) throw error;
-  return (data?.[0] as Family) ?? null;
+  return (data ?? []) as Family[];
+}
+
+/** 가족 하나를 id로 정확히 */
+export async function fetchFamilyById(id: string): Promise<Family | null> {
+  const { data, error } = await supabase.from('families').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  return (data as Family) ?? null;
 }
 
 /** 우리 가족 구성원 전부 */
@@ -58,7 +76,8 @@ export async function createFamily(
   if (!row) throw new Error('가족을 만들었는데 정보를 받지 못했어요.');
 
   // 이제는 구성원이므로 정책을 통과한다
-  const family = await fetchMyFamily();
+  // ⚠️ 방금 그 가족을 **id로** 집는다. 가족이 여럿이면 '아무거나 하나'는 다른 가족일 수 있다
+  const family = await fetchFamilyById(row.family_id);
   if (!family) throw new Error('가족을 만들었는데 불러오지 못했어요. 앱을 다시 열어보세요.');
   const members = await fetchMembers(family.id);
   const me = members.find((m) => m.id === row.member_id) ?? members[0];
@@ -92,7 +111,8 @@ export async function joinFamilyByCode(
   const row = Array.isArray(data) ? data[0] : data;
   if (!row) throw new Error('초대 코드를 찾지 못했어요. 코드를 다시 확인해주세요.');
 
-  const family = await fetchMyFamily();
+  // ⚠️ 방금 그 가족을 **id로** 집는다. 가족이 여럿이면 '아무거나 하나'는 다른 가족일 수 있다
+  const family = await fetchFamilyById(row.family_id);
   if (!family) throw new Error('합류는 됐는데 가족 정보를 불러오지 못했어요.');
   const members = await fetchMembers(family.id);
   const me = members.find((m) => m.display_name === displayName.trim());

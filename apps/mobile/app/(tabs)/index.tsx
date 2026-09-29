@@ -3,7 +3,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useRecentRecords, CATEGORY_LABELS, relativeDay, type RecordCategory } from '../../store/records';
-import { useMe } from '../../store/family';
+import { useMe, useFamilyInfo } from '../../store/family';
+import { useMyFamilies } from '../../store/session';
 import { useTodayEvents, formatTime, membersLabel } from '../../store/events';
 import { useState, useCallback, useRef, useEffect } from 'react';
 
@@ -47,6 +48,9 @@ export default function HomeScreen() {
   const recent = useRecentRecords(4);
   // 로그인한 사람의 짧은 이름 (없으면 예시 가족의 '지수') — store/family.ts
   const me = useMe();
+  // 가족이 둘 이상이면 지금 어느 가족을 보고 있는지 날짜 옆에 적는다
+  const familyInfo = useFamilyInfo();
+  const familyCount = useMyFamilies().length;
   // 오늘 일정 — 캘린더와 **같은 보관소**를 본다
   const todayEvents = useTodayEvents();
   const [refreshing, setRefreshing] = useState(false);
@@ -157,7 +161,7 @@ export default function HomeScreen() {
         {/* 1. Hero — 한 줄 인사 */}
         <Animated.View style={[s.hero, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           <Text style={s.greetingLine}>{me ? `${me}님, ${greeting}` : greeting}</Text>
-          <Text style={s.dateText}>{dateStr} {dayName}</Text>
+          <Text style={s.dateText}>{dateStr} {dayName}{familyCount > 1 ? ` · ${familyInfo.name}` : ''}</Text>
         </Animated.View>
 
         {/* 오늘의 일정 */}

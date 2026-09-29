@@ -271,14 +271,20 @@ export function restoreFinanceSettings(data: Partial<FinanceSettingsData>) {
  * 로그인 전에 정해둔 예산·반복 거래·카드 주인을 다시 입력하지 않아도 되게.
  */
 export async function attachFinanceSettings(familyId: string) {
+  const switching = attachedFamily !== null && attachedFamily !== familyId;
   attachedFamily = familyId;
+  // 다른 가족으로 바꾸는 중이면 먼저 비운다 — 이전 가족의 예산이 새 가족에 보이지 않게
+  if (switching) useFinanceSettings.setState(EMPTY);
   try {
     const remote = await fetchFinanceSettings(familyId);
+    if (attachedFamily !== familyId) return;   // 그사이 또 바꿨다
     if (remote) {
       useFinanceSettings.setState({ ...EMPTY, ...(remote as Partial<FinanceSettingsData>) });
-    } else {
+    } else if (!switching) {
+      // 처음 연결될 때만 — 이 기기(로그인 전)에 있던 설정을 가족 설정으로 올린다
       await saveFinanceSettings(familyId, pickData(useFinanceSettings.getState()));
     }
+    // 가족을 바꾼 경우엔 올리지 않는다. 올리면 **이전 가족의 예산이 새 가족으로 복사된다.**
   } catch {
     /* 불러오지 못하면 지금 값을 그대로 쓴다 — 다음 저장 때 올라간다 */
   }

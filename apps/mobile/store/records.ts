@@ -145,9 +145,14 @@ export const useRecordsStore = create<RecordsState>((set, get) => ({
   error: null,
 
   load: async (familyId, userId) => {
-    set({ familyId, userId, loading: true, error: null });
+    // 가족이 바뀌면 **먼저 비운다.** 새 가족 기록을 불러오는 사이
+    // 이전 가족의 기록이 새 가족 이름 아래 스치지 않게 (친가 기록이 시댁 이름 아래 등)
+    const switching = get().familyId !== familyId;
+    set({ familyId, userId, loading: true, error: null, ...(switching ? { records: [], ready: false } : {}) });
     try {
       const rows = await fetchRecords(familyId);
+      // 그사이 또 바꿨으면 늦게 온 결과는 버린다
+      if (get().familyId !== familyId) return;
       set({ records: rows.map(fromDb), ready: true, loading: false });
     } catch (e: any) {
       set({ error: String(e?.message ?? e), ready: true, loading: false });

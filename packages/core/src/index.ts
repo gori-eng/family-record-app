@@ -7,7 +7,8 @@ export {
   onAuthStateChange,
 } from './supabase/auth';
 export {
-  fetchMyFamily,
+  fetchMyFamilies,
+  fetchFamilyById,
   fetchMembers,
   createFamily,
   joinFamilyByCode,

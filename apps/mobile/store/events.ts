@@ -108,9 +108,12 @@ export const useEventsStore = create<EventsState>((set, get) => ({
   ready: false,
 
   load: async (familyId, userId) => {
-    set({ familyId, userId });
+    // 가족이 바뀌면 먼저 비운다 (기록과 같은 이유)
+    const switching = get().familyId !== familyId;
+    set({ familyId, userId, ...(switching ? { events: [], ready: false } : {}) });
     try {
       const rows = await fetchEvents(familyId);
+      if (get().familyId !== familyId) return;   // 그사이 또 바꿨다
       set({ events: rows as CalendarEvent[], ready: true });
     } catch {
       set({ ready: true });
