@@ -7,13 +7,26 @@ import { useMe } from '../../store/family';
 import { useTodayEvents, formatTime, membersLabel } from '../../store/events';
 import { useState, useCallback, useRef, useEffect } from 'react';
 
-const NOTIFICATIONS = [
-  { id: 1, icon: 'book', color: '#B8D8C0', title: '독서 기록을 추가했어요', desc: '"어린 왕자" 완독!', time: '10분 전', unread: true, author: '서준' },
-  { id: 2, icon: 'calendar', color: '#B0C8D8', title: '내일 학교 발표회가 있어요', desc: '서현초등학교 14:00', time: '1시간 전', unread: true, author: '시스템' },
-  { id: 3, icon: 'child', color: '#F0B8B8', title: '육아일지에 새 기록을 남겼어요', desc: '첫 자전거 타기 성공!', time: '3시간 전', unread: true, author: '지수' },
-  { id: 4, icon: 'money', color: '#E8D8C0', title: '이번 달 가계부 정산 알림', desc: '4월 지출 요약이 준비되었어요', time: '어제', unread: false, author: '시스템' },
-  { id: 5, icon: 'trophy', color: '#D8CDB8', title: '가족 목표 달성률 업데이트', desc: '"주말 가족 운동" 75% 달성', time: '2일 전', unread: false, author: '민준' },
-];
+type Notice = {
+  id: string;
+  icon: string;
+  color: string;
+  title: string;
+  desc: string;
+  time: string;
+  unread: boolean;
+  author: string;
+};
+
+/**
+ * 알림 — **지금은 비어 있다.**
+ *
+ * ⚠️ 여기에는 가짜 알림 5개가 박혀 있었다("독서 기록을 추가했어요 — 서준" 등).
+ *    예시 가족일 때는 그럴듯했지만, 진짜 가족으로 로그인하자 **없는 일을 알려주는
+ *    알림**이 됐다. 벨에 '3'이 떠 있어 사용자는 확인해야 할 게 있다고 믿게 된다.
+ *    진짜 알림(가족이 남긴 새 기록, 다가오는 일정 등)을 만들 때 이 배열을 채운다.
+ */
+const NOTIFICATIONS: Notice[] = [];
 
 /** 홈 카드에 쓸 카테고리별 아이콘·색, 그리고 눌렀을 때 갈 화면 */
 const CATEGORY_UI: Record<RecordCategory, { icon: string; bg: string; screen: string; deepLink: boolean }> = {
@@ -97,6 +110,13 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
+              {NOTIFICATIONS.length === 0 && (
+                <View style={s.notifEmpty}>
+                  <FontAwesome name="bell-o" size={28} color="#D0D0D0" />
+                  <Text style={s.notifEmptyTitle}>아직 새 소식이 없어요</Text>
+                  <Text style={s.notifEmptySub}>가족 소식을 모아 보여주는 기능은 준비 중이에요</Text>
+                </View>
+              )}
               {NOTIFICATIONS.map(n => (
                 <TouchableOpacity key={n.id} style={[s.notifItem, n.unread && s.notifItemUnread]} activeOpacity={0.7}>
                   <View style={[s.notifIcon, { backgroundColor: n.color }]}>
@@ -338,6 +358,9 @@ const s = StyleSheet.create({
   // 7. Notification Modal — 커스텀 애니메이션
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
+  notifEmpty: { alignItems: 'center', paddingVertical: 36 },
+  notifEmptyTitle: { fontSize: 15, fontWeight: '600', color: '#7A6B55', marginTop: 12, fontFamily: 'Pretendard' },
+  notifEmptySub: { fontSize: 12, color: '#9C8B75', marginTop: 4, fontFamily: 'Pretendard' },
   notifModal: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '75%', paddingHorizontal: 20, paddingBottom: 40 },
   notifHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginTop: 10, marginBottom: 12 },
   notifHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
