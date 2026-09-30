@@ -173,8 +173,11 @@ familog의 정체성은 "가족 구성원 모두가 사용하는 기록 앱, 함
 
 ### 라우팅
 - `_layout.tsx`에 모든 서브 라우트를 명시적으로 등록한다
-- 네비게이션은 **상대경로** 사용: `router.push('./parenting')`, `router.push({ pathname: './[type]', params: { type: 'movies' } })`
-- 절대경로 `/(tabs)/records/parenting` 형태는 중첩 Stack에서 오작동하므로 사용하지 않는다
+- 네비게이션은 **절대경로** 사용: `router.push('/(tabs)/records/parenting')`, `router.push({ pathname: '/(tabs)/records/parenting', params: { openId } })`
+- 🔴 **상대경로 `./parenting`는 쓰지 않는다** (2026-09-30 정정). 기록 허브(`records/index`)에서 `./travel`이
+  `/(tabs)/travel`로 풀려 **"페이지를 찾을 수 없어요"**가 떴다 — index 화면에서는 `./`가 한 칸 위 폴더를 가리킨다.
+  홈의 빠른 기록(절대경로)은 멀쩡했고 허브(상대경로)만 죽어서 운영자가 발견했다. 예전 메모("절대경로가 중첩 Stack에서
+  오작동")는 지금 expo-router 6에서는 반대로 확인됐다
 
 ### 스타일
 - `StyleSheet.create()` 사용, 인라인 스타일 금지

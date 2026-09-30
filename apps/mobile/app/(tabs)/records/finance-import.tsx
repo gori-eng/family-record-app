@@ -236,7 +236,7 @@ function FinanceImportScreen() {
     showAlert(
       `${count}건을 가져왔어요`,
       `${comma(willAdd.reduce((s, c) => s + c.amount, 0))}원이 가계부에 추가됐어요.`,
-      [{ text: '가계부로 가기', onPress: () => router.replace('./finance') }]
+      [{ text: '가계부로 가기', onPress: () => router.replace('/(tabs)/records/finance' as any) }]
     );
     setCandidates(null);
     setRawRows([]);

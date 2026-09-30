@@ -27,7 +27,7 @@ export default function RecordsScreen() {
   const totalRecords = Object.values(counts).reduce((sum, n) => sum + n, 0);
 
   const handlePress = (screen: string) => {
-    router.push(`./${screen}` as any);
+    router.push(`/(tabs)/records/${screen}` as any);
   };
 
   return (

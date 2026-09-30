@@ -684,7 +684,7 @@ function FinanceScreen() {
           <TouchableOpacity
             style={styles.importRow}
             activeOpacity={0.7}
-            onPress={() => router.push('./finance-import')}>
+            onPress={() => router.push('/(tabs)/records/finance-import' as any)}>
             <FontAwesome name="file-excel-o" size={14} color="#4A8C6F" />
             <Text style={styles.importRowText}>카드 명세서에서 불러오기</Text>
             <FontAwesome name="chevron-right" size={11} color="#9CB3A4" />
