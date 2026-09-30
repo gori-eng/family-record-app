@@ -13,6 +13,7 @@ import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { say, TRAVEL_LABEL } from '../../../constants/labels';
 import { parseLooseDate, formatKoreanDate } from '../../../lib/dates';
+import { SummaryLine } from '../../../components/SummaryLine';
 
 /** 필터를 골랐는데 비어 있을 때 — 재촉 대신 권유로 (§9) */
 const EMPTY_BY_FILTER: Record<string, string> = {
@@ -58,6 +59,16 @@ const tripDates = (t: { date?: string; dateEnd?: string }) => {
   if (t.dateEnd) return `${formatKoreanDate(a)}부터 ${formatKoreanDate(t.dateEnd)}까지`;
   return formatKoreanDate(a);
 };
+
+/** 맨 위 한 문장 — 숫자판 대신 (검토 6번) */
+function summaryOf(went: number, planned: number, wish: number) {
+  if (!went && !planned && !wish) return '';
+  const parts: string[] = [];
+  if (went) parts.push(`지금까지 ${went}곳을 다녀왔어요.`);
+  if (planned) parts.push(`${planned}곳은 갈 예정이에요.`);
+  if (wish) parts.push(`가고 싶은 곳도 ${wish}곳 적어뒀어요.`);
+  return parts.join(' ');
+}
 
 export default function TravelScreen() {
   const { askDelete, undoBar } = useRecordDelete('여행 기록');
@@ -341,11 +352,7 @@ export default function TravelScreen() {
         </Modal>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={s.statsRow}>
-            <View style={s.stat}><Text style={s.statNum}>{counts['다녀옴']}</Text><Text style={s.statLabel}>다녀온 곳</Text></View>
-            <View style={s.stat}><Text style={s.statNum}>{counts['계획 중']}</Text><Text style={s.statLabel}>갈 곳</Text></View>
-            <View style={s.stat}><Text style={s.statNum}>{counts['가고 싶은']}</Text><Text style={s.statLabel}>가고 싶은 곳</Text></View>
-          </View>
+          <SummaryLine icon="plane" text={summaryOf(counts['다녀옴'], counts['계획 중'], counts['가고 싶은'])} />
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filterRow}>
             {filters.map((f, i) => (
@@ -414,10 +421,6 @@ export default function TravelScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
-  statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
-  stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
-  statNum: { fontSize: 22, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  statLabel: { fontSize: 12, color: '#7A6B55', marginTop: 2, fontFamily: 'Pretendard' },
   filterRow: { paddingHorizontal: 20, gap: 8, marginBottom: 24 },
   chip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF' },
   chipActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },

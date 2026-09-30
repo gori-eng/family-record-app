@@ -11,6 +11,7 @@ import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../compon
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
 import { say, DIFFICULTY_LABEL } from '../../../constants/labels';
+import { SummaryLine } from '../../../components/SummaryLine';
 
 type Recipe = {
   /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
@@ -26,6 +27,14 @@ type Recipe = {
 const NEW_RECIPE_COLORS = ['#FF8A65', '#81C784', '#FFD54F', '#CE93D8'];
 
 const DIFF_COLOR: Record<string, string> = { '쉬움': '#4AA86B', '보통': '#E6A817', '어려움': '#4A8C6F' };
+
+/** 맨 위 한 문장 — 숫자판 대신 (검토 6번) */
+function summaryOf(total: number, inherited: number) {
+  if (!total) return '';
+  const parts = [`레시피 ${total}개를 모아뒀어요.`];
+  if (inherited) parts.push(`그중 ${inherited}개는 물려받은 맛이에요.`);
+  return parts.join(' ');
+}
 
 export default function RecipesScreen() {
   const { askDelete, undoBar } = useRecordDelete('레시피');
@@ -318,10 +327,7 @@ export default function RecipesScreen() {
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.header}>
             <Text style={s.subtitle}>우리 집 손맛을 모아둬요</Text>
-            <View style={s.statsRow}>
-              <View style={s.stat}><Text style={s.statNum}>{recipes.length}</Text><Text style={s.statLabel}>모든 레시피</Text></View>
-              <View style={s.stat}><Text style={s.statNum}>{inheritedCount}</Text><Text style={s.statLabel}>물려받은 맛</Text></View>
-            </View>
+            <SummaryLine icon="cutlery" text={summaryOf(recipes.length, inheritedCount)} />
           </View>
 
           <View style={s.list}>
@@ -382,10 +388,6 @@ const s = StyleSheet.create({
   emptySub: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
   header: { padding: 20, paddingBottom: 8 },
   subtitle: { fontSize: 13, color: '#7A6B55', marginBottom: 16, fontFamily: 'Pretendard' },
-  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
-  stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
-  statNum: { fontSize: 22, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  statLabel: { fontSize: 12, color: '#7A6B55', marginTop: 2, fontFamily: 'Pretendard' },
   list: { paddingHorizontal: 20 },
   card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   recipeIcon: { width: 56, height: 56, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },

@@ -14,6 +14,7 @@ import { useFamilyMembers, useMe } from '../../../store/family';
 import { say, MOVIE_FILTER_LABEL } from '../../../constants/labels';
 import { parseLooseDate, formatKoreanDate } from '../../../lib/dates';
 import { todayISO } from '../../../store/finance';
+import { SummaryLine } from '../../../components/SummaryLine';
 
 type Movie = {
   /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
@@ -44,6 +45,15 @@ function StarRating({ rating, size = 12 }: { rating: number; size?: number }) {
       ))}
     </View>
   );
+}
+
+/** 맨 위 한 문장 — 숫자판 대신 (검토 6번). 평균 별점은 말하지 않는다 */
+function summaryOf(total: number, wish: number) {
+  if (!total && !wish) return '';
+  if (!total) return `아직 본 영화는 없고, 보고 싶은 영화 ${wish}편을 적어뒀어요.`;
+  const parts = [`지금까지 영화 ${total}편을 같이 봤어요.`];
+  if (wish) parts.push(`보고 싶은 영화는 ${wish}편이에요.`);
+  return parts.join(' ');
 }
 
 export default function MoviesScreen() {
@@ -385,11 +395,7 @@ export default function MoviesScreen() {
         </Modal>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={s.statsRow}>
-            <View style={s.stat}><Text style={s.statNum}>{stats.total}</Text><Text style={s.statLabel}>본 영화</Text></View>
-            <View style={s.stat}><Text style={s.statNum}>{stats.avg}</Text><Text style={s.statLabel}>평균 별점</Text></View>
-            <View style={s.stat}><Text style={s.statNum}>{stats.wish}</Text><Text style={s.statLabel}>보고 싶은 영화</Text></View>
-          </View>
+          <SummaryLine icon="film" text={summaryOf(stats.total, stats.wish)} />
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filterRow}>
             {FILTERS.map((f, i) => (
@@ -459,10 +465,6 @@ export default function MoviesScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
-  statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
-  stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
-  statNum: { fontSize: 22, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  statLabel: { fontSize: 12, color: '#7A6B55', marginTop: 2, fontFamily: 'Pretendard' },
   filterRow: { paddingHorizontal: 20, gap: 8, marginBottom: 24 },
   pillRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
   chip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF' },

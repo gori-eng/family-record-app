@@ -14,6 +14,7 @@ import { useMe } from '../../../store/family';
 import { nameColor } from '../../../lib/nameColor';
 import { parseLooseDate, formatKoreanDate } from '../../../lib/dates';
 import { todayISO, daysAgoISO } from '../../../store/finance';
+import { SummaryLine } from '../../../components/SummaryLine';
 
 type ParentingEntry = {
   /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
@@ -26,6 +27,16 @@ type ParentingEntry = {
 
 /** 화면에 보일 날짜 — ISO면 한국어로, 옛 글자면 그대로 */
 const showDate = (d: string) => formatKoreanDate(d) || d;
+
+/** 맨 위 한 문장 — 숫자판 대신 (검토 6번). 기록이 없으면 빈 문장 */
+function summaryOf(total: number, thisMonth: number, milestones: number) {
+  if (!total) return '';
+  const parts = [thisMonth
+    ? `이번 달에 ${thisMonth}편, 지금까지 ${total}편을 남겼어요.`
+    : `지금까지 일기 ${total}편을 남겼어요.`];
+  if (milestones) parts.push(`처음 해낸 일도 ${milestones}개 적어뒀어요.`);
+  return parts.join(' ');
+}
 
 export default function ParentingScreen() {
   const { askDelete, undoBar } = useRecordDelete('육아 일기');
@@ -332,24 +343,8 @@ export default function ParentingScreen() {
         </Modal>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Stats */}
-          <View style={styles.statsRow}>
-            <TouchableOpacity style={styles.statCard} onPress={() => setActiveChild('전체')} activeOpacity={0.7}>
-              <FontAwesome name="book" size={18} color="#4A8C6F" />
-              <Text style={styles.statNumber}>{entries.length}</Text>
-              <Text style={styles.statLabel}>모든 일기</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.statCard} onPress={() => showAlert('처음 해낸 일', milestoneByChild || '아직 적어둔 게 없어요.')} activeOpacity={0.7}>
-              <FontAwesome name="trophy" size={18} color="#E6A817" />
-              <Text style={styles.statNumber}>{milestoneCount}</Text>
-              <Text style={styles.statLabel}>처음 해낸 일</Text>
-            </TouchableOpacity>
-            <View style={styles.statCard}>
-              <FontAwesome name="calendar" size={18} color="#4A90C8" />
-              <Text style={styles.statNumber}>{thisMonthCount}</Text>
-              <Text style={styles.statLabel}>이번 달</Text>
-            </View>
-          </View>
+          <SummaryLine icon="child" text={summaryOf(entries.length, thisMonthCount, milestoneCount)}
+            onPress={milestoneCount ? () => showAlert('처음 해낸 일', milestoneByChild || '아직 적어둔 게 없어요.') : undefined} />
 
           {/* Child Filter */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterContainer}>
@@ -441,10 +436,6 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   emptySub: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
-  statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
-  statCard: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', gap: 6, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
-  statNumber: { fontSize: 22, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  statLabel: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
   filterContainer: { paddingHorizontal: 20, gap: 8, marginBottom: 24 },
   childPicker: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 },
   filterChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF' },

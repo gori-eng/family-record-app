@@ -11,6 +11,7 @@ import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../compon
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
 import { say, GOAL_LABEL } from '../../../constants/labels';
+import { SummaryLine } from '../../../components/SummaryLine';
 
 /** 해냈는지 — 상태를 '달성'으로 바꿨거나 진행률을 다 채웠으면. 요약·목록·상세가 같은 기준을 쓴다 */
 const isReached = (g: { status?: string; progress?: number }) => g.status === '달성' || (g.progress ?? 0) >= 100;
@@ -37,6 +38,14 @@ const progressOf = (g: Goal) => {
   if (!ms.length) return Math.max(0, Math.min(100, g.progress ?? 0));
   return Math.round((ms.filter((m) => m.done).length / ms.length) * 100);
 };
+
+/** 맨 위 한 문장 — 숫자판 대신 (검토 6번) */
+function summaryOf(total: number, done: number, ongoing: number) {
+  if (!total) return '';
+  if (!done) return `목표 ${total}개를 함께 가는 중이에요.`;
+  if (!ongoing) return `목표 ${total}개를 모두 해냈어요!`;
+  return `목표 ${total}개 중 ${done}개를 해냈어요. ${ongoing}개는 함께 가는 중이에요.`;
+}
 
 export default function GoalsScreen() {
   const { askDelete, undoBar } = useRecordDelete('목표');
@@ -366,20 +375,7 @@ export default function GoalsScreen() {
         </Modal>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={s.summary}>
-            <View style={s.summaryCard}>
-              <Text style={s.summaryNum}>{summary.total}</Text>
-              <Text style={s.summaryLabel}>모든 목표</Text>
-            </View>
-            <View style={s.summaryCard}>
-              <Text style={[s.summaryNum, { color: '#4AA86B' }]}>{summary.done}</Text>
-              <Text style={s.summaryLabel}>해낸 목표</Text>
-            </View>
-            <View style={s.summaryCard}>
-              <Text style={[s.summaryNum, { color: '#4A8C6F' }]}>{summary.ongoing}</Text>
-              <Text style={s.summaryLabel}>함께 가는 중</Text>
-            </View>
-          </View>
+          <SummaryLine icon="trophy" text={summaryOf(summary.total, summary.done, summary.ongoing)} />
 
           <View style={s.list}>
             {goals.map((record) => {
@@ -438,10 +434,6 @@ const s = StyleSheet.create({
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   emptySub: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
-  summary: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 24 },
-  summaryCard: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
-  summaryNum: { fontSize: 24, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  summaryLabel: { fontSize: 12, color: '#7A6B55', marginTop: 2, fontFamily: 'Pretendard' },
   list: { paddingHorizontal: 20 },
   card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },

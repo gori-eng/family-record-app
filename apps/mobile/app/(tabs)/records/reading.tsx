@@ -11,6 +11,7 @@ import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../compon
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { say, READING_LABEL } from '../../../constants/labels';
+import { SummaryLine } from '../../../components/SummaryLine';
 
 type Book = {
   /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
@@ -38,6 +39,16 @@ function StarRating({ rating }: { rating: number }) {
       ))}
     </View>
   );
+}
+
+/** 맨 위 한 문장 — 숫자판 대신 (검토 6번) */
+function summaryOf(total: number, done: number, reading: number) {
+  if (!total) return '';
+  const parts = [done
+    ? `지금까지 책 ${total}권을 적었고, ${done}권은 다 읽었어요.`
+    : `지금까지 책 ${total}권을 적어뒀어요.`];
+  if (reading) parts.push(`지금 ${reading}권을 읽고 있어요.`);
+  return parts.join(' ');
 }
 
 export default function ReadingScreen() {
@@ -417,24 +428,7 @@ export default function ReadingScreen() {
         </Modal>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Stats */}
-          <View style={styles.statsRow}>
-            <TouchableOpacity style={styles.statCard} onPress={() => setActiveStatus('전체')} activeOpacity={0.7}>
-              <FontAwesome name="book" size={18} color="#4A8C6F" />
-              <Text style={styles.statNumber}>{stats.total}</Text>
-              <Text style={styles.statLabel}>모든 책</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.statCard} onPress={() => setActiveStatus('완독')} activeOpacity={0.7}>
-              <FontAwesome name="check-circle" size={18} color="#4AA86B" />
-              <Text style={styles.statNumber}>{stats.done}</Text>
-              <Text style={styles.statLabel}>다 읽은 책</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.statCard} onPress={() => setActiveStatus('읽는 중')} activeOpacity={0.7}>
-              <FontAwesome name="bookmark" size={18} color="#E6A817" />
-              <Text style={styles.statNumber}>{stats.reading}</Text>
-              <Text style={styles.statLabel}>읽고 있는 책</Text>
-            </TouchableOpacity>
-          </View>
+          <SummaryLine icon="book" text={summaryOf(stats.total, stats.done, stats.reading)} />
 
           {/* Filter */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterContainer}>
@@ -530,15 +524,6 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   emptySub: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
-  statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
-  statCard: {
-    flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,
-    alignItems: 'center', borderWidth: 1, borderColor: '#EDE8DF',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
-  },
-  statNumber: { fontSize: 22, fontWeight: '700', color: '#1F1F1F', marginTop: 4, fontFamily: 'PretendardBold' },
-  statLabel: { fontSize: 12, color: '#7A6B55', marginTop: 2, fontFamily: 'Pretendard' },
   filterContainer: { paddingHorizontal: 20, gap: 8, marginBottom: 24 },
   filterChip: {
     paddingHorizontal: 16, paddingVertical: 8, borderRadius: 24,
