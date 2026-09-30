@@ -333,7 +333,7 @@ ${failed}장은 받지 못했어요. 인터넷을 확인하고 한 번 더 해�
               사진은 따로 두고, 어느 사진인지만 적어둬요.
             </Text>
           </View>
-          <FontAwesome name="chevron-right" size={12} color="#B0A590" />
+          <FontAwesome name="chevron-right" size={12} color="#A39682" />
         </TouchableOpacity>
 
         {/* 되살리기 */}
@@ -348,7 +348,7 @@ ${failed}장은 받지 못했어요. 인터넷을 확인하고 한 번 더 해�
                 담아둔 파일을 고르면 기록을 되살려요. 무엇이 들었는지 먼저 보여주고, 괜찮다고 하면 넣을게요.
               </Text>
             </View>
-            <FontAwesome name="chevron-right" size={12} color="#B0A590" />
+            <FontAwesome name="chevron-right" size={12} color="#A39682" />
           </TouchableOpacity>
           {Platform.OS === 'web' && (
             <Text style={[s.dropHint, dragging && s.dropHintOn]}>
@@ -369,7 +369,7 @@ ${failed}장은 받지 못했어요. 인터넷을 확인하고 한 번 더 해�
             <Text style={s.cardTitle}>기록책으로 만들기</Text>
             <Text style={s.cardDesc}>표지와 차례가 있는 책으로 엮어요. 사진도 함께 넣고, 인쇄해서 부모님께 드릴 수도 있어요.</Text>
           </View>
-          <FontAwesome name="chevron-right" size={12} color="#B0A590" />
+          <FontAwesome name="chevron-right" size={12} color="#A39682" />
         </TouchableOpacity>
 
         {/* 사진 모아 담기 — ZIP 한 파일로 (2026-09-30) */}
@@ -387,7 +387,7 @@ ${failed}장은 받지 못했어요. 인터넷을 확인하고 한 번 더 해�
                   : '기록에 사진을 붙이면 여기서 한꺼번에 내려받을 수 있어요.'}
             </Text>
           </View>
-          <FontAwesome name="chevron-right" size={12} color="#B0A590" />
+          <FontAwesome name="chevron-right" size={12} color="#A39682" />
         </TouchableOpacity>
 
         <View style={s.infoBox}>
@@ -408,10 +408,10 @@ const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5', padding: 20 },
   subtitle: { fontSize: 14, color: '#7A6B55', marginBottom: 20, lineHeight: 21, fontFamily: 'Pretendard' },
 
-  mineCard: { backgroundColor: '#FFFFFF', borderRadius: 14, padding: 18, marginBottom: 14, borderWidth: 1, borderColor: '#EAEAEA' },
+  mineCard: { backgroundColor: '#FFFFFF', borderRadius: 14, padding: 18, marginBottom: 14, borderWidth: 1, borderColor: '#EDE8DF' },
   mineTitle: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard', marginBottom: 12 },
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 14 },
-  chip: { backgroundColor: '#F4F2EE', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
+  chip: { backgroundColor: '#F4F0E8', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
   chipText: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
 
   tallyRow: { flexDirection: 'row', gap: 12 },
@@ -419,7 +419,7 @@ const s = StyleSheet.create({
   tallyNum: { fontSize: 24, fontWeight: '700', color: '#2D5A3F', fontFamily: 'PretendardBold' },
   tallyLabel: { fontSize: 12, color: '#4A8C6F', fontFamily: 'Pretendard', marginTop: 2 },
 
-  card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EAEAEA' },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EDE8DF' },
   cardPrimary: { borderColor: '#4A8C6F', borderWidth: 1.5 },
   cardTall: { flexDirection: 'column', alignItems: 'stretch', gap: 0 },
   cardInner: { flexDirection: 'row', alignItems: 'center', gap: 14 },
@@ -433,13 +433,13 @@ const s = StyleSheet.create({
 
   sectionLabel: { fontSize: 12, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 18, marginBottom: 8 },
 
-  infoBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: '#F4F2EE', borderRadius: 12, padding: 14, marginTop: 16 },
+  infoBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: '#F4F0E8', borderRadius: 12, padding: 14, marginTop: 16 },
   infoText: { flex: 1, fontSize: 12, color: '#7A6B55', lineHeight: 18, fontFamily: 'Pretendard' },
 
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBgLayer: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   sheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
-  handle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginTop: -10, marginBottom: 14 },
+  handle: { width: 36, height: 4, backgroundColor: '#D6CDBF', borderRadius: 2, alignSelf: 'center', marginTop: -10, marginBottom: 14 },
   sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   sheetTitle: { fontSize: 19, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
 
@@ -447,12 +447,12 @@ const s = StyleSheet.create({
   fileName: { flex: 1, fontSize: 13, color: '#2D5A3F', fontFamily: 'Pretendard' },
   fileMeta: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 8, marginBottom: 14 },
 
-  listRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#F4F2EE' },
+  listRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#F4F0E8' },
   listLabel: { fontSize: 13, color: '#4A4A4A', fontFamily: 'Pretendard' },
   listValue: { fontSize: 13, color: '#1F1F1F', fontWeight: '600', fontFamily: 'Pretendard' },
 
   choiceTitle: { fontSize: 14, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginTop: 20, marginBottom: 10 },
-  choice: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, padding: 14, marginBottom: 10 },
+  choice: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, padding: 14, marginBottom: 10 },
   choiceIcon: { width: 34, height: 34, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   choiceLabel: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
   choiceDesc: { fontSize: 12, color: '#7A6B55', marginTop: 3, lineHeight: 18, fontFamily: 'Pretendard' },

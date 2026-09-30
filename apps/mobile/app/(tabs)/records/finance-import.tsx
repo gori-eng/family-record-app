@@ -419,11 +419,11 @@ function FinanceImportScreen() {
               return (
                 <View key={c.line} style={[s.row, !will && s.rowOff]}>
                   <TouchableOpacity
-                    style={[s.rowIcon, { backgroundColor: will ? meta.color : '#EFEDE9' }]}
+                    style={[s.rowIcon, { backgroundColor: will ? meta.color : '#F4F0E8' }]}
                     activeOpacity={0.7}
                     disabled={!!c.skip}
                     onPress={() => setEditingLine(c.line)}>
-                    <FontAwesome name={meta.icon as any} size={12} color={will ? '#5C4A32' : '#B8B2A8'} />
+                    <FontAwesome name={meta.icon as any} size={12} color={will ? '#5C4A32' : '#A39682'} />
                   </TouchableOpacity>
                   <View style={{ flex: 1 }}>
                     <Text style={[s.rowDesc, !will && s.rowTextOff]} numberOfLines={1}>{c.merchant}</Text>
@@ -479,7 +479,7 @@ function FinanceImportScreen() {
                       <Text style={[s.mapPickText, !cur && s.mapPickTextEmpty]}>
                         {cur ?? '알아서 찾기'}
                       </Text>
-                      <FontAwesome name="caret-down" size={12} color="#888888" />
+                      <FontAwesome name="caret-down" size={12} color="#7A6B55" />
                     </TouchableOpacity>
                     {mappingField === f.key && (
                       <View style={s.mapOptions}>
@@ -583,7 +583,7 @@ const s = StyleSheet.create({
   introDesc: { fontSize: 14, color: '#4A4A4A', fontFamily: 'Pretendard', textAlign: 'center', lineHeight: 21, marginTop: 10 },
   noteBox: {
     alignSelf: 'stretch', backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16,
-    borderWidth: 1, borderColor: '#EAEAEA', marginTop: 22, gap: 6,
+    borderWidth: 1, borderColor: '#EDE8DF', marginTop: 22, gap: 6,
   },
   noteTitle: { fontSize: 13, color: '#2D5A3F', fontFamily: 'PretendardBold', marginBottom: 2 },
   noteRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -600,7 +600,7 @@ const s = StyleSheet.create({
     alignSelf: 'stretch', backgroundColor: '#4A8C6F', borderRadius: 14, paddingVertical: 16, marginTop: 22,
   },
   pickBtnText: { fontSize: 16, color: '#FFFFFF', fontFamily: 'PretendardBold' },
-  tested: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard', marginTop: 14, textAlign: 'center', lineHeight: 18 },
+  tested: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 14, textAlign: 'center', lineHeight: 18 },
 
   fileRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -612,44 +612,44 @@ const s = StyleSheet.create({
 
   card: {
     marginHorizontal: 20, marginTop: 14, backgroundColor: '#FFFFFF', borderRadius: 16,
-    padding: 18, borderWidth: 1, borderColor: '#EAEAEA',
+    padding: 18, borderWidth: 1, borderColor: '#EDE8DF',
   },
   cardTitle: { fontSize: 15, color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
-  cardDesc: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard', marginTop: 6, lineHeight: 19 },
+  cardDesc: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 6, lineHeight: 19 },
   cardRow: { marginTop: 14, gap: 8 },
   cardTag: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   cardTagText: { fontSize: 13, color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  cardCount: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  cardCount: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
   ownerPicks: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   ownerChip: {
     paddingHorizontal: 13, paddingVertical: 7, borderRadius: 16,
-    borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF',
+    borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF',
   },
   ownerChipActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  ownerChipText: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  ownerChipText: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
   ownerChipTextActive: { color: '#FFFFFF', fontFamily: 'PretendardBold' },
   warn: { fontSize: 12, color: '#C2853A', fontFamily: 'Pretendard', marginTop: 12, lineHeight: 18 },
 
   policyRow: { flexDirection: 'row', gap: 8, marginTop: 14 },
   policyChip: {
     flex: 1, paddingVertical: 11, borderRadius: 12, alignItems: 'center',
-    borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF',
+    borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF',
   },
   policyChipActive: { backgroundColor: '#EFF6F1', borderColor: '#4A8C6F' },
-  policyText: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  policyText: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
   policyTextActive: { color: '#2D5A3F', fontFamily: 'PretendardBold' },
 
   sumRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
-  sumChip: { alignItems: 'center', backgroundColor: '#F4F2EE', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 16, minWidth: 74 },
+  sumChip: { alignItems: 'center', backgroundColor: '#F4F0E8', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 16, minWidth: 74 },
   sumAdd: { backgroundColor: '#EFF6F1' },
   sumWarn: { backgroundColor: '#FBF3E8' },
-  sumValue: { fontSize: 19, color: '#6B6B6B', fontFamily: 'PretendardBold' },
+  sumValue: { fontSize: 19, color: '#7A6B55', fontFamily: 'PretendardBold' },
   sumValueAdd: { color: '#2D5A3F' },
   sumValueWarn: { color: '#C2853A' },
-  sumLabel: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard', marginTop: 2 },
+  sumLabel: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 2 },
   totalRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: '#F1EFEA',
+    marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: '#F4F0E8',
   },
   totalLabel: { fontSize: 14, color: '#4A4A4A', fontFamily: 'Pretendard' },
   totalValue: { fontSize: 18, color: '#1F1F1F', fontFamily: 'PretendardBold' },
@@ -658,16 +658,16 @@ const s = StyleSheet.create({
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     marginHorizontal: 20, marginBottom: 6, backgroundColor: '#FFFFFF',
-    borderRadius: 12, padding: 13, borderWidth: 1, borderColor: '#EAEAEA',
+    borderRadius: 12, padding: 13, borderWidth: 1, borderColor: '#EDE8DF',
   },
-  rowOff: { backgroundColor: '#F7F6F3', borderColor: '#EFEDE9' },
+  rowOff: { backgroundColor: '#F4F0E8', borderColor: '#F4F0E8' },
   rowIcon: { width: 30, height: 30, borderRadius: 9, justifyContent: 'center', alignItems: 'center' },
   rowDesc: { fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard' },
-  rowTextOff: { color: '#A8A29A', textDecorationLine: 'line-through' },
-  rowMeta: { fontSize: 12, color: '#767676', fontFamily: 'Pretendard', marginTop: 3 },
+  rowTextOff: { color: '#A39682', textDecorationLine: 'line-through' },
+  rowMeta: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 3 },
   rowCat: { color: '#4A8C6F', textDecorationLine: 'underline' },
   rowAmount: { fontSize: 14, color: '#4A8C6F', fontFamily: 'PretendardBold' },
-  reasonSkip: { fontSize: 12, color: '#A8A29A', fontFamily: 'Pretendard', marginTop: 4 },
+  reasonSkip: { fontSize: 12, color: '#A39682', fontFamily: 'Pretendard', marginTop: 4 },
   reasonDup: { fontSize: 12, color: '#C2853A', fontFamily: 'Pretendard', marginTop: 4, lineHeight: 17 },
   reasonForced: { color: '#2D5A3F' },
   reasonAction: { textDecorationLine: 'underline', fontFamily: 'PretendardBold' },
@@ -679,24 +679,24 @@ const s = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 24, elevation: 12,
   },
   modalTitle: { fontSize: 17, color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  modalDesc: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard', marginTop: 8, marginBottom: 16, lineHeight: 19 },
+  modalDesc: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 8, marginBottom: 16, lineHeight: 19 },
   mapRow: { marginBottom: 12 },
   mapLabel: { fontSize: 13, color: '#4A4A4A', fontFamily: 'Pretendard', marginBottom: 5 },
   mapReq: { color: '#D94040' },
   mapPick: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA',
+    backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF',
     borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10,
   },
   mapPickEmpty: { borderColor: '#E8C4C4', backgroundColor: '#FCF6F6' },
   mapPickText: { fontSize: 13, color: '#1F1F1F', fontFamily: 'Pretendard' },
-  mapPickTextEmpty: { color: '#B0A89C' },
-  mapOptions: { marginTop: 6, borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 10, overflow: 'hidden' },
-  mapOption: { paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#F4F2EE' },
+  mapPickTextEmpty: { color: '#A39682' },
+  mapOptions: { marginTop: 6, borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 10, overflow: 'hidden' },
+  mapOption: { paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#F4F0E8' },
   mapOptionText: { fontSize: 13, color: '#4A4A4A', fontFamily: 'Pretendard' },
   modalBtns: { flexDirection: 'row', gap: 8, marginTop: 18 },
   modalBtn: { flex: 1, backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 13, alignItems: 'center' },
-  modalBtnGhost: { backgroundColor: '#F1EFEA' },
+  modalBtnGhost: { backgroundColor: '#F4F0E8' },
   modalBtnText: { fontSize: 14, color: '#FFFFFF', fontFamily: 'PretendardBold' },
   modalBtnGhostText: { fontSize: 14, color: '#4A4A4A', fontFamily: 'PretendardBold' },
 
@@ -704,20 +704,20 @@ const s = StyleSheet.create({
   catChip: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 12, paddingVertical: 9, borderRadius: 20,
-    borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF',
+    borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF',
   },
   catChipActive: { borderColor: '#4A8C6F', backgroundColor: '#EFF6F1' },
   catDot: { width: 20, height: 20, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
-  catChipText: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  catChipText: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
   catChipTextActive: { color: '#2D5A3F', fontFamily: 'PretendardBold' },
 
   footer: {
     position: 'absolute', left: 0, right: 0, bottom: 0,
     padding: 16, paddingBottom: 24, backgroundColor: '#F9F8F5',
-    borderTopWidth: 1, borderTopColor: '#EAEAEA',
+    borderTopWidth: 1, borderTopColor: '#EDE8DF',
   },
   importBtn: { backgroundColor: '#4A8C6F', borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
-  importBtnOff: { backgroundColor: '#CFC7BA' },
+  importBtnOff: { backgroundColor: '#D6CDBF' },
   importBtnText: { fontSize: 16, color: '#FFFFFF', fontFamily: 'PretendardBold' },
 });
 

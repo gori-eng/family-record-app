@@ -204,7 +204,7 @@ export default function TravelScreen() {
                     <PhotoGallery photos={photosOf(selectedItem)} />
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>상태</Text>
-                      <View style={[s.statusBadge, { backgroundColor: (STATUS_COLORS[selectedItem.status] ?? { bg: '#EFEFEF' }).bg }]}>
+                      <View style={[s.statusBadge, { backgroundColor: (STATUS_COLORS[selectedItem.status] ?? { bg: '#F4F0E8' }).bg }]}>
                         <Text style={[s.statusText, { color: (STATUS_COLORS[selectedItem.status] ?? { text: '#4A4A4A' }).text }]}>{say(TRAVEL_LABEL, selectedItem.status)}</Text>
                       </View>
                     </View>
@@ -279,7 +279,7 @@ export default function TravelScreen() {
               <TextInput
                 style={s.createInput}
                 placeholder="예) 제주도"
-                placeholderTextColor="#BFAE99"
+                placeholderTextColor="#A39682"
                 value={formDest}
                 onChangeText={setFormDest}
               />
@@ -315,7 +315,7 @@ export default function TravelScreen() {
               <TextInput
                 style={s.createInput}
                 placeholder="이번 여행을 한 문장으로"
-                placeholderTextColor="#BFAE99"
+                placeholderTextColor="#A39682"
                 value={formHighlight}
                 onChangeText={setFormHighlight}
               />
@@ -323,7 +323,7 @@ export default function TravelScreen() {
               <TextInput
                 style={[s.createInput, { height: 160, textAlignVertical: 'top' }]}
                 placeholder={'어디를 들렀는지, 뭐가 좋았는지 편하게 적어두세요'}
-                placeholderTextColor="#BFAE99"
+                placeholderTextColor="#A39682"
                 multiline
                 value={formJournal}
                 onChangeText={setFormJournal}
@@ -355,7 +355,7 @@ export default function TravelScreen() {
           <View style={s.list}>
             {filtered.map((record) => {
               const t = record.data;
-              const statusColor = STATUS_COLORS[t.status] ?? { bg: '#EFEFEF', text: '#4A4A4A' };
+              const statusColor = STATUS_COLORS[t.status] ?? { bg: '#F4F0E8', text: '#4A4A4A' };
               return (
               <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
                 onPress={() => openDetail({ ...t, id: record.id, recordedBy: record.recordedBy })}>
@@ -380,7 +380,7 @@ export default function TravelScreen() {
                     <Text style={s.highlight} numberOfLines={1}>{t.highlight}</Text>
                   ) : null}
                   <View style={s.bottomRow}>
-                    <FontAwesome name="users" size={10} color="#9C8B75" />
+                    <FontAwesome name="users" size={10} color="#7A6B55" />
                     <Text style={s.members}>{membersLabel(t.members)}</Text>
                   </View>
                 </View>
@@ -390,7 +390,7 @@ export default function TravelScreen() {
             {filtered.length === 0 && !ready && <LoadingRows />}
             {filtered.length === 0 &&  ready && (
               <View style={s.empty}>
-                <FontAwesome name="plane" size={32} color="#CFC7BA" />
+                <FontAwesome name="plane" size={32} color="#D6CDBF" />
                 <Text style={s.emptyText}>
                   {filter === '전체' ? '아직 여행 기록이 없어요' : (EMPTY_BY_FILTER[filter] ?? '아직 여행 기록이 없어요')}
                 </Text>
@@ -412,24 +412,24 @@ export default function TravelScreen() {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
-  stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
+  stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   statNum: { fontSize: 22, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  statLabel: { fontSize: 12, color: '#6B6B6B', marginTop: 2, fontFamily: 'Pretendard' },
+  statLabel: { fontSize: 12, color: '#7A6B55', marginTop: 2, fontFamily: 'Pretendard' },
   filterRow: { paddingHorizontal: 20, gap: 8, marginBottom: 24 },
-  chip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA' },
+  chip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF' },
   chipActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  chipText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
+  chipText: { fontSize: 13, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard' },
   chipTextActive: { color: '#FFFFFF' },
   memberRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   list: { paddingHorizontal: 20 },
-  card: { flexDirection: 'row', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
+  card: { flexDirection: 'row', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   destIcon: { width: 56, height: 56, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
   destName: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3, flexShrink: 1 },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
   statusText: { fontSize: 12, fontWeight: '700', fontFamily: 'PretendardBold' },
-  country: { fontSize: 12, color: '#767676', marginBottom: 4, fontFamily: 'Pretendard' },
+  country: { fontSize: 12, color: '#7A6B55', marginBottom: 4, fontFamily: 'Pretendard' },
   highlight: { fontSize: 13, color: '#5C4A32', marginBottom: 6, fontFamily: 'Pretendard' },
   bottomRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   members: { fontSize: 12, color: '#7A6B55', flex: 1, fontFamily: 'Pretendard' },
@@ -437,22 +437,22 @@ const s = StyleSheet.create({
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
-  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#D6CDBF', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
   modalContent: {},
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
-  modalLabel: { fontSize: 13, color: '#767676', width: 64, fontFamily: 'Pretendard' },
+  modalLabel: { fontSize: 13, color: '#7A6B55', width: 64, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
-  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
+  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
-  divider: { height: 1, backgroundColor: '#EAEAEA', marginVertical: 14 },
+  divider: { height: 1, backgroundColor: '#EDE8DF', marginVertical: 14 },
   journalHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
   journalTitle: { fontSize: 14, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   journalText: { fontSize: 14, color: '#1F1F1F', lineHeight: 22, fontFamily: 'Pretendard' },
   statusPicker: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
-  emptySub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  emptySub: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
 });

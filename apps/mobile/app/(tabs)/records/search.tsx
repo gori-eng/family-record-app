@@ -120,21 +120,21 @@ export default function SearchScreen() {
       }} />
 
       <View style={s.searchBox}>
-        <FontAwesome name="search" size={15} color="#888888" />
+        <FontAwesome name="search" size={15} color="#7A6B55" />
         <TextInput
           style={s.input}
           value={query}
           onChangeText={(v) => { setQuery(v); setFilter('all'); }}
           onSubmitEditing={() => remember(query)}
           placeholder="이름이나 가게, 메모 속 한 낱말로"
-          placeholderTextColor="#A0A0A0"
+          placeholderTextColor="#A39682"
           autoFocus
           returnKeyType="search"
           autoCorrect={false}
         />
         {query.length > 0 && (
           <TouchableOpacity onPress={() => setQuery('')} activeOpacity={0.7} style={s.clearBtn} accessibilityLabel="지우기">
-            <FontAwesome name="times-circle" size={16} color="#BDBDBD" />
+            <FontAwesome name="times-circle" size={16} color="#A39682" />
           </TouchableOpacity>
         )}
       </View>
@@ -151,7 +151,7 @@ export default function SearchScreen() {
                       <Text style={s.recentText}>{q}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => forget(q)} activeOpacity={0.7} style={s.recentX} accessibilityLabel={`${q} 지우기`}>
-                      <FontAwesome name="times" size={11} color="#A0A0A0" />
+                      <FontAwesome name="times" size={11} color="#A39682" />
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -172,7 +172,7 @@ export default function SearchScreen() {
         <LoadingRows />
       ) : hits.length === 0 ? (
         <View style={s.empty}>
-          <FontAwesome name="search" size={28} color="#D0D0D0" />
+          <FontAwesome name="search" size={28} color="#D6CDBF" />
           <Text style={s.emptyTitle}>'{typed}'{iga(typed)} 들어간 기록이 없어요</Text>
           <Text style={s.emptySub}>다른 낱말로 찾아보거나, 조금 짧게 줄여보세요</Text>
         </View>
@@ -211,7 +211,7 @@ export default function SearchScreen() {
                     )}
                     <Text style={s.rowMeta} numberOfLines={1}>{meta}</Text>
                   </View>
-                  <FontAwesome name="chevron-right" size={12} color="#C8C8C8" />
+                  <FontAwesome name="chevron-right" size={12} color="#A39682" />
                 </TouchableOpacity>
               );
             })}
@@ -236,7 +236,7 @@ const s = StyleSheet.create({
   searchBox: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     marginHorizontal: 20, marginTop: 8, marginBottom: 10,
-    backgroundColor: '#FFFFFF', borderRadius: 14, borderWidth: 1, borderColor: '#EAEAEA',
+    backgroundColor: '#FFFFFF', borderRadius: 14, borderWidth: 1, borderColor: '#EDE8DF',
     paddingHorizontal: 14, height: 48,
   },
   input: { flex: 1, fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard', height: 46 },
@@ -247,27 +247,27 @@ const s = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   recentChip: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF',
-    borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 16, paddingLeft: 12, paddingRight: 4, height: 32,
+    borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 16, paddingLeft: 12, paddingRight: 4, height: 32,
   },
   recentText: { fontSize: 13, color: '#1F1F1F', fontFamily: 'Pretendard' },
   recentX: { paddingHorizontal: 8, paddingVertical: 6 },
-  tip: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard', lineHeight: 22 },
-  hint: { textAlign: 'center', color: '#6B6B6B', fontSize: 13, fontFamily: 'Pretendard', marginTop: 40 },
+  tip: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard', lineHeight: 22 },
+  hint: { textAlign: 'center', color: '#7A6B55', fontSize: 13, fontFamily: 'Pretendard', marginTop: 40 },
   empty: { alignItems: 'center', marginTop: 56, gap: 10, paddingHorizontal: 32 },
   emptyTitle: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', textAlign: 'center' },
-  emptySub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard', textAlign: 'center' },
+  emptySub: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard', textAlign: 'center' },
   filterRow: { flexGrow: 0, marginBottom: 6 },
   filterContent: { paddingHorizontal: 20, gap: 8 },
   filterChip: {
     paddingHorizontal: 12, height: 32, justifyContent: 'center',
-    borderRadius: 16, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA',
+    borderRadius: 16, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF',
   },
   filterChipOn: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
   filterText: { fontSize: 13, color: '#4A4A4A', fontFamily: 'Pretendard' },
   filterTextOn: { color: '#FFFFFF', fontFamily: 'PretendardBold' },
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#FFFFFF', borderRadius: 14, borderWidth: 1, borderColor: '#EAEAEA',
+    backgroundColor: '#FFFFFF', borderRadius: 14, borderWidth: 1, borderColor: '#EDE8DF',
     padding: 14, marginBottom: 8,
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.03, shadowRadius: 4, elevation: 1,
   },
@@ -276,7 +276,7 @@ const s = StyleSheet.create({
   rowText: { flex: 1, gap: 3 },
   rowTitle: { fontSize: 15, color: '#1F1F1F', fontFamily: 'PretendardBold' },
   rowSnippet: { fontSize: 13, color: '#4A4A4A', fontFamily: 'Pretendard', lineHeight: 18 },
-  rowMeta: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  rowMeta: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
   mark: { color: '#2D5A3F', backgroundColor: '#E3F0E7' },
   markSub: { color: '#2D5A3F', fontFamily: 'PretendardBold' },
   bottomPad: { height: 24 },

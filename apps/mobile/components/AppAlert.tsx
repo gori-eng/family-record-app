@@ -130,7 +130,7 @@ const s = StyleSheet.create({
     flex: 1, paddingVertical: 13, borderRadius: 12,
     backgroundColor: '#4A8C6F', alignItems: 'center', justifyContent: 'center',
   },
-  btnCancel: { backgroundColor: '#F1EFEA' },
+  btnCancel: { backgroundColor: '#F4F0E8' },
   btnDanger: { backgroundColor: '#D94040' },
   btnText: { fontSize: 15, color: '#FFFFFF', fontFamily: 'PretendardBold' },
   btnTextCancel: { color: '#4A4A4A' },

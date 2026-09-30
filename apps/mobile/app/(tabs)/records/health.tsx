@@ -207,7 +207,7 @@ function HealthScreen() {
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>다음 검진</Text>
                       <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <FontAwesome name="calendar" size={13} color="#9C8B75" />
+                        <FontAwesome name="calendar" size={13} color="#7A6B55" />
                         <Text style={s.modalValue}>{showDate(selectedItem.nextDate)}</Text>
                       </View>
                     </View>
@@ -250,17 +250,17 @@ function HealthScreen() {
               </View>
               <Text style={s.authorHint}>적는 사람: {CURRENT_USER} (나)</Text>
               <Text style={s.createLabel}>어떤 검진이었나요?</Text>
-              <TextInput style={s.createInput} placeholder="예) 치과 정기검진" placeholderTextColor="#BFAE99"
+              <TextInput style={s.createInput} placeholder="예) 치과 정기검진" placeholderTextColor="#A39682"
                 value={formType} onChangeText={setFormType} />
               <Text style={s.createLabel}>언제 받았나요?</Text>
               <DateField value={formDate} onChange={setFormDate} placeholder="비워두면 오늘로 적어요" />
               <Text style={s.createLabel}>결과</Text>
-              <TextInput style={s.createInput} placeholder="예) 정상, 충치 1개" placeholderTextColor="#BFAE99"
+              <TextInput style={s.createInput} placeholder="예) 정상, 충치 1개" placeholderTextColor="#A39682"
                 value={formResult} onChangeText={setFormResult} />
               <Text style={s.createLabel}>다음 검진은 언제인가요?</Text>
               <DateField value={formNext} onChange={setFormNext} placeholder="적어두면 다가올 때 알려줄게요" />
               <Text style={s.createLabel}>메모</Text>
-              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="처방이나 의사 선생님 말씀을 적어두세요" placeholderTextColor="#BFAE99" multiline
+              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="처방이나 의사 선생님 말씀을 적어두세요" placeholderTextColor="#A39682" multiline
                 value={formNotes} onChangeText={setFormNotes} />
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
@@ -313,7 +313,7 @@ function HealthScreen() {
                     {r.notes ? <Text style={s.notes} numberOfLines={1}>{r.notes}</Text> : null}
                     {r.nextDate ? (
                       <View style={s.nextRow}>
-                        <FontAwesome name="calendar" size={10} color="#9C8B75" />
+                        <FontAwesome name="calendar" size={10} color="#7A6B55" />
                         <Text style={s.nextDate}>다음 검진 {showDate(r.nextDate)}</Text>
                       </View>
                     ) : null}
@@ -324,7 +324,7 @@ function HealthScreen() {
             {records.length === 0 && !ready && <LoadingRows />}
             {records.length === 0 &&  ready && (
               <View style={s.empty}>
-                <FontAwesome name="heartbeat" size={32} color="#CFC7BA" />
+                <FontAwesome name="heartbeat" size={32} color="#D6CDBF" />
                 <Text style={s.emptyText}>아직 건강 기록이 없어요</Text>
                 <Text style={s.emptySub}>검진 결과를 남겨두면 다음에 찾기 쉬워요</Text>
               </View>
@@ -345,41 +345,41 @@ const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
-  emptySub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  emptySub: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
   upcoming: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, margin: 20, marginBottom: 4, backgroundColor: '#EFF6F1', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#D0E4D6' },
   upcomingText: { fontSize: 12, color: '#2D5A3F', lineHeight: 18, fontFamily: 'PretendardBold' },
   list: { paddingHorizontal: 20, paddingTop: 16 },
-  card: { flexDirection: 'row', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
+  card: { flexDirection: 'row', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   icon: { width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
   memberName: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   resultBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
   resultText: { fontSize: 12, fontWeight: '700', fontFamily: 'PretendardBold' },
-  type: { fontSize: 12, color: '#767676', marginBottom: 4, fontFamily: 'Pretendard' },
+  type: { fontSize: 12, color: '#7A6B55', marginBottom: 4, fontFamily: 'Pretendard' },
   notes: { fontSize: 13, color: '#5C4A32', marginBottom: 6, fontFamily: 'Pretendard' },
   nextRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  nextDate: { fontSize: 12, color: '#767676', fontFamily: 'Pretendard' },
+  nextDate: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
-  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#D6CDBF', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
   modalContent: {},
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
-  modalLabel: { fontSize: 13, color: '#767676', width: 64, fontFamily: 'Pretendard' },
+  modalLabel: { fontSize: 13, color: '#7A6B55', width: 64, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
-  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
+  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
   memberRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
-  memberPill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' },
+  memberPill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF' },
   memberPillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  memberPillText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
+  memberPillText: { fontSize: 13, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard' },
   memberPillTextActive: { color: '#FFFFFF' },
-  authorHint: { fontSize: 12, color: '#6B6B6B', marginBottom: 16, marginTop: -4, fontFamily: 'Pretendard' },
+  authorHint: { fontSize: 12, color: '#7A6B55', marginBottom: 16, marginTop: -4, fontFamily: 'Pretendard' },
 });
 
 // 아이 계정에는 보이지 않는다 (DB 00010과 같은 규칙)

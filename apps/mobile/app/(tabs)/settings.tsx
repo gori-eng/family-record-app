@@ -274,7 +274,7 @@ export default function SettingsScreen() {
               </>
             )}
           </Text>
-          <FontAwesome name="chevron-right" size={11} color="#B0A590" />
+          <FontAwesome name="chevron-right" size={11} color="#A39682" />
         </TouchableOpacity>
       )}
 
@@ -291,7 +291,7 @@ export default function SettingsScreen() {
               </View>
               <View style={styles.menuRight}>
                 {item.subtitle && <Text style={styles.menuSubtitle}>{item.subtitle}</Text>}
-                <FontAwesome name="chevron-right" size={12} color="#D4C8B0" />
+                <FontAwesome name="chevron-right" size={12} color="#D6CDBF" />
               </View>
             </TouchableOpacity>
           ))}
@@ -312,9 +312,9 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   sampleBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: '#F4F2EE', borderRadius: 12, padding: 14,
+    backgroundColor: '#F4F0E8', borderRadius: 12, padding: 14,
     marginHorizontal: 20, marginBottom: 8,
-    borderWidth: 1, borderColor: '#EAE6DE',
+    borderWidth: 1, borderColor: '#F4F0E8',
   },
   sampleText: { flex: 1, fontSize: 12, color: '#7A6B55', lineHeight: 18, fontFamily: 'Pretendard' },
   sampleStrong: { color: '#2D5A3F', fontWeight: '700' },
@@ -334,33 +334,33 @@ const styles = StyleSheet.create({
   sheetTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 14 },
   sheetRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 12, borderRadius: 12, marginBottom: 4 },
   sheetRowOn: { backgroundColor: '#EFF6F1' },
-  sheetDot: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#F4F2EE', justifyContent: 'center', alignItems: 'center' },
+  sheetDot: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#F4F0E8', justifyContent: 'center', alignItems: 'center' },
   sheetDotOn: { backgroundColor: '#4A8C6F' },
   sheetInitial: { fontSize: 15, fontWeight: '700', color: '#7A6B55', fontFamily: 'PretendardBold' },
   sheetInitialOn: { color: '#FFFFFF' },
   sheetName: { flex: 1, fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
   sheetNameOn: { fontWeight: '700', color: '#2D5A3F' },
-  sheetAdd: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 14, paddingHorizontal: 12, marginTop: 6, borderTopWidth: 1, borderTopColor: '#F0EEE9' },
+  sheetAdd: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 14, paddingHorizontal: 12, marginTop: 6, borderTopWidth: 1, borderTopColor: '#F4F0E8' },
   sheetAddText: { fontSize: 14, color: '#2D5A3F', fontFamily: 'Pretendard' },
   profileCard: {
     flexDirection: 'row', alignItems: 'center', gap: 16,
     backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20,
-    borderWidth: 1, borderColor: '#EAEAEA', marginBottom: 24,
+    borderWidth: 1, borderColor: '#EDE8DF', marginBottom: 24,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
   profileName: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  profileRole: { fontSize: 13, color: '#6B6B6B', marginTop: 2, fontFamily: 'Pretendard' },
+  profileRole: { fontSize: 13, color: '#7A6B55', marginTop: 2, fontFamily: 'Pretendard' },
   editProfileButton: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: '#EFF6F1', justifyContent: 'center', alignItems: 'center',
   },
   section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#767676', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5, fontFamily: 'PretendardBold' },
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#7A6B55', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5, fontFamily: 'PretendardBold' },
   menuItem: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     backgroundColor: '#FFFFFF', borderRadius: 12, padding: 14, marginBottom: 6,
-    borderWidth: 1, borderColor: '#EAEAEA',
+    borderWidth: 1, borderColor: '#EDE8DF',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
@@ -371,11 +371,11 @@ const styles = StyleSheet.create({
   },
   menuLabel: { fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
   menuRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  menuSubtitle: { fontSize: 13, color: '#767676', fontFamily: 'Pretendard' },
+  menuSubtitle: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
   signOutButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 16, marginTop: 8,
   },
   signOutText: { fontSize: 15, fontWeight: '600', color: '#D94040', fontFamily: 'Pretendard' },
-  version: { textAlign: 'center', color: '#767676', fontSize: 12, marginTop: 16, marginBottom: 32, fontFamily: 'Pretendard' },
+  version: { textAlign: 'center', color: '#7A6B55', fontSize: 12, marginTop: 16, marginBottom: 32, fontFamily: 'Pretendard' },
 });

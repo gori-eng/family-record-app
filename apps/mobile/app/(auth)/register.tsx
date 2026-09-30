@@ -51,26 +51,26 @@ export default function RegisterScreen() {
 
         <View style={s.form}>
           <Text style={s.label}>이메일</Text>
-          <TextInput style={s.input} placeholder="example@email.com" placeholderTextColor="#B0B0B0"
+          <TextInput style={s.input} placeholder="example@email.com" placeholderTextColor="#A39682"
             value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
 
           <Text style={s.label}>비밀번호</Text>
           <View style={s.passwordRow}>
-            <TextInput style={s.passwordInput} placeholder="6자 이상이면 돼요" placeholderTextColor="#B0B0B0"
+            <TextInput style={s.passwordInput} placeholder="6자 이상이면 돼요" placeholderTextColor="#A39682"
               value={password} onChangeText={setPassword} secureTextEntry={!showPassword} />
             <TouchableOpacity style={s.eyeBtn} onPress={() => setShowPassword(!showPassword)} activeOpacity={0.7}>
-              <FontAwesome name={showPassword ? 'eye' : 'eye-slash'} size={18} color="#B0B0B0" />
+              <FontAwesome name={showPassword ? 'eye' : 'eye-slash'} size={18} color="#A39682" />
             </TouchableOpacity>
           </View>
 
           <Text style={s.label}>비밀번호 확인</Text>
           <View style={s.passwordRow}>
-            <TextInput style={s.passwordInput} placeholder="한 번 더 적어주세요" placeholderTextColor="#B0B0B0"
+            <TextInput style={s.passwordInput} placeholder="한 번 더 적어주세요" placeholderTextColor="#A39682"
               value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry={!showPassword} />
           </View>
 
           <TouchableOpacity style={s.agreeRow} activeOpacity={0.7} onPress={() => setAgreed((v) => !v)}>
-            <FontAwesome name={agreed ? 'check-square' : 'square-o'} size={20} color={agreed ? '#4A8C6F' : '#BBBBBB'} />
+            <FontAwesome name={agreed ? 'check-square' : 'square-o'} size={20} color={agreed ? '#4A8C6F' : '#A39682'} />
             <Text style={s.agreeText}>
               <Text style={s.agreeLink} onPress={() => HAS_LEGAL && Linking.openURL(PRIVACY_URL)}>개인정보 처리방침</Text>
               {TERMS_URL ? <>과 <Text style={s.agreeLink} onPress={() => Linking.openURL(TERMS_URL)}>이용약관</Text></> : null}
@@ -105,15 +105,15 @@ const s = StyleSheet.create({
   brand: { alignItems: 'center', marginBottom: 52 },
   logo: { fontSize: 48, color: '#2D5A3F', fontFamily: 'GaeguBold', letterSpacing: 1, transform: [{ rotate: '-2deg' }] },
   form: { marginBottom: 32 },
-  label: { fontSize: 13, fontWeight: '600', color: '#666', marginBottom: 6, fontFamily: 'Pretendard' },
-  input: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 15, fontSize: 16, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
-  passwordRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 14, marginBottom: 16 },
+  label: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
+  input: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 15, fontSize: 16, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
+  passwordRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 14, marginBottom: 16 },
   passwordInput: { flex: 1, paddingHorizontal: 16, paddingVertical: 15, fontSize: 16, color: '#1F1F1F', fontFamily: 'Pretendard' },
   eyeBtn: { paddingHorizontal: 14, paddingVertical: 14 },
   submitBtn: { backgroundColor: '#4A8C6F', borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
   submitBtnDisabled: { opacity: 0.5 },
   submitBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
   loginRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
-  loginText: { color: '#767676', fontSize: 14, fontFamily: 'Pretendard' },
+  loginText: { color: '#7A6B55', fontSize: 14, fontFamily: 'Pretendard' },
   loginLink: { color: '#1F1F1F', fontSize: 14, fontWeight: '700', fontFamily: 'PretendardBold', textDecorationLine: 'underline' },
 });

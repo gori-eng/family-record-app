@@ -19,7 +19,7 @@ export default function NotificationsScreen() {
       <ScrollView style={s.container} contentContainerStyle={s.content}>
         <View style={s.card}>
           <View style={s.iconWrap}>
-            <FontAwesome name="bell-slash-o" size={22} color="#A0A0A0" />
+            <FontAwesome name="bell-slash-o" size={22} color="#A39682" />
           </View>
           <Text style={s.title}>휴대폰 알림은 아직 준비 중이에요</Text>
           <Text style={s.desc}>
@@ -38,10 +38,10 @@ const s = StyleSheet.create({
   content: { padding: 20 },
   card: {
     alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 24,
-    borderWidth: 1, borderColor: '#EAEAEA',
+    borderWidth: 1, borderColor: '#EDE8DF',
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.03, shadowRadius: 4, elevation: 1,
   },
-  iconWrap: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#F4F3EF', justifyContent: 'center', alignItems: 'center', marginBottom: 14 },
+  iconWrap: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#F4F0E8', justifyContent: 'center', alignItems: 'center', marginBottom: 14 },
   title: { fontSize: 16, color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 8 },
-  desc: { fontSize: 13, color: '#6B6B6B', lineHeight: 20, textAlign: 'center', fontFamily: 'Pretendard' },
+  desc: { fontSize: 13, color: '#7A6B55', lineHeight: 20, textAlign: 'center', fontFamily: 'Pretendard' },
 });

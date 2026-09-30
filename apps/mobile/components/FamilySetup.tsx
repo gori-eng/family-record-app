@@ -237,7 +237,7 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
             <Text style={s.choiceTitle}>가족 새로 만들기</Text>
             <Text style={s.choiceDesc}>내가 처음이에요. 만들면 초대 코드가 생겨요.</Text>
           </View>
-          <FontAwesome name="chevron-right" size={12} color="#B0A590" />
+          <FontAwesome name="chevron-right" size={12} color="#A39682" />
         </TouchableOpacity>
 
         <TouchableOpacity style={s.choice} activeOpacity={0.8} onPress={() => setMode('join')}>
@@ -248,7 +248,7 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
             <Text style={s.choiceTitle}>초대 코드로 들어가기</Text>
             <Text style={s.choiceDesc}>가족에게 받은 코드가 있어요.</Text>
           </View>
-          <FontAwesome name="chevron-right" size={12} color="#B0A590" />
+          <FontAwesome name="chevron-right" size={12} color="#A39682" />
         </TouchableOpacity>
       </View>
     );
@@ -268,13 +268,13 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
       {creating ? (
         <>
           <Text style={s.label}>가족 이름</Text>
-          <TextInput style={s.input} placeholder="예) 김씨네" placeholderTextColor="#A0A0A0"
+          <TextInput style={s.input} placeholder="예) 김씨네" placeholderTextColor="#A39682"
             value={familyName} onChangeText={setFamilyName} />
         </>
       ) : (
         <>
           <Text style={s.label}>초대 코드</Text>
-          <TextInput style={[s.input, s.codeInput]} placeholder="예) ABC12345" placeholderTextColor="#A0A0A0"
+          <TextInput style={[s.input, s.codeInput]} placeholder="예) ABC12345" placeholderTextColor="#A39682"
             value={inviteCode} onChangeText={setInviteCode} autoCapitalize="characters" />
         </>
       )}
@@ -299,14 +299,14 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
       )}
 
       <Text style={s.label}>기록에 뜰 이름</Text>
-      <TextInput style={s.input} placeholder="예) 지수" placeholderTextColor="#A0A0A0"
+      <TextInput style={s.input} placeholder="예) 지수" placeholderTextColor="#A39682"
         value={display} onChangeText={setDisplay} />
       <Text style={s.hint}>
         가계부나 일기에 "누가 썼는지"로 뜨는 이름이에요. 가족 안에서 겹치지 않게, 짧게 부르는 이름이 좋아요.
       </Text>
 
       <Text style={s.label}>프로필에 뜰 이름</Text>
-      <TextInput style={s.input} placeholder="예) 김지수" placeholderTextColor="#A0A0A0"
+      <TextInput style={s.input} placeholder="예) 김지수" placeholderTextColor="#A39682"
         value={full} onChangeText={setFull} />
       <Text style={s.hint}>비워두면 위에 적은 이름을 그대로 써요.</Text>
 
@@ -332,7 +332,7 @@ const s = StyleSheet.create({
   title: { fontSize: 24, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', textAlign: 'center', marginBottom: 10 },
   lead: { fontSize: 14, color: '#7A6B55', fontFamily: 'Pretendard', textAlign: 'center', lineHeight: 21, marginBottom: 32 },
 
-  choice: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 18, marginBottom: 12, borderWidth: 1, borderColor: '#EAEAEA' },
+  choice: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 18, marginBottom: 12, borderWidth: 1, borderColor: '#EDE8DF' },
   choiceIcon: { width: 44, height: 44, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   choiceTitle: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
   choiceDesc: { fontSize: 12, color: '#7A6B55', marginTop: 3, fontFamily: 'Pretendard' },
@@ -342,11 +342,11 @@ const s = StyleSheet.create({
   backText: { fontSize: 14, color: '#4A4A4A', fontFamily: 'Pretendard' },
 
   label: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', fontFamily: 'Pretendard', marginBottom: 6, marginTop: 14 },
-  input: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
+  input: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
   codeInput: { letterSpacing: 2, fontFamily: 'PretendardBold' },
   hint: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 6, lineHeight: 17 },
   roleRow: { flexDirection: 'row', gap: 8 },
-  roleChip: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' },
+  roleChip: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF' },
   roleChipOn: { borderColor: '#4A8C6F', backgroundColor: '#EFF6F1' },
   roleText: { fontSize: 14, color: '#7A6B55', fontFamily: 'Pretendard' },
   roleTextOn: { color: '#2D5A3F', fontWeight: '700' },

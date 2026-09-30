@@ -32,7 +32,7 @@ const FamilyTheme = {
     background: '#F9F8F5',
     card: '#FFFFFF',
     text: '#1F1F1F',
-    border: '#EAEAEA',
+    border: '#EDE8DF',
     notification: '#4A8C6F',
   },
 };

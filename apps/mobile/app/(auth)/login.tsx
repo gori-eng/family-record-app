@@ -51,7 +51,7 @@ export default function LoginScreen() {
           <TextInput
             style={s.input}
             placeholder="example@email.com"
-            placeholderTextColor="#B0B0B0"
+            placeholderTextColor="#A39682"
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -63,13 +63,13 @@ export default function LoginScreen() {
             <TextInput
               style={s.passwordInput}
               placeholder="비밀번호"
-              placeholderTextColor="#B0B0B0"
+              placeholderTextColor="#A39682"
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
             />
             <TouchableOpacity style={s.eyeBtn} onPress={() => setShowPassword(!showPassword)} activeOpacity={0.7}>
-              <FontAwesome name={showPassword ? 'eye' : 'eye-slash'} size={18} color="#B0B0B0" />
+              <FontAwesome name={showPassword ? 'eye' : 'eye-slash'} size={18} color="#A39682" />
             </TouchableOpacity>
           </View>
 
@@ -115,15 +115,15 @@ const s = StyleSheet.create({
 
   // Form
   form: { marginBottom: 32 },
-  label: { fontSize: 13, fontWeight: '600', color: '#666', marginBottom: 6, fontFamily: 'Pretendard' },
+  label: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   input: {
-    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA',
+    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF',
     borderRadius: 14, paddingHorizontal: 16, paddingVertical: 15,
     fontSize: 16, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard',
   },
   passwordRow: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA',
+    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF',
     borderRadius: 14, marginBottom: 20,
   },
   passwordInput: { flex: 1, paddingHorizontal: 16, paddingVertical: 15, fontSize: 16, color: '#1F1F1F', fontFamily: 'Pretendard' },
@@ -140,14 +140,14 @@ const s = StyleSheet.create({
   forgotBtn: { alignItems: 'center', paddingVertical: 14 },
   forgotText: { color: '#4A8C6F', fontSize: 14, fontFamily: 'Pretendard' },
   divider: { flexDirection: 'row', alignItems: 'center', marginVertical: 24 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#EAEAEA' },
-  dividerText: { color: '#B0B0B0', paddingHorizontal: 16, fontSize: 13, fontFamily: 'Pretendard' },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#EDE8DF' },
+  dividerText: { color: '#A39682', paddingHorizontal: 16, fontSize: 13, fontFamily: 'Pretendard' },
 
   // Social
   socialRow: { flexDirection: 'row', gap: 10 },
   socialBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA',
+    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF',
     borderRadius: 14, paddingVertical: 14,
   },
   socialText: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
@@ -156,6 +156,6 @@ const s = StyleSheet.create({
 
   // Register
   registerRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
-  registerText: { color: '#767676', fontSize: 14, fontFamily: 'Pretendard' },
+  registerText: { color: '#7A6B55', fontSize: 14, fontFamily: 'Pretendard' },
   registerLink: { color: '#1F1F1F', fontSize: 14, fontWeight: '700', fontFamily: 'PretendardBold', textDecorationLine: 'underline' },
 });

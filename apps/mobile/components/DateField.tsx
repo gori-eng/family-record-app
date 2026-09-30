@@ -32,7 +32,7 @@ export function DateField({
         <Text style={[s.fieldText, !label && s.fieldPlaceholder]}>{label || placeholder}</Text>
         {!!value && allowEmpty && (
           <TouchableOpacity onPress={() => onChange('')} activeOpacity={0.7} hitSlop={12} accessibilityLabel="날짜 비우기">
-            <FontAwesome name="times-circle" size={15} color="#BDBDBD" />
+            <FontAwesome name="times-circle" size={15} color="#A39682" />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
@@ -101,7 +101,7 @@ export function DatePickerSheet({ visible, value, onPick, onClose }: {
           <View style={s.quick}>
             <TouchableOpacity style={s.quickBtn} activeOpacity={0.7} onPress={() => onPick(today)}><Text style={s.quickText}>오늘</Text></TouchableOpacity>
             <View style={s.typedRow}>
-              <TextInput style={s.typed} placeholder="직접 적기 예) 2026.10.3" placeholderTextColor="#A0A0A0"
+              <TextInput style={s.typed} placeholder="직접 적기 예) 2026.10.3" placeholderTextColor="#A39682"
                 value={typed} onChangeText={setTyped} onSubmitEditing={pickTyped} keyboardType="numbers-and-punctuation" returnKeyType="done" />
               {!!parseLooseDate(typed) && (
                 <TouchableOpacity style={s.typedGo} activeOpacity={0.7} onPress={pickTyped}><Text style={s.typedGoText}>이 날로</Text></TouchableOpacity>
@@ -118,10 +118,10 @@ export function DatePickerSheet({ visible, value, onPick, onClose }: {
 const s = StyleSheet.create({
   field: {
     flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#FFFFFF',
-    borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, marginBottom: 12,
+    borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, marginBottom: 12,
   },
   fieldText: { flex: 1, fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
-  fieldPlaceholder: { color: '#8A8A8A' },
+  fieldPlaceholder: { color: '#7A6B55' },
   wrap: { flex: 1, justifyContent: 'flex-end' },
   bg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
   sheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: 32 },
@@ -129,7 +129,7 @@ const s = StyleSheet.create({
   nav: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 17, color: '#1F1F1F', fontFamily: 'PretendardBold' },
   week: { flexDirection: 'row', marginBottom: 4 },
-  weekText: { width: `${100 / 7}%`, textAlign: 'center', fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  weekText: { width: `${100 / 7}%`, textAlign: 'center', fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
   sun: { color: '#C25A5A' }, sat: { color: '#4A90C8' },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
   cell: { width: `${100 / 7}%`, height: 44, alignItems: 'center', justifyContent: 'center' },
@@ -141,9 +141,9 @@ const s = StyleSheet.create({
   quickBtn: { paddingHorizontal: 14, paddingVertical: 11, borderRadius: 12, backgroundColor: '#EFF6F1' },
   quickText: { fontSize: 14, color: '#2D5A3F', fontFamily: 'PretendardBold' },
   typedRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  typed: { flex: 1, borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard' },
+  typed: { flex: 1, borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard' },
   typedGo: { paddingHorizontal: 12, paddingVertical: 11, borderRadius: 12, backgroundColor: '#4A8C6F' },
   typedGoText: { color: '#FFFFFF', fontSize: 13, fontFamily: 'PretendardBold' },
   close: { alignItems: 'center', paddingVertical: 14, marginTop: 4 },
-  closeText: { color: '#6B6B6B', fontSize: 14, fontFamily: 'Pretendard' },
+  closeText: { color: '#7A6B55', fontSize: 14, fontFamily: 'Pretendard' },
 });

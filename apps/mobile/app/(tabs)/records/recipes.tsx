@@ -253,10 +253,10 @@ export default function RecipesScreen() {
               <Text style={s.modalTitle}>{editingId ? '레시피 고치기' : '새 레시피'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }} keyboardShouldPersistTaps="handled">
               <Text style={s.createLabel}>레시피 이름</Text>
-              <TextInput style={s.createInput} placeholder="예) 할머니 장조림" placeholderTextColor="#BFAE99"
+              <TextInput style={s.createInput} placeholder="예) 할머니 장조림" placeholderTextColor="#A39682"
                 value={formName} onChangeText={setFormName} />
               <Text style={s.createLabel}>누구에게 배웠나요?</Text>
-              <TextInput style={s.createInput} placeholder="예) 할머니께 배웠어요" placeholderTextColor="#BFAE99"
+              <TextInput style={s.createInput} placeholder="예) 할머니께 배웠어요" placeholderTextColor="#A39682"
                 value={formOrigin} onChangeText={setFormOrigin} />
               <Text style={s.createLabel}>난이도</Text>
               <View style={s.pillRow}>
@@ -272,7 +272,7 @@ export default function RecipesScreen() {
                 ))}
               </View>
               <Text style={s.createLabel}>걸리는 시간</Text>
-              <TextInput style={s.createInput} placeholder="예) 30분" placeholderTextColor="#BFAE99"
+              <TextInput style={s.createInput} placeholder="예) 30분" placeholderTextColor="#A39682"
                 value={formTime} onChangeText={setFormTime} />
               <Text style={s.createLabel}>완성 사진</Text>
               <PhotoPickerRow draft={photoDraft} />
@@ -280,7 +280,7 @@ export default function RecipesScreen() {
               <TextInput
                 style={[s.createInput, { height: 110, textAlignVertical: 'top' }]}
                 placeholder={'재료를 한 줄에 하나씩 적어주세요\n예) 묵은지 1/4포기\n돼지고기 200g'}
-                placeholderTextColor="#BFAE99"
+                placeholderTextColor="#A39682"
                 multiline
                 value={formIngredients}
                 onChangeText={setFormIngredients}
@@ -289,7 +289,7 @@ export default function RecipesScreen() {
               <TextInput
                 style={[s.createInput, { height: 140, textAlignVertical: 'top' }]}
                 placeholder={'만드는 순서를 한 줄에 하나씩 적어주세요\n예) 들기름에 묵은지를 볶는다\n돼지고기를 넣고 함께 볶는다'}
-                placeholderTextColor="#BFAE99"
+                placeholderTextColor="#A39682"
                 multiline
                 value={formSteps}
                 onChangeText={setFormSteps}
@@ -298,7 +298,7 @@ export default function RecipesScreen() {
               <TextInput
                 style={[s.createInput, { height: 70, textAlignVertical: 'top' }]}
                 placeholder="있다면 살짝 적어주세요"
-                placeholderTextColor="#BFAE99"
+                placeholderTextColor="#A39682"
                 multiline
                 value={formTip}
                 onChangeText={setFormTip}
@@ -340,22 +340,22 @@ export default function RecipesScreen() {
                     <Text style={[s.difficulty, { color: DIFF_COLOR[r.difficulty] }]}>{say(DIFFICULTY_LABEL, r.difficulty)}</Text>
                     {r.time ? (
                       <>
-                        <FontAwesome name="clock-o" size={11} color="#9C8B75" style={s.metaIcon} />
+                        <FontAwesome name="clock-o" size={11} color="#7A6B55" style={s.metaIcon} />
                         <Text style={s.time}>{r.time}</Text>
                       </>
                     ) : null}
-                    <FontAwesome name="user-o" size={11} color="#9C8B75" style={s.metaIcon} />
+                    <FontAwesome name="user-o" size={11} color="#7A6B55" style={s.metaIcon} />
                     <Text style={s.author}>{r.author}</Text>
                   </View>
                 </View>
-                <FontAwesome name="chevron-right" size={12} color="#D4C8B0" />
+                <FontAwesome name="chevron-right" size={12} color="#D6CDBF" />
               </TouchableOpacity>
               );
             })}
             {recipes.length === 0 && !ready && <LoadingRows />}
             {recipes.length === 0 &&  ready && (
               <View style={s.empty}>
-                <FontAwesome name="cutlery" size={32} color="#CFC7BA" />
+                <FontAwesome name="cutlery" size={32} color="#D6CDBF" />
                 <Text style={s.emptyText}>아직 적어둔 레시피가 없어요</Text>
                 <Text style={s.emptySub}>우리 집 손맛, 잊기 전에 하나 남겨볼까요?</Text>
               </View>
@@ -376,19 +376,19 @@ const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
-  emptySub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  emptySub: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
   header: { padding: 20, paddingBottom: 8 },
-  subtitle: { fontSize: 13, color: '#767676', marginBottom: 16, fontFamily: 'Pretendard' },
+  subtitle: { fontSize: 13, color: '#7A6B55', marginBottom: 16, fontFamily: 'Pretendard' },
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
-  stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
+  stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   statNum: { fontSize: 22, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  statLabel: { fontSize: 12, color: '#6B6B6B', marginTop: 2, fontFamily: 'Pretendard' },
+  statLabel: { fontSize: 12, color: '#7A6B55', marginTop: 2, fontFamily: 'Pretendard' },
   list: { paddingHorizontal: 20 },
-  card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   recipeIcon: { width: 52, height: 52, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
   name: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', marginBottom: 2, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  origin: { fontSize: 12, color: '#767676', marginBottom: 6, fontFamily: 'Pretendard' },
+  origin: { fontSize: 12, color: '#7A6B55', marginBottom: 6, fontFamily: 'Pretendard' },
   meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 4 },
   difficulty: { fontSize: 12, fontWeight: '600' },
   metaIcon: { marginLeft: 8 },
@@ -398,23 +398,23 @@ const s = StyleSheet.create({
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
-  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#D6CDBF', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
   modalContent: {},
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
-  modalLabel: { fontSize: 13, color: '#767676', width: 60, fontFamily: 'Pretendard' },
+  modalLabel: { fontSize: 13, color: '#7A6B55', width: 60, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
-  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
+  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
-  pill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
+  pill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
   pillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  pillText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
+  pillText: { fontSize: 13, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard' },
   pillTextActive: { color: '#FFFFFF' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 
-  sectionDivider: { height: 1, backgroundColor: '#EAEAEA', marginVertical: 14 },
+  sectionDivider: { height: 1, backgroundColor: '#EDE8DF', marginVertical: 14 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
   sectionTitle: { fontSize: 14, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   ingRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 4 },

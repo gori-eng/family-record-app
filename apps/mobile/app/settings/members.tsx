@@ -26,7 +26,7 @@ const ROLE_BADGE: Record<string, { bg: string; fg: string }> = {
   '부모': { bg: '#E3F0FA', fg: '#2D6FA8' },
   '자녀': { bg: '#E8F5E9', fg: '#2E7D32' },
   '조부모': { bg: '#F3E8F5', fg: '#7B3FA0' },
-  '손님': { bg: '#F4F2EE', fg: '#7A6B55' },
+  '손님': { bg: '#F4F0E8', fg: '#7A6B55' },
 };
 
 export default function MembersScreen() {
@@ -134,7 +134,7 @@ export default function MembersScreen() {
                 ? '아직 가족을 만들지 않아서 예시 가족이 보여요.'
                 : '아직 로그인 전이라 예시 가족이 보여요.'}
             </Text>
-            <FontAwesome name="chevron-right" size={11} color="#B0A590" />
+            <FontAwesome name="chevron-right" size={11} color="#A39682" />
           </TouchableOpacity>
         )}
 
@@ -151,8 +151,8 @@ export default function MembersScreen() {
                     <Text style={s.adminBadgeText}>관리자</Text>
                   </View>
                 )}
-                <View style={[s.roleBadge, { backgroundColor: ROLE_BADGE[m.role]?.bg ?? '#EAEAEA' }]}>
-                  <Text style={[s.roleBadgeText, { color: ROLE_BADGE[m.role]?.fg ?? '#666' }]}>{m.role}</Text>
+                <View style={[s.roleBadge, { backgroundColor: ROLE_BADGE[m.role]?.bg ?? '#EDE8DF' }]}>
+                  <Text style={[s.roleBadgeText, { color: ROLE_BADGE[m.role]?.fg ?? '#4A4A4A' }]}>{m.role}</Text>
                 </View>
                 {m.isMe && (
                   <View style={s.meBadge}><Text style={s.meBadgeText}>나</Text></View>
@@ -160,7 +160,7 @@ export default function MembersScreen() {
               </View>
               <Text style={s.sub}>기록에는 '{m.display}'{ro(m.display)} 남아요</Text>
             </View>
-            <FontAwesome name="chevron-right" size={12} color="#D4C8B0" />
+            <FontAwesome name="chevron-right" size={12} color="#D6CDBF" />
           </TouchableOpacity>
         ))}
 
@@ -232,21 +232,21 @@ const s = StyleSheet.create({
   sheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 22, paddingBottom: 34 },
   sheetHead: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 },
   sheetName: { fontSize: 17, color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  sheetSub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard', marginTop: 2 },
+  sheetSub: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 2 },
   sheetLabel: { fontSize: 13, color: '#4A4A4A', fontFamily: 'PretendardBold', marginBottom: 8 },
   roleRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
-  roleChip: { flex: 1, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' },
+  roleChip: { flex: 1, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF', alignItems: 'center' },
   roleChipOn: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
   roleChipOff: { opacity: 0.6 },
   roleChipText: { fontSize: 14, color: '#4A4A4A', fontFamily: 'Pretendard' },
   roleChipTextOn: { color: '#FFFFFF', fontFamily: 'PretendardBold' },
-  sheetHint: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard', marginBottom: 16, lineHeight: 18 },
+  sheetHint: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginBottom: 16, lineHeight: 18 },
   sheetBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#EFF6F1', borderRadius: 12, paddingVertical: 13, marginBottom: 8 },
   sheetBtnText: { fontSize: 14, color: '#2D5A3F', fontFamily: 'PretendardBold' },
   sheetDanger: { alignItems: 'center', paddingVertical: 13, marginTop: 6 },
   sheetDangerText: { fontSize: 13, color: '#D94040', fontFamily: 'Pretendard' },
   sheetClose: { alignItems: 'center', paddingVertical: 12 },
-  sheetCloseText: { fontSize: 14, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  sheetCloseText: { fontSize: 14, color: '#7A6B55', fontFamily: 'Pretendard' },
   adminBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#EFF6F1', borderRadius: 8, paddingHorizontal: 7, paddingVertical: 2 },
   adminBadgeText: { fontSize: 12, color: '#2D5A3F', fontFamily: 'PretendardBold' },
   container: { flex: 1, backgroundColor: '#F9F8F5', padding: 20 },
@@ -254,8 +254,8 @@ const s = StyleSheet.create({
 
   sampleBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: '#F4F2EE', borderRadius: 12, padding: 14, marginBottom: 14,
-    borderWidth: 1, borderColor: '#EAE6DE',
+    backgroundColor: '#F4F0E8', borderRadius: 12, padding: 14, marginBottom: 14,
+    borderWidth: 1, borderColor: '#F4F0E8',
   },
   sampleText: { flex: 1, fontSize: 12, color: '#7A6B55', lineHeight: 18, fontFamily: 'Pretendard' },
   sampleStrong: { color: '#2D5A3F', fontWeight: '700' },
@@ -263,7 +263,7 @@ const s = StyleSheet.create({
   card: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16, marginBottom: 10,
-    borderWidth: 1, borderColor: '#EAEAEA',
+    borderWidth: 1, borderColor: '#EDE8DF',
   },
   info: { flex: 1 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },

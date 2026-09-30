@@ -194,12 +194,12 @@ export function PhotoGallery({ photos }: { photos: string[] }) {
           <View style={s.viewerBar}>
             <TouchableOpacity activeOpacity={0.7} style={s.viewerBtn} disabled={!viewing}
               onPress={() => setViewing((v) => (v ? v - 1 : v))} accessibilityLabel="앞 사진">
-              <FontAwesome name="chevron-left" size={18} color={viewing ? '#FFFFFF' : '#555555'} />
+              <FontAwesome name="chevron-left" size={18} color={viewing ? '#FFFFFF' : '#4A4A4A'} />
             </TouchableOpacity>
             <Text style={s.viewerCount}>{viewing !== null ? viewing + 1 : 0} / {photos.length}</Text>
             <TouchableOpacity activeOpacity={0.7} style={s.viewerBtn} disabled={viewing === null || viewing >= photos.length - 1}
               onPress={() => setViewing((v) => (v !== null && v < photos.length - 1 ? v + 1 : v))} accessibilityLabel="다음 사진">
-              <FontAwesome name="chevron-right" size={18} color={viewing !== null && viewing < photos.length - 1 ? '#FFFFFF' : '#555555'} />
+              <FontAwesome name="chevron-right" size={18} color={viewing !== null && viewing < photos.length - 1 ? '#FFFFFF' : '#4A4A4A'} />
             </TouchableOpacity>
           </View>
           <TouchableOpacity style={s.viewerClose} activeOpacity={0.7} onPress={() => setViewing(null)} accessibilityLabel="닫기">

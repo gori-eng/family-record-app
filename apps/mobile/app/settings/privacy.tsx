@@ -48,7 +48,7 @@ export default function PrivacyScreen() {
         {NOT_YET.map((p) => (
           <View key={p.title} style={[s.row, s.rowMuted]}>
             <View style={[s.iconWrap, s.iconMuted]}>
-              <FontAwesome name="clock-o" size={15} color="#A0A0A0" />
+              <FontAwesome name="clock-o" size={15} color="#A39682" />
             </View>
             <View style={s.info}>
               <Text style={[s.label, s.labelMuted]}>{p.title}</Text>
@@ -68,19 +68,19 @@ export default function PrivacyScreen() {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   content: { padding: 20, paddingBottom: 40 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#6B6B6B', marginBottom: 10, fontFamily: 'PretendardBold' },
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#7A6B55', marginBottom: 10, fontFamily: 'PretendardBold' },
   sectionGap: { marginTop: 20 },
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14,
-    padding: 16, marginBottom: 8, borderWidth: 1, borderColor: '#EAEAEA',
+    padding: 16, marginBottom: 8, borderWidth: 1, borderColor: '#EDE8DF',
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.03, shadowRadius: 4, elevation: 1,
   },
-  rowMuted: { backgroundColor: '#F4F3EF', shadowOpacity: 0, elevation: 0 },
+  rowMuted: { backgroundColor: '#F4F0E8', shadowOpacity: 0, elevation: 0 },
   iconWrap: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#EFF6F1', justifyContent: 'center', alignItems: 'center' },
-  iconMuted: { backgroundColor: '#EAEAEA' },
+  iconMuted: { backgroundColor: '#EDE8DF' },
   info: { flex: 1 },
   label: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', fontFamily: 'PretendardBold' },
   labelMuted: { color: '#4A4A4A' },
-  desc: { fontSize: 12, color: '#6B6B6B', marginTop: 3, lineHeight: 17, fontFamily: 'Pretendard' },
-  note: { fontSize: 12, color: '#6B6B6B', marginTop: 8, lineHeight: 18, fontFamily: 'Pretendard' },
+  desc: { fontSize: 12, color: '#7A6B55', marginTop: 3, lineHeight: 17, fontFamily: 'Pretendard' },
+  note: { fontSize: 12, color: '#7A6B55', marginTop: 8, lineHeight: 18, fontFamily: 'Pretendard' },
 });

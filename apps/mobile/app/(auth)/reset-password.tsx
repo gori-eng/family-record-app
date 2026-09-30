@@ -68,14 +68,14 @@ export default function ResetPasswordScreen() {
             <Text style={s.title}>새 비밀번호를 정해주세요</Text>
             <Text style={s.label}>새 비밀번호</Text>
             <View style={s.row}>
-              <TextInput style={s.input} placeholder="6자 이상이면 돼요" placeholderTextColor="#B0B0B0"
+              <TextInput style={s.input} placeholder="6자 이상이면 돼요" placeholderTextColor="#A39682"
                 value={pw} onChangeText={setPw} secureTextEntry={!show} autoFocus />
               <TouchableOpacity style={s.eye} onPress={() => setShow((v) => !v)} activeOpacity={0.7}>
-                <FontAwesome name={show ? 'eye' : 'eye-slash'} size={18} color="#B0B0B0" />
+                <FontAwesome name={show ? 'eye' : 'eye-slash'} size={18} color="#A39682" />
               </TouchableOpacity>
             </View>
             <Text style={s.label}>한 번 더</Text>
-            <TextInput style={[s.input, s.inputSolo]} placeholder="같은 비밀번호를 한 번 더" placeholderTextColor="#B0B0B0"
+            <TextInput style={[s.input, s.inputSolo]} placeholder="같은 비밀번호를 한 번 더" placeholderTextColor="#A39682"
               value={pw2} onChangeText={setPw2} secureTextEntry={!show} />
             <TouchableOpacity style={[s.btn, busy && s.btnOff]} onPress={save} disabled={busy} activeOpacity={0.8}>
               <Text style={s.btnText}>{busy ? '바꾸고 있어요' : '이 비밀번호로 할게요'}</Text>
@@ -93,9 +93,9 @@ const s = StyleSheet.create({
   title: { fontSize: 22, color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 20 },
   desc: { fontSize: 14, color: '#4A4A4A', fontFamily: 'Pretendard', lineHeight: 21, marginBottom: 24 },
   label: { fontSize: 13, color: '#4A4A4A', fontFamily: 'PretendardBold', marginBottom: 8 },
-  row: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, marginBottom: 20 },
+  row: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, marginBottom: 20 },
   input: { flex: 1, paddingHorizontal: 16, paddingVertical: 14, fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
-  inputSolo: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, marginBottom: 24 },
+  inputSolo: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, marginBottom: 24 },
   eye: { paddingHorizontal: 14 },
   btn: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' },
   btnOff: { opacity: 0.6 },

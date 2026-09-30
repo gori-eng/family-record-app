@@ -106,7 +106,7 @@ export function DeleteRecordRow({
   if (id && !canDelete(authorId)) {
     return (
       <View style={s.noRow}>
-        <FontAwesome name="lock" size={12} color="#9C8B75" />
+        <FontAwesome name="lock" size={12} color="#7A6B55" />
         <Text style={s.noRowText}>고치기와 지우기는 쓴 사람과 관리자만 할 수 있어요</Text>
       </View>
     );
@@ -163,7 +163,7 @@ const s = StyleSheet.create({
     backgroundColor: '#2D2A26', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12,
     shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 10,
   },
-  undoText: { flex: 1, fontSize: 13, color: '#F4F2EE', fontFamily: 'Pretendard' },
+  undoText: { flex: 1, fontSize: 13, color: '#F4F0E8', fontFamily: 'Pretendard' },
   undoBtn: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   undoBtnText: { fontSize: 13, color: '#FFFFFF', fontFamily: 'PretendardBold' },
 });

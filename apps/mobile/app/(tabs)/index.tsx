@@ -142,13 +142,13 @@ export default function HomeScreen() {
             <View style={s.notifHeader}>
               <Text style={s.notifTitle}>가족 소식</Text>
               <TouchableOpacity onPress={closeNotif} activeOpacity={0.7} style={s.notifClose}>
-                <FontAwesome name="times" size={18} color="#888" />
+                <FontAwesome name="times" size={18} color="#7A6B55" />
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
               {news.items.length === 0 && (
                 <View style={s.notifEmpty}>
-                  <FontAwesome name="bell-o" size={28} color="#D0D0D0" />
+                  <FontAwesome name="bell-o" size={28} color="#D6CDBF" />
                   <Text style={s.notifEmptyTitle}>아직 새 소식이 없어요</Text>
                   <Text style={s.notifEmptySub}>가족이 뭔가 남기거나 일정이 다가오면 여기서 알려줄게요</Text>
                 </View>
@@ -236,7 +236,7 @@ export default function HomeScreen() {
             <LoadingRows label="오늘 일정을 살펴보고 있어요" />
           ) : todayEvents.length === 0 ? (
             <TouchableOpacity style={s.emptyState} activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')}>
-              <FontAwesome name="calendar-o" size={32} color="#D0D0D0" />
+              <FontAwesome name="calendar-o" size={32} color="#D6CDBF" />
               <Text style={s.emptyTitle}>오늘은 일정이 없어요</Text>
               <Text style={s.emptySub}>약속이 생기면 눌러서 적어두세요</Text>
             </TouchableOpacity>
@@ -254,7 +254,7 @@ export default function HomeScreen() {
                   <Text style={s.timelineTitle}>{ev.title}</Text>
                   {!!ev.location && (
                     <View style={s.timelineRow}>
-                      <FontAwesome name="map-marker" size={10} color="#A0A0A0" />
+                      <FontAwesome name="map-marker" size={10} color="#A39682" />
                       <Text style={s.timelineLoc}>{ev.location}</Text>
                     </View>
                   )}
@@ -289,7 +289,7 @@ export default function HomeScreen() {
                     <Text style={s.memoryTitle} numberOfLines={1}>{rec.title}</Text>
                     <Text style={s.memoryMeta}>{years}년 전 오늘, {rec.recordedBy}{iga(rec.recordedBy)} 남긴 {CATEGORY_LABELS[rec.category]}</Text>
                   </View>
-                  <FontAwesome name="chevron-right" size={11} color="#D4C8B0" />
+                  <FontAwesome name="chevron-right" size={11} color="#D6CDBF" />
                 </TouchableOpacity>
               );
             })}
@@ -310,7 +310,7 @@ export default function HomeScreen() {
             ].filter((q) => !q.category || canSee(q.category)).map((q, i) => (
               <TouchableOpacity key={i} style={s.quickChip} activeOpacity={0.7}
                 onPress={() => router.push({ pathname: q.route as any, params: { new: '1' } })}>
-                <FontAwesome name={q.icon as any} size={15} color="#666" />
+                <FontAwesome name={q.icon as any} size={15} color="#4A4A4A" />
                 <Text style={s.quickLabel}>{q.label}</Text>
               </TouchableOpacity>
             ))}
@@ -333,7 +333,7 @@ export default function HomeScreen() {
             <LoadingRows label="기록을 꺼내오고 있어요" />
           ) : recent.length === 0 ? (
             <TouchableOpacity style={s.emptyState} activeOpacity={0.7} onPress={() => router.push('/(tabs)/records')}>
-              <FontAwesome name="pencil-square-o" size={32} color="#D0D0D0" />
+              <FontAwesome name="pencil-square-o" size={32} color="#D6CDBF" />
               <Text style={s.emptyTitle}>아직 기록이 없어요</Text>
               <Text style={s.emptySub}>오늘 있었던 일부터 하나 남겨볼까요?</Text>
             </TouchableOpacity>
@@ -376,10 +376,10 @@ const s = StyleSheet.create({
   headerSpacer: { flex: 1 },
   logo: { fontSize: 24, color: '#2D5A3F', fontFamily: 'GaeguBold', transform: [{ rotate: '-2deg' }] },
   headerIcon: { padding: 8 },
-  memoryRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#EAEAEA' },
+  memoryRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#EDE8DF' },
   memoryIcon: { width: 34, height: 34, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   memoryTitle: { fontSize: 14, color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  memoryMeta: { fontSize: 12, color: '#767676', marginTop: 2, fontFamily: 'Pretendard' },
+  memoryMeta: { fontSize: 12, color: '#7A6B55', marginTop: 2, fontFamily: 'Pretendard' },
   badge: { position: 'absolute', top: 2, right: 2, backgroundColor: '#4A8C6F', borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4 },
   badgeText: { color: '#FFF', fontSize: 12, fontWeight: '700' },
 
@@ -390,7 +390,7 @@ const s = StyleSheet.create({
   inviteTitle: { fontSize: 15, color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 2 },
   inviteSub: { fontSize: 13, color: '#4A4A4A', fontFamily: 'Pretendard', lineHeight: 18 },
   greetingLine: { fontSize: 26, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.5 },
-  dateText: { fontSize: 13, color: '#767676', marginTop: 4, fontFamily: 'Pretendard' },
+  dateText: { fontSize: 13, color: '#7A6B55', marginTop: 4, fontFamily: 'Pretendard' },
 
   // Section
   section: { paddingHorizontal: 20, marginBottom: 32 },
@@ -398,22 +398,22 @@ const s = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   // 손글씨는 딱 두 곳 — 그때 오늘, 타임캡슐 편지 (그 밖엔 가독성 때문에 안 쓴다)
   handTitle: { fontFamily: 'GaeguBold', fontSize: 22, color: '#2D5A3F', letterSpacing: 0 },
-  sectionSub: { fontSize: 12, color: '#767676', marginTop: 2 },
+  sectionSub: { fontSize: 12, color: '#7A6B55', marginTop: 2 },
   seeAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 4 },
   seeAllText: { fontSize: 13, color: '#4A8C6F', fontWeight: '600' },
 
   // Empty state
-  emptyState: { alignItems: 'center', paddingVertical: 36, backgroundColor: '#FFFFFF', borderRadius: 16, borderWidth: 1, borderColor: '#EAEAEA' },
-  emptyTitle: { fontSize: 15, fontWeight: '600', color: '#6B6B6B', marginTop: 12, fontFamily: 'Pretendard' },
-  emptySub: { fontSize: 13, color: '#767676', marginTop: 4, fontFamily: 'Pretendard' },
+  emptyState: { alignItems: 'center', paddingVertical: 36, backgroundColor: '#FFFFFF', borderRadius: 16, borderWidth: 1, borderColor: '#EDE8DF' },
+  emptyTitle: { fontSize: 15, fontWeight: '600', color: '#7A6B55', marginTop: 12, fontFamily: 'Pretendard' },
+  emptySub: { fontSize: 13, color: '#7A6B55', marginTop: 4, fontFamily: 'Pretendard' },
 
   // Timeline
   timeline: {},
   timelineItem: { flexDirection: 'row', marginBottom: 4 },
   timelineLeft: { width: 56, alignItems: 'center', paddingTop: 2 },
-  timelineTime: { fontSize: 12, fontWeight: '600', color: '#6B6B6B', marginBottom: 6, fontFamily: 'Pretendard' },
+  timelineTime: { fontSize: 12, fontWeight: '600', color: '#7A6B55', marginBottom: 6, fontFamily: 'Pretendard' },
   timelineDot: { width: 10, height: 10, borderRadius: 5, zIndex: 1 },
-  timelineLine: { width: 1.5, flex: 1, backgroundColor: '#E0E0E0', marginTop: -1 },
+  timelineLine: { width: 1.5, flex: 1, backgroundColor: '#D6CDBF', marginTop: -1 },
   timelineCard: {
     flex: 1, marginLeft: 8, marginBottom: 10,
     backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,
@@ -422,9 +422,9 @@ const s = StyleSheet.create({
   },
   timelineTitle: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', marginBottom: 4, fontFamily: 'Pretendard' },
   timelineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  timelineLoc: { fontSize: 12, color: '#767676' },
-  timelineMemberWrap: { marginTop: 6, alignSelf: 'flex-start', backgroundColor: '#F4F3F0', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
-  timelineMember: { fontSize: 12, fontWeight: '600', color: '#6B6B6B' },
+  timelineLoc: { fontSize: 12, color: '#7A6B55' },
+  timelineMemberWrap: { marginTop: 6, alignSelf: 'flex-start', backgroundColor: '#F4F0E8', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
+  timelineMember: { fontSize: 12, fontWeight: '600', color: '#7A6B55' },
 
   // 6. Quick Record — 일정과 기록 사이
   quickSection: { paddingLeft: 20, marginBottom: 32 },
@@ -433,7 +433,7 @@ const s = StyleSheet.create({
   quickChip: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     backgroundColor: '#FFFFFF', paddingHorizontal: 14, paddingVertical: 9,
-    borderRadius: 24, borderWidth: 1, borderColor: '#EAEAEA',
+    borderRadius: 24, borderWidth: 1, borderColor: '#EDE8DF',
   },
   quickLabel: { fontSize: 13, fontWeight: '500', color: '#4A4A4A', fontFamily: 'Pretendard' },
 
@@ -458,20 +458,20 @@ const s = StyleSheet.create({
   notifEmptyTitle: { fontSize: 15, fontWeight: '600', color: '#7A6B55', marginTop: 12, fontFamily: 'Pretendard' },
   notifEmptySub: { fontSize: 12, color: '#7A6B55', marginTop: 4, fontFamily: 'Pretendard' },
   notifModal: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '75%', paddingHorizontal: 20, paddingBottom: 40 },
-  notifHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginTop: 10, marginBottom: 12 },
+  notifHandle: { width: 36, height: 4, backgroundColor: '#D6CDBF', borderRadius: 2, alignSelf: 'center', marginTop: 10, marginBottom: 12 },
   notifHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   notifTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
   notifClose: { padding: 4 },
-  notifItem: { flexDirection: 'row', gap: 12, padding: 14, borderRadius: 14, marginBottom: 6, backgroundColor: '#FAFAFA' },
+  notifItem: { flexDirection: 'row', gap: 12, padding: 14, borderRadius: 14, marginBottom: 6, backgroundColor: '#F4F0E8' },
   notifItemUnread: { backgroundColor: '#F5F0EC' },
   notifIcon: { width: 36, height: 36, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
   notifContent: { flex: 1 },
   notifItemTitle: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', marginBottom: 2 },
   notifAuthorRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 },
   notifAuthorDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#4A8C6F' },
-  notifAuthor: { fontSize: 12, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
-  notifItemDesc: { fontSize: 12, color: '#6B6B6B' },
+  notifAuthor: { fontSize: 12, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard' },
+  notifItemDesc: { fontSize: 12, color: '#7A6B55' },
   notifMeta: { alignItems: 'flex-end', gap: 4 },
-  notifTime: { fontSize: 12, color: '#767676' },
+  notifTime: { fontSize: 12, color: '#7A6B55' },
   notifDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#4A8C6F' },
 });

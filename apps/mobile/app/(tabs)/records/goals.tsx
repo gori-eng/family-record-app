@@ -217,7 +217,7 @@ export default function GoalsScreen() {
                       <Text style={s.modalLabel}>얼마나 왔나요</Text>
                       <View style={{ flex: 1 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                          <View style={{ flex: 1, height: 8, backgroundColor: '#EAEAEA', borderRadius: 4 }}>
+                          <View style={{ flex: 1, height: 8, backgroundColor: '#EDE8DF', borderRadius: 4 }}>
                             <View style={{ height: 8, borderRadius: 4, width: `${selProgress}%`, backgroundColor: selReached ? '#4AA86B' : sel.color }} />
                           </View>
                           <Text style={s.pctText}>{selProgress}%</Text>
@@ -254,7 +254,7 @@ export default function GoalsScreen() {
                             <FontAwesome
                               name={m.done ? 'check-circle' : 'circle-o'}
                               size={20}
-                              color={m.done ? '#4AA86B' : '#C8C8C8'}
+                              color={m.done ? '#4AA86B' : '#A39682'}
                             />
                             <Text style={[s.msText, m.done && s.msTextDone]}>{m.label}</Text>
                           </TouchableOpacity>
@@ -325,13 +325,13 @@ export default function GoalsScreen() {
               <Text style={s.modalTitle}>{editingId ? '목표 고치기' : '새 가족 목표'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }} keyboardShouldPersistTaps="handled">
               <Text style={s.createLabel}>어떤 목표인가요?</Text>
-              <TextInput style={s.createInput} placeholder="예) 올해 가족 여행 세 번 가기" placeholderTextColor="#BFAE99"
+              <TextInput style={s.createInput} placeholder="예) 올해 가족 여행 세 번 가기" placeholderTextColor="#A39682"
                 value={formTitle} onChangeText={setFormTitle} />
               <Text style={s.createLabel}>설명</Text>
-              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="왜 하고 싶은지, 어떻게 할지 적어도 좋아요" placeholderTextColor="#BFAE99" multiline
+              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="왜 하고 싶은지, 어떻게 할지 적어도 좋아요" placeholderTextColor="#A39682" multiline
                 value={formDesc} onChangeText={setFormDesc} />
               <Text style={s.createLabel}>언제까지 해볼까요?</Text>
-              <TextInput style={s.createInput} placeholder="예) 2027년 12월" placeholderTextColor="#BFAE99"
+              <TextInput style={s.createInput} placeholder="예) 2027년 12월" placeholderTextColor="#A39682"
                 value={formTarget} onChangeText={setFormTarget} />
               <Text style={s.createLabel}>작은 목표로 나눠볼까요?</Text>
               <TextInput
@@ -339,7 +339,7 @@ export default function GoalsScreen() {
                 value={formMilestones}
                 onChangeText={setFormMilestones}
                 placeholder={'한 줄에 하나씩 적어주세요\n예) 봄 여행\n여름 여행\n가을 여행'}
-                placeholderTextColor="#BFAE99"
+                placeholderTextColor="#A39682"
                 multiline
               />
               <Text style={s.createLabel}>사진</Text>
@@ -350,7 +350,7 @@ export default function GoalsScreen() {
                 value={formNotes}
                 onChangeText={setFormNotes}
                 placeholder="다 해내면 뭘 할지, 누구랑 할지 적어도 좋아요"
-                placeholderTextColor="#BFAE99"
+                placeholderTextColor="#A39682"
                 multiline
               />
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
@@ -413,7 +413,7 @@ export default function GoalsScreen() {
             {goals.length === 0 && !ready && <LoadingRows />}
             {goals.length === 0 &&  ready && (
               <View style={s.empty}>
-                <FontAwesome name="trophy" size={32} color="#CFC7BA" />
+                <FontAwesome name="trophy" size={32} color="#D6CDBF" />
                 <Text style={s.emptyText}>아직 가족 목표가 없어요</Text>
                 <Text style={s.emptySub}>올해 가족이 함께 해보고 싶은 걸 하나 적어볼까요?</Text>
               </View>
@@ -434,51 +434,51 @@ const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
-  emptySub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  emptySub: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
   summary: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 24 },
-  summaryCard: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
+  summaryCard: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   summaryNum: { fontSize: 24, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  summaryLabel: { fontSize: 12, color: '#6B6B6B', marginTop: 2, fontFamily: 'Pretendard' },
+  summaryLabel: { fontSize: 12, color: '#7A6B55', marginTop: 2, fontFamily: 'Pretendard' },
   list: { paddingHorizontal: 20 },
-  card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
   goalIcon: { width: 44, height: 44, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   cardInfo: { flex: 1 },
   goalTitle: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', marginBottom: 2, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  goalDesc: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  goalDesc: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
   progressSection: {},
-  progressBarBg: { height: 8, backgroundColor: '#EAEAEA', borderRadius: 4, marginBottom: 8 },
+  progressBarBg: { height: 8, backgroundColor: '#EDE8DF', borderRadius: 4, marginBottom: 8 },
   progressBar: { height: 8, borderRadius: 4 },
   progressMeta: { flexDirection: 'row', justifyContent: 'space-between' },
   progressPct: { fontSize: 13, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  targetDate: { fontSize: 12, color: '#767676', fontFamily: 'Pretendard' },
+  targetDate: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
   pctText: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
-  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#D6CDBF', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
   modalContent: {},
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
-  modalLabel: { fontSize: 13, color: '#767676', width: 60, fontFamily: 'Pretendard' },
+  modalLabel: { fontSize: 13, color: '#7A6B55', width: 60, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
-  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
+  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
-  divider: { height: 1, backgroundColor: '#EAEAEA', marginVertical: 14 },
+  divider: { height: 1, backgroundColor: '#EDE8DF', marginVertical: 14 },
   subHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
   subTitle: { fontSize: 14, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   msRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 },
   msText: { fontSize: 14, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
-  msTextDone: { color: '#6B6B6B', textDecorationLine: 'line-through' },
+  msTextDone: { color: '#7A6B55', textDecorationLine: 'line-through' },
   stepRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 6 },
   stepBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#EFF6F1', justifyContent: 'center', alignItems: 'center' },
   stepText: { fontSize: 20, color: '#1F1F1F', fontFamily: 'PretendardBold', minWidth: 60, textAlign: 'center' },
   doneBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 13, marginTop: 14 },
   doneText: { color: '#FFFFFF', fontSize: 15, fontFamily: 'PretendardBold' },
   reopenBtn: { alignItems: 'center', paddingVertical: 12, marginTop: 8 },
-  reopenText: { color: '#6B6B6B', fontSize: 13, fontFamily: 'Pretendard' },
+  reopenText: { color: '#7A6B55', fontSize: 13, fontFamily: 'Pretendard' },
   notesText: { fontSize: 14, color: '#1F1F1F', lineHeight: 22, fontFamily: 'Pretendard' },
 });

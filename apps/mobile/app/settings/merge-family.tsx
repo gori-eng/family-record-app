@@ -140,14 +140,14 @@ export default function MergeFamilyScreen() {
           <Text style={s.note}>먼저 가족을 만들어주세요.</Text>
         ) : !iAmTargetAdmin ? (
           <View style={s.noteBox}>
-            <FontAwesome name="lock" size={13} color="#9C8B75" />
+            <FontAwesome name="lock" size={13} color="#7A6B55" />
             <Text style={s.note}>
               합치기는 두 가족 모두의 관리자만 할 수 있어요. {target.name}에서 나는 관리자가 아니에요.
             </Text>
           </View>
         ) : candidates.length === 0 ? (
           <View style={s.noteBox}>
-            <FontAwesome name="info-circle" size={13} color="#9C8B75" />
+            <FontAwesome name="info-circle" size={13} color="#7A6B55" />
             <Text style={s.note}>
               {families.length <= 1
                 ? '합칠 다른 가족이 아직 없어요. 가족이 둘 이상일 때 쓸 수 있어요.'
@@ -164,7 +164,7 @@ export default function MergeFamilyScreen() {
                   <Text style={s.name}>{f.name}</Text>
                   <Text style={s.sub}>{nameIn(f.id) ? `기록에는 '${nameIn(f.id)}'${ro(nameIn(f.id))} 남아 있어요` : ''}</Text>
                 </View>
-                {busy === f.id ? <ActivityIndicator color="#4A8C6F" /> : <FontAwesome name="chevron-right" size={12} color="#B0A590" />}
+                {busy === f.id ? <ActivityIndicator color="#4A8C6F" /> : <FontAwesome name="chevron-right" size={12} color="#A39682" />}
               </TouchableOpacity>
             ))}
             {others.length > 0 && (
@@ -198,15 +198,15 @@ const s = StyleSheet.create({
   label: { fontSize: 13, color: '#4A4A4A', fontFamily: 'PretendardBold', marginBottom: 10 },
   card: {
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF',
-    borderRadius: 14, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EAEAEA',
+    borderRadius: 14, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EDE8DF',
   },
   dot: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#EFF6F1', alignItems: 'center', justifyContent: 'center' },
   initial: { fontSize: 16, color: '#2D5A3F', fontFamily: 'PretendardBold' },
   info: { flex: 1 },
   name: { fontSize: 15, color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  sub: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard', marginTop: 2 },
+  sub: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 2 },
   hint: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 4, lineHeight: 18 },
-  noteBox: { flexDirection: 'row', gap: 8, alignItems: 'flex-start', backgroundColor: '#F4F2EE', borderRadius: 12, padding: 14 },
+  noteBox: { flexDirection: 'row', gap: 8, alignItems: 'flex-start', backgroundColor: '#F4F0E8', borderRadius: 12, padding: 14 },
   note: { flex: 1, fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard', lineHeight: 19 },
   infoBox: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', backgroundColor: '#EFF6F1', borderRadius: 12, padding: 14, marginTop: 24 },
   infoText: { flex: 1, fontSize: 12, color: '#4A4A4A', fontFamily: 'Pretendard', lineHeight: 18 },

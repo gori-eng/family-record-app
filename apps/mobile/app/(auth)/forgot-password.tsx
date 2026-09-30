@@ -44,7 +44,7 @@ export default function ForgotPasswordScreen() {
         <Text style={s.title}>비밀번호를 잊으셨나요?</Text>
         <Text style={s.desc}>가입한 이메일을 적어주세요. 새 비밀번호를 정할 수 있는 링크를 보내드릴게요.</Text>
         <Text style={s.label}>이메일</Text>
-        <TextInput style={s.input} placeholder="example@email.com" placeholderTextColor="#B0B0B0"
+        <TextInput style={s.input} placeholder="example@email.com" placeholderTextColor="#A39682"
           value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoFocus />
         <TouchableOpacity style={[s.btn, busy && s.btnOff]} onPress={send} disabled={busy} activeOpacity={0.8}>
           <Text style={s.btnText}>{busy ? '보내고 있어요' : '링크 보내기'}</Text>
@@ -63,7 +63,7 @@ const s = StyleSheet.create({
   title: { fontSize: 22, color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 8 },
   desc: { fontSize: 14, color: '#4A4A4A', fontFamily: 'Pretendard', lineHeight: 21, marginBottom: 28 },
   label: { fontSize: 13, color: '#4A4A4A', fontFamily: 'PretendardBold', marginBottom: 8 },
-  input: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard', marginBottom: 20 },
+  input: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard', marginBottom: 20 },
   btn: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' },
   btnOff: { opacity: 0.6 },
   btnText: { color: '#FFFFFF', fontSize: 16, fontFamily: 'PretendardBold' },

@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: { fontSize: 22, color: '#1F1F1F', marginBottom: 8, fontFamily: 'PretendardBold' },
-  subtitle: { fontSize: 15, color: '#6B6B6B', textAlign: 'center', lineHeight: 22, marginBottom: 32, fontFamily: 'Pretendard' },
+  subtitle: { fontSize: 15, color: '#7A6B55', textAlign: 'center', lineHeight: 22, marginBottom: 32, fontFamily: 'Pretendard' },
   button: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: '#4A8C6F', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 12,

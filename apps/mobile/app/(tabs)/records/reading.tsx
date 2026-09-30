@@ -317,7 +317,7 @@ export default function ReadingScreen() {
                         value={editNotes}
                         onChangeText={setEditNotes}
                         placeholder="기억에 남는 문장이나 느낌을 적어두세요"
-                        placeholderTextColor="#BFAE99"
+                        placeholderTextColor="#A39682"
                         multiline
                       />
                       <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={saveEdits}>
@@ -360,7 +360,7 @@ export default function ReadingScreen() {
               <TextInput
                 style={styles.createInput}
                 placeholder="어떤 책인가요?"
-                placeholderTextColor="#BFAE99"
+                placeholderTextColor="#A39682"
                 value={formTitle}
                 onChangeText={setFormTitle}
               />
@@ -370,7 +370,7 @@ export default function ReadingScreen() {
               <TextInput
                 style={styles.createInput}
                 placeholder="누가 썼나요?"
-                placeholderTextColor="#BFAE99"
+                placeholderTextColor="#A39682"
                 value={formAuthor}
                 onChangeText={setFormAuthor}
               />
@@ -494,7 +494,7 @@ export default function ReadingScreen() {
             {filtered.length === 0 && !ready && <LoadingRows />}
             {filtered.length === 0 &&  ready && (
               <View style={styles.empty}>
-                <FontAwesome name="book" size={32} color="#CFC7BA" />
+                <FontAwesome name="book" size={32} color="#D6CDBF" />
                 <Text style={styles.emptyText}>
                   {activeStatus === '전체' ? '아직 담아둔 책이 없어요' : (EMPTY_BY_STATUS[activeStatus] ?? '아직 담아둔 책이 없어요')}
                 </Text>
@@ -523,29 +523,29 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
-  emptySub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  emptySub: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
   statCard: {
     flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,
-    alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA',
+    alignItems: 'center', borderWidth: 1, borderColor: '#EDE8DF',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
   statNumber: { fontSize: 22, fontWeight: '700', color: '#1F1F1F', marginTop: 4, fontFamily: 'PretendardBold' },
-  statLabel: { fontSize: 12, color: '#6B6B6B', marginTop: 2, fontFamily: 'Pretendard' },
+  statLabel: { fontSize: 12, color: '#7A6B55', marginTop: 2, fontFamily: 'Pretendard' },
   filterContainer: { paddingHorizontal: 20, gap: 8, marginBottom: 24 },
   filterChip: {
     paddingHorizontal: 16, paddingVertical: 8, borderRadius: 24,
-    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA',
+    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF',
   },
   filterChipActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  filterText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
+  filterText: { fontSize: 13, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard' },
   filterTextActive: { color: '#FFFFFF' },
   bookList: { paddingHorizontal: 20 },
   bookCard: {
     flexDirection: 'row', gap: 14,
     backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10,
-    borderWidth: 1, borderColor: '#EAEAEA',
+    borderWidth: 1, borderColor: '#EDE8DF',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
@@ -558,12 +558,12 @@ const styles = StyleSheet.create({
   bookTitle: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', flex: 1, marginRight: 8, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
   statusText: { fontSize: 12, fontWeight: '700' },
-  bookAuthor: { fontSize: 13, color: '#6B6B6B', marginBottom: 6, fontFamily: 'Pretendard' },
+  bookAuthor: { fontSize: 13, color: '#7A6B55', marginBottom: 6, fontFamily: 'Pretendard' },
   bookMeta: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
   readerDot: { width: 8, height: 8, borderRadius: 4 },
   readerName: { fontSize: 12, color: '#5C4A32', fontWeight: '600' },
   progressRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flex: 1 },
-  progressBarBg: { flex: 1, height: 6, backgroundColor: '#EAEAEA', borderRadius: 3 },
+  progressBarBg: { flex: 1, height: 6, backgroundColor: '#EDE8DF', borderRadius: 3 },
   progressBar: { height: 6, backgroundColor: '#4A8C6F', borderRadius: 3 },
   progressText: { fontSize: 12, color: '#7A6B55', fontWeight: '500' },
   bookNotes: { fontSize: 12, color: '#5C4A32', fontStyle: 'italic', lineHeight: 18, fontFamily: 'Pretendard' },
@@ -577,36 +577,36 @@ const styles = StyleSheet.create({
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
-  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#D6CDBF', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
   modalContent: {},
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
-  modalLabel: { fontSize: 13, color: '#767676', width: 60, fontFamily: 'Pretendard' },
+  modalLabel: { fontSize: 13, color: '#7A6B55', width: 60, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
-  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
+  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   pillRow: { flexDirection: 'row', gap: 8, marginBottom: 16, flexWrap: 'wrap' },
-  pill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
+  pill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
   pillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  pillText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
+  pillText: { fontSize: 13, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard' },
   pillTextActive: { color: '#FFFFFF' },
-  memberPill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' },
+  memberPill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF' },
   memberPillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  authorHint: { fontSize: 12, color: '#6B6B6B', marginBottom: 16, marginTop: -4, fontFamily: 'Pretendard' },
-  editDivider: { height: 1, backgroundColor: '#EAEAEA', marginVertical: 12 },
+  authorHint: { fontSize: 12, color: '#7A6B55', marginBottom: 16, marginTop: -4, fontFamily: 'Pretendard' },
+  editDivider: { height: 1, backgroundColor: '#EDE8DF', marginVertical: 12 },
   editSectionTitle: { fontSize: 14, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 10 },
   editLabel: { fontSize: 12, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   progressEditRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
   stepBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#EFF6F1', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#D0E4D6' },
   progressBarWrap: { flex: 1 },
-  progressBarBgEdit: { height: 8, backgroundColor: '#EAEAEA', borderRadius: 4, overflow: 'hidden' },
+  progressBarBgEdit: { height: 8, backgroundColor: '#EDE8DF', borderRadius: 4, overflow: 'hidden' },
   progressBarFillEdit: { height: 8, backgroundColor: '#4A8C6F', borderRadius: 4 },
-  progressInput: { width: 48, height: 32, borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 8, textAlign: 'center', fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard', backgroundColor: '#FFFFFF', paddingVertical: 0 },
-  percentSign: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  progressInput: { width: 48, height: 32, borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 8, textAlign: 'center', fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard', backgroundColor: '#FFFFFF', paddingVertical: 0 },
+  percentSign: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
   editStatusRow: { flexDirection: 'row', gap: 8, marginBottom: 14 },
-  editStatusPill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' },
+  editStatusPill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF', alignItems: 'center' },
   editStatusPillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  editStatusText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
+  editStatusText: { fontSize: 13, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard' },
   editStatusTextActive: { color: '#FFFFFF' },
   ratingEditRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 14 },
   ratingEditText: { fontSize: 13, color: '#7A6B55', marginLeft: 6, fontFamily: 'Pretendard' },

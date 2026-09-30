@@ -287,25 +287,25 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun
 .brand { font-family: 'Gaegu', cursive; font-weight: 700; font-size: 26pt; color: #2D5A3F; transform: rotate(-2deg); margin-bottom: 18mm; letter-spacing: 1px; }
 .cover h1 { font-size: 28pt; margin: 0 0 6mm; }
 .range, .count { color: #4A4A4A; font-size: 12pt; }
-.made { margin-top: 30mm; color: #888; font-size: 10pt; }
+.made { margin-top: 30mm; color: #7A6B55; font-size: 10pt; }
 .toc { page-break-after: always; padding-top: 10mm; }
 .toc h2 { font-size: 18pt; margin-bottom: 8mm; }
 .toc-row { display: flex; align-items: baseline; gap: 8px; font-size: 12.5pt; margin-bottom: 4mm; }
-.toc-row .dots { flex: 1; border-bottom: 1px dotted #BBB; }
+.toc-row .dots { flex: 1; border-bottom: 1px dotted #A39682; }
 .chapter { page-break-before: always; }
 .chapter:first-of-type { page-break-before: auto; }
 .chapter header { border-bottom: 2px solid #4A8C6F; padding-bottom: 3mm; margin-bottom: 6mm; }
 .chapter h2 { font-size: 20pt; margin: 0; color: #2D5A3F; }
-.chapter-sub { color: #888; font-size: 10pt; }
-.entry { page-break-inside: avoid; border-bottom: 1px solid #EAEAEA; padding: 4mm 0 5mm; }
+.chapter-sub { color: #7A6B55; font-size: 10pt; }
+.entry { page-break-inside: avoid; border-bottom: 1px solid #EDE8DF; padding: 4mm 0 5mm; }
 .entry h3 { font-size: 14pt; margin: 1mm 0 2mm; }
-.meta { color: #888; font-size: 9.5pt; }
+.meta { color: #7A6B55; font-size: 9.5pt; }
 .row { display: flex; gap: 10px; font-size: 10.5pt; margin: 1mm 0; }
-.row .k { color: #888; min-width: 22mm; }
+.row .k { color: #7A6B55; min-width: 22mm; }
 .text { margin: 2mm 0; white-space: normal; }
 .quote { color: #2D5A3F; }
 .letter { background: #FBF8F1; border-left: 3px solid #D8CDB8; padding: 3mm 4mm; }
-.sealed { color: #9C8B75; }
+.sealed { color: #7A6B55; }
 .tip { color: #7A6B55; }
 .sub { font-weight: 700; margin-top: 3mm; font-size: 10.5pt; }
 ul, ol { margin: 1mm 0 2mm 5mm; padding-left: 4mm; }
@@ -317,8 +317,8 @@ ul, ol { margin: 1mm 0 2mm 5mm; padding-left: 4mm; }
 .photos.one img { width: 100%; height: auto; max-height: 110mm; object-fit: contain; }
 .money { color: #4A4A4A; font-size: 10.5pt; margin-bottom: 2mm; }
 table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
-th, td { border-bottom: 1px solid #EEE; padding: 1.5mm 1mm; text-align: left; }
-th { color: #888; font-weight: 600; }
+th, td { border-bottom: 1px solid #F4F0E8; padding: 1.5mm 1mm; text-align: left; }
+th { color: #7A6B55; font-weight: 600; }
 .num { text-align: right; white-space: nowrap; }
-.empty { text-align: center; color: #888; margin-top: 40mm; }
+.empty { text-align: center; color: #7A6B55; margin-top: 40mm; }
 `;

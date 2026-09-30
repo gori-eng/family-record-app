@@ -574,7 +574,7 @@ function FinanceScreen() {
                     style={styles.amountInput}
                     autoFocus={!editingId}
                     placeholder="0"
-                    placeholderTextColor="#CFC7BA"
+                    placeholderTextColor="#D6CDBF"
                     keyboardType="numeric"
                     value={formAmount}
                     // 입력은 숫자만 받고, 보여줄 때 천 단위 콤마를 넣는다
@@ -590,7 +590,7 @@ function FinanceScreen() {
                 <TextInput
                   style={styles.createInput}
                   placeholder="예) 이마트 장보기"
-                  placeholderTextColor="#BFAE99"
+                  placeholderTextColor="#A39682"
                   value={formDesc}
                   onChangeText={onDescChange}
                 />
@@ -665,7 +665,7 @@ function FinanceScreen() {
                 <TextInput
                   style={[styles.createInput, { height: 70, textAlignVertical: 'top' }]}
                   placeholder="나중에 떠올릴 수 있게 한마디 남겨두세요"
-                  placeholderTextColor="#BFAE99"
+                  placeholderTextColor="#A39682"
                   multiline
                   value={formMemo}
                   onChangeText={setFormMemo}
@@ -687,13 +687,13 @@ function FinanceScreen() {
             <TextInput
               style={styles.searchInput}
               placeholder="가게 이름이나 메모로 찾기"
-              placeholderTextColor="#B0A89C"
+              placeholderTextColor="#A39682"
               value={query}
               onChangeText={setQuery}
             />
             {query.length > 0 && (
               <TouchableOpacity activeOpacity={0.7} onPress={() => setQuery('')}>
-                <FontAwesome name="times-circle" size={15} color="#C4BDB2" />
+                <FontAwesome name="times-circle" size={15} color="#A39682" />
               </TouchableOpacity>
             )}
           </View>
@@ -913,7 +913,7 @@ function FinanceScreen() {
             <LoadingRows />
           ) : grouped.length === 0 ? (
             <View style={styles.emptyState}>
-              <FontAwesome name="inbox" size={36} color="#E0D8C8" />
+              <FontAwesome name="inbox" size={36} color="#D6CDBF" />
               <Text style={styles.emptyText}>
                 {activeCategory === '전체'
                   ? `${formatMonth(viewMonth)}엔 아직 적은 거래가 없어요`
@@ -998,7 +998,7 @@ function FinanceScreen() {
                 <TextInput
                   style={styles.amountInput}
                   placeholder="0"
-                  placeholderTextColor="#CFC7BA"
+                  placeholderTextColor="#D6CDBF"
                   keyboardType="numeric"
                   value={draftTotal}
                   onChangeText={(v) => setDraftTotal(parseAmount(v) ? comma(parseAmount(v)) : '')}
@@ -1016,7 +1016,7 @@ function FinanceScreen() {
                     <TextInput
                       style={styles.budgetCatInput}
                       placeholder="0"
-                      placeholderTextColor="#CFC7BA"
+                      placeholderTextColor="#D6CDBF"
                       keyboardType="numeric"
                       value={draftByCat[c.name] ?? ''}
                       onChangeText={(v) => setDraftByCat((d) => ({ ...d, [c.name]: parseAmount(v) ? comma(parseAmount(v)) : '' }))}
@@ -1060,7 +1060,7 @@ function FinanceScreen() {
                         onPress={() => showAlert('매달 넣기에서 뺄까요?', `${item.desc}${eulreul(item.desc)} 더는 자동으로 넣지 않아요. 이미 넣은 거래는 그대로예요.`, [
                           { text: '그냥 둘게요', style: 'cancel' }, { text: '빼기', style: 'destructive', onPress: () => settings.removeRecurring(item.id) },
                         ])}>
-                        <FontAwesome name="times" size={16} color="#8A7A62" />
+                        <FontAwesome name="times" size={16} color="#7A6B55" />
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -1085,7 +1085,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   summaryCard: {
     marginHorizontal: 20, marginTop: 14, marginBottom: 20, backgroundColor: '#FFFFFF', borderRadius: 20,
-    padding: 20, borderWidth: 1, borderColor: '#EAEAEA',
+    padding: 20, borderWidth: 1, borderColor: '#EDE8DF',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
@@ -1094,23 +1094,23 @@ const styles = StyleSheet.create({
     marginHorizontal: 20, marginTop: 16,
     backgroundColor: '#FFFFFF', borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 11,
-    borderWidth: 1, borderColor: '#EAEAEA',
+    borderWidth: 1, borderColor: '#EDE8DF',
   },
   searchInput: { flex: 1, fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard', paddingVertical: 0 },
   searchCount: { fontSize: 13, color: '#4A4A4A', fontFamily: 'PretendardBold', marginHorizontal: 20, marginTop: 18, marginBottom: 10 },
   budgetRow: { marginBottom: 16 },
   budgetTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 },
-  budgetLabel: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  budgetLabel: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
   budgetLeft: { fontSize: 12, color: '#2D5A3F', fontFamily: 'PretendardBold' },
   budgetOver: { color: '#C25A5A' },
-  budgetBarBg: { height: 8, backgroundColor: '#F1EFEA', borderRadius: 4 },
+  budgetBarBg: { height: 8, backgroundColor: '#F4F0E8', borderRadius: 4 },
   budgetBar: { height: 8, borderRadius: 4, backgroundColor: '#4A8C6F' },
   budgetBarOver: { backgroundColor: '#D98A8A' },
   budgetEmpty: { fontSize: 12, color: '#5F8A72', fontFamily: 'Pretendard', textAlign: 'center', paddingVertical: 4 },
   budgetCatRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
   budgetCatName: { flex: 1, fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard' },
   budgetCatInput: {
-    width: 110, backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA',
+    width: 110, backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF',
     borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8,
     fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard', textAlign: 'right',
   },
@@ -1123,14 +1123,14 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#D0E4D6',
   },
   recurText: { flex: 1, fontSize: 12, color: '#2D5A3F', fontFamily: 'PretendardBold' },
-  recurAmount: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard' },
-  recurEmpty: { fontSize: 13, color: '#767676', fontFamily: 'Pretendard', textAlign: 'center', paddingVertical: 24 },
+  recurAmount: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
+  recurEmpty: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard', textAlign: 'center', paddingVertical: 24 },
   recurItem: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: '#F4F2EE',
+    paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: '#F4F0E8',
   },
   recurItemDesc: { fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard' },
-  recurItemMeta: { fontSize: 12, color: '#767676', fontFamily: 'Pretendard', marginTop: 3 },
+  recurItemMeta: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 3 },
   recurItemAmount: { fontSize: 13, color: '#4A8C6F', fontFamily: 'PretendardBold' },
   centerWrap: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
   centerBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
@@ -1139,7 +1139,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 24, elevation: 12,
   },
   centerTitle: { fontSize: 17, color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  centerDesc: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard', marginTop: 8, marginBottom: 16, lineHeight: 19 },
+  centerDesc: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 8, marginBottom: 16, lineHeight: 19 },
   importRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     marginHorizontal: 20, marginTop: 16,
@@ -1158,9 +1158,9 @@ const styles = StyleSheet.create({
   summaryMonth: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', textAlign: 'center', fontFamily: 'PretendardBold', letterSpacing: -0.3, minWidth: 130 },
   summaryRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
   summaryItem: { flex: 1, alignItems: 'center' },
-  summaryLabel: { fontSize: 12, color: '#767676', marginBottom: 4, fontFamily: 'Pretendard' },
+  summaryLabel: { fontSize: 12, color: '#7A6B55', marginBottom: 4, fontFamily: 'Pretendard' },
   summaryAmount: { fontSize: 18, fontWeight: '700', fontFamily: 'PretendardBold' },
-  summaryDivider: { width: 1, height: 40, backgroundColor: '#EAEAEA' },
+  summaryDivider: { width: 1, height: 40, backgroundColor: '#EDE8DF' },
   balanceRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     backgroundColor: '#EFF6F1', borderRadius: 12, padding: 14, marginBottom: 16,
@@ -1171,45 +1171,45 @@ const styles = StyleSheet.create({
   chartRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   chartLabel: { width: 56, fontSize: 12, color: '#4A4A4A', fontFamily: 'Pretendard' } as any,
   budgetCancel: { alignItems: 'center', paddingVertical: 12 },
-  budgetCancelText: { fontSize: 14, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  budgetCancelText: { fontSize: 14, color: '#7A6B55', fontFamily: 'Pretendard' },
   chartLabelActive: { color: '#4A8C6F', fontFamily: 'PretendardBold' },
-  chartBarBg: { flex: 1, height: 10, backgroundColor: '#F1EFEA', borderRadius: 5 },
+  chartBarBg: { flex: 1, height: 10, backgroundColor: '#F4F0E8', borderRadius: 5 },
   chartBar: { height: 10, borderRadius: 5 },
   chartAmount: { width: 74, fontSize: 12, color: '#4A4A4A', textAlign: 'right', fontFamily: 'Pretendard' },
-  chartPct: { width: 34, fontSize: 12, color: '#6B6B6B', textAlign: 'right', fontFamily: 'Pretendard' },
-  noChart: { fontSize: 13, color: '#767676', textAlign: 'center', paddingVertical: 8, fontFamily: 'Pretendard' },
-  memberRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: '#F1EFEA' },
+  chartPct: { width: 34, fontSize: 12, color: '#7A6B55', textAlign: 'right', fontFamily: 'Pretendard' },
+  noChart: { fontSize: 13, color: '#7A6B55', textAlign: 'center', paddingVertical: 8, fontFamily: 'Pretendard' },
+  memberRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: '#F4F0E8' },
   memberChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#F9F8F5', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6 },
   memberName: { fontSize: 12, color: '#4A4A4A', fontFamily: 'PretendardBold' },
-  memberAmount: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  memberAmount: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
   // 오른쪽 아래 + 버튼과 글자가 겹치지 않게 양옆을 비운다
   emptyState: { alignItems: 'center' as const, paddingVertical: 48, paddingHorizontal: 56, gap: 6 },
   emptyText: { fontSize: 15, color: '#4A4A4A', marginTop: 8, fontFamily: 'PretendardBold', letterSpacing: -0.2 },
-  emptySubtext: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  emptySubtext: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
   filterScroll: { marginBottom: 8 },
   filterContainer: { paddingHorizontal: 20, gap: 8 },
   filterChip: {
     paddingHorizontal: 16, paddingVertical: 8, borderRadius: 24,
-    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA',
+    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF',
   },
   filterChipActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  filterText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
+  filterText: { fontSize: 13, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard' },
   filterTextActive: { color: '#FFFFFF' },
   transGroup: { paddingHorizontal: 20, marginTop: 16 },
   transDateRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, marginTop: 4 },
   transDate: { fontSize: 13, fontWeight: '700', color: '#4A4A4A', fontFamily: 'PretendardBold' },
-  transDaySum: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  transDaySum: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
   transItem: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     backgroundColor: '#FFFFFF', borderRadius: 12, padding: 14, marginBottom: 6,
-    borderWidth: 1, borderColor: '#EAEAEA',
+    borderWidth: 1, borderColor: '#EDE8DF',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
   transIcon: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   transInfo: { flex: 1 },
   transDesc: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
-  transCat: { fontSize: 12, color: '#767676', marginTop: 3, fontFamily: 'Pretendard' },
+  transCat: { fontSize: 12, color: '#7A6B55', marginTop: 3, fontFamily: 'Pretendard' },
   transAmount: { fontSize: 14, fontWeight: '700', fontFamily: 'PretendardBold' },
   aiHint: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 8,
@@ -1224,7 +1224,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2D2A26', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12,
     shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 10,
   },
-  undoText: { flex: 1, fontSize: 13, color: '#F4F2EE', fontFamily: 'Pretendard' },
+  undoText: { flex: 1, fontSize: 13, color: '#F4F0E8', fontFamily: 'Pretendard' },
   undoBtn: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   undoBtnText: { fontSize: 13, color: '#FFFFFF', fontFamily: 'PretendardBold' },
   fab: {
@@ -1237,12 +1237,12 @@ const styles = StyleSheet.create({
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
-  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#D6CDBF', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
   modalContent: {},
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
   detailAmount: { fontSize: 28, fontWeight: '700', fontFamily: 'PretendardBold', marginBottom: 20, letterSpacing: -0.5 },
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
-  modalLabel: { fontSize: 13, color: '#767676', width: 66, fontFamily: 'Pretendard' },
+  modalLabel: { fontSize: 13, color: '#7A6B55', width: 66, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   sourceTag: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#EFF6F1', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 7, marginBottom: 4, alignSelf: 'flex-start' },
   sourceTagText: { fontSize: 12, color: '#4A8C6F', fontFamily: 'Pretendard' },
@@ -1254,10 +1254,10 @@ const styles = StyleSheet.create({
   actionBtnDanger: { borderColor: '#F0D4D4', backgroundColor: '#FCF2F2' },
   actionText: { fontSize: 13, color: '#2D5A3F', fontFamily: 'PretendardBold' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
-  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
+  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   amountWrap: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA',
+    backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF',
     borderRadius: 12, paddingHorizontal: 14, marginBottom: 16,
   },
   amountInput: { flex: 1, paddingVertical: 12, fontSize: 24, color: '#1F1F1F', fontFamily: 'PretendardBold', textAlign: 'right' },
@@ -1274,24 +1274,24 @@ const styles = StyleSheet.create({
   catChip: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20,
-    borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF',
+    borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF',
   },
   catChipActive: { borderColor: '#4A8C6F', backgroundColor: '#EFF6F1' },
   catDot: { width: 20, height: 20, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
-  catChipText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
+  catChipText: { fontSize: 13, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard' },
   catChipTextActive: { color: '#2D5A3F' },
   quickDateRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
   quickDate: {
     paddingHorizontal: 14, paddingVertical: 7, borderRadius: 18,
-    borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF',
+    borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF',
   },
   quickDateActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  quickDateText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
+  quickDateText: { fontSize: 13, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard' },
   quickDateTextActive: { color: '#FFFFFF' },
   pillRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  pill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
+  pill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
   pillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  pillText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
+  pillText: { fontSize: 13, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard' },
   pillTextActive: { color: '#FFFFFF' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },

@@ -316,7 +316,7 @@ export default function CalendarScreen() {
                   </TouchableOpacity>
                 </View>
                 <View style={styles.detailRow}>
-                  <View style={styles.detailIconBox}><FontAwesome name="clock-o" size={15} color="#A0A0A0" /></View>
+                  <View style={styles.detailIconBox}><FontAwesome name="clock-o" size={15} color="#A39682" /></View>
                   <View>
                     <Text style={styles.detailLabel}>언제</Text>
                     <Text style={styles.detailValue}>{whenLine(showDetail)}</Text>
@@ -324,7 +324,7 @@ export default function CalendarScreen() {
                 </View>
                 {!!showDetail.location && (
                   <View style={styles.detailRow}>
-                    <View style={styles.detailIconBox}><FontAwesome name="map-marker" size={15} color="#A0A0A0" /></View>
+                    <View style={styles.detailIconBox}><FontAwesome name="map-marker" size={15} color="#A39682" /></View>
                     <TouchableOpacity activeOpacity={0.7} onPress={() => openMap(showDetail.location!)}>
                       <Text style={styles.detailLabel}>어디서</Text>
                       <Text style={styles.detailValue}>{showDetail.location}</Text>
@@ -333,17 +333,17 @@ export default function CalendarScreen() {
                   </View>
                 )}
                 <View style={styles.detailRow}>
-                  <View style={styles.detailIconBox}><FontAwesome name="users" size={14} color="#A0A0A0" /></View>
+                  <View style={styles.detailIconBox}><FontAwesome name="users" size={14} color="#A39682" /></View>
                   <View><Text style={styles.detailLabel}>누구랑</Text><Text style={styles.detailValue}>{membersLabel(showDetail.members)}</Text></View>
                 </View>
                 {!!showDetail.memo && (
                   <View style={styles.detailRow}>
-                    <View style={styles.detailIconBox}><FontAwesome name="sticky-note-o" size={14} color="#A0A0A0" /></View>
+                    <View style={styles.detailIconBox}><FontAwesome name="sticky-note-o" size={14} color="#A39682" /></View>
                     <View style={{ flex: 1 }}><Text style={styles.detailLabel}>메모</Text><Text style={styles.detailValue}>{showDetail.memo}</Text></View>
                   </View>
                 )}
                 <View style={styles.detailRow}>
-                  <View style={styles.detailIconBox}><FontAwesome name="pencil-square-o" size={14} color="#A0A0A0" /></View>
+                  <View style={styles.detailIconBox}><FontAwesome name="pencil-square-o" size={14} color="#A39682" /></View>
                   <View>
                     <Text style={styles.detailLabel}>적어둔 사람</Text>
                     <Text style={styles.detailValue}>
@@ -393,11 +393,11 @@ export default function CalendarScreen() {
                   <DateField value={fDate} onChange={setFDate} allowEmpty={false} />
 
                   <Text style={styles.addLabel}>무슨 일인가요?</Text>
-                  <TextInput style={styles.addInput} placeholder="예) 가족 저녁 식사" placeholderTextColor="#A0A0A0"
+                  <TextInput style={styles.addInput} placeholder="예) 가족 저녁 식사" placeholderTextColor="#A39682"
                     value={fTitle} onChangeText={setFTitle} />
 
                   <Text style={styles.addLabel}>몇 시에?</Text>
-                  <TextInput style={styles.addInput} placeholder="비워두면 하루 종일" placeholderTextColor="#A0A0A0"
+                  <TextInput style={styles.addInput} placeholder="비워두면 하루 종일" placeholderTextColor="#A39682"
                     value={fTime} onChangeText={setFTime} />
                   <View style={styles.chipRow}>
                     {TIME_CHIPS.map((t) => (
@@ -412,7 +412,7 @@ export default function CalendarScreen() {
                   </View>
 
                   <TouchableOpacity style={styles.toggleRow} activeOpacity={0.7} onPress={() => setFMultiDay((v) => !v)}>
-                    <FontAwesome name={fMultiDay ? 'check-square' : 'square-o'} size={18} color={fMultiDay ? '#4A8C6F' : '#BBBBBB'} />
+                    <FontAwesome name={fMultiDay ? 'check-square' : 'square-o'} size={18} color={fMultiDay ? '#4A8C6F' : '#A39682'} />
                     <Text style={styles.toggleText}>끝나는 날이나 시각도 정할래요</Text>
                   </TouchableOpacity>
                   {fMultiDay && (
@@ -428,14 +428,14 @@ export default function CalendarScreen() {
                       </View>
                       <DateField value={fEndDate} onChange={setFEndDate} placeholder="비워두면 같은 날에 끝나요" />
                       <Text style={styles.addLabel}>몇 시에 끝나요?</Text>
-                      <TextInput style={styles.addInput} placeholder="비워두면 시각은 안 적어요" placeholderTextColor="#A0A0A0"
+                      <TextInput style={styles.addInput} placeholder="비워두면 시각은 안 적어요" placeholderTextColor="#A39682"
                         value={fEndTime} onChangeText={setFEndTime} />
                     </View>
                   )}
 
                   <Text style={styles.addLabel}>어디서?</Text>
                   <View style={styles.placeInputRow}>
-                    <TextInput style={[styles.addInput, styles.placeInput]} placeholder="예) 정자동 한강갈비" placeholderTextColor="#A0A0A0"
+                    <TextInput style={[styles.addInput, styles.placeInput]} placeholder="예) 정자동 한강갈비" placeholderTextColor="#A39682"
                       value={fLocation} onChangeText={setFLocation}
                       onFocus={() => setPlaceFocus(true)} onBlur={() => setTimeout(() => setPlaceFocus(false), 150)} />
                     {!!fLocation.trim() && (
@@ -451,12 +451,12 @@ export default function CalendarScreen() {
                         <View key={p.id} style={styles.suggestRow}>
                           <TouchableOpacity style={styles.suggestMain} activeOpacity={0.7}
                             onPress={() => { setFLocation(p.name); setPlaceFocus(false); }}>
-                            <FontAwesome name="map-marker" size={13} color="#9C8B75" />
+                            <FontAwesome name="map-marker" size={13} color="#7A6B55" />
                             <Text style={styles.suggestText}>{p.name}</Text>
                             {p.useCount > 1 && <Text style={styles.suggestCount}>{p.useCount}번</Text>}
                           </TouchableOpacity>
                           <TouchableOpacity style={styles.suggestX} activeOpacity={0.7} onPress={() => forgetPlace(p.id)} accessibilityLabel={`${p.name} 목록에서 빼기`}>
-                            <FontAwesome name="times" size={12} color="#BBBBBB" />
+                            <FontAwesome name="times" size={12} color="#A39682" />
                           </TouchableOpacity>
                         </View>
                       ))}
@@ -477,7 +477,7 @@ export default function CalendarScreen() {
 
                   <Text style={styles.addLabel}>메모</Text>
                   <TextInput style={[styles.addInput, { minHeight: 80, textAlignVertical: 'top' }]}
-                    placeholder="챙길 것이나 기억하고 싶은 것" placeholderTextColor="#A0A0A0"
+                    placeholder="챙길 것이나 기억하고 싶은 것" placeholderTextColor="#A39682"
                     value={fMemo} onChangeText={setFMemo} multiline numberOfLines={3} />
 
                   <TouchableOpacity style={styles.addSubmit} activeOpacity={0.8} onPress={handleSave}>
@@ -557,7 +557,7 @@ export default function CalendarScreen() {
             <LoadingRows label="일정을 살펴보고 있어요" />
           ) : selectedEvents.length === 0 ? (
             <TouchableOpacity style={styles.emptyState} activeOpacity={0.7} onPress={openCreate}>
-              <FontAwesome name="calendar-plus-o" size={32} color="#D4C8B0" />
+              <FontAwesome name="calendar-plus-o" size={32} color="#D6CDBF" />
               <Text style={styles.emptyText}>아직 적어둔 일정이 없어요</Text>
               <Text style={styles.emptySubtext}>여기를 눌러 하나 적어볼까요?</Text>
             </TouchableOpacity>
@@ -575,7 +575,7 @@ export default function CalendarScreen() {
                   <View style={styles.eventMetaRow}>
                     {!!ev.location && (
                       <View style={styles.eventLocRow}>
-                        <FontAwesome name="map-marker" size={11} color="#9C8B75" />
+                        <FontAwesome name="map-marker" size={11} color="#7A6B55" />
                         <Text style={styles.eventLoc}>{ev.location}</Text>
                       </View>
                     )}
@@ -584,7 +584,7 @@ export default function CalendarScreen() {
                     </View>
                   </View>
                 </View>
-                <FontAwesome name="chevron-right" size={12} color="#D4C8B0" />
+                <FontAwesome name="chevron-right" size={12} color="#D6CDBF" />
               </TouchableOpacity>
             ))
           )}
@@ -613,9 +613,9 @@ export default function CalendarScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   monthNav: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
-  navButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA' },
+  navButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#EDE8DF' },
   monthTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  monthSub: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard', marginTop: 2 },
+  monthSub: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 2 },
   todayChip: { flexDirection: 'row', alignItems: 'center', alignSelf: 'center', gap: 6, backgroundColor: '#EFF6F1', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16, marginBottom: 8 },
   todayChipText: { fontSize: 12, fontWeight: '600', color: '#2D5A3F', fontFamily: 'Pretendard' },
   weekHeader: { flexDirection: 'row', paddingHorizontal: 20, marginBottom: 4 },
@@ -638,18 +638,18 @@ const styles = StyleSheet.create({
 
   section: { paddingHorizontal: 20, marginBottom: 24 },
   sectionTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', marginBottom: 12, fontFamily: 'PretendardBold' },
-  emptyState: { alignItems: 'center', paddingVertical: 32, backgroundColor: '#FFFFFF', borderRadius: 14, borderWidth: 1, borderColor: '#EAEAEA' },
+  emptyState: { alignItems: 'center', paddingVertical: 32, backgroundColor: '#FFFFFF', borderRadius: 14, borderWidth: 1, borderColor: '#EDE8DF' },
   emptyText: { fontSize: 15, fontWeight: '600', color: '#7A6B55', marginTop: 12, fontFamily: 'Pretendard' },
   emptySubtext: { fontSize: 13, color: '#7A6B55', marginTop: 4, fontFamily: 'Pretendard' },
-  eventCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
+  eventCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   eventColorBar: { width: 4, height: 48, borderRadius: 2 },
   eventContent: { flex: 1 },
-  eventTime: { fontSize: 12, color: '#6B6B6B', fontWeight: '600', marginBottom: 2, fontFamily: 'Pretendard' },
+  eventTime: { fontSize: 12, color: '#7A6B55', fontWeight: '600', marginBottom: 2, fontFamily: 'Pretendard' },
   eventName: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
   eventMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 5, flexWrap: 'wrap' },
   eventLocRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   eventLoc: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
-  memberTag: { backgroundColor: '#F4F2EE', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
+  memberTag: { backgroundColor: '#F4F0E8', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
   memberTagText: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
 
   undoBar: {
@@ -658,7 +658,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2D2A26', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12,
     shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 10,
   },
-  undoText: { flex: 1, fontSize: 13, color: '#F4F2EE', fontFamily: 'Pretendard' },
+  undoText: { flex: 1, fontSize: 13, color: '#F4F0E8', fontFamily: 'Pretendard' },
   undoBtn: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   undoBtnText: { fontSize: 13, color: '#FFFFFF', fontFamily: 'PretendardBold' },
 
@@ -666,14 +666,14 @@ const styles = StyleSheet.create({
 
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBgLayer: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
-  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginTop: 10, marginBottom: 12 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#D6CDBF', borderRadius: 2, alignSelf: 'center', marginTop: 10, marginBottom: 12 },
   detailModal: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
   detailHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 },
   detailColorDot: { width: 12, height: 12, borderRadius: 6 },
   detailTitle: { flex: 1, fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
   detailRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 14 },
   detailIconBox: { width: 24, height: 24, justifyContent: 'center', alignItems: 'center', marginTop: 2 },
-  detailLabel: { fontSize: 12, color: '#767676', fontFamily: 'Pretendard', marginBottom: 2 },
+  detailLabel: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginBottom: 2 },
   detailValue: { fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
   aiHint: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: '#EFF6F1', borderRadius: 12, padding: 14, marginVertical: 12 },
   aiHintText: { flex: 1, fontSize: 13, color: '#2D5A3F', lineHeight: 20, fontFamily: 'Pretendard' },
@@ -688,11 +688,11 @@ const styles = StyleSheet.create({
   addLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   toggleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6, marginBottom: 12 },
   toggleText: { fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard' },
-  endBox: { backgroundColor: '#F6F5F1', borderRadius: 12, padding: 12, marginBottom: 12 },
+  endBox: { backgroundColor: '#F4F0E8', borderRadius: 12, padding: 12, marginBottom: 12 },
   placeInputRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
   placeInput: { flex: 1 },
   mapBtn: { width: 46, height: 46, borderRadius: 12, backgroundColor: '#EFF6F1', alignItems: 'center', justifyContent: 'center' },
-  suggestBox: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingVertical: 6, marginTop: -6, marginBottom: 14 },
+  suggestBox: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingVertical: 6, marginTop: -6, marginBottom: 14 },
   suggestTitle: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', paddingHorizontal: 14, paddingVertical: 4 },
   suggestRow: { flexDirection: 'row', alignItems: 'center' },
   suggestMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 10 },
@@ -701,9 +701,9 @@ const styles = StyleSheet.create({
   suggestX: { paddingHorizontal: 14, paddingVertical: 10 },
   detailMapHint: { fontSize: 12, color: '#4A8C6F', fontFamily: 'Pretendard', marginTop: 2 },
   eventDayIndex: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginBottom: 2 },
-  addInput: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 12, fontFamily: 'Pretendard' },
+  addInput: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 12, fontFamily: 'Pretendard' },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
-  chip: { paddingHorizontal: 12, paddingVertical: 10, borderRadius: 16, backgroundColor: '#F4F2EE', borderWidth: 1, borderColor: '#EAEAEA' },
+  chip: { paddingHorizontal: 12, paddingVertical: 10, borderRadius: 16, backgroundColor: '#F4F0E8', borderWidth: 1, borderColor: '#EDE8DF' },
   chipOn: { backgroundColor: '#EFF6F1', borderColor: '#4A8C6F' },
   chipText: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
   chipTextOn: { color: '#2D5A3F', fontWeight: '700' },

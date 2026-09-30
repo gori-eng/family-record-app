@@ -41,7 +41,7 @@ export default function RecordsScreen() {
         {/* 통합 검색 입구 — 눌러서 검색 화면으로 (여기서 바로 치게 하면 결과를 보여줄 자리가 없다) */}
         <TouchableOpacity style={styles.searchEntry} activeOpacity={0.7} onPress={() => router.push('/(tabs)/records/search' as any)}
           accessibilityLabel="기록 찾기">
-          <FontAwesome name="search" size={14} color="#888888" />
+          <FontAwesome name="search" size={14} color="#7A6B55" />
           <Text style={styles.searchEntryText}>기억나는 낱말로 찾아보기</Text>
         </TouchableOpacity>
 
@@ -72,17 +72,17 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   scrollView: { flex: 1, paddingHorizontal: 20 },
   title: { fontSize: 26, fontWeight: '700', color: '#1F1F1F', marginBottom: 6, fontFamily: 'PretendardBold', letterSpacing: -0.5, marginTop: 16 },
-  subtitle: { fontSize: 13, color: '#767676', marginBottom: 16, fontFamily: 'Pretendard', lineHeight: 18 },
+  subtitle: { fontSize: 13, color: '#7A6B55', marginBottom: 16, fontFamily: 'Pretendard', lineHeight: 18 },
   searchEntry: {
     flexDirection: 'row', alignItems: 'center', gap: 10, height: 46, paddingHorizontal: 14, marginBottom: 20,
-    backgroundColor: '#FFFFFF', borderRadius: 14, borderWidth: 1, borderColor: '#EAEAEA',
+    backgroundColor: '#FFFFFF', borderRadius: 14, borderWidth: 1, borderColor: '#EDE8DF',
   },
-  searchEntryText: { fontSize: 14, color: '#767676', fontFamily: 'Pretendard' },
+  searchEntryText: { fontSize: 14, color: '#7A6B55', fontFamily: 'Pretendard' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
   card: {
     width: '47%', backgroundColor: '#FFFFFF',
     borderRadius: 16, paddingVertical: 22, paddingHorizontal: 14, alignItems: 'center',
-    borderWidth: 1, borderColor: '#EAEAEA',
+    borderWidth: 1, borderColor: '#EDE8DF',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
     marginBottom: 2,
@@ -92,5 +92,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center', marginBottom: 12,
   },
   cardLabel: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', marginBottom: 4, fontFamily: 'Pretendard' },
-  cardCount: { fontSize: 12, color: '#767676', fontWeight: '500', fontFamily: 'Pretendard' },
+  cardCount: { fontSize: 12, color: '#7A6B55', fontWeight: '500', fontFamily: 'Pretendard' },
 });

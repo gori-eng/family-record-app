@@ -255,7 +255,7 @@ export default function TimeCapsuleScreen() {
                       </View>
                     ) : (
                       <View style={s.sealedBox}>
-                        <FontAwesome name="lock" size={16} color="#B0A590" />
+                        <FontAwesome name="lock" size={16} color="#A39682" />
                         <Text style={s.sealedText}>
                           편지는 봉인돼 있어요.{'\n'}{whenLabel(sel)}
                         </Text>
@@ -292,17 +292,17 @@ export default function TimeCapsuleScreen() {
               <Text style={s.modalTitle}>{editingId ? '캡슐 고치기' : '새 타임캡슐'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }} keyboardShouldPersistTaps="handled">
               <Text style={s.createLabel}>제목</Text>
-              <TextInput style={s.createInput} placeholder="예) 첫째 스무 살 생일에" placeholderTextColor="#BFAE99"
+              <TextInput style={s.createInput} placeholder="예) 첫째 스무 살 생일에" placeholderTextColor="#A39682"
                 value={formTitle} onChangeText={setFormTitle} />
               <Text style={s.createLabel}>편지</Text>
-              <TextInput style={[s.createInput, { height: 140, textAlignVertical: 'top' }]} placeholder="몇 년 뒤의 우리에게 하고 싶은 말" placeholderTextColor="#BFAE99" multiline numberOfLines={5}
+              <TextInput style={[s.createInput, { height: 140, textAlignVertical: 'top' }]} placeholder="몇 년 뒤의 우리에게 하고 싶은 말" placeholderTextColor="#A39682" multiline numberOfLines={5}
                 value={formMessage} onChangeText={setFormMessage} />
               <Text style={s.createLabel}>편지와 함께 넣을 사진</Text>
               <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>언제 열어볼까요?</Text>
               <DateField value={formTarget} onChange={setFormTarget} placeholder="열어볼 날을 골라주세요" allowEmpty={false} />
               <Text style={s.createLabel}>어떤 날인가요?</Text>
-              <TextInput style={s.createInput} placeholder="예) 첫째 성인식" placeholderTextColor="#BFAE99"
+              <TextInput style={s.createInput} placeholder="예) 첫째 성인식" placeholderTextColor="#A39682"
                 value={formType} onChangeText={setFormType} />
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '봉인하기'}</Text>
@@ -343,14 +343,14 @@ export default function TimeCapsuleScreen() {
                     <Text style={[s.dateText, { color: open ? '#4AA86B' : '#4A8C6F' }]}>{whenLabel(c)}</Text>
                   </View>
                 </View>
-                <FontAwesome name="chevron-right" size={12} color="#D4C8B0" />
+                <FontAwesome name="chevron-right" size={12} color="#D6CDBF" />
               </TouchableOpacity>
               );
             })}
             {capsules.length === 0 && !ready && <LoadingRows />}
             {capsules.length === 0 &&  ready && (
               <View style={s.empty}>
-                <FontAwesome name="clock-o" size={32} color="#CFC7BA" />
+                <FontAwesome name="clock-o" size={32} color="#D6CDBF" />
                 <Text style={s.emptyText}>아직 타임캡슐이 없어요</Text>
                 <Text style={s.emptySub}>몇 년 뒤의 우리 가족에게 편지를 남겨볼까요?</Text>
               </View>
@@ -374,37 +374,37 @@ const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
-  emptySub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
+  emptySub: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
   intro: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, margin: 20, backgroundColor: '#FFF8F0', borderRadius: 16, padding: 18, borderWidth: 1, borderColor: '#F5E8D8' },
   introContent: { flex: 1 },
   introTitle: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', marginBottom: 4, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  introDesc: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard', lineHeight: 17 },
+  introDesc: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', lineHeight: 17 },
   list: { paddingHorizontal: 20 },
-  card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   capsuleIcon: { width: 52, height: 52, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
   capsuleTitle: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', marginBottom: 2, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  capsuleType: { fontSize: 12, color: '#767676', marginBottom: 6, fontFamily: 'Pretendard' },
+  capsuleType: { fontSize: 12, color: '#7A6B55', marginBottom: 6, fontFamily: 'Pretendard' },
   dateRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   dateText: { fontSize: 12, fontWeight: '600', fontFamily: 'Pretendard' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalSheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
-  modalHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  modalHandle: { width: 36, height: 4, backgroundColor: '#D6CDBF', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
   modalContent: {},
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
-  modalLabel: { fontSize: 13, color: '#767676', width: 60, fontFamily: 'Pretendard' },
+  modalLabel: { fontSize: 13, color: '#7A6B55', width: 60, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   letter: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', backgroundColor: '#FFF8F0', borderRadius: 14, padding: 16, marginTop: 6, borderWidth: 1, borderColor: '#F5E8D8' },
   // 열린 편지는 손글씨로 — 봉인이 풀리는 순간이 이 앱의 정체성이다
   letterText: { flex: 1, fontSize: 19, color: '#1F1F1F', lineHeight: 30, fontFamily: 'GaeguBold' },
-  sealedBox: { alignItems: 'center', gap: 8, backgroundColor: '#F4F2EE', borderRadius: 14, padding: 20, marginTop: 6 },
+  sealedBox: { alignItems: 'center', gap: 8, backgroundColor: '#F4F0E8', borderRadius: 14, padding: 20, marginTop: 6 },
   sealedText: { fontSize: 13, color: '#7A6B55', textAlign: 'center', lineHeight: 19, fontFamily: 'Pretendard' },
   sealedAction: { fontSize: 13, color: '#2D5A3F', fontFamily: 'PretendardBold', marginTop: 4 },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
-  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
+  createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 });

@@ -45,7 +45,7 @@ export const EXPENSE_CATEGORIES = [
   { name: '의료', icon: 'medkit', color: '#E0B0B0' },
   { name: '여가', icon: 'film', color: '#C8B0D0' },
   { name: '생활', icon: 'shopping-basket', color: '#C0D8C8' },
-  { name: '기타', icon: 'ellipsis-h', color: '#D0CCC4' },
+  { name: '기타', icon: 'ellipsis-h', color: '#D6CDBF' },
 ] as const;
 
 export const INCOME_CATEGORIES = [
@@ -58,7 +58,7 @@ const CATEGORY_META: Record<string, { icon: string; color: string }> = Object.fr
   [...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES].map((c) => [c.name, { icon: c.icon, color: c.color }])
 );
 export const metaOf = (category: string) =>
-  CATEGORY_META[category] ?? { icon: 'circle-o', color: '#D0CCC4' };
+  CATEGORY_META[category] ?? { icon: 'circle-o', color: '#D6CDBF' };
 
 export const PAYMENT_METHODS = ['카드', '현금', '계좌이체'];
 
