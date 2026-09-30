@@ -1,3 +1,4 @@
+import { Avatar } from '../../components/Avatar';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Share, Modal, Pressable } from 'react-native';
 import { useState } from 'react';
 import { showAlert } from '../../components/AppAlert';
@@ -217,11 +218,8 @@ export default function SettingsScreen() {
       </Modal>
 
       <TouchableOpacity style={styles.profileCard} activeOpacity={0.7} onPress={() => router.push('/settings/profile')}>
-        <View style={styles.avatar}>
-          {myAvatar
-            ? <Text style={styles.avatarEmoji}>{myAvatar}</Text>
-            : <FontAwesome name="user" size={28} color="#4A8C6F" />}
-        </View>
+        <Avatar avatar={myAvatar} size={56} bg="#E8D0C0"
+          fallback={<FontAwesome name="user" size={28} color="#4A8C6F" />} />
         <View style={{ flex: 1 }}>
           <Text style={styles.profileName}>{myFullName}</Text>
           <Text style={styles.profileRole}>
@@ -329,11 +327,6 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
-  avatar: {
-    width: 56, height: 56, borderRadius: 28,
-    backgroundColor: '#E8D0C0', justifyContent: 'center', alignItems: 'center',
-  },
-  avatarEmoji: { fontSize: 30 },
   profileName: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   profileRole: { fontSize: 13, color: '#888', marginTop: 2, fontFamily: 'Pretendard' },
   editProfileButton: {

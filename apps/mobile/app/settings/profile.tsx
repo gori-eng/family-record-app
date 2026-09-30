@@ -11,6 +11,9 @@ import { useEventsStore } from '../../store/events';
 import { attachFinanceSettings } from '../../store/financeSettings';
 import { ro, iga } from '../../lib/korean';
 import { dbErrorText } from '../../lib/dbErrors';
+import { Avatar, PHOTO_PREFIX, avatarPhotoPath } from '../../components/Avatar';
+import { pickAndUploadAvatar, removePhotoFiles } from '../../lib/photos';
+import { Platform } from 'react-native';
 
 /**
  * 프로필 고치기.
@@ -26,7 +29,9 @@ import { dbErrorText } from '../../lib/dbErrors';
  *   카드 주인…)를 **한 번에 함께** 고친다. 바꾸기 전에 몇 건이 함께 바뀌는지 알려주고 확인을 받는다
  * - 이메일 → 로그인 계정이라 보기만
  * - 역할 → 보기만. 스스로 바꿀 수 있으면 누구나 관리자가 된다. DB도 막는다(00009)
- * - 사진 → 올려둘 저장소가 아직 없어 '준비 중'. 예전엔 고르면 보였다가 새로고침하면 사라졌다
+ * - 사진 → 2026-09-30부터 된다. 사진 창고(family-photos)에 512px 정사각형으로 올리고
+ *   `avatar_url`에 `photo:{경로}`로 적는다(components/Avatar가 알아본다). 고른 즉시 올라가고,
+ *   저장하지 않고 나가면 치운다. 저장하면 이전 얼굴 사진 파일을 치운다
  */
 
 const EMOJIS = ['😀', '😎', '🥰', '🤓', '😺', '🐶', '🦊', '🐰', '🌸', '🌿', '⭐', '❤️', '🌈', '🎨', '🍀', '🦄'];
@@ -77,6 +82,29 @@ export default function ProfileScreen() {
     closeEmoji();
   };
 
+  /** 이번에 올렸지만 아직 저장하지 않은 얼굴 사진들 — 저장 안 하고 나가면 치운다 */
+  const uploadedAvatars = useRef<string[]>([]);
+  useEffect(() => () => { removePhotoFiles(uploadedAvatars.current); }, []);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const pickPhoto = async (from: 'library' | 'camera') => {
+    if (!family) {
+      showAlert('가족이 있어야 사진을 올릴 수 있어요', '사진은 우리 가족만 보는 곳에 모아둬요.');
+      return;
+    }
+    closeEmoji();
+    setUploadingAvatar(true);
+    try {
+      const path = await pickAndUploadAvatar(family.id, from);
+      if (!path) return;
+      uploadedAvatars.current.push(path);
+      setAvatar(PHOTO_PREFIX + path);
+    } catch (e) {
+      showAlert('사진을 올리지 못했어요', dbErrorText(e));
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const nextShort = shortName.trim();
   const shortChanged = !!me && nextShort !== me.display_name;
   const changed = !!me && (fullName.trim() !== me.full_name || avatar !== me.avatar_url || shortChanged);
@@ -107,6 +135,11 @@ export default function ProfileScreen() {
         await reloadAfterRename(nextShort);
       }
       await updateMyName(me.id, { fullName: name, avatarUrl: avatar });
+      // 저장됐으니 — 이번에 올렸다가 안 쓰게 된 사진과, 이전 얼굴 사진 파일을 치운다
+      const keep = avatarPhotoPath(avatar);
+      const old = avatarPhotoPath(me.avatar_url);
+      removePhotoFiles([...uploadedAvatars.current, ...(old ? [old] : [])].filter((p) => p !== keep));
+      uploadedAvatars.current = [];
       patchMe({ full_name: name, avatar_url: avatar });
       showAlert('저장했어요', shortChanged
         ? `이제 기록에 '${nextShort}'${ro(nextShort)} 남아요. 지금까지 쓴 것도 함께 바뀌었어요.`
@@ -174,15 +207,13 @@ export default function ProfileScreen() {
       <Stack.Screen options={{ title: '프로필' }} />
       <ScrollView style={s.container} contentContainerStyle={s.content}>
         <View style={s.avatarSection}>
-          <TouchableOpacity style={s.avatar} activeOpacity={0.7} onPress={openEmoji}>
-            {avatar
-              ? <Text style={s.avatarEmoji}>{avatar}</Text>
-              : <Text style={s.avatarInitial}>{me.display_name.slice(0, 1)}</Text>}
+          <TouchableOpacity style={s.avatar} activeOpacity={0.7} onPress={openEmoji} disabled={uploadingAvatar}>
+            <Avatar avatar={avatar} initial={me.display_name} size={88} />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} onPress={openEmoji}>
-            <Text style={s.changePhoto}>이모지 고르기</Text>
+          <TouchableOpacity activeOpacity={0.7} onPress={openEmoji} disabled={uploadingAvatar}>
+            <Text style={s.changePhoto}>{uploadingAvatar ? '올리는 중…' : '사진이나 이모지 고르기'}</Text>
           </TouchableOpacity>
-          <Text style={s.photoNote}>사진 올리기는 준비 중이에요</Text>
+          <Text style={s.photoNote}>가족 목록에서 이름 옆에 보여요</Text>
         </View>
 
         <Text style={s.label}>이름</Text>
@@ -228,8 +259,20 @@ export default function ProfileScreen() {
           </Animated.View>
           <Animated.View style={[s.sheet, { transform: [{ translateY: emojiSlide }] }]}>
             <View style={s.handle} />
-            <Text style={s.sheetTitle}>나를 닮은 이모지</Text>
-            <Text style={s.sheetSub}>가족 목록에서 이름 옆에 보여요</Text>
+            <Text style={s.sheetTitle}>내 얼굴</Text>
+            <Text style={s.sheetSub}>사진을 올리거나, 나를 닮은 이모지를 골라요</Text>
+            <View style={s.photoRow}>
+              <TouchableOpacity style={s.photoBtn} activeOpacity={0.7} onPress={() => pickPhoto('library')}>
+                <FontAwesome name="photo" size={16} color="#2D5A3F" />
+                <Text style={s.photoBtnText}>사진첩에서</Text>
+              </TouchableOpacity>
+              {Platform.OS !== 'web' && (
+                <TouchableOpacity style={s.photoBtn} activeOpacity={0.7} onPress={() => pickPhoto('camera')}>
+                  <FontAwesome name="camera" size={16} color="#2D5A3F" />
+                  <Text style={s.photoBtnText}>지금 찍기</Text>
+                </TouchableOpacity>
+              )}
+            </View>
             <View style={s.emojiGrid}>
               {EMOJIS.map((e) => (
                 <TouchableOpacity
@@ -244,7 +287,7 @@ export default function ProfileScreen() {
             </View>
             {avatar && (
               <TouchableOpacity style={s.cancelBtn} activeOpacity={0.7} onPress={() => pickEmoji(null)}>
-                <Text style={s.cancelText}>이모지 빼고 이름 첫 글자로</Text>
+                <Text style={s.cancelText}>{avatarPhotoPath(avatar) ? '사진 빼고 이름 첫 글자로' : '이모지 빼고 이름 첫 글자로'}</Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity style={s.cancelBtn} activeOpacity={0.7} onPress={closeEmoji}>
@@ -265,9 +308,13 @@ const s = StyleSheet.create({
   emptyText: { fontSize: 14, color: '#888', fontFamily: 'Pretendard', textAlign: 'center' },
 
   avatarSection: { alignItems: 'center', marginBottom: 28 },
-  avatar: { width: 88, height: 88, borderRadius: 44, backgroundColor: '#EFF6F1', justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
-  avatarEmoji: { fontSize: 48 },
-  avatarInitial: { fontSize: 34, color: '#4A8C6F', fontFamily: 'PretendardBold' },
+  avatar: { marginBottom: 10 },
+  photoRow: { flexDirection: 'row', gap: 8, marginBottom: 14 },
+  photoBtn: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: '#EFF6F1', borderRadius: 12, paddingVertical: 12,
+  },
+  photoBtnText: { fontSize: 14, color: '#2D5A3F', fontFamily: 'PretendardBold' },
   changePhoto: { fontSize: 14, fontWeight: '600', color: '#4A8C6F', fontFamily: 'Pretendard' },
   photoNote: { fontSize: 12, color: '#A0A0A0', marginTop: 4, fontFamily: 'Pretendard' },
 

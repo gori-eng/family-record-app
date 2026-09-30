@@ -194,3 +194,34 @@ export async function photoUrlsFor(paths: string[]): Promise<Record<string, stri
   }
   return out;
 }
+
+/**
+ * 얼굴 사진 한 장 — 프로필용. 정사각형으로 잘라(휴대폰에서만 편집 화면이 뜬다) 512px로 줄인다.
+ * 돌려주는 값은 창고 경로. 고르지 않았으면 null
+ */
+export async function pickAndUploadAvatar(familyId: string, from: 'library' | 'camera'): Promise<string | null> {
+  if (Platform.OS !== 'web') {
+    const perm = from === 'camera'
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) throw new Error(from === 'camera'
+      ? '카메라를 쓸 수 있게 허락해주세요. 휴대폰 설정 > familog에서 바꿀 수 있어요.'
+      : '사진첩을 볼 수 있게 허락해주세요. 휴대폰 설정 > familog에서 바꿀 수 있어요.');
+  }
+  const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 1 };
+  const res = from === 'camera' ? await ImagePicker.launchCameraAsync(opts) : await ImagePicker.launchImageLibraryAsync(opts);
+  if (res.canceled || !res.assets?.length) return null;
+  const a = res.assets[0];
+  const w = a.width || 0, h = a.height || 0;
+  const side = Math.min(w, h);
+  // 웹은 편집 화면이 없어서 가운데를 정사각형으로 자른다
+  const actions: any[] = [];
+  if (side > 0 && w !== h) actions.push({ crop: { originX: Math.floor((w - side) / 2), originY: Math.floor((h - side) / 2), width: side, height: side } });
+  if (side > 512) actions.push({ resize: { width: 512 } });
+  const out = await manipulateAsync(a.uri, actions, { compress: 0.8, format: SaveFormat.JPEG, base64: true });
+  if (!out.base64) throw new Error('no base64');
+  const path = await uploadPhoto(familyId, base64ToBytes(out.base64));
+  cache.set(path, { url: `data:image/jpeg;base64,${out.base64}`, exp: Number.MAX_SAFE_INTEGER });
+  listeners.forEach((l) => l());
+  return path;
+}

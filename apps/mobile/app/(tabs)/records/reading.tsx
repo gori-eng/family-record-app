@@ -5,12 +5,16 @@ import { Stack } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
 import { useOpenParam } from '../../../lib/useOpenParam';
+import { usePhotoDraft, PhotoPickerRow, PhotoGallery, PhotoThumb } from '../../../components/Photos';
+import { photosOf } from '../../../lib/photos';
 import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { say, READING_LABEL } from '../../../constants/labels';
 
 type Book = {
+  /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
+  photos?: string[];
   author: string; reader: string; status: string;
   rating?: number; progress?: number; color: string; notes: string;
 };
@@ -74,9 +78,12 @@ export default function ReadingScreen() {
   const createSlide = useRef(new Animated.Value(500)).current;
 
 
+  /** 폼의 사진 — 고르는 순간 올라가고, 저장하지 않고 닫으면 치운다 (components/Photos) */
+  const photoDraft = usePhotoDraft();
   /** 폼 열기 — `edit`을 주면 그 책을 값이 채워진 채로 연다 */
   const openCreate = (edit?: FamilyRecord<Book>) => {
     const d = edit?.data;
+    photoDraft.reset(photosOf(d));
     setEditingId(edit?.id ?? null);
     setFormTitle(edit?.title ?? '');
     setFormAuthor(d?.author ?? '');
@@ -89,6 +96,7 @@ export default function ReadingScreen() {
     ]).start();
   };
   const closeCreate = () => {
+    photoDraft.discard();   // 저장했으면 commit이 먼저 비워둬서 아무 일도 안 한다
     Animated.parallel([
       Animated.timing(createBg, { toValue: 0, duration: 250, useNativeDriver: true }),
       Animated.timing(createSlide, { toValue: 500, duration: 250, useNativeDriver: true }),
@@ -153,6 +161,7 @@ export default function ReadingScreen() {
           author: formAuthor.trim(),
           reader: createReader,
           status: createStatus,
+          photos: photoDraft.photos,
           ...(statusChanged && createStatus === '읽는 중' ? { progress: 0 } : {}),
           ...(statusChanged && createStatus === '완독' ? { progress: 100 } : {}),
         },
@@ -168,10 +177,12 @@ export default function ReadingScreen() {
           status: createStatus,
           color: NEW_BOOK_COLORS[books.length % NEW_BOOK_COLORS.length],
           notes: '',
+          photos: photoDraft.photos,
           ...(createStatus === '읽는 중' ? { progress: 0 } : {}),
         },
       });
     }
+    photoDraft.commit();
     closeCreate();
   };
 
@@ -203,6 +214,7 @@ export default function ReadingScreen() {
                 <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 560 }}>
                 <View style={styles.modalContent}>
                   <Text style={styles.modalTitle}>{selectedItem.title}</Text>
+                  <PhotoGallery photos={photosOf(selectedItem)} />
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>저자</Text>
                     <Text style={styles.modalValue}>{selectedItem.author}</Text>
@@ -347,6 +359,8 @@ export default function ReadingScreen() {
                 value={formTitle}
                 onChangeText={setFormTitle}
               />
+              <Text style={styles.createLabel}>사진 (선택) — 표지, 밑줄 친 페이지</Text>
+              <PhotoPickerRow draft={photoDraft} />
               <Text style={styles.createLabel}>저자</Text>
               <TextInput
                 style={styles.createInput}
@@ -435,9 +449,12 @@ export default function ReadingScreen() {
                 activeOpacity={0.7}
                 onPress={() => openDetail(record)}
               >
-                <View style={[styles.bookCover, { backgroundColor: book.color }]}>
-                  <FontAwesome name="book" size={24} color="#5C4A32" />
-                </View>
+                {/* 사진이 있으면 첫 사진(표지), 없으면 색 표지 */}
+                {photosOf(book).length ? <PhotoThumb photos={photosOf(book)} size={56} /> : (
+                  <View style={[styles.bookCover, { backgroundColor: book.color }]}>
+                    <FontAwesome name="book" size={24} color="#5C4A32" />
+                  </View>
+                )}
                 <View style={styles.bookInfo}>
                   <View style={styles.bookTopRow}>
                     <Text style={styles.bookTitle}>{book.title}</Text>

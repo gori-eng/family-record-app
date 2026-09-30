@@ -1,3 +1,4 @@
+import { Avatar } from '../../components/Avatar';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Share } from 'react-native';
 import { showAlert } from '../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
@@ -161,11 +162,7 @@ export default function MembersScreen() {
         {members.map((m) => (
           <TouchableOpacity key={m.display} style={s.card} activeOpacity={0.7}
             onPress={() => openMember(m)}>
-            <View style={[s.avatar, { backgroundColor: m.color }]}>
-              {m.avatar
-                ? <Text style={s.avatarEmoji}>{m.avatar}</Text>
-                : <Text style={s.initial}>{m.display.slice(0, 1)}</Text>}
-            </View>
+            <Avatar avatar={m.avatar} initial={m.display} size={44} bg={m.color} color="#4A4A4A" />
             <View style={s.info}>
               <View style={s.nameRow}>
                 <Text style={s.name}>{m.full}</Text>
@@ -210,9 +207,6 @@ const s = StyleSheet.create({
     backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16, marginBottom: 10,
     borderWidth: 1, borderColor: '#EAEAEA',
   },
-  avatar: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
-  avatarEmoji: { fontSize: 22 },
-  initial: { fontSize: 17, fontWeight: '700', color: '#4A4A4A', fontFamily: 'PretendardBold' },
   info: { flex: 1 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   name: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
