@@ -65,7 +65,15 @@ export const useSession = create<SessionState>((set, get) => ({
   loading: false,
   error: null,
 
-  setUserId: (userId) => set({ userId }),
+  /**
+   * 사람이 바뀌면 **앞사람의 확인 결과를 버린다** (2026-09-30).
+   * 로그아웃 상태는 "확인 끝 · 가족 없음"(ready: true)이라, 그대로 두면 로그인한 순간 가드가
+   * 새 사람을 "가족 없는 사람"으로 읽고 온보딩으로 보냈다가, 1초 뒤 가족이 도착하면 홈으로 되돌렸다.
+   */
+  setUserId: (userId) => {
+    if (get().userId === userId) return;
+    set({ userId, families: [], family: null, members: [], me: null, ready: false, error: null });
+  },
 
   refresh: async () => {
     const userId = get().userId;

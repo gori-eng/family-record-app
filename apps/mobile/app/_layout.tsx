@@ -124,7 +124,10 @@ function RootLayoutNav() {
    *    가드가 온보딩으로 보내고, 모르고 가족을 또 만들면 **가족이 둘로 쪼개진다.**
    *    그래서 실패했을 때는 "아직 모른다"로 두고(가드가 기다린다) 잠시 뒤 다시 묻는다.
    */
-  const familyReady = useSession((s) => s.ready && !s.error);
+  // "확인 끝"이 **지금 로그인한 사람의** 확인이어야 한다 — 앞사람(로그아웃 상태)의 "가족 없음"을
+  // 새 사람 것으로 읽으면 로그인 직후 온보딩이 1초 번쩍인다 (2026-09-30)
+  const currentUserId = session?.user?.id ?? null;
+  const familyReady = useSession((s) => s.ready && !s.error && s.userId === currentUserId);
   const hasFamily = useSession((s) => !!s.family);
   const sessionError = useSession((s) => s.error);
   useEffect(() => {
