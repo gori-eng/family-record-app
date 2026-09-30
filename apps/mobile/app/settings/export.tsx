@@ -12,6 +12,9 @@ import {
 import { saveTextFile, pickTextFile } from '../../lib/saveFile';
 import { useSession } from '../../store/session';
 import { BookSheet } from '../../components/BookSheet';
+import { saveBinaryFile } from '../../lib/saveFile';
+import { buildPhotoArchive, planArchive } from '../../lib/photoArchive';
+import { todayISO } from '../../store/finance';
 
 /** '2026-09-28T07:12:00.000Z' → '2026년 9월 28일 오후 4:12' */
 function formatMoment(iso: string): string {
@@ -42,6 +45,43 @@ export default function ExportScreen() {
   const [dragging, setDragging] = useState(false);
   /** 기록책(PDF) 만들기 창 */
   const [showBook, setShowBook] = useState(false);
+
+  // ── 사진 모아 담기 (ZIP) ─────────────────────────────────
+  const members = useSession((s) => s.members);
+  const photoPlan = useMemo(
+    () => planArchive({ records, members, today: todayISO() }),
+    [records, members]
+  );
+  const [zipping, setZipping] = useState<{ done: number; total: number } | null>(null);
+  const handlePhotos = async () => {
+    if (!photoPlan.length) {
+      showAlert('아직 모아둘 사진이 없어요', '기록에 사진을 붙이면 여기서 한꺼번에 내려받을 수 있어요.');
+      return;
+    }
+    setZipping({ done: 0, total: photoPlan.length });
+    try {
+      const { zip, count, failed } = await buildPhotoArchive(
+        { records, members, today: todayISO() },
+        (done, total) => setZipping({ done, total })
+      );
+      const name = `familog-사진-${todayISO()}.zip`;
+      const result = await saveBinaryFile(name, zip);
+      if (!result.ok) { showAlert('사진을 담지 못했어요', result.reason); return; }
+      showAlert(
+        `사진 ${count}장을 담았어요`,
+        `${name}
+
+폴더는 기록 종류, 파일 이름은 날짜와 제목이에요.` +
+          (failed ? `
+
+${failed}장은 받지 못해 빠졌어요. 인터넷을 확인하고 다시 해보세요.` : '')
+      );
+    } catch (e: any) {
+      showAlert('사진을 담지 못했어요', String(e?.message ?? e));
+    } finally {
+      setZipping(null);
+    }
+  };
   const dropRef = useRef<any>(null);
 
   const modalBg = useRef(new Animated.Value(0)).current;
@@ -331,18 +371,23 @@ export default function ExportScreen() {
           <FontAwesome name="chevron-right" size={12} color="#B0A590" />
         </TouchableOpacity>
 
-        {/* 아직 안 되는 것 — 되는 척하지 않는다 */}
-        <Text style={s.sectionLabel}>아직 준비 중</Text>
-
-        <View style={[s.card, s.cardMuted]}>
-          <View style={[s.icon, { backgroundColor: '#F4F2EE' }]}>
-            <FontAwesome name="photo" size={20} color="#9C8B75" />
+        {/* 사진 모아 담기 — ZIP 한 파일로 (2026-09-30) */}
+        <TouchableOpacity style={s.card} activeOpacity={0.8} onPress={handlePhotos} disabled={!!zipping}>
+          <View style={[s.icon, { backgroundColor: '#EFF6F1' }]}>
+            <FontAwesome name="photo" size={20} color="#2D5A3F" />
           </View>
           <View style={s.info}>
-            <Text style={[s.cardTitle, s.mutedText]}>사진·영상 모아 담기</Text>
-            <Text style={s.cardDesc}>사진은 가족 창고에 안전하게 있어요. 한꺼번에 내려받는 기능은 만드는 중이에요.</Text>
+            <Text style={s.cardTitle}>사진 모아 담기 (ZIP)</Text>
+            <Text style={s.cardDesc}>
+              {zipping
+                ? `받는 중… ${zipping.done}/${zipping.total}`
+                : photoPlan.length
+                  ? `기록에 붙인 사진 ${photoPlan.length}장을 한 파일로 내려받아요. 폴더는 기록 종류, 이름은 날짜와 제목이에요.`
+                  : '기록에 사진을 붙이면 여기서 한꺼번에 내려받을 수 있어요.'}
+            </Text>
           </View>
-        </View>
+          <FontAwesome name="chevron-right" size={12} color="#B0A590" />
+        </TouchableOpacity>
 
         <View style={s.infoBox}>
           <FontAwesome name="info-circle" size={14} color="#7A6B55" />
@@ -378,8 +423,6 @@ const s = StyleSheet.create({
   cardTall: { flexDirection: 'column', alignItems: 'stretch', gap: 0 },
   cardInner: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   cardDragging: { borderColor: '#4A8C6F', borderWidth: 1.5, backgroundColor: '#EFF6F1' },
-  cardMuted: { backgroundColor: '#FBFAF8', borderColor: '#F0EEE9' },
-  mutedText: { color: '#7A6B55' },
   icon: { width: 46, height: 46, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
   cardTitle: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },

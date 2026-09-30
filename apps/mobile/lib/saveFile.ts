@@ -119,3 +119,40 @@ export async function pickTextFile(
     input.click();
   });
 }
+
+/** 바이트로 된 파일(ZIP·PDF 등)을 내려준다. 글자 파일과 같은 길이다 */
+export async function saveBinaryFile(
+  fileName: string,
+  bytes: Uint8Array,
+  mimeType = 'application/zip'
+): Promise<SaveResult> {
+  if (Platform.OS !== 'web') {
+    try {
+      const file = new File(Paths.cache, fileName);
+      if (file.exists) file.delete();
+      file.write(bytes);
+      if (!(await Sharing.isAvailableAsync())) {
+        return { ok: false, reason: '이 기기에서는 파일을 내보낼 방법이 없어요.' };
+      }
+      await Sharing.shareAsync(file.uri, { mimeType, dialogTitle: '파일을 어디에 둘까요?' });
+      return { ok: true, how: 'share' };
+    } catch (e: unknown) {
+      return { ok: false, reason: `파일을 만들지 못했어요. (${String((e as Error)?.message ?? e)})` };
+    }
+  }
+  try {
+    const blob = new Blob([bytes as BlobPart], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return { ok: true, how: 'download' };
+  } catch (e: unknown) {
+    return { ok: false, reason: `파일을 만들지 못했어요. (${String((e as Error)?.message ?? e)})` };
+  }
+}
