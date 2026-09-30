@@ -1,3 +1,4 @@
+import { DateField } from '../../../components/DateField';
 import { iga } from '../../../lib/korean';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { showAlert } from '../../../components/AppAlert';
@@ -299,8 +300,7 @@ export default function TimeCapsuleScreen() {
               <Text style={s.createLabel}>편지와 함께 넣을 사진</Text>
               <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>언제 열어볼까요?</Text>
-              <TextInput style={s.createInput} placeholder="예) 2036.5.15" placeholderTextColor="#BFAE99"
-                value={formTarget} onChangeText={setFormTarget} />
+              <DateField value={formTarget} onChange={setFormTarget} placeholder="열어볼 날을 골라주세요" allowEmpty={false} />
               <Text style={s.createLabel}>어떤 날인가요?</Text>
               <TextInput style={s.createInput} placeholder="예) 첫째 성인식" placeholderTextColor="#BFAE99"
                 value={formType} onChangeText={setFormType} />
@@ -358,7 +358,7 @@ export default function TimeCapsuleScreen() {
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
-        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => openCreate()}>
+        <TouchableOpacity style={s.fab} accessibilityLabel="새로 적기" activeOpacity={0.8} onPress={() => openCreate()}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
         {undoBar}
@@ -374,17 +374,17 @@ const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
-  emptySub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
+  emptySub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
   intro: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, margin: 20, backgroundColor: '#FFF8F0', borderRadius: 16, padding: 18, borderWidth: 1, borderColor: '#F5E8D8' },
   introContent: { flex: 1 },
   introTitle: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', marginBottom: 4, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  introDesc: { fontSize: 12, color: '#888', fontFamily: 'Pretendard', lineHeight: 17 },
+  introDesc: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard', lineHeight: 17 },
   list: { paddingHorizontal: 20 },
   card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   capsuleIcon: { width: 52, height: 52, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
   capsuleTitle: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', marginBottom: 2, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  capsuleType: { fontSize: 12, color: '#A0A0A0', marginBottom: 6, fontFamily: 'Pretendard' },
+  capsuleType: { fontSize: 12, color: '#767676', marginBottom: 6, fontFamily: 'Pretendard' },
   dateRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   dateText: { fontSize: 12, fontWeight: '600', fontFamily: 'Pretendard' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
@@ -395,7 +395,7 @@ const s = StyleSheet.create({
   modalContent: {},
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
-  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 60, fontFamily: 'Pretendard' },
+  modalLabel: { fontSize: 13, color: '#767676', width: 60, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   letter: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', backgroundColor: '#FFF8F0', borderRadius: 14, padding: 16, marginTop: 6, borderWidth: 1, borderColor: '#F5E8D8' },
   letterText: { flex: 1, fontSize: 15, color: '#1F1F1F', lineHeight: 24, fontFamily: 'Pretendard' },

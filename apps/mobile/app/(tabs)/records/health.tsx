@@ -1,3 +1,4 @@
+import { DateField } from '../../../components/DateField';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
@@ -252,14 +253,12 @@ function HealthScreen() {
               <TextInput style={s.createInput} placeholder="예) 치과 정기검진" placeholderTextColor="#BFAE99"
                 value={formType} onChangeText={setFormType} />
               <Text style={s.createLabel}>언제 받았나요?</Text>
-              <TextInput style={s.createInput} placeholder="비워두면 오늘로 적어요" placeholderTextColor="#BFAE99"
-                value={formDate} onChangeText={setFormDate} />
+              <DateField value={formDate} onChange={setFormDate} placeholder="비워두면 오늘로 적어요" />
               <Text style={s.createLabel}>결과</Text>
               <TextInput style={s.createInput} placeholder="예) 정상, 충치 1개" placeholderTextColor="#BFAE99"
                 value={formResult} onChangeText={setFormResult} />
               <Text style={s.createLabel}>다음 검진은 언제인가요?</Text>
-              <TextInput style={s.createInput} placeholder="적어두면 다가올 때 알려줄게요" placeholderTextColor="#BFAE99"
-                value={formNext} onChangeText={setFormNext} />
+              <DateField value={formNext} onChange={setFormNext} placeholder="적어두면 다가올 때 알려줄게요" />
               <Text style={s.createLabel}>메모</Text>
               <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="처방이나 의사 선생님 말씀을 적어두세요" placeholderTextColor="#BFAE99" multiline
                 value={formNotes} onChangeText={setFormNotes} />
@@ -333,7 +332,7 @@ function HealthScreen() {
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
-        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => openCreate()}>
+        <TouchableOpacity style={s.fab} accessibilityLabel="새로 적기" activeOpacity={0.8} onPress={() => openCreate()}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
         {undoBar}
@@ -346,7 +345,7 @@ const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
-  emptySub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
+  emptySub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
   upcoming: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, margin: 20, marginBottom: 4, backgroundColor: '#EFF6F1', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#D0E4D6' },
   upcomingText: { fontSize: 12, color: '#2D5A3F', lineHeight: 18, fontFamily: 'PretendardBold' },
   list: { paddingHorizontal: 20, paddingTop: 16 },
@@ -356,11 +355,11 @@ const s = StyleSheet.create({
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
   memberName: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   resultBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
-  resultText: { fontSize: 11, fontWeight: '700', fontFamily: 'PretendardBold' },
-  type: { fontSize: 12, color: '#A0A0A0', marginBottom: 4, fontFamily: 'Pretendard' },
+  resultText: { fontSize: 12, fontWeight: '700', fontFamily: 'PretendardBold' },
+  type: { fontSize: 12, color: '#767676', marginBottom: 4, fontFamily: 'Pretendard' },
   notes: { fontSize: 13, color: '#5C4A32', marginBottom: 6, fontFamily: 'Pretendard' },
   nextRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  nextDate: { fontSize: 11, color: '#A0A0A0', fontFamily: 'Pretendard' },
+  nextDate: { fontSize: 12, color: '#767676', fontFamily: 'Pretendard' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
@@ -369,7 +368,7 @@ const s = StyleSheet.create({
   modalContent: {},
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
-  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 64, fontFamily: 'Pretendard' },
+  modalLabel: { fontSize: 13, color: '#767676', width: 64, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
@@ -378,9 +377,9 @@ const s = StyleSheet.create({
   memberRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
   memberPill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' },
   memberPillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  memberPillText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
+  memberPillText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
   memberPillTextActive: { color: '#FFFFFF' },
-  authorHint: { fontSize: 12, color: '#888', marginBottom: 16, marginTop: -4, fontFamily: 'Pretendard' },
+  authorHint: { fontSize: 12, color: '#6B6B6B', marginBottom: 16, marginTop: -4, fontFamily: 'Pretendard' },
 });
 
 // 아이 계정에는 보이지 않는다 (DB 00010과 같은 규칙)

@@ -1,5 +1,6 @@
 import { Avatar } from '../../components/Avatar';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Share } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Share, Modal, Pressable } from 'react-native';
+import { useState } from 'react';
 import { showAlert } from '../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
@@ -97,29 +98,9 @@ export default function MembersScreen() {
     }
   };
 
-  const openMember = (m: MemberCard) => {
-    const info = `기록에는 '${m.display}'${ro(m.display)} 남아요.\n역할은 ${m.role}${ieyo(m.role)}.`;
-    // 관리자는 다른 사람의 역할을 바로잡을 수 있다. 나 자신·예시 가족은 보기만
-    if (!isAdmin || m.isMe || !m.memberId) {
-      showAlert(
-        m.full,
-        info + (m.isMe ? '\n\n나예요.' : '') +
-          (isAdmin ? '' : '\n\n역할은 관리자가 바꿀 수 있어요.')
-      );
-      return;
-    }
-    const options = ([
-      ['parent', '부모로'], ['child', '자녀로'], ['elder', '조부모로'],
-    ] as const)
-      .filter(([key]) => key !== m.roleKey)
-      .map(([key, text]) => ({ text, onPress: () => changeRole(m, key) }));
-    showAlert(m.full, info + '\n\n자녀는 가계부와 건강 기록을 볼 수 없어요.', [
-      ...options,
-      { text: '관리자 넘기기', onPress: () => confirmHandOver(m) },
-      { text: '가족에서 내보내기', style: 'destructive', onPress: () => confirmRemove(m) },
-      { text: '그냥 둘게요', style: 'cancel' },
-    ]);
-  };
+  /** 구성원 상세 시트 — 예전엔 버튼 여섯 개짜리 알림창이었다 (제품 검토 🟡) */
+  const [sheet, setSheet] = useState<MemberCard | null>(null);
+  const openMember = (m: MemberCard) => setSheet(m);
 
   const invite = async () => {
     if (!family.inviteCode) {
@@ -190,13 +171,84 @@ export default function MembersScreen() {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <Modal visible={!!sheet} transparent animationType="fade" onRequestClose={() => setSheet(null)}>
+        <View style={s.sheetWrap}>
+          <Pressable style={s.sheetBg} onPress={() => setSheet(null)} />
+          {sheet && (
+            <View style={s.sheet}>
+              <View style={s.sheetHead}>
+                <Avatar avatar={sheet.avatar} initial={sheet.display} size={52} bg={sheet.color} color="#4A4A4A" />
+                <View style={{ flex: 1 }}>
+                  <Text style={s.sheetName}>{sheet.full}{sheet.isMe ? ' (나)' : ''}</Text>
+                  <Text style={s.sheetSub}>기록에는 '{sheet.display}'{ro(sheet.display)} 남아요</Text>
+                </View>
+                {sheet.isAdmin && <View style={s.adminBadge}><FontAwesome name="star" size={9} color="#2D5A3F" /><Text style={s.adminBadgeText}>관리자</Text></View>}
+              </View>
+
+              <Text style={s.sheetLabel}>이 가족에서</Text>
+              <View style={s.roleRow}>
+                {([['parent', '부모'], ['child', '자녀'], ['elder', '조부모']] as const).map(([key, label]) => {
+                  const on = sheet.roleKey === key || (sheet.isAdmin && sheet.role === label);
+                  const canChange = isAdmin && !sheet.isMe && !!sheet.memberId;
+                  return (
+                    <TouchableOpacity key={key} style={[s.roleChip, on && s.roleChipOn, !canChange && s.roleChipOff]} activeOpacity={0.7}
+                      disabled={!canChange || on}
+                      onPress={() => { setSheet(null); changeRole(sheet, key); }}>
+                      <Text style={[s.roleChipText, on && s.roleChipTextOn]}>{label}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              <Text style={s.sheetHint}>
+                {isAdmin && !sheet.isMe ? '자녀로 두면 가계부와 건강 기록이 보이지 않아요.' : sheet.isMe ? '내 자리는 프로필에서 바꿀 수 있어요.' : '자리는 관리자가 바꿀 수 있어요.'}
+              </Text>
+
+              {isAdmin && !sheet.isMe && !!sheet.memberId && (
+                <>
+                  <TouchableOpacity style={s.sheetBtn} activeOpacity={0.7} onPress={() => { setSheet(null); confirmHandOver(sheet); }}>
+                    <FontAwesome name="star-o" size={14} color="#2D5A3F" />
+                    <Text style={s.sheetBtnText}>관리자 넘기기</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={s.sheetDanger} activeOpacity={0.7} onPress={() => { setSheet(null); confirmRemove(sheet); }}>
+                    <Text style={s.sheetDangerText}>가족에서 내보내기</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+              <TouchableOpacity style={s.sheetClose} activeOpacity={0.7} onPress={() => setSheet(null)}>
+                <Text style={s.sheetCloseText}>닫기</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </Modal>
     </>
   );
 }
 
 const s = StyleSheet.create({
+  sheetWrap: { flex: 1, justifyContent: 'flex-end' },
+  sheetBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
+  sheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 22, paddingBottom: 34 },
+  sheetHead: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 },
+  sheetName: { fontSize: 17, color: '#1F1F1F', fontFamily: 'PretendardBold' },
+  sheetSub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard', marginTop: 2 },
+  sheetLabel: { fontSize: 13, color: '#4A4A4A', fontFamily: 'PretendardBold', marginBottom: 8 },
+  roleRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  roleChip: { flex: 1, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' },
+  roleChipOn: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
+  roleChipOff: { opacity: 0.6 },
+  roleChipText: { fontSize: 14, color: '#4A4A4A', fontFamily: 'Pretendard' },
+  roleChipTextOn: { color: '#FFFFFF', fontFamily: 'PretendardBold' },
+  sheetHint: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard', marginBottom: 16, lineHeight: 18 },
+  sheetBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#EFF6F1', borderRadius: 12, paddingVertical: 13, marginBottom: 8 },
+  sheetBtnText: { fontSize: 14, color: '#2D5A3F', fontFamily: 'PretendardBold' },
+  sheetDanger: { alignItems: 'center', paddingVertical: 13, marginTop: 6 },
+  sheetDangerText: { fontSize: 13, color: '#D94040', fontFamily: 'Pretendard' },
+  sheetClose: { alignItems: 'center', paddingVertical: 12 },
+  sheetCloseText: { fontSize: 14, color: '#6B6B6B', fontFamily: 'Pretendard' },
   adminBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#EFF6F1', borderRadius: 8, paddingHorizontal: 7, paddingVertical: 2 },
-  adminBadgeText: { fontSize: 11, color: '#2D5A3F', fontFamily: 'PretendardBold' },
+  adminBadgeText: { fontSize: 12, color: '#2D5A3F', fontFamily: 'PretendardBold' },
   container: { flex: 1, backgroundColor: '#F9F8F5', padding: 20 },
   subtitle: { fontSize: 14, color: '#7A6B55', marginBottom: 16, fontFamily: 'Pretendard' },
 
@@ -217,10 +269,10 @@ const s = StyleSheet.create({
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   name: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
   roleBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
-  roleBadgeText: { fontSize: 11, fontWeight: '600', fontFamily: 'Pretendard' },
+  roleBadgeText: { fontSize: 12, fontWeight: '600', fontFamily: 'Pretendard' },
   meBadge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8, backgroundColor: '#EFF6F1' },
-  meBadgeText: { fontSize: 11, fontWeight: '700', color: '#2D5A3F', fontFamily: 'Pretendard' },
-  sub: { fontSize: 12, color: '#9C8B75', marginTop: 3, fontFamily: 'Pretendard' },
+  meBadgeText: { fontSize: 12, fontWeight: '700', color: '#2D5A3F', fontFamily: 'Pretendard' },
+  sub: { fontSize: 12, color: '#7A6B55', marginTop: 3, fontFamily: 'Pretendard' },
 
   addBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,

@@ -43,5 +43,5 @@ const s = StyleSheet.create({
   },
   iconWrap: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#F4F3EF', justifyContent: 'center', alignItems: 'center', marginBottom: 14 },
   title: { fontSize: 16, color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 8 },
-  desc: { fontSize: 13, color: '#888888', lineHeight: 20, textAlign: 'center', fontFamily: 'Pretendard' },
+  desc: { fontSize: 13, color: '#6B6B6B', lineHeight: 20, textAlign: 'center', fontFamily: 'Pretendard' },
 });

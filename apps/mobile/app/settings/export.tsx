@@ -412,7 +412,7 @@ const s = StyleSheet.create({
   mineTitle: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard', marginBottom: 12 },
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 14 },
   chip: { backgroundColor: '#F4F2EE', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
-  chipText: { fontSize: 11, color: '#7A6B55', fontFamily: 'Pretendard' },
+  chipText: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
 
   tallyRow: { flexDirection: 'row', gap: 12 },
   tally: { flex: 1, backgroundColor: '#EFF6F1', borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
@@ -428,10 +428,10 @@ const s = StyleSheet.create({
   info: { flex: 1 },
   cardTitle: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
   cardDesc: { fontSize: 12, color: '#7A6B55', marginTop: 3, lineHeight: 18, fontFamily: 'Pretendard' },
-  dropHint: { fontSize: 12, color: '#9C8B75', fontFamily: 'Pretendard', marginTop: 12, textAlign: 'center' },
+  dropHint: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 12, textAlign: 'center' },
   dropHintOn: { color: '#2D5A3F', fontWeight: '700' },
 
-  sectionLabel: { fontSize: 12, fontWeight: '600', color: '#9C8B75', fontFamily: 'Pretendard', marginTop: 18, marginBottom: 8 },
+  sectionLabel: { fontSize: 12, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 18, marginBottom: 8 },
 
   infoBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: '#F4F2EE', borderRadius: 12, padding: 14, marginTop: 16 },
   infoText: { flex: 1, fontSize: 12, color: '#7A6B55', lineHeight: 18, fontFamily: 'Pretendard' },
@@ -445,7 +445,7 @@ const s = StyleSheet.create({
 
   fileBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#EFF6F1', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10 },
   fileName: { flex: 1, fontSize: 13, color: '#2D5A3F', fontFamily: 'Pretendard' },
-  fileMeta: { fontSize: 12, color: '#9C8B75', fontFamily: 'Pretendard', marginTop: 8, marginBottom: 14 },
+  fileMeta: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 8, marginBottom: 14 },
 
   listRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#F4F2EE' },
   listLabel: { fontSize: 13, color: '#4A4A4A', fontFamily: 'Pretendard' },
@@ -456,5 +456,5 @@ const s = StyleSheet.create({
   choiceIcon: { width: 34, height: 34, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   choiceLabel: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
   choiceDesc: { fontSize: 12, color: '#7A6B55', marginTop: 3, lineHeight: 18, fontFamily: 'Pretendard' },
-  adminNote: { fontSize: 12, color: '#9C8B75', fontFamily: 'Pretendard', lineHeight: 18, paddingVertical: 6 },
+  adminNote: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', lineHeight: 18, paddingVertical: 6 },
 });

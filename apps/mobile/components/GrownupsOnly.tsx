@@ -37,5 +37,5 @@ const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: '#F9F8F5', alignItems: 'center', justifyContent: 'center', padding: 32 },
   icon: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#EFF6F1', justifyContent: 'center', alignItems: 'center', marginBottom: 14 },
   title: { fontSize: 16, color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 6 },
-  desc: { fontSize: 13, color: '#888888', textAlign: 'center', lineHeight: 19, fontFamily: 'Pretendard' },
+  desc: { fontSize: 13, color: '#6B6B6B', textAlign: 'center', lineHeight: 19, fontFamily: 'Pretendard' },
 });

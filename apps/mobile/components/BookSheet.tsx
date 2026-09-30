@@ -94,7 +94,7 @@ export function BookSheet({ visible, onClose }: { visible: boolean; onClose: () 
                 const on = picked.includes(c);
                 return (
                   <TouchableOpacity key={c} style={[s.chip, on && s.chipOn]} activeOpacity={0.7} onPress={() => toggle(c)}>
-                    <FontAwesome name={on ? 'check' : 'plus'} size={11} color={on ? '#FFFFFF' : '#888888'} />
+                    <FontAwesome name={on ? 'check' : 'plus'} size={11} color={on ? '#FFFFFF' : '#6B6B6B'} />
                     <Text style={[s.chipText, on && s.chipTextOn]}>{BOOK_CHAPTERS[c]?.title ?? c} {counts[c]}</Text>
                   </TouchableOpacity>
                 );
@@ -130,8 +130,8 @@ const s = StyleSheet.create({
   sheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 22, paddingBottom: 34 },
   handle: { width: 36, height: 4, borderRadius: 2, backgroundColor: '#E0E0E0', alignSelf: 'center', marginBottom: 16 },
   title: { fontSize: 18, color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 6 },
-  sub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard', lineHeight: 19, marginBottom: 16 },
-  empty: { fontSize: 14, color: '#888888', fontFamily: 'Pretendard', textAlign: 'center', paddingVertical: 20 },
+  sub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard', lineHeight: 19, marginBottom: 16 },
+  empty: { fontSize: 14, color: '#6B6B6B', fontFamily: 'Pretendard', textAlign: 'center', paddingVertical: 20 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 },
   chip: {
     flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, height: 34, borderRadius: 17,
@@ -146,5 +146,5 @@ const s = StyleSheet.create({
   btnOff: { backgroundColor: '#B8D0C2' },
   btnText: { color: '#FFFFFF', fontSize: 15, fontFamily: 'PretendardBold' },
   cancel: { alignItems: 'center', paddingVertical: 14 },
-  cancelText: { color: '#888888', fontSize: 14, fontFamily: 'Pretendard' },
+  cancelText: { color: '#6B6B6B', fontSize: 14, fontFamily: 'Pretendard' },
 });

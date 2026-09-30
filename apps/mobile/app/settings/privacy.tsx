@@ -68,7 +68,7 @@ export default function PrivacyScreen() {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   content: { padding: 20, paddingBottom: 40 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#888888', marginBottom: 10, fontFamily: 'PretendardBold' },
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#6B6B6B', marginBottom: 10, fontFamily: 'PretendardBold' },
   sectionGap: { marginTop: 20 },
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14,
@@ -81,6 +81,6 @@ const s = StyleSheet.create({
   info: { flex: 1 },
   label: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', fontFamily: 'PretendardBold' },
   labelMuted: { color: '#4A4A4A' },
-  desc: { fontSize: 12, color: '#888888', marginTop: 3, lineHeight: 17, fontFamily: 'Pretendard' },
-  note: { fontSize: 12, color: '#888888', marginTop: 8, lineHeight: 18, fontFamily: 'Pretendard' },
+  desc: { fontSize: 12, color: '#6B6B6B', marginTop: 3, lineHeight: 17, fontFamily: 'Pretendard' },
+  note: { fontSize: 12, color: '#6B6B6B', marginTop: 8, lineHeight: 18, fontFamily: 'Pretendard' },
 });

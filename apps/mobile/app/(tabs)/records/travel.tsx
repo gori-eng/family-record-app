@@ -1,3 +1,4 @@
+import { DateField } from '../../../components/DateField';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
@@ -11,6 +12,7 @@ import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../compon
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { say, TRAVEL_LABEL } from '../../../constants/labels';
+import { parseLooseDate, formatKoreanDate } from '../../../lib/dates';
 
 /** 필터를 골랐는데 비어 있을 때 — 재촉 대신 권유로 (§9) */
 const EMPTY_BY_FILTER: Record<string, string> = {
@@ -20,6 +22,8 @@ const EMPTY_BY_FILTER: Record<string, string> = {
 };
 
 type Trip = {
+  /** 돌아온 날 'YYYY-MM-DD'. 하루짜리면 없다 */
+  dateEnd?: string;
   /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
   photos?: string[];
   dest: string; status: string; date: string;
@@ -46,6 +50,15 @@ const membersLabel = (m: string[] | string | undefined) => {
   return m && m !== '전체' ? m : '가족 모두';
 };
 
+/** 여행 날짜 한 줄 — ISO면 '2026년 7월 10일부터 7월 13일까지', 옛 자유 글자는 그대로 */
+const tripDates = (t: { date?: string; dateEnd?: string }) => {
+  if (!t.date) return '';
+  const a = parseLooseDate(t.date);
+  if (!a) return t.date;
+  if (t.dateEnd) return `${formatKoreanDate(a)}부터 ${formatKoreanDate(t.dateEnd)}까지`;
+  return formatKoreanDate(a);
+};
+
 export default function TravelScreen() {
   const { askDelete, undoBar } = useRecordDelete('여행 기록');
   const ready = useRecordsReady();
@@ -64,6 +77,7 @@ export default function TravelScreen() {
   // 작성 폼에 사용자가 입력한 값을 담아둘 칸들
   const [formDest, setFormDest] = useState('');
   const [formDate, setFormDate] = useState('');
+  const [formDateEnd, setFormDateEnd] = useState('');
   const [formHighlight, setFormHighlight] = useState('');
   const [formJournal, setFormJournal] = useState('');
   const [formStatus, setFormStatus] = useState('다녀옴');
@@ -84,7 +98,8 @@ export default function TravelScreen() {
     const d = edit?.data;
     setEditingId(edit?.id ?? null);
     setFormDest(d?.dest ?? '');
-    setFormDate(d?.date ?? '');
+    setFormDate(d?.date ? (parseLooseDate(d.date) ?? d.date) : '');
+    setFormDateEnd(d?.dateEnd ?? '');
     setFormHighlight(d?.highlight ?? '');
     setFormJournal(d?.journal ?? '');
     setFormStatus(d?.status ?? '다녀옴');
@@ -116,7 +131,7 @@ export default function TravelScreen() {
       return;
     }
     const fields = {
-      dest, status: formStatus, date: formDate.trim(), members: formMembers,
+      dest, status: formStatus, date: formDate.trim(), dateEnd: formDateEnd.trim() || undefined, members: formMembers,
       highlight: formHighlight.trim(), journal: formJournal.trim(),
       photos: photoDraft.photos,
     };
@@ -197,7 +212,7 @@ export default function TravelScreen() {
                     {selectedItem.date ? (
                       <View style={s.modalRow}>
                         <Text style={s.modalLabel}>언제</Text>
-                        <Text style={s.modalValue}>{selectedItem.date}</Text>
+                        <Text style={s.modalValue}>{tripDates(selectedItem)}</Text>
                       </View>
                     ) : null}
                     {selectedItem.country ? (
@@ -281,13 +296,8 @@ export default function TravelScreen() {
                 ))}
               </View>
               <Text style={s.createLabel}>언제</Text>
-              <TextInput
-                style={s.createInput}
-                placeholder="예) 2026.7.10 ~ 7.13"
-                placeholderTextColor="#BFAE99"
-                value={formDate}
-                onChangeText={setFormDate}
-              />
+              <DateField value={formDate} onChange={setFormDate} placeholder="떠난 날" />
+              <DateField value={formDateEnd} onChange={setFormDateEnd} placeholder="돌아온 날 (하루면 비워두세요)" />
               <Text style={s.createLabel}>누구랑 갔나요?</Text>
               <View style={s.memberRow}>
                 {MEMBERS.map((m) => {
@@ -364,7 +374,7 @@ export default function TravelScreen() {
                   </View>
                   {/* 안 적은 항목은 빈 줄을 남기지 않고 아예 숨긴다 */}
                   {(t.country || t.date) ? (
-                    <Text style={s.country}>{[t.country, t.date].filter(Boolean).join(', ')}</Text>
+                    <Text style={s.country}>{[t.country, tripDates(t)].filter(Boolean).join(', ')}</Text>
                   ) : null}
                   {t.highlight ? (
                     <Text style={s.highlight} numberOfLines={1}>{t.highlight}</Text>
@@ -390,7 +400,7 @@ export default function TravelScreen() {
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
-        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => openCreate()}>
+        <TouchableOpacity style={s.fab} accessibilityLabel="새로 적기" activeOpacity={0.8} onPress={() => openCreate()}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
         {undoBar}
@@ -404,11 +414,11 @@ const s = StyleSheet.create({
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
   stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   statNum: { fontSize: 22, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  statLabel: { fontSize: 11, color: '#888', marginTop: 2, fontFamily: 'Pretendard' },
+  statLabel: { fontSize: 12, color: '#6B6B6B', marginTop: 2, fontFamily: 'Pretendard' },
   filterRow: { paddingHorizontal: 20, gap: 8, marginBottom: 24 },
-  chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 24, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA' },
+  chip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA' },
   chipActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  chipText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
+  chipText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
   chipTextActive: { color: '#FFFFFF' },
   memberRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   list: { paddingHorizontal: 20 },
@@ -418,11 +428,11 @@ const s = StyleSheet.create({
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
   destName: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3, flexShrink: 1 },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
-  statusText: { fontSize: 11, fontWeight: '700', fontFamily: 'PretendardBold' },
-  country: { fontSize: 12, color: '#A0A0A0', marginBottom: 4, fontFamily: 'Pretendard' },
+  statusText: { fontSize: 12, fontWeight: '700', fontFamily: 'PretendardBold' },
+  country: { fontSize: 12, color: '#767676', marginBottom: 4, fontFamily: 'Pretendard' },
   highlight: { fontSize: 13, color: '#5C4A32', marginBottom: 6, fontFamily: 'Pretendard' },
   bottomRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  members: { fontSize: 11, color: '#9C8B75', flex: 1, fontFamily: 'Pretendard' },
+  members: { fontSize: 12, color: '#7A6B55', flex: 1, fontFamily: 'Pretendard' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
@@ -431,7 +441,7 @@ const s = StyleSheet.create({
   modalContent: {},
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
-  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 64, fontFamily: 'Pretendard' },
+  modalLabel: { fontSize: 13, color: '#767676', width: 64, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
@@ -444,5 +454,5 @@ const s = StyleSheet.create({
   statusPicker: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
-  emptySub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
+  emptySub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
 });

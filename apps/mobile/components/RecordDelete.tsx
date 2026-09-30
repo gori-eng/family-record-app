@@ -155,7 +155,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
     paddingVertical: 12, marginTop: 18, marginBottom: 4,
   },
-  noRowText: { fontSize: 12, color: '#9C8B75', fontFamily: 'Pretendard' },
+  noRowText: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
 
   undoBar: {
     position: 'absolute', bottom: 20, left: 20, right: 88, zIndex: 11,

@@ -28,5 +28,5 @@ export function useEventsReady(): boolean {
 
 const s = StyleSheet.create({
   wrap: { alignItems: 'center', paddingVertical: 48, gap: 10 },
-  text: { fontSize: 13, color: '#9C8B75', fontFamily: 'Pretendard' },
+  text: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
 });

@@ -156,6 +156,6 @@ const s = StyleSheet.create({
 
   // Register
   registerRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
-  registerText: { color: '#A0A0A0', fontSize: 14, fontFamily: 'Pretendard' },
+  registerText: { color: '#767676', fontSize: 14, fontFamily: 'Pretendard' },
   registerLink: { color: '#1F1F1F', fontSize: 14, fontWeight: '700', fontFamily: 'PretendardBold', textDecorationLine: 'underline' },
 });

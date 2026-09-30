@@ -1,3 +1,4 @@
+import { DateField } from '../../../components/DateField';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
@@ -332,13 +333,7 @@ export default function MoviesScreen() {
               {formWatched ? (
                 <>
                   <Text style={s.createLabel}>언제 봤나요?</Text>
-                  <TextInput
-                    style={s.createInput}
-                    placeholder="비워두면 오늘로 적어요"
-                    placeholderTextColor="#BFAE99"
-                    value={formDate}
-                    onChangeText={setFormDate}
-                  />
+                  <DateField value={formDate} onChange={setFormDate} placeholder="비워두면 오늘로 적어요" />
                   <Text style={s.createLabel}>별점</Text>
                   <View style={s.ratingPicker}>
                     {[1, 2, 3, 4, 5].map((i) => (
@@ -450,7 +445,7 @@ export default function MoviesScreen() {
           </View>
           <View style={{ height: 80 }} />
         </ScrollView>
-        <TouchableOpacity style={s.fab} activeOpacity={0.8} onPress={() => openCreate()}>
+        <TouchableOpacity style={s.fab} accessibilityLabel="새로 적기" activeOpacity={0.8} onPress={() => openCreate()}>
           <FontAwesome name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
         {undoBar}
@@ -464,27 +459,27 @@ const s = StyleSheet.create({
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
   stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   statNum: { fontSize: 22, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  statLabel: { fontSize: 11, color: '#888', marginTop: 2, fontFamily: 'Pretendard' },
+  statLabel: { fontSize: 12, color: '#6B6B6B', marginTop: 2, fontFamily: 'Pretendard' },
   filterRow: { paddingHorizontal: 20, gap: 8, marginBottom: 24 },
   pillRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 24, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA' },
+  chip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA' },
   chipActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  chipText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
+  chipText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
   chipTextActive: { color: '#FFFFFF' },
   list: { paddingHorizontal: 20 },
   card: { flexDirection: 'row', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   poster: { width: 64, height: 88, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
   title: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', marginBottom: 2, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  genre: { fontSize: 12, color: '#A0A0A0', marginBottom: 6, fontFamily: 'Pretendard' },
+  genre: { fontSize: 12, color: '#767676', marginBottom: 6, fontFamily: 'Pretendard' },
   meta: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' },
   watchedBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  watchedText: { fontSize: 11, color: '#7A6B55', fontFamily: 'Pretendard' },
+  watchedText: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
   wishBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#F3E5F5', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
-  wishBadgeText: { fontSize: 11, color: '#9C27B0', fontFamily: 'PretendardBold' },
+  wishBadgeText: { fontSize: 12, color: '#9C27B0', fontFamily: 'PretendardBold' },
   wishBox: { alignItems: 'center', backgroundColor: '#F9F8F5', borderRadius: 14, padding: 16, marginBottom: 12 },
   wishTitle: { fontSize: 14, color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  wishSub: { fontSize: 12, color: '#888', marginTop: 2, marginBottom: 10, fontFamily: 'Pretendard' },
+  wishSub: { fontSize: 12, color: '#6B6B6B', marginTop: 2, marginBottom: 10, fontFamily: 'Pretendard' },
   review: { fontSize: 12, color: '#5C4A32', fontStyle: 'italic', fontFamily: 'Pretendard' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
@@ -494,7 +489,7 @@ const s = StyleSheet.create({
   modalContent: {},
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
   modalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
-  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 64, fontFamily: 'Pretendard' },
+  modalLabel: { fontSize: 13, color: '#767676', width: 64, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
@@ -503,11 +498,11 @@ const s = StyleSheet.create({
   memberRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
   memberPill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' },
   memberPillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
-  memberPillText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
+  memberPillText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
   memberPillTextActive: { color: '#FFFFFF' },
-  authorHint: { fontSize: 12, color: '#888', marginBottom: 16, marginTop: -4, lineHeight: 18, fontFamily: 'Pretendard' },
+  authorHint: { fontSize: 12, color: '#6B6B6B', marginBottom: 16, marginTop: -4, lineHeight: 18, fontFamily: 'Pretendard' },
   ratingPicker: { flexDirection: 'row', gap: 10, marginBottom: 16 },
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
-  emptySub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
+  emptySub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
 });

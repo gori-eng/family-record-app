@@ -114,6 +114,6 @@ const s = StyleSheet.create({
   submitBtnDisabled: { opacity: 0.5 },
   submitBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
   loginRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
-  loginText: { color: '#A0A0A0', fontSize: 14, fontFamily: 'Pretendard' },
+  loginText: { color: '#767676', fontSize: 14, fontFamily: 'Pretendard' },
   loginLink: { color: '#1F1F1F', fontSize: 14, fontWeight: '700', fontFamily: 'PretendardBold', textDecorationLine: 'underline' },
 });

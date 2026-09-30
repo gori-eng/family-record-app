@@ -242,7 +242,7 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', gap: 4, backgroundColor: '#F6FAF7',
   },
   pickBusy: { borderStyle: 'solid' },
-  pickAddText: { fontSize: 11, color: '#4A8C6F', fontFamily: 'Pretendard' },
+  pickAddText: { fontSize: 12, color: '#4A8C6F', fontFamily: 'Pretendard' },
 
   gallery: { marginBottom: 14 },
   galleryRow: { gap: 8 },
@@ -263,5 +263,5 @@ const s = StyleSheet.create({
     position: 'absolute', right: 2, bottom: 2, backgroundColor: 'rgba(0,0,0,0.6)',
     borderRadius: 8, paddingHorizontal: 5, paddingVertical: 1,
   },
-  thumbCountText: { color: '#FFFFFF', fontSize: 10, fontFamily: 'PretendardBold' },
+  thumbCountText: { color: '#FFFFFF', fontSize: 12, fontFamily: 'PretendardBold' },
 });

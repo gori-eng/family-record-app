@@ -1,3 +1,4 @@
+import { DateField } from '../../components/DateField';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, Modal, Animated, Pressable, KeyboardAvoidingView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
@@ -389,8 +390,7 @@ export default function CalendarScreen() {
                       </TouchableOpacity>
                     ))}
                   </View>
-                  <TextInput style={styles.addInput} placeholder="2026-10-03" placeholderTextColor="#A0A0A0"
-                    value={fDate} onChangeText={setFDate} />
+                  <DateField value={fDate} onChange={setFDate} allowEmpty={false} />
 
                   <Text style={styles.addLabel}>무슨 일인가요?</Text>
                   <TextInput style={styles.addInput} placeholder="예) 가족 저녁 식사" placeholderTextColor="#A0A0A0"
@@ -426,8 +426,7 @@ export default function CalendarScreen() {
                           </TouchableOpacity>
                         ))}
                       </View>
-                      <TextInput style={styles.addInput} placeholder="비워두면 같은 날에 끝나요" placeholderTextColor="#A0A0A0"
-                        value={fEndDate} onChangeText={setFEndDate} />
+                      <DateField value={fEndDate} onChange={setFEndDate} placeholder="비워두면 같은 날에 끝나요" />
                       <Text style={styles.addLabel}>몇 시에 끝나요?</Text>
                       <TextInput style={styles.addInput} placeholder="비워두면 시각은 안 적어요" placeholderTextColor="#A0A0A0"
                         value={fEndTime} onChangeText={setFEndTime} />
@@ -604,7 +603,7 @@ export default function CalendarScreen() {
         </View>
       )}
 
-      <TouchableOpacity style={styles.fab} activeOpacity={0.8} onPress={openCreate}>
+      <TouchableOpacity style={styles.fab} accessibilityLabel="새로 적기" activeOpacity={0.8} onPress={openCreate}>
         <FontAwesome name="plus" size={22} color="#FFFFFF" />
       </TouchableOpacity>
     </View>
@@ -616,11 +615,11 @@ const styles = StyleSheet.create({
   monthNav: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
   navButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA' },
   monthTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  monthSub: { fontSize: 12, color: '#888', fontFamily: 'Pretendard', marginTop: 2 },
+  monthSub: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard', marginTop: 2 },
   todayChip: { flexDirection: 'row', alignItems: 'center', alignSelf: 'center', gap: 6, backgroundColor: '#EFF6F1', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16, marginBottom: 8 },
   todayChipText: { fontSize: 12, fontWeight: '600', color: '#2D5A3F', fontFamily: 'Pretendard' },
   weekHeader: { flexDirection: 'row', paddingHorizontal: 20, marginBottom: 4 },
-  weekDay: { flex: 1, textAlign: 'center', fontSize: 13, fontWeight: '600', color: '#9C8B75', fontFamily: 'Pretendard' },
+  weekDay: { flex: 1, textAlign: 'center', fontSize: 13, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard' },
   sundayColor: { color: '#C25A5A' },
   saturdayColor: { color: '#4A90C8' },
   calendarGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, marginBottom: 16 },
@@ -641,17 +640,17 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', marginBottom: 12, fontFamily: 'PretendardBold' },
   emptyState: { alignItems: 'center', paddingVertical: 32, backgroundColor: '#FFFFFF', borderRadius: 14, borderWidth: 1, borderColor: '#EAEAEA' },
   emptyText: { fontSize: 15, fontWeight: '600', color: '#7A6B55', marginTop: 12, fontFamily: 'Pretendard' },
-  emptySubtext: { fontSize: 13, color: '#9C8B75', marginTop: 4, fontFamily: 'Pretendard' },
+  emptySubtext: { fontSize: 13, color: '#7A6B55', marginTop: 4, fontFamily: 'Pretendard' },
   eventCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   eventColorBar: { width: 4, height: 48, borderRadius: 2 },
   eventContent: { flex: 1 },
-  eventTime: { fontSize: 12, color: '#888', fontWeight: '600', marginBottom: 2, fontFamily: 'Pretendard' },
+  eventTime: { fontSize: 12, color: '#6B6B6B', fontWeight: '600', marginBottom: 2, fontFamily: 'Pretendard' },
   eventName: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
   eventMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 5, flexWrap: 'wrap' },
   eventLocRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  eventLoc: { fontSize: 12, color: '#9C8B75', fontFamily: 'Pretendard' },
+  eventLoc: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
   memberTag: { backgroundColor: '#F4F2EE', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
-  memberTagText: { fontSize: 11, color: '#7A6B55', fontFamily: 'Pretendard' },
+  memberTagText: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
 
   undoBar: {
     position: 'absolute', bottom: 20, left: 20, right: 88, zIndex: 11,
@@ -674,7 +673,7 @@ const styles = StyleSheet.create({
   detailTitle: { flex: 1, fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
   detailRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 14 },
   detailIconBox: { width: 24, height: 24, justifyContent: 'center', alignItems: 'center', marginTop: 2 },
-  detailLabel: { fontSize: 12, color: '#A0A0A0', fontFamily: 'Pretendard', marginBottom: 2 },
+  detailLabel: { fontSize: 12, color: '#767676', fontFamily: 'Pretendard', marginBottom: 2 },
   detailValue: { fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
   aiHint: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: '#EFF6F1', borderRadius: 12, padding: 14, marginVertical: 12 },
   aiHintText: { flex: 1, fontSize: 13, color: '#2D5A3F', lineHeight: 20, fontFamily: 'Pretendard' },
@@ -694,17 +693,17 @@ const styles = StyleSheet.create({
   placeInput: { flex: 1 },
   mapBtn: { width: 46, height: 46, borderRadius: 12, backgroundColor: '#EFF6F1', alignItems: 'center', justifyContent: 'center' },
   suggestBox: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingVertical: 6, marginTop: -6, marginBottom: 14 },
-  suggestTitle: { fontSize: 11, color: '#9C8B75', fontFamily: 'Pretendard', paddingHorizontal: 14, paddingVertical: 4 },
+  suggestTitle: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', paddingHorizontal: 14, paddingVertical: 4 },
   suggestRow: { flexDirection: 'row', alignItems: 'center' },
   suggestMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 10 },
   suggestText: { flex: 1, fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard' },
-  suggestCount: { fontSize: 11, color: '#9C8B75', fontFamily: 'Pretendard' },
+  suggestCount: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
   suggestX: { paddingHorizontal: 14, paddingVertical: 10 },
-  detailMapHint: { fontSize: 11, color: '#4A8C6F', fontFamily: 'Pretendard', marginTop: 2 },
-  eventDayIndex: { fontSize: 11, color: '#9C8B75', fontFamily: 'Pretendard', marginBottom: 2 },
+  detailMapHint: { fontSize: 12, color: '#4A8C6F', fontFamily: 'Pretendard', marginTop: 2 },
+  eventDayIndex: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginBottom: 2 },
   addInput: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 12, fontFamily: 'Pretendard' },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
-  chip: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, backgroundColor: '#F4F2EE', borderWidth: 1, borderColor: '#EAEAEA' },
+  chip: { paddingHorizontal: 12, paddingVertical: 10, borderRadius: 16, backgroundColor: '#F4F2EE', borderWidth: 1, borderColor: '#EAEAEA' },
   chipOn: { backgroundColor: '#EFF6F1', borderColor: '#4A8C6F' },
   chipText: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
   chipTextOn: { color: '#2D5A3F', fontWeight: '700' },

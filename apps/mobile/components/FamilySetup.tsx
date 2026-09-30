@@ -344,7 +344,7 @@ const s = StyleSheet.create({
   label: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', fontFamily: 'Pretendard', marginBottom: 6, marginTop: 14 },
   input: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
   codeInput: { letterSpacing: 2, fontFamily: 'PretendardBold' },
-  hint: { fontSize: 12, color: '#9C8B75', fontFamily: 'Pretendard', marginTop: 6, lineHeight: 17 },
+  hint: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 6, lineHeight: 17 },
   roleRow: { flexDirection: 'row', gap: 8 },
   roleChip: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' },
   roleChipOn: { borderColor: '#4A8C6F', backgroundColor: '#EFF6F1' },
@@ -360,5 +360,5 @@ const s = StyleSheet.create({
   code: { fontSize: 28, fontWeight: '700', color: '#2D5A3F', fontFamily: 'PretendardBold', letterSpacing: 4 },
   copyRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 8 },
   copyText: { fontSize: 12, color: '#2D5A3F', fontFamily: 'Pretendard' },
-  codeNote: { fontSize: 12, color: '#9C8B75', fontFamily: 'Pretendard', textAlign: 'center', marginTop: 14 },
+  codeNote: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', textAlign: 'center', marginTop: 14 },
 });

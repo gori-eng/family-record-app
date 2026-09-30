@@ -347,7 +347,7 @@ const s = StyleSheet.create({
   content: { padding: 20, paddingBottom: 40 },
   fill: { flex: 1 },
   emptyWrap: { flex: 1, backgroundColor: '#F9F8F5', alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24 },
-  emptyText: { fontSize: 14, color: '#888', fontFamily: 'Pretendard', textAlign: 'center' },
+  emptyText: { fontSize: 14, color: '#6B6B6B', fontFamily: 'Pretendard', textAlign: 'center' },
 
   avatarSection: { alignItems: 'center', marginBottom: 28 },
   avatar: { marginBottom: 10 },
@@ -358,13 +358,13 @@ const s = StyleSheet.create({
   },
   photoBtnText: { fontSize: 14, color: '#2D5A3F', fontFamily: 'PretendardBold' },
   changePhoto: { fontSize: 14, fontWeight: '600', color: '#4A8C6F', fontFamily: 'Pretendard' },
-  photoNote: { fontSize: 12, color: '#A0A0A0', marginTop: 4, fontFamily: 'Pretendard' },
+  photoNote: { fontSize: 12, color: '#767676', marginTop: 4, fontFamily: 'Pretendard' },
 
   label: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   input: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 14, fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
   readonly: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#F1EFEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 14 },
   readonlyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'Pretendard' },
-  help: { fontSize: 12, color: '#888888', marginTop: 6, marginBottom: 20, lineHeight: 17, fontFamily: 'Pretendard' },
+  help: { fontSize: 12, color: '#6B6B6B', marginTop: 6, marginBottom: 20, lineHeight: 17, fontFamily: 'Pretendard' },
 
   saveBtn: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
   kinRow: { flexDirection: 'row', gap: 8, marginBottom: 6 },
@@ -373,7 +373,7 @@ const s = StyleSheet.create({
   kinText: { fontSize: 14, color: '#4A4A4A', fontFamily: 'Pretendard' },
   kinTextOn: { color: '#FFFFFF', fontFamily: 'PretendardBold' },
   deleteRow: { alignItems: 'center', paddingVertical: 18, marginTop: 24 },
-  deleteText: { fontSize: 13, color: '#9C8B75', fontFamily: 'Pretendard', textDecorationLine: 'underline' },
+  deleteText: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard', textDecorationLine: 'underline' },
   saveBtnOff: { backgroundColor: '#B8CFC3' },
   saveBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 
@@ -382,9 +382,9 @@ const s = StyleSheet.create({
   sheet: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 36 },
   handle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginBottom: 14 },
   sheetTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', textAlign: 'center', letterSpacing: -0.3 },
-  sheetSub: { fontSize: 13, color: '#A0A0A0', textAlign: 'center', marginTop: 4, marginBottom: 18, fontFamily: 'Pretendard' },
+  sheetSub: { fontSize: 13, color: '#767676', textAlign: 'center', marginTop: 4, marginBottom: 18, fontFamily: 'Pretendard' },
   cancelBtn: { paddingVertical: 14, alignItems: 'center', marginTop: 4 },
-  cancelText: { fontSize: 15, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
+  cancelText: { fontSize: 15, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
 
   emojiGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 10 },
   emojiCell: { width: '22%', aspectRatio: 1, backgroundColor: '#F9F8F5', borderRadius: 14, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#EAEAEA' },

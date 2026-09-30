@@ -72,12 +72,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   scrollView: { flex: 1, paddingHorizontal: 20 },
   title: { fontSize: 26, fontWeight: '700', color: '#1F1F1F', marginBottom: 6, fontFamily: 'PretendardBold', letterSpacing: -0.5, marginTop: 16 },
-  subtitle: { fontSize: 13, color: '#A0A0A0', marginBottom: 16, fontFamily: 'Pretendard', lineHeight: 18 },
+  subtitle: { fontSize: 13, color: '#767676', marginBottom: 16, fontFamily: 'Pretendard', lineHeight: 18 },
   searchEntry: {
     flexDirection: 'row', alignItems: 'center', gap: 10, height: 46, paddingHorizontal: 14, marginBottom: 20,
     backgroundColor: '#FFFFFF', borderRadius: 14, borderWidth: 1, borderColor: '#EAEAEA',
   },
-  searchEntryText: { fontSize: 14, color: '#A0A0A0', fontFamily: 'Pretendard' },
+  searchEntryText: { fontSize: 14, color: '#767676', fontFamily: 'Pretendard' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
   card: {
     width: '47%', backgroundColor: '#FFFFFF',
@@ -92,5 +92,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center', marginBottom: 12,
   },
   cardLabel: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', marginBottom: 4, fontFamily: 'Pretendard' },
-  cardCount: { fontSize: 12, color: '#A0A0A0', fontWeight: '500', fontFamily: 'Pretendard' },
+  cardCount: { fontSize: 12, color: '#767676', fontWeight: '500', fontFamily: 'Pretendard' },
 });

@@ -1,3 +1,4 @@
+import { DateField } from '../../../components/DateField';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
@@ -289,13 +290,7 @@ export default function ParentingScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              <TextInput
-                style={styles.createInput}
-                placeholder="2026-09-22"
-                placeholderTextColor="#BFAE99"
-                value={formDate}
-                onChangeText={setFormDate}
-              />
+              <DateField value={formDate} onChange={setFormDate} allowEmpty={false} />
               <Text style={styles.createLabel}>제목</Text>
               <TextInput
                 style={styles.createInput}
@@ -442,17 +437,17 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
-  emptySub: { fontSize: 13, color: '#888888', fontFamily: 'Pretendard' },
+  emptySub: { fontSize: 13, color: '#6B6B6B', fontFamily: 'Pretendard' },
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginTop: 16, marginBottom: 16 },
   statCard: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, alignItems: 'center', gap: 6, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   statNumber: { fontSize: 22, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  statLabel: { fontSize: 11, color: '#888', fontFamily: 'Pretendard' },
+  statLabel: { fontSize: 12, color: '#6B6B6B', fontFamily: 'Pretendard' },
   filterContainer: { paddingHorizontal: 20, gap: 8, marginBottom: 24 },
   childPicker: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 },
   filterChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA' },
   filterChipActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
   filterDot: { width: 8, height: 8, borderRadius: 4 },
-  filterText: { fontSize: 13, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
+  filterText: { fontSize: 13, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
   filterTextActive: { color: '#FFFFFF' },
   timeline: { paddingHorizontal: 20 },
   entryCard: { flexDirection: 'row', gap: 12, marginBottom: 4 },
@@ -461,14 +456,14 @@ const styles = StyleSheet.create({
   timelineConnector: { width: 2, flex: 1, backgroundColor: '#EAEAEA', marginTop: 4 },
   entryContent: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   entryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  entryDate: { fontSize: 12, color: '#A0A0A0', fontFamily: 'Pretendard' },
+  entryDate: { fontSize: 12, color: '#767676', fontFamily: 'Pretendard' },
   childBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10 },
-  childBadgeText: { fontSize: 11, fontWeight: '700', color: '#5C4A32', fontFamily: 'PretendardBold' },
+  childBadgeText: { fontSize: 12, fontWeight: '700', color: '#5C4A32', fontFamily: 'PretendardBold' },
   entryTitle: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', marginBottom: 6, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   entryText: { fontSize: 14, color: '#4A4A4A', lineHeight: 20, marginBottom: 10, fontFamily: 'Pretendard' },
   entryFooter: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
   milestoneBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#FFF8E1', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
-  milestoneText: { fontSize: 11, fontWeight: '600', color: '#B8860B', fontFamily: 'Pretendard' },
+  milestoneText: { fontSize: 12, fontWeight: '600', color: '#B8860B', fontFamily: 'Pretendard' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
@@ -477,7 +472,7 @@ const styles = StyleSheet.create({
   modalContent: {},
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 16, letterSpacing: -0.3 },
   modalRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 12 },
-  modalLabel: { fontSize: 13, color: '#A0A0A0', width: 64, fontFamily: 'Pretendard', paddingTop: 2 },
+  modalLabel: { fontSize: 13, color: '#767676', width: 64, fontFamily: 'Pretendard', paddingTop: 2 },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, lineHeight: 22, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },

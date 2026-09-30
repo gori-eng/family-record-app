@@ -18,7 +18,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: '#4A8C6F',
-        tabBarInactiveTintColor: '#BFAE99',
+        tabBarInactiveTintColor: '#8A7A62',
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopColor: '#EAEAEA',
@@ -31,7 +31,7 @@ export default function TabLayout() {
           shadowRadius: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: '600',
           fontFamily: 'Pretendard',
         },

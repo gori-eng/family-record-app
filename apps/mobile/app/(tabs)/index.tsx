@@ -342,12 +342,12 @@ export default function HomeScreen() {
             {recent.map((rec, i) => {
               const ui = CATEGORY_UI[rec.category];
               return (
-              <TouchableOpacity key={rec.id} style={[s.recordCard, i === 0 && s.recordCardLarge]} activeOpacity={0.85}
+              <TouchableOpacity key={rec.id} style={s.recordCard} activeOpacity={0.85}
                 onPress={() => openRecord(rec.category, rec.id)}>
                 <View style={[s.recordInner, { backgroundColor: ui.bg }]}>
                   {/* 아이콘 우측 중앙 */}
                   <View style={s.recordIconWrap}>
-                    <FontAwesome name={ui.icon as any} size={i === 0 ? 32 : 22} color="rgba(0,0,0,0.1)" />
+                    <FontAwesome name={ui.icon as any} size={22} color="rgba(0,0,0,0.1)" />
                   </View>
                   <View style={s.recordBottom}>
                     <Text style={[s.recordType, { fontSize: i === 0 ? 11 : 10 }]}>{CATEGORY_LABELS[rec.category]}</Text>
@@ -379,9 +379,9 @@ const s = StyleSheet.create({
   memoryRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#EAEAEA' },
   memoryIcon: { width: 34, height: 34, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   memoryTitle: { fontSize: 14, color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  memoryMeta: { fontSize: 11, color: '#A0A0A0', marginTop: 2, fontFamily: 'Pretendard' },
+  memoryMeta: { fontSize: 12, color: '#767676', marginTop: 2, fontFamily: 'Pretendard' },
   badge: { position: 'absolute', top: 2, right: 2, backgroundColor: '#4A8C6F', borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4 },
-  badgeText: { color: '#FFF', fontSize: 9, fontWeight: '700' },
+  badgeText: { color: '#FFF', fontSize: 12, fontWeight: '700' },
 
   // 1. Hero — 한 줄
   hero: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 28 },
@@ -390,26 +390,26 @@ const s = StyleSheet.create({
   inviteTitle: { fontSize: 15, color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 2 },
   inviteSub: { fontSize: 13, color: '#4A4A4A', fontFamily: 'Pretendard', lineHeight: 18 },
   greetingLine: { fontSize: 26, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.5 },
-  dateText: { fontSize: 13, color: '#A0A0A0', marginTop: 4, fontFamily: 'Pretendard' },
+  dateText: { fontSize: 13, color: '#767676', marginTop: 4, fontFamily: 'Pretendard' },
 
   // Section
   section: { paddingHorizontal: 20, marginBottom: 32 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 16 },
   sectionTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  sectionSub: { fontSize: 12, color: '#A0A0A0', marginTop: 2 },
+  sectionSub: { fontSize: 12, color: '#767676', marginTop: 2 },
   seeAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 4 },
   seeAllText: { fontSize: 13, color: '#4A8C6F', fontWeight: '600' },
 
   // Empty state
   emptyState: { alignItems: 'center', paddingVertical: 36, backgroundColor: '#FFFFFF', borderRadius: 16, borderWidth: 1, borderColor: '#EAEAEA' },
-  emptyTitle: { fontSize: 15, fontWeight: '600', color: '#888', marginTop: 12, fontFamily: 'Pretendard' },
-  emptySub: { fontSize: 13, color: '#A0A0A0', marginTop: 4, fontFamily: 'Pretendard' },
+  emptyTitle: { fontSize: 15, fontWeight: '600', color: '#6B6B6B', marginTop: 12, fontFamily: 'Pretendard' },
+  emptySub: { fontSize: 13, color: '#767676', marginTop: 4, fontFamily: 'Pretendard' },
 
   // Timeline
   timeline: {},
   timelineItem: { flexDirection: 'row', marginBottom: 4 },
   timelineLeft: { width: 56, alignItems: 'center', paddingTop: 2 },
-  timelineTime: { fontSize: 12, fontWeight: '600', color: '#888', marginBottom: 6, fontFamily: 'Pretendard' },
+  timelineTime: { fontSize: 12, fontWeight: '600', color: '#6B6B6B', marginBottom: 6, fontFamily: 'Pretendard' },
   timelineDot: { width: 10, height: 10, borderRadius: 5, zIndex: 1 },
   timelineLine: { width: 1.5, flex: 1, backgroundColor: '#E0E0E0', marginTop: -1 },
   timelineCard: {
@@ -420,9 +420,9 @@ const s = StyleSheet.create({
   },
   timelineTitle: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', marginBottom: 4, fontFamily: 'Pretendard' },
   timelineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  timelineLoc: { fontSize: 12, color: '#A0A0A0' },
+  timelineLoc: { fontSize: 12, color: '#767676' },
   timelineMemberWrap: { marginTop: 6, alignSelf: 'flex-start', backgroundColor: '#F4F3F0', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
-  timelineMember: { fontSize: 10, fontWeight: '600', color: '#888' },
+  timelineMember: { fontSize: 12, fontWeight: '600', color: '#6B6B6B' },
 
   // 6. Quick Record — 일정과 기록 사이
   quickSection: { paddingLeft: 20, marginBottom: 32 },
@@ -447,14 +447,14 @@ const s = StyleSheet.create({
   recordBottom: {},
   recordType: { color: 'rgba(0,0,0,0.35)', fontWeight: '600', marginBottom: 2 },
   recordTitle: { color: 'rgba(0,0,0,0.7)', fontWeight: '700', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  recordDate: { fontSize: 11, color: 'rgba(0,0,0,0.25)', marginTop: 2 },
+  recordDate: { fontSize: 12, color: 'rgba(0,0,0,0.25)', marginTop: 2 },
 
   // 7. Notification Modal — 커스텀 애니메이션
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   notifEmpty: { alignItems: 'center', paddingVertical: 36 },
   notifEmptyTitle: { fontSize: 15, fontWeight: '600', color: '#7A6B55', marginTop: 12, fontFamily: 'Pretendard' },
-  notifEmptySub: { fontSize: 12, color: '#9C8B75', marginTop: 4, fontFamily: 'Pretendard' },
+  notifEmptySub: { fontSize: 12, color: '#7A6B55', marginTop: 4, fontFamily: 'Pretendard' },
   notifModal: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '75%', paddingHorizontal: 20, paddingBottom: 40 },
   notifHandle: { width: 36, height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, alignSelf: 'center', marginTop: 10, marginBottom: 12 },
   notifHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
@@ -467,9 +467,9 @@ const s = StyleSheet.create({
   notifItemTitle: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', marginBottom: 2 },
   notifAuthorRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 },
   notifAuthorDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#4A8C6F' },
-  notifAuthor: { fontSize: 11, fontWeight: '600', color: '#888', fontFamily: 'Pretendard' },
-  notifItemDesc: { fontSize: 12, color: '#888' },
+  notifAuthor: { fontSize: 12, fontWeight: '600', color: '#6B6B6B', fontFamily: 'Pretendard' },
+  notifItemDesc: { fontSize: 12, color: '#6B6B6B' },
   notifMeta: { alignItems: 'flex-end', gap: 4 },
-  notifTime: { fontSize: 11, color: '#A0A0A0' },
+  notifTime: { fontSize: 12, color: '#767676' },
   notifDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#4A8C6F' },
 });

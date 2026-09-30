@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20, marginTop: 12, marginBottom: 4,
     backgroundColor: '#EFF6F1', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12,
   },
-  familySwitchLabel: { fontSize: 11, color: '#4A8C6F', fontFamily: 'Pretendard' },
+  familySwitchLabel: { fontSize: 12, color: '#4A8C6F', fontFamily: 'Pretendard' },
   familySwitchName: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', marginTop: 1 },
   familySwitchAction: { fontSize: 12, color: '#2D5A3F', fontFamily: 'Pretendard' },
   sheetWrap: { flex: 1, justifyContent: 'flex-end' },
@@ -350,13 +350,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
   profileName: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  profileRole: { fontSize: 13, color: '#888', marginTop: 2, fontFamily: 'Pretendard' },
+  profileRole: { fontSize: 13, color: '#6B6B6B', marginTop: 2, fontFamily: 'Pretendard' },
   editProfileButton: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: '#EFF6F1', justifyContent: 'center', alignItems: 'center',
   },
   section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#A0A0A0', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5, fontFamily: 'PretendardBold' },
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#767676', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5, fontFamily: 'PretendardBold' },
   menuItem: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     backgroundColor: '#FFFFFF', borderRadius: 12, padding: 14, marginBottom: 6,
@@ -371,11 +371,11 @@ const styles = StyleSheet.create({
   },
   menuLabel: { fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
   menuRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  menuSubtitle: { fontSize: 13, color: '#A0A0A0', fontFamily: 'Pretendard' },
+  menuSubtitle: { fontSize: 13, color: '#767676', fontFamily: 'Pretendard' },
   signOutButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 16, marginTop: 8,
   },
   signOutText: { fontSize: 15, fontWeight: '600', color: '#D94040', fontFamily: 'Pretendard' },
-  version: { textAlign: 'center', color: '#A0A0A0', fontSize: 12, marginTop: 16, marginBottom: 32, fontFamily: 'Pretendard' },
+  version: { textAlign: 'center', color: '#767676', fontSize: 12, marginTop: 16, marginBottom: 32, fontFamily: 'Pretendard' },
 });
