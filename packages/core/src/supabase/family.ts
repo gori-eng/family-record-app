@@ -191,3 +191,29 @@ export async function removeMember(memberId: string): Promise<void> {
   const { error } = await supabase.rpc('remove_member', { p_member_id: memberId });
   if (error) throw error;
 }
+
+/** 내가 속한 가족마다 나의 역할·짧은 이름 — 합치기 화면에서 "어느 가족의 관리자인가"를 볼 때 */
+export async function fetchMyMemberships(): Promise<Pick<FamilyMember, 'family_id' | 'role' | 'display_name'>[]> {
+  const { data, error } = await supabase.from('family_members').select('family_id, role, display_name');
+  if (error) throw error;
+  return (data ?? []) as Pick<FamilyMember, 'family_id' | 'role' | 'display_name'>[];
+}
+
+export type MergeResult = { movedRecords: number; movedEvents: number; movedMembers: number; skippedDuplicates: number };
+
+/**
+ * 가족 합치기 (00012). `source`가 `target`으로 들어가고 source는 사라진다.
+ * **양쪽 모두의 관리자**만. 한 트랜잭션이라 중간에 막히면(이름 겹침) 아무것도 안 바뀐다.
+ */
+export async function mergeFamilies(sourceId: string, targetId: string): Promise<MergeResult> {
+  const { data, error } = await supabase.rpc('merge_families', { p_source: sourceId, p_target: targetId });
+  if (error) throw error;
+  const row = (Array.isArray(data) ? data[0] : data) as
+    { moved_records: number; moved_events: number; moved_members: number; skipped_duplicates: number } | undefined;
+  return {
+    movedRecords: row?.moved_records ?? 0,
+    movedEvents: row?.moved_events ?? 0,
+    movedMembers: row?.moved_members ?? 0,
+    skippedDuplicates: row?.skipped_duplicates ?? 0,
+  };
+}

@@ -145,6 +145,10 @@ export default function SettingsScreen() {
           action: () => router.push('/settings/members') },
         { icon: 'qrcode', label: '초대 코드', subtitle: family.inviteCode ?? '아직 없어요',
           action: handleShareInviteCode },
+        // 가족이 둘 이상이면 합치기 (두 가족 모두의 관리자만 — 화면이 후보를 가른다)
+        ...(families.length > 1
+          ? [{ icon: 'compress', label: '가족 합치기', subtitle: '두 가족을 하나로', action: () => router.push('/settings/merge-family' as any) }]
+          : []),
         // 진짜 가족이 있을 때만. 혼자 남은 관리자는 지우기, 그 밖에는 나가기
         ...(family.isReal && currentFamilyId
           ? [soleAdmin

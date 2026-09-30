@@ -19,7 +19,10 @@ export {
   deleteFamily,
   renameMe,
   removeMember,
+  fetchMyMemberships,
+  mergeFamilies,
 } from './supabase/family';
+export type { MergeResult } from './supabase/family';
 export {
   fetchRecords,
   insertRecord,

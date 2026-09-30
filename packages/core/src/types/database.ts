@@ -243,6 +243,11 @@ export type Database = {
         Args: { p_member_id: string };
         Returns: undefined;
       };
+      /** 가족 합치기 — source가 target으로. 양쪽 관리자만 (00012) */
+      merge_families: {
+        Args: { p_source: string; p_target: string };
+        Returns: { moved_records: number; moved_events: number; moved_members: number; skipped_duplicates: number }[];
+      };
       /** RLS 재귀를 피하려고 만든 함수. 정책 안에서만 쓴다 */
       my_family_ids: {
         Args: Record<string, never>;
