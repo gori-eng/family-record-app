@@ -116,6 +116,13 @@ export default function TimeCapsuleScreen() {
     setTimeout(() => openCreate(record), 260);
   };
 
+  // 제목·편지·여는 날(내일 이후) 중 하나라도 비면 봉인 버튼을 흐리게. 검사는 handleSave가 한 번 더 한다
+  const canSave = (() => {
+    if (!formTitle.trim() || !formMessage.trim()) return false;
+    const target = parseLooseDate(formTarget);
+    return !!target && target > todayISO();
+  })();
+
   const handleSave = () => {
     const title = formTitle.trim();
     if (!title) {
@@ -294,17 +301,17 @@ export default function TimeCapsuleScreen() {
               <Text style={s.createLabel}>제목</Text>
               <TextInput style={s.createInput} placeholder="예) 첫째 스무 살 생일에" placeholderTextColor="#A39682"
                 value={formTitle} onChangeText={setFormTitle} />
+              <Text style={s.createLabel}>편지와 함께 넣을 사진</Text>
+              <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>편지</Text>
               <TextInput style={[s.createInput, { height: 140, textAlignVertical: 'top' }]} placeholder="몇 년 뒤의 우리에게 하고 싶은 말" placeholderTextColor="#A39682" multiline numberOfLines={5}
                 value={formMessage} onChangeText={setFormMessage} />
-              <Text style={s.createLabel}>편지와 함께 넣을 사진</Text>
-              <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>언제 열어볼까요?</Text>
               <DateField value={formTarget} onChange={setFormTarget} placeholder="열어볼 날을 골라주세요" allowEmpty={false} />
               <Text style={s.createLabel}>어떤 날인가요?</Text>
               <TextInput style={s.createInput} placeholder="예) 첫째 성인식" placeholderTextColor="#A39682"
                 value={formType} onChangeText={setFormType} />
-              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
+              <TouchableOpacity style={[s.createSubmit, !canSave && s.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '봉인하기'}</Text>
               </TouchableOpacity>
             </ScrollView>
@@ -381,7 +388,7 @@ const s = StyleSheet.create({
   introDesc: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', lineHeight: 17 },
   list: { paddingHorizontal: 20 },
   card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
-  capsuleIcon: { width: 52, height: 52, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
+  capsuleIcon: { width: 56, height: 56, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
   capsuleTitle: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', marginBottom: 2, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   capsuleType: { fontSize: 12, color: '#7A6B55', marginBottom: 6, fontFamily: 'Pretendard' },
@@ -407,4 +414,5 @@ const s = StyleSheet.create({
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
+  submitDisabled: { opacity: 0.45 },
 });

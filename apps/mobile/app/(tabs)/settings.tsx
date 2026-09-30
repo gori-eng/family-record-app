@@ -13,6 +13,7 @@ import { useSession, useMyFamilies } from '../../store/session';
 import { useRecordsStore } from '../../store/records';
 import { useEventsStore } from '../../store/events';
 import { eulreul } from '../../lib/korean';
+import { inviteMessage } from '../../constants/links';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -132,7 +133,7 @@ export default function SettingsScreen() {
       return;
     }
     try {
-      await Share.share({ message: `우리 가족 기록장에 같이 적어요. familog 앱을 열고 초대 코드 ${family.inviteCode}를 넣으면 들어올 수 있어요.` });
+      await Share.share({ message: inviteMessage(family.name, family.inviteCode) });
     } catch {
       showAlert('초대 코드', `${family.inviteCode}\n\n이 코드를 가족에게 보내주세요.`);
     }

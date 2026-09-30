@@ -12,7 +12,7 @@ import { parseLooseDate } from '../../lib/dates';
 import { nameColor } from '../../lib/nameColor';
 import { LoadingRows, useEventsReady } from '../../components/Loading';
 import {
-  useEventsStore, useEventsOn, useEventDaysInMonth, useEventDotsInMonth, eventColor, dayIndexOf, toISO,
+  useEventsStore, useEventsOn, useEventDaysInMonth, useEventDotsInMonth, useFirstTitlesInMonth, eventColor, dayIndexOf, toISO,
   EVENT_COLORS, formatTime, formatEventDate, membersLabel, normalizeTime, todayISO,
   type CalendarEvent,
 } from '../../store/events';
@@ -47,6 +47,8 @@ export default function CalendarScreen() {
   const ym = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
   const eventDays = useEventDaysInMonth(ym);
   const eventDots = useEventDotsInMonth(ym);
+  /** 칸마다 첫 일정 제목 한 줄 — 점만으로는 무슨 일정인지 알 수 없어서 */
+  const eventPeeks = useFirstTitlesInMonth(ym);
   const selectedEvents = useEventsOn(selectedDate);
 
   const [showDetail, setShowDetail] = useState<CalendarEvent | null>(null);
@@ -537,13 +539,27 @@ export default function CalendarScreen() {
                   todayCell && styles.todayText,
                   selected && !todayCell && styles.selectedText,
                 ]}>{day}</Text>
-                {eventDays.has(dateOf(day)) && (
-                  <View style={styles.dotRow}>
-                    {(eventDots.get(dateOf(day)) ?? ['#4A8C6F']).map((c) => (
-                      <View key={c} style={[styles.eventIndicator, { backgroundColor: c }, todayCell && styles.eventIndicatorToday]} />
-                    ))}
-                  </View>
-                )}
+                {(() => {
+                  const peek = eventPeeks.get(dateOf(day));
+                  if (!peek) return null;
+                  return (
+                    <>
+                      {/* 첫 일정 제목 한 줄 — 오늘 칸은 초록 배경이라 흰 글씨로 */}
+                      <Text numberOfLines={1} ellipsizeMode="tail"
+                        style={[styles.peekTitle, { color: todayCell ? '#FFFFFF' : peek.color }]}>
+                        {peek.title}
+                      </Text>
+                      {/* 일정이 둘 이상이면 나머지는 점으로 */}
+                      {peek.count > 1 && eventDays.has(dateOf(day)) && (
+                        <View style={styles.dotRow}>
+                          {(eventDots.get(dateOf(day)) ?? ['#4A8C6F']).map((c) => (
+                            <View key={c} style={[styles.eventIndicator, { backgroundColor: c }, todayCell && styles.eventIndicatorToday]} />
+                          ))}
+                        </View>
+                      )}
+                    </>
+                  );
+                })()}
               </TouchableOpacity>
             );
           })}
@@ -623,13 +639,15 @@ const styles = StyleSheet.create({
   sundayColor: { color: '#C25A5A' },
   saturdayColor: { color: '#4A90C8' },
   calendarGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, marginBottom: 16 },
-  dayCell: { width: `${100 / 7}%`, aspectRatio: 1, justifyContent: 'center', alignItems: 'center', position: 'relative' as const },
-  todayCell: { backgroundColor: '#4A8C6F', borderRadius: 20 },
-  selectedCell: { backgroundColor: '#EFF6F1', borderRadius: 20 },
+  // 칸을 세로로 늘려(64) 날짜 아래 첫 일정 제목 한 줄이 들어가게 했다 (예전엔 정사각형 + 점만)
+  dayCell: { width: `${100 / 7}%`, height: 64, paddingTop: 6, paddingHorizontal: 2, justifyContent: 'flex-start', alignItems: 'center', position: 'relative' as const },
+  todayCell: { backgroundColor: '#4A8C6F', borderRadius: 12 },
+  selectedCell: { backgroundColor: '#EFF6F1', borderRadius: 12 },
   dayText: { fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
   todayText: { color: '#FFFFFF', fontWeight: '700', fontFamily: 'PretendardBold' },
   selectedText: { color: '#2D5A3F', fontWeight: '700' },
-  dotRow: { flexDirection: 'row', gap: 3, position: 'absolute' as const, bottom: '14%' },
+  peekTitle: { fontSize: 10, fontFamily: 'Pretendard', marginTop: 3, maxWidth: '100%', textAlign: 'center' },
+  dotRow: { flexDirection: 'row', gap: 3, position: 'absolute' as const, bottom: 5 },
   eventIndicator: { width: 5, height: 5, borderRadius: 3, backgroundColor: '#4A8C6F' },
   eventIndicatorToday: { backgroundColor: '#FFFFFF' },
 

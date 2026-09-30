@@ -213,9 +213,10 @@ export function PhotoGallery({ photos }: { photos: string[] }) {
 
 // ── 목록 카드: 작은 사진 ───────────────────────────────────
 /** `size`는 그 카드의 색 동그라미와 같은 크기로 — 사진이 있든 없든 줄이 가지런하게 */
-export function PhotoThumb({ photos, size = 48 }: { photos: string[]; size?: number }) {
+export function PhotoThumb({ photos, size = 48, height }: { photos: string[]; size?: number; height?: number }) {
   if (!photos.length) return null;
-  const box = { width: size, height: size };
+  // 책·영화 표지처럼 세로가 긴 자리는 height를 따로 준다. 안 주면 정사각형
+  const box = { width: size, height: height ?? size };
   return (
     <View style={box}>
       <PhotoImage path={photos[0]} style={[s.thumb, box]} />

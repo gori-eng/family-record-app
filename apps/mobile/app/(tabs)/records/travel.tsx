@@ -124,6 +124,9 @@ export default function TravelScreen() {
     setTimeout(() => openCreate(record), 260);
   };
 
+  // 목적지가 비면 저장 버튼을 흐리게. 검사는 handleSave가 한 번 더 한다
+  const canSave = !!formDest.trim();
+
   const handleSave = () => {
     const dest = formDest.trim();
     if (!dest) {
@@ -283,6 +286,8 @@ export default function TravelScreen() {
                 value={formDest}
                 onChangeText={setFormDest}
               />
+              <Text style={s.createLabel}>사진</Text>
+              <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>어떤 여행인가요?</Text>
               <View style={s.statusPicker}>
                 {['다녀옴', '계획 중', '가고 싶은'].map((st) => (
@@ -309,8 +314,6 @@ export default function TravelScreen() {
                   );
                 })}
               </View>
-              <Text style={s.createLabel}>사진</Text>
-              <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>한 줄 소감</Text>
               <TextInput
                 style={s.createInput}
@@ -328,7 +331,7 @@ export default function TravelScreen() {
                 value={formJournal}
                 onChangeText={setFormJournal}
               />
-              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
+              <TouchableOpacity style={[s.createSubmit, !canSave && s.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
               </TouchableOpacity>
               </ScrollView>
@@ -447,6 +450,7 @@ const s = StyleSheet.create({
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
+  submitDisabled: { opacity: 0.45 },
   divider: { height: 1, backgroundColor: '#EDE8DF', marginVertical: 14 },
   journalHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
   journalTitle: { fontSize: 14, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.2 },

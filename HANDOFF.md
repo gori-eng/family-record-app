@@ -3,7 +3,7 @@
 > **이 문서의 역할:** 다른 PC에서 이 프로젝트를 처음 열었을 때 **큰 그림**을 잡는 문서.
 > 상세한 작업 일지·규칙·TODO는 [`CLAUDE.md`](./CLAUDE.md)에 있다. 여기서는 요약하고 가리킨다.
 >
-> 최종 갱신: **2026-09-30 밤** (커밋 `4aeb7fd` 기준)
+> 최종 갱신: **2026-10-01 오전** (팔레트 C안·남은 검토 항목·00016)
 
 ---
 
@@ -169,7 +169,7 @@ pnpm --filter mobile exec expo start --web
 
 ### 남은 것 (우선순위 순)
 
-1. **`supabase/APPLY_LATEST.sql` Run (00014·00015)** — 캘린더 며칠짜리·자주 가는 곳, 역할 자리·고치기 권한·계정 삭제
+1. **`supabase/APPLY_LATEST.sql` Run (00014·00015·00016)** — 캘린더 며칠짜리·자주 가는 곳, 역할 자리·고치기 권한·계정 삭제, 합치기 때 장소도
 1-1. 대시보드 Redirect URLs에 `http://localhost:8081/reset-password`, `familog://reset-password` 등록 (비밀번호 재설정 메일)
 1-2. 처리방침·약관을 노션에 올리고 `apps/mobile/constants/legal.ts`에 주소
 2. **앱 아이콘·스플래시 그림** — 지금은 Expo 기본 그림. 1024×1024 PNG 하나가 필요하다 (코드로 못 만든다)

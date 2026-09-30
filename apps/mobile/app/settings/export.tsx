@@ -321,8 +321,23 @@ ${failed}장은 받지 못했어요. 인터넷을 확인하고 한 번 더 해�
           )}
         </View>
 
+        {/* 기록책 — 조부모에게는 이게 "familog가 없어도 열어볼 수 있어요"에 가장 가깝다. 그래서 맨 위 (검토 2026-09-30) */}
+        <TouchableOpacity style={[s.card, s.cardPrimary]} activeOpacity={0.8} onPress={() => {
+          if (!records.length) { showAlert('아직 책으로 엮을 기록이 없어요', '기록을 하나 남기고 다시 와주세요.'); return; }
+          setShowBook(true);
+        }}>
+          <View style={[s.icon, { backgroundColor: '#EFF6F1' }]}>
+            <FontAwesome name="book" size={20} color="#2D5A3F" />
+          </View>
+          <View style={s.info}>
+            <Text style={s.cardTitle}>기록책으로 만들기</Text>
+            <Text style={s.cardDesc}>표지와 차례가 있는 책으로 엮어요. 사진도 함께 넣고, 인쇄해서 부모님께 드릴 수도 있어요.</Text>
+          </View>
+          <FontAwesome name="chevron-right" size={12} color="#A39682" />
+        </TouchableOpacity>
+
         {/* JSON 내보내기 — 지금 진짜로 되는 것 */}
-        <TouchableOpacity style={[s.card, s.cardPrimary]} activeOpacity={0.8} onPress={handleExport}>
+        <TouchableOpacity style={s.card} activeOpacity={0.8} onPress={handleExport}>
           <View style={[s.icon, { backgroundColor: '#EFF6F1' }]}>
             <FontAwesome name="download" size={20} color="#2D5A3F" />
           </View>
@@ -356,21 +371,6 @@ ${failed}장은 받지 못했어요. 인터넷을 확인하고 한 번 더 해�
             </Text>
           )}
         </View>
-
-        {/* 기록책 — 표지·차례가 있는 책으로 엮어 PDF로 (2026-09-30) */}
-        <TouchableOpacity style={s.card} activeOpacity={0.8} onPress={() => {
-          if (!records.length) { showAlert('아직 책으로 엮을 기록이 없어요', '기록을 하나 남기고 다시 와주세요.'); return; }
-          setShowBook(true);
-        }}>
-          <View style={[s.icon, { backgroundColor: '#EFF6F1' }]}>
-            <FontAwesome name="book" size={20} color="#2D5A3F" />
-          </View>
-          <View style={s.info}>
-            <Text style={s.cardTitle}>기록책으로 만들기</Text>
-            <Text style={s.cardDesc}>표지와 차례가 있는 책으로 엮어요. 사진도 함께 넣고, 인쇄해서 부모님께 드릴 수도 있어요.</Text>
-          </View>
-          <FontAwesome name="chevron-right" size={12} color="#A39682" />
-        </TouchableOpacity>
 
         {/* 사진 모아 담기 — ZIP 한 파일로 (2026-09-30) */}
         <TouchableOpacity style={s.card} activeOpacity={0.8} onPress={handlePhotos} disabled={!!zipping}>

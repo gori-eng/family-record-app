@@ -104,6 +104,9 @@ export default function RecipesScreen() {
   /** 여러 줄로 적은 입력을 줄 단위 배열로 (빈 줄은 버린다) */
   const toLines = (v: string) => v.split('\n').map((l) => l.trim()).filter(Boolean);
 
+  // 요리 이름이 비면 저장 버튼을 흐리게. 검사는 handleSave가 한 번 더 한다
+  const canSave = !!formName.trim();
+
   const handleSave = () => {
     const name = formName.trim();
     if (!name) {
@@ -255,6 +258,8 @@ export default function RecipesScreen() {
               <Text style={s.createLabel}>레시피 이름</Text>
               <TextInput style={s.createInput} placeholder="예) 할머니 장조림" placeholderTextColor="#A39682"
                 value={formName} onChangeText={setFormName} />
+              <Text style={s.createLabel}>완성 사진</Text>
+              <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>누구에게 배웠나요?</Text>
               <TextInput style={s.createInput} placeholder="예) 할머니께 배웠어요" placeholderTextColor="#A39682"
                 value={formOrigin} onChangeText={setFormOrigin} />
@@ -274,8 +279,6 @@ export default function RecipesScreen() {
               <Text style={s.createLabel}>걸리는 시간</Text>
               <TextInput style={s.createInput} placeholder="예) 30분" placeholderTextColor="#A39682"
                 value={formTime} onChangeText={setFormTime} />
-              <Text style={s.createLabel}>완성 사진</Text>
-              <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>재료</Text>
               <TextInput
                 style={[s.createInput, { height: 110, textAlignVertical: 'top' }]}
@@ -303,7 +306,7 @@ export default function RecipesScreen() {
                 value={formTip}
                 onChangeText={setFormTip}
               />
-              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
+              <TouchableOpacity style={[s.createSubmit, !canSave && s.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
               </TouchableOpacity>
               </ScrollView>
@@ -328,7 +331,7 @@ export default function RecipesScreen() {
               <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
                 onPress={() => openDetail({ ...r, id: record.id })}>
                 {/* 완성 사진이 있으면 그 사진, 없으면 색 동그라미 */}
-                {photosOf(r).length ? <PhotoThumb photos={photosOf(r)} size={52} /> : (
+                {photosOf(r).length ? <PhotoThumb photos={photosOf(r)} size={56} /> : (
                   <View style={[s.recipeIcon, { backgroundColor: r.color }]}>
                     <FontAwesome name={r.icon as any} size={20} color="#FFFFFF" />
                   </View>
@@ -385,7 +388,7 @@ const s = StyleSheet.create({
   statLabel: { fontSize: 12, color: '#7A6B55', marginTop: 2, fontFamily: 'Pretendard' },
   list: { paddingHorizontal: 20 },
   card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
-  recipeIcon: { width: 52, height: 52, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
+  recipeIcon: { width: 56, height: 56, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
   name: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', marginBottom: 2, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   origin: { fontSize: 12, color: '#7A6B55', marginBottom: 6, fontFamily: 'Pretendard' },
@@ -413,6 +416,7 @@ const s = StyleSheet.create({
   pillTextActive: { color: '#FFFFFF' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
+  submitDisabled: { opacity: 0.45 },
 
   sectionDivider: { height: 1, backgroundColor: '#EDE8DF', marginVertical: 14 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },

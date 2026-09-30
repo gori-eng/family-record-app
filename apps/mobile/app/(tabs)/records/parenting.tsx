@@ -114,6 +114,9 @@ export default function ParentingScreen() {
     setTimeout(() => openForm(record), 260);
   };
 
+  // 필수 칸(아이·제목·날짜)이 비면 저장 버튼을 흐리게. 검사는 handleSave가 한 번 더 한다
+  const canSave = !!formChild.trim() && !!formTitle.trim() && !!parseLooseDate(formDate);
+
   const handleSave = () => {
     const child = formChild.trim();
     if (!child) {
@@ -299,6 +302,8 @@ export default function ParentingScreen() {
                 value={formTitle}
                 onChangeText={setFormTitle}
               />
+              <Text style={styles.createLabel}>사진</Text>
+              <PhotoPickerRow draft={photoDraft} />
               <Text style={styles.createLabel}>내용</Text>
               <TextInput
                 style={[styles.createInput, { height: 100, textAlignVertical: 'top' }]}
@@ -309,8 +314,6 @@ export default function ParentingScreen() {
                 value={formContent}
                 onChangeText={setFormContent}
               />
-              <Text style={styles.createLabel}>사진</Text>
-              <PhotoPickerRow draft={photoDraft} />
               <Text style={styles.createLabel}>처음 해낸 일이 있었나요?</Text>
               <TextInput
                 style={styles.createInput}
@@ -319,7 +322,7 @@ export default function ParentingScreen() {
                 value={formMilestones}
                 onChangeText={setFormMilestones}
               />
-              <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={handleSave}>
+              <TouchableOpacity style={[styles.createSubmit, !canSave && styles.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={styles.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
               </TouchableOpacity>
             </ScrollView>
@@ -387,7 +390,7 @@ export default function ParentingScreen() {
                   <Text style={styles.entryTitle}>{record.title}</Text>
                   {entry.content ? <Text style={styles.entryText} numberOfLines={2}>{entry.content}</Text> : null}
                   {photosOf(entry).length ? (
-                    <View style={styles.entryPhoto}><PhotoThumb photos={photosOf(entry)} /></View>
+                    <View style={styles.entryPhoto}><PhotoThumb photos={photosOf(entry)} size={56} /></View>
                   ) : null}
                   {(entry.milestones ?? []).length > 0 && (
                     <View style={styles.entryFooter}>
@@ -478,4 +481,5 @@ const styles = StyleSheet.create({
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
+  submitDisabled: { opacity: 0.45 },
 });

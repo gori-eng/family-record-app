@@ -1,8 +1,9 @@
 import { iga } from '../lib/korean';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, StyleSheet, Platform, Share } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { inviteMessage } from '../constants/links';
 import { createFamily, joinFamilyByCode, fetchMembers } from '@core/supabase';
 import type { Family, FamilyMember } from '@core/supabase';
 import { showAlert } from './AppAlert';
@@ -25,20 +26,28 @@ type Mode = 'choose' | 'create' | 'join';
 /** 알림창에서 문단을 띄울 때 */
 const BR = String.fromCharCode(10, 10);
 
-export default function FamilySetup({ adding = false }: { adding?: boolean }) {
+export default function FamilySetup({ adding = false, initialCode }: { adding?: boolean; initialCode?: string }) {
   const router = useRouter();
   const userId = useSession((s) => s.userId);
   const setFamily = useSession((s) => s.setFamily);
+  /**
+   * 초대 링크(`familog://join?code=…`)로 들어왔으면 주소에 코드가 실려 온다 (`app/join.tsx`).
+   * 그때는 고르는 화면을 건너뛰고 '초대 코드로 들어가기'를 코드가 채워진 채로 연다
+   */
+  const params = useLocalSearchParams<{ code?: string }>();
+  const codeFromLink = (initialCode ?? (typeof params.code === 'string' ? params.code : ''))?.trim().toUpperCase() ?? '';
 
-  const [mode, setMode] = useState<Mode>('choose');
+  const [mode, setMode] = useState<Mode>(codeFromLink ? 'join' : 'choose');
   const [busy, setBusy] = useState(false);
 
   const [familyName, setFamilyName] = useState('');
-  const [inviteCode, setInviteCode] = useState('');
-  /** 기록에 뜰 짧은 이름 (지수) */
+  const [inviteCode, setInviteCode] = useState(codeFromLink);
+  /**
+   * 이름 한 칸 — 기록에 남는 짧은 이름(display_name)이자 프로필 이름(full_name).
+   * 예전엔 두 칸(짧은 이름 + 전체 이름)을 물었는데 처음 가입하는 사람에게는 부담이라 하나로 줄였다.
+   * 프로필 이름은 나중에 프로필 화면에서 따로 바꿀 수 있다
+   */
   const [display, setDisplay] = useState('');
-  /** 프로필에 뜰 이름 (김지수) */
-  const [full, setFull] = useState('');
   /**
    * 합류할 때 고르는 역할 (2026-09-29 운영자 결정).
    * 관리자는 목록에 없다 — 고를 수 있으면 누구나 관리자가 되어 지우기 권한이 무너진다.
@@ -89,10 +98,10 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
     return msg;
   };
 
-  /** 이름 두 칸 검사 — 두 화면이 같이 쓴다 */
+  /** 이름 검사 — 만들기·들어가기 둘 다 쓴다 */
   const checkNames = (): string | null => {
-    if (!display.trim()) return '기록에 뜰 이름을 적어주세요. 짧게 부르는 이름이 좋아요.';
-    if (display.trim().length > 10) return '기록에 뜰 이름은 10글자까지예요. 매일 화면에 뜨는 이름이라 짧을수록 좋아요.';
+    if (!display.trim()) return '기록에 남을 이름을 적어주세요. 가족이 부르는 이름이면 돼요.';
+    if (display.trim().length > 10) return '기록에 남을 이름은 10글자까지예요. 매일 화면에 뜨는 이름이라 짧을수록 좋아요.';
     // 가계부 거래 지문이 '이름|날짜|…' 모양이라 | 가 섞이면 지문이 깨진다 (DB도 막는다 — 00013)
     if (display.includes('|')) return '이름에 | 기호는 쓸 수 없어요.';
     return null;
@@ -118,8 +127,9 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
 
     setBusy(true);
     try {
+      // 프로필 이름도 같은 이름으로 — 한 칸만 묻기로 했다
       const { family, member } = await createFamily(
-        familyName.trim(), display.trim(), userId!, full.trim() || undefined, role
+        familyName.trim(), display.trim(), userId!, display.trim(), role
       );
       setFamily(family, [member]);
       setMadeFamily(family);
@@ -141,7 +151,7 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
 
     setBusy(true);
     try {
-      const { family } = await joinFamilyByCode(inviteCode.trim(), display.trim(), full.trim() || undefined, role);
+      const { family } = await joinFamilyByCode(inviteCode.trim(), display.trim(), display.trim(), role);
       const members: FamilyMember[] = await fetchMembers(family.id);
       setFamily(family, members);
       showAlert('가족에 들어왔어요', `이제 ${family.name}의 기록을 함께 볼 수 있어요.`, [
@@ -156,10 +166,12 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
 
   const copyCode = async () => {
     if (!madeFamily) return;
+    // 코드만이 아니라 앱 주소(familog://join?code=…)까지 담긴 초대 글 — 받는 사람이 누르면 바로 들어온다
+    const message = inviteMessage(madeFamily.name, madeFamily.invite_code);
     if (Platform.OS === 'web') {
       try {
-        await navigator.clipboard.writeText(madeFamily.invite_code);
-        showAlert('코드를 복사했어요', '가족에게 보내주세요.');
+        await navigator.clipboard.writeText(message);
+        showAlert('초대 글을 복사했어요', '카톡이나 문자에 붙여 가족에게 보내주세요.');
         return;
       } catch {
         /* 복사가 막힌 브라우저도 있다 — 아래 안내로 넘어간다 */
@@ -169,7 +181,7 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
     }
     // 휴대폰 — 공유 시트로 카톡·문자에 바로 보낸다 (예전엔 웹 전용 복사라 알림창만 떴다, 점검 B12)
     try {
-      await Share.share({ message: `우리 가족 기록장에 같이 적어요. familog 앱을 열고 초대 코드 ${madeFamily.invite_code}를 넣으면 들어올 수 있어요.` });
+      await Share.share({ message });
     } catch {
       showAlert('초대 코드', madeFamily.invite_code);
     }
@@ -298,17 +310,10 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
         </>
       )}
 
-      <Text style={s.label}>기록에 뜰 이름</Text>
+      <Text style={s.label}>기록에 남을 이름</Text>
       <TextInput style={s.input} placeholder="예) 지수" placeholderTextColor="#A39682"
-        value={display} onChangeText={setDisplay} />
-      <Text style={s.hint}>
-        가계부나 일기에 "누가 썼는지"로 뜨는 이름이에요. 가족 안에서 겹치지 않게, 짧게 부르는 이름이 좋아요.
-      </Text>
-
-      <Text style={s.label}>프로필에 뜰 이름</Text>
-      <TextInput style={s.input} placeholder="예) 김지수" placeholderTextColor="#A39682"
-        value={full} onChangeText={setFull} />
-      <Text style={s.hint}>비워두면 위에 적은 이름을 그대로 써요.</Text>
+        value={display} onChangeText={setDisplay} maxLength={10} />
+      <Text style={s.hint}>가족이 부르는 이름이면 돼요. 프로필 이름은 나중에 바꿀 수 있어요.</Text>
 
       <TouchableOpacity
         style={[s.primaryBtn, busy && s.primaryBtnOff]}

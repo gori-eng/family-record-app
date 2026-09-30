@@ -105,6 +105,11 @@ function HealthScreen() {
     setTimeout(() => openCreate(record), 260);
   };
 
+  // 누구·어떤 검진이 비거나 날짜를 못 알아들으면 저장 버튼을 흐리게. 검사는 handleSave가 한 번 더 한다
+  const canSave = !!createMember && !!formType.trim()
+    && (!formDate.trim() || parseLooseDate(formDate) !== null)
+    && (!formNext.trim() || parseLooseDate(formNext) !== null);
+
   const handleSave = () => {
     const type = formType.trim();
     if (!type) {
@@ -179,10 +184,13 @@ function HealthScreen() {
                     <Text style={s.modalLabel}>누구의 기록</Text>
                     <Text style={s.modalValue}>{selectedItem.member}{selectedItem.member === CURRENT_USER ? ' (나)' : ''}</Text>
                   </View>
-                  <View style={s.modalRow}>
-                    <Text style={s.modalLabel}>적은 사람</Text>
-                    <Text style={s.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
-                  </View>
+                  {/* 본인 기록을 본인이 적었으면 같은 이름을 두 번 보여주지 않는다 */}
+                  {selectedItem.recordedBy !== selectedItem.member ? (
+                    <View style={s.modalRow}>
+                      <Text style={s.modalLabel}>적은 사람</Text>
+                      <Text style={s.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
+                    </View>
+                  ) : null}
                   {selectedItem.date ? (
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>받은 날</Text>
@@ -262,7 +270,7 @@ function HealthScreen() {
               <Text style={s.createLabel}>메모</Text>
               <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="처방이나 의사 선생님 말씀을 적어두세요" placeholderTextColor="#A39682" multiline
                 value={formNotes} onChangeText={setFormNotes} />
-              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
+              <TouchableOpacity style={[s.createSubmit, !canSave && s.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
               </TouchableOpacity>
             </ScrollView>
@@ -350,7 +358,7 @@ const s = StyleSheet.create({
   upcomingText: { fontSize: 12, color: '#2D5A3F', lineHeight: 18, fontFamily: 'PretendardBold' },
   list: { paddingHorizontal: 20, paddingTop: 16 },
   card: { flexDirection: 'row', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
-  icon: { width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
+  icon: { width: 56, height: 56, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
   memberName: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
@@ -374,6 +382,7 @@ const s = StyleSheet.create({
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
+  submitDisabled: { opacity: 0.45 },
   memberRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
   memberPill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF' },
   memberPillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },

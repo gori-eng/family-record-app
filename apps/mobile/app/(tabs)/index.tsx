@@ -10,6 +10,7 @@ import { useTodayEvents, useEventsStore, formatTime, membersLabel, dayIndexOf, t
 import { useFamilyNews, type NewsItem } from '../../store/news';
 import { LoadingRows, useRecordsReady, useEventsReady } from '../../components/Loading';
 import { CATEGORY_UI } from '../../constants/categoryUi';
+import { inviteMessage } from '../../constants/links';
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 
 /*
@@ -206,7 +207,7 @@ export default function HomeScreen() {
         {familyInfo.isReal && familyInfo.memberCount === 1 && !!familyInfo.inviteCode && (
           <TouchableOpacity style={s.inviteCard} activeOpacity={0.8} onPress={async () => {
             try {
-              await Share.share({ message: `우리 가족 기록장에 같이 적어요. familog 앱을 열고 초대 코드 ${familyInfo.inviteCode}를 넣으면 들어올 수 있어요.` });
+              await Share.share({ message: inviteMessage(familyInfo.name, familyInfo.inviteCode!) });
             } catch {
               router.push('/settings/members' as any);
             }

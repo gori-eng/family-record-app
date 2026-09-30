@@ -27,8 +27,8 @@
 // 2026-09-29 켰다 — 마이그레이션 적용·로그인·가족 만들기·기록 DB 저장까지 확인한 뒤
 export const REQUIRE_AUTH = true;
 
-/** 지금 보고 있는 화면이 어느 묶음인지 */
-export type Where = 'auth' | 'onboarding' | 'app';
+/** 지금 보고 있는 화면이 어느 묶음인지. `join`은 초대 링크로 들어온 자리(`app/join.tsx`) */
+export type Where = 'auth' | 'onboarding' | 'app' | 'join';
 
 export type GateState = {
   /** 로그인 여부 확인이 끝났는지. 끝나기 전에는 아무 판단도 하지 않는다 */
@@ -61,6 +61,10 @@ export function decideRoute(state: GateState, requireAuth = REQUIRE_AUTH): strin
     return state.where === 'auth' ? null : LOGIN;
   }
 
+  // 초대 링크로 들어왔다 → 그 화면이 스스로 온보딩이나 가족 더하기로 보낸다.
+  // 여기서 먼저 밀어내면 주소에 실린 초대 코드가 사라진다
+  if (state.where === 'join') return null;
+
   // 로그인은 했는데 가족을 아직 못 불러왔다 → 기다린다
   if (!state.familyReady) return null;
 
@@ -83,5 +87,6 @@ export function whereOfRoute(route: string): Where {
 export function whereFrom(segments: string[]): Where {
   if (segments[0] === '(auth)') return 'auth';
   if (segments[0] === 'onboarding') return 'onboarding';
+  if (segments[0] === 'join') return 'join';
   return 'app';
 }

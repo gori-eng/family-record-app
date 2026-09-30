@@ -144,6 +144,9 @@ export default function ReadingScreen() {
     closeDetail();
   };
 
+  // 책 제목이 비면 저장 버튼을 흐리게. 검사는 handleCreate가 한 번 더 한다
+  const canSave = !!formTitle.trim();
+
   const handleCreate = () => {
     const title = formTitle.trim();
     if (!title) {
@@ -226,10 +229,13 @@ export default function ReadingScreen() {
                     <Text style={styles.modalLabel}>읽는 사람</Text>
                     <Text style={styles.modalValue}>{selectedItem.reader}</Text>
                   </View>
-                  <View style={styles.modalRow}>
-                    <Text style={styles.modalLabel}>적은 사람</Text>
-                    <Text style={styles.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
-                  </View>
+                  {/* 읽는 사람이 곧 적은 사람이면 같은 이름을 두 번 보여주지 않는다 */}
+                  {selectedItem.recordedBy !== selectedItem.reader ? (
+                    <View style={styles.modalRow}>
+                      <Text style={styles.modalLabel}>적은 사람</Text>
+                      <Text style={styles.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
+                    </View>
+                  ) : null}
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>상태</Text>
                     <View style={[styles.statusBadge, {
@@ -364,8 +370,6 @@ export default function ReadingScreen() {
                 value={formTitle}
                 onChangeText={setFormTitle}
               />
-              <Text style={styles.createLabel}>표지나 밑줄 친 페이지</Text>
-              <PhotoPickerRow draft={photoDraft} />
               <Text style={styles.createLabel}>지은이</Text>
               <TextInput
                 style={styles.createInput}
@@ -374,6 +378,8 @@ export default function ReadingScreen() {
                 value={formAuthor}
                 onChangeText={setFormAuthor}
               />
+              <Text style={styles.createLabel}>표지나 밑줄 친 페이지</Text>
+              <PhotoPickerRow draft={photoDraft} />
               <Text style={styles.createLabel}>읽는 사람</Text>
               <View style={styles.pillRow}>
                 {MEMBERS.map(m => (
@@ -401,7 +407,7 @@ export default function ReadingScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={handleCreate}>
+              <TouchableOpacity style={[styles.createSubmit, !canSave && styles.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleCreate}>
                 <Text style={styles.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
               </TouchableOpacity>
             </ScrollView>
@@ -456,7 +462,7 @@ export default function ReadingScreen() {
                 onPress={() => openDetail(record)}
               >
                 {/* 사진이 있으면 첫 사진(표지), 없으면 색 표지 */}
-                {photosOf(book).length ? <PhotoThumb photos={photosOf(book)} size={56} /> : (
+                {photosOf(book).length ? <PhotoThumb photos={photosOf(book)} size={56} height={76} /> : (
                   <View style={[styles.bookCover, { backgroundColor: book.color }]}>
                     <FontAwesome name="book" size={24} color="#5C4A32" />
                   </View>
@@ -550,7 +556,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
   bookCover: {
-    width: 56, height: 72, borderRadius: 8,
+    width: 56, height: 76, borderRadius: 8,
     justifyContent: 'center', alignItems: 'center',
   },
   bookInfo: { flex: 1 },
@@ -612,4 +618,5 @@ const styles = StyleSheet.create({
   ratingEditText: { fontSize: 13, color: '#7A6B55', marginLeft: 6, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
+  submitDisabled: { opacity: 0.45 },
 });

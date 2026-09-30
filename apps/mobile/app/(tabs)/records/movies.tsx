@@ -118,6 +118,9 @@ export default function MoviesScreen() {
     setTimeout(() => openCreate(record), 260);
   };
 
+  // 제목이 비거나(봤다면) 날짜를 못 알아들으면 저장 버튼을 흐리게. 검사는 handleSave가 한 번 더 한다
+  const canSave = !!formTitle.trim() && (!formWatched || !formDate.trim() || !!parseLooseDate(formDate));
+
   const handleSave = () => {
     const title = formTitle.trim();
     if (!title) {
@@ -312,6 +315,8 @@ export default function MoviesScreen() {
                 value={formTitle}
                 onChangeText={setFormTitle}
               />
+              <Text style={s.createLabel}>티켓이나 포스터 사진</Text>
+              <PhotoPickerRow draft={photoDraft} />
               <View style={s.pillRow}>
                 {([['봤어요', true], ['아직 안 봤어요', false]] as const).map(([label, val]) => (
                   <TouchableOpacity key={label} style={[s.chip, formWatched === val && s.chipActive]} activeOpacity={0.7}
@@ -320,8 +325,6 @@ export default function MoviesScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              <Text style={s.createLabel}>티켓이나 포스터 사진</Text>
-              <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>장르</Text>
               <TextInput
                 style={s.createInput}
@@ -372,7 +375,7 @@ export default function MoviesScreen() {
               ) : (
                 <Text style={s.authorHint}>보고 싶은 영화로 담아둘게요. 보고 나서 별을 매기면 본 영화로 옮겨가요.</Text>
               )}
-              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
+              <TouchableOpacity style={[s.createSubmit, !canSave && s.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : formWatched ? '저장하기' : '보고 싶은 영화로 담기'}</Text>
               </TouchableOpacity>
             </ScrollView>
@@ -468,7 +471,7 @@ const s = StyleSheet.create({
   chipTextActive: { color: '#FFFFFF' },
   list: { paddingHorizontal: 20 },
   card: { flexDirection: 'row', gap: 14, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
-  poster: { width: 64, height: 88, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  poster: { width: 56, height: 76, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
   title: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', marginBottom: 2, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   genre: { fontSize: 12, color: '#7A6B55', marginBottom: 6, fontFamily: 'Pretendard' },
@@ -495,6 +498,7 @@ const s = StyleSheet.create({
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
+  submitDisabled: { opacity: 0.45 },
   memberRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
   memberPill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF' },
   memberPillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },

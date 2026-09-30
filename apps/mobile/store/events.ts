@@ -300,6 +300,40 @@ export function useEventDotsInMonth(ym: string): Map<string, string[]> {
   }, [events, ym]);
 }
 
+/** 달력 칸에 살짝 보여줄 그 날의 첫 일정 — 제목·색·그 날 일정 수 */
+export type DayPeek = { title: string; color: string; count: number };
+
+/**
+ * 그 달의 날짜마다 **첫 일정 제목** (시간순 첫 번째) — 달력 칸 아래 한 줄로 보여준다.
+ * 며칠짜리 일정은 그 사이 날마다 들어간다(`coversDay`와 같은 규칙).
+ * 점만으로는 "무슨 일정인지" 눌러봐야 알 수 있어서, 제목 한 줄을 먼저 보여준다.
+ */
+export function useFirstTitlesInMonth(ym: string): Map<string, DayPeek> {
+  const events = useEventsStore((s) => s.events);
+  return useMemo(() => {
+    const peek = new Map<string, DayPeek>();
+    // 하루 종일 일정이 먼저, 그 다음 이른 시간순 — 그 날 목록과 같은 순서
+    const sorted = [...events].sort(byTime);
+    for (const e of sorted) {
+      const end = e.endDate && e.endDate > e.date ? e.endDate : e.date;
+      if (end < `${ym}-01` || e.date > `${ym}-31`) continue;
+      const d = new Date(`${e.date}T00:00:00`);
+      const last = new Date(`${end}T00:00:00`);
+      const c = eventColor(e);
+      while (d <= last) {
+        const iso = toISO(d);
+        if (iso.startsWith(ym)) {
+          const cur = peek.get(iso);
+          if (cur) cur.count += 1;
+          else peek.set(iso, { title: e.title, color: c, count: 1 });
+        }
+        d.setDate(d.getDate() + 1);
+      }
+    }
+    return peek;
+  }, [events, ym]);
+}
+
 /**
  * 그 달에 일정이 있는 날짜들 — 달력 칸 아래 점을 찍는 데 쓴다.
  * `ym`은 `YYYY-MM`.

@@ -217,6 +217,8 @@ function RootLayoutNav() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="onboarding" options={{ presentation: 'modal' }} />
+        {/* 초대 링크(familog://join?code=…)가 닿는 자리 — 알맞은 화면으로 넘겨준다 */}
+        <Stack.Screen name="join" />
       </Stack>
     </>
   );

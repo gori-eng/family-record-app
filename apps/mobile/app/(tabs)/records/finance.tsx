@@ -153,6 +153,9 @@ function FinanceScreen() {
     }
   };
 
+  // 금액이 0이거나 날짜가 이상하면 저장 버튼을 흐리게. 검사는 handleSave가 한 번 더 한다
+  const canSave = parseAmount(formAmount) > 0 && isISODate(formDate);
+
   const handleSave = () => {
     const amount = parseAmount(formAmount);
     if (amount <= 0) {
@@ -671,7 +674,7 @@ function FinanceScreen() {
                   onChangeText={setFormMemo}
                 />
 
-                <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={handleSave}>
+                <TouchableOpacity style={[styles.createSubmit, !canSave && styles.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
                   <Text style={styles.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
                 </TouchableOpacity>
               </ScrollView>
@@ -1295,6 +1298,7 @@ const styles = StyleSheet.create({
   pillTextActive: { color: '#FFFFFF' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
+  submitDisabled: { opacity: 0.45 },
 });
 
 // 아이 계정에는 보이지 않는다 (DB 00010과 같은 규칙)

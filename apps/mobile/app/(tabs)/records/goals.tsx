@@ -99,6 +99,9 @@ export default function GoalsScreen() {
     setTimeout(() => openCreate(record), 260);
   };
 
+  // 목표가 비면 저장 버튼을 흐리게. 검사는 handleSave가 한 번 더 한다
+  const canSave = !!formTitle.trim();
+
   const handleSave = () => {
     const title = formTitle.trim();
     if (!title) {
@@ -327,6 +330,8 @@ export default function GoalsScreen() {
               <Text style={s.createLabel}>어떤 목표인가요?</Text>
               <TextInput style={s.createInput} placeholder="예) 올해 가족 여행 세 번 가기" placeholderTextColor="#A39682"
                 value={formTitle} onChangeText={setFormTitle} />
+              <Text style={s.createLabel}>사진</Text>
+              <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>설명</Text>
               <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="왜 하고 싶은지, 어떻게 할지 적어도 좋아요" placeholderTextColor="#A39682" multiline
                 value={formDesc} onChangeText={setFormDesc} />
@@ -342,8 +347,6 @@ export default function GoalsScreen() {
                 placeholderTextColor="#A39682"
                 multiline
               />
-              <Text style={s.createLabel}>사진</Text>
-              <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>메모</Text>
               <TextInput
                 style={[s.createInput, { height: 80, textAlignVertical: 'top' }]}
@@ -353,7 +356,7 @@ export default function GoalsScreen() {
                 placeholderTextColor="#A39682"
                 multiline
               />
-              <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
+              <TouchableOpacity style={[s.createSubmit, !canSave && s.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
               </TouchableOpacity>
               </ScrollView>
@@ -467,6 +470,7 @@ const s = StyleSheet.create({
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   createSubmit: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center' as const, marginTop: 8 },
   createSubmitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
+  submitDisabled: { opacity: 0.45 },
   divider: { height: 1, backgroundColor: '#EDE8DF', marginVertical: 14 },
   subHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
   subTitle: { fontSize: 14, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
