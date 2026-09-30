@@ -210,7 +210,7 @@ export default function ParentingScreen() {
                   </View>
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>적은 사람</Text>
-                    <Text style={styles.modalValue}>{selected.recordedBy === CURRENT_USER ? '나' : selected.recordedBy}</Text>
+                    <Text style={styles.modalValue}>{selected.recordedBy}{selected.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
                   </View>
                   {sel.content ? (
                     <View style={styles.modalRow}>

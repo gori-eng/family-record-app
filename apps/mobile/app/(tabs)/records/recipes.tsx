@@ -182,7 +182,7 @@ export default function RecipesScreen() {
                     ) : null}
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>적은 사람</Text>
-                      <Text style={s.modalValue}>{selectedItem.author === CURRENT_USER ? '나' : selectedItem.author}</Text>
+                      <Text style={s.modalValue}>{selectedItem.author}{selectedItem.author === CURRENT_USER ? ' (나)' : ''}</Text>
                     </View>
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>난이도</Text>

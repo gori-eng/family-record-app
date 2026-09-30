@@ -269,7 +269,7 @@ export default function MoviesScreen() {
                   )}
                   <View style={s.modalRow}>
                     <Text style={s.modalLabel}>적은 사람</Text>
-                    <Text style={s.modalValue}>{selected.recordedBy === CURRENT_USER ? '나' : selected.recordedBy}</Text>
+                    <Text style={s.modalValue}>{selected.recordedBy}{selected.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
                   </View>
                   {sel.review ? (
                     <View style={s.modalRow}>

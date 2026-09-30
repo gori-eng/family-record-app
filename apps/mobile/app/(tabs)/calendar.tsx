@@ -275,7 +275,7 @@ export default function CalendarScreen() {
                   <View>
                     <Text style={styles.detailLabel}>적어둔 사람</Text>
                     <Text style={styles.detailValue}>
-                      {showDetail.createdBy === CURRENT_USER ? '나' : showDetail.createdBy}
+                      {showDetail.createdBy}{showDetail.createdBy === CURRENT_USER ? ' (나)' : ''}
                     </Text>
                   </View>
                 </View>

@@ -222,7 +222,7 @@ export default function TimeCapsuleScreen() {
                     </View>
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>쓴 사람</Text>
-                      <Text style={s.modalValue}>{sel.author === CURRENT_USER ? '나' : sel.author}</Text>
+                      <Text style={s.modalValue}>{sel.author}{sel.author === CURRENT_USER ? ' (나)' : ''}</Text>
                     </View>
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>봉인한 날</Text>

@@ -225,7 +225,7 @@ export default function ReadingScreen() {
                   </View>
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>적은 사람</Text>
-                    <Text style={styles.modalValue}>{selectedItem.recordedBy === CURRENT_USER ? '나' : selectedItem.recordedBy}</Text>
+                    <Text style={styles.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
                   </View>
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>상태</Text>
@@ -382,7 +382,7 @@ export default function ReadingScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              <Text style={styles.authorHint}>내가 적는 기록이에요</Text>
+              <Text style={styles.authorHint}>적는 사람: {CURRENT_USER} (나)</Text>
               <Text style={styles.createLabel}>상태</Text>
               <View style={styles.pillRow}>
                 {(['읽고 싶은', '읽는 중', '완독'] as const).map(label => (

@@ -215,7 +215,7 @@ export default function TravelScreen() {
                     ) : null}
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>적은 사람</Text>
-                      <Text style={s.modalValue}>{selectedItem.recordedBy === CURRENT_USER ? '나' : selectedItem.recordedBy}</Text>
+                      <Text style={s.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
                     </View>
                     {selectedItem.highlight ? (
                       <View style={s.modalRow}>

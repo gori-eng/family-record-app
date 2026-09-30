@@ -455,7 +455,7 @@ function FinanceScreen() {
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>쓴 사람</Text>
                     <Text style={styles.modalValue}>
-                      {(sel.ownerMember || selectedRecord.recordedBy) === CURRENT_USER ? '나' : (sel.ownerMember || selectedRecord.recordedBy)}
+                      {sel.ownerMember || selectedRecord.recordedBy}{(sel.ownerMember || selectedRecord.recordedBy) === CURRENT_USER ? ' (나)' : ''}
                     </Text>
                   </View>
                   {/* 기록한 사람이 쓴 사람과 다를 때만 보여준다 */}
@@ -654,7 +654,7 @@ function FinanceScreen() {
                       activeOpacity={0.7}
                       onPress={() => setFormOwner(m)}>
                       <Text style={[styles.catChipText, formOwner === m && styles.catChipTextActive]}>
-                        {m === CURRENT_USER ? '나' : m}
+                        {m}{m === CURRENT_USER ? ' (나)' : ''}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -780,18 +780,18 @@ function FinanceScreen() {
 
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
-                <Text style={styles.summaryLabel}>들어온 돈</Text>
+                <Text style={styles.summaryLabel}>수입</Text>
                 <Text style={[styles.summaryAmount, { color: '#4AA86B' }]}>{summary.income ? '+' : ''}{comma(summary.income)}원</Text>
               </View>
               <View style={styles.summaryDivider} />
               <View style={styles.summaryItem}>
-                <Text style={styles.summaryLabel}>나간 돈</Text>
+                <Text style={styles.summaryLabel}>지출</Text>
                 <Text style={[styles.summaryAmount, { color: '#4A8C6F' }]}>{summary.expense ? '-' : ''}{comma(summary.expense)}원</Text>
               </View>
             </View>
 
             <View style={styles.balanceRow}>
-              <Text style={styles.balanceLabel}>남은 돈</Text>
+              <Text style={styles.balanceLabel}>잔액</Text>
               <Text style={styles.balanceAmount}>{comma(summary.balance)}원</Text>
             </View>
 

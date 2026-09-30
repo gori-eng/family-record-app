@@ -173,11 +173,11 @@ function HealthScreen() {
                   <Text style={s.modalTitle}>{selectedItem.member}의 {selectedItem.type}</Text>
                   <View style={s.modalRow}>
                     <Text style={s.modalLabel}>누구의 기록</Text>
-                    <Text style={s.modalValue}>{selectedItem.member === CURRENT_USER ? '나' : selectedItem.member}</Text>
+                    <Text style={s.modalValue}>{selectedItem.member}{selectedItem.member === CURRENT_USER ? ' (나)' : ''}</Text>
                   </View>
                   <View style={s.modalRow}>
                     <Text style={s.modalLabel}>적은 사람</Text>
-                    <Text style={s.modalValue}>{selectedItem.recordedBy === CURRENT_USER ? '나' : selectedItem.recordedBy}</Text>
+                    <Text style={s.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
                   </View>
                   {selectedItem.date ? (
                     <View style={s.modalRow}>
@@ -242,7 +242,7 @@ function HealthScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              <Text style={s.authorHint}>내가 적는 기록이에요</Text>
+              <Text style={s.authorHint}>적는 사람: {CURRENT_USER} (나)</Text>
               <Text style={s.createLabel}>어떤 검진이었나요?</Text>
               <TextInput style={s.createInput} placeholder="예) 치과 정기검진" placeholderTextColor="#BFAE99"
                 value={formType} onChangeText={setFormType} />
