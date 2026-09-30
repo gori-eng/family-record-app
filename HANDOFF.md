@@ -3,7 +3,7 @@
 > **이 문서의 역할:** 다른 PC에서 이 프로젝트를 처음 열었을 때 **큰 그림**을 잡는 문서.
 > 상세한 작업 일지·규칙·TODO는 [`CLAUDE.md`](./CLAUDE.md)에 있다. 여기서는 요약하고 가리킨다.
 >
-> 최종 갱신: **2026-09-30 저녁** (커밋 `62c7d0a` 기준)
+> 최종 갱신: **2026-09-30 밤** (커밋 `4aeb7fd` 기준)
 
 ---
 
@@ -169,8 +169,9 @@ pnpm --filter mobile exec expo start --web
 
 ### 남은 것 (우선순위 순)
 
-1. ~~00013 Run~~ — 적용·확인 끝(9/30 저녁). **운영자 피드백 반영이 다음 순서**
-1-1. **애플 심사 대비** — 계정 삭제, 개인정보 처리방침, '준비 중' 버튼 정리
+1. **`supabase/APPLY_LATEST.sql` Run (00014·00015)** — 캘린더 며칠짜리·자주 가는 곳, 역할 자리·고치기 권한·계정 삭제
+1-1. 대시보드 Redirect URLs에 `http://localhost:8081/reset-password`, `familog://reset-password` 등록 (비밀번호 재설정 메일)
+1-2. 처리방침·약관을 노션에 올리고 `apps/mobile/constants/legal.ts`에 주소
 2. **앱 아이콘·스플래시 그림** — 지금은 Expo 기본 그림. 1024×1024 PNG 하나가 필요하다 (코드로 못 만든다)
 3. **EAS 빌드** — 개발자 계정(Apple $99/년, Google $25) 준비 후 `npx eas init` → `eas build --profile preview`
 4. 휴대폰 푸시 알림·구글 로그인·확인 메일 SMTP — EAS와 함께
