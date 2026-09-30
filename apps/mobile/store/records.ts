@@ -21,6 +21,7 @@ import {
   type AppRecord,
 } from '@core/supabase';
 import { showAlert } from '../components/AppAlert';
+import { dbErrorText } from '../lib/dbErrors';
 
 export const RECORD_CATEGORIES = [
   'parenting',
@@ -135,12 +136,11 @@ const pendingPatches = new Map<string, { title?: string; data?: Record<string, a
 
 /** 저장에 실패했을 때 — 넣었던 것을 도로 빼고 알린다 */
 function failed(action: string, e: unknown) {
-  const msg = String((e as Error)?.message ?? e);
   showAlert(
     `${action} 저장하지 못했어요`,
-    /fetch|network/i.test(msg)
-      ? '인터넷 연결을 확인하고 다시 해주세요.'
-      : `방금 한 건 저장되지 않았어요.\n\n${msg}`
+    `방금 한 건 저장되지 않았어요.
+
+${dbErrorText(e)}`
   );
 }
 

@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { useRecentRecords, useRecordsStore, CATEGORY_LABELS, relativeDay, type RecordCategory } from '../../store/records';
 import { useMe, useFamilyInfo, useCanSee } from '../../store/family';
 import { useMyFamilies, useSession } from '../../store/session';
-import { useTodayEvents, useEventsStore, formatTime, membersLabel } from '../../store/events';
+import { useTodayEvents, useEventsStore, formatTime, membersLabel, dayIndexOf, todayISO } from '../../store/events';
 import { useFamilyNews, type NewsItem } from '../../store/news';
 import { LoadingRows, useRecordsReady, useEventsReady } from '../../components/Loading';
 import { CATEGORY_UI } from '../../constants/categoryUi';
@@ -228,7 +228,7 @@ export default function HomeScreen() {
               <TouchableOpacity key={i} style={s.timelineItem} activeOpacity={0.7}
                 onPress={() => router.push('/(tabs)/calendar')}>
                 <View style={s.timelineLeft}>
-                  <Text style={s.timelineTime}>{formatTime(ev.time)}</Text>
+                  <Text style={s.timelineTime}>{ev.endDate && ev.endDate > ev.date ? `${dayIndexOf(ev, todayISO())?.nth ?? 1}째 날` : formatTime(ev.time)}</Text>
                   <View style={[s.timelineDot, { backgroundColor: ev.color }]} />
                   {i < todayEvents.length - 1 && <View style={s.timelineLine} />}
                 </View>

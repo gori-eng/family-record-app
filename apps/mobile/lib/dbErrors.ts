@@ -13,6 +13,10 @@ export function dbErrorText(e: unknown): string {
   if (err?.code === 'PGRST202' || /Could not find the function/i.test(msg)) {
     return '이 기능에 필요한 DB 준비가 아직이에요. 대시보드 SQL Editor에서 supabase/APPLY_LATEST.sql을 Run 해주세요.';
   }
+  // 새 기능이 쓰는 칸·표가 아직 DB에 없다 = 새 마이그레이션을 아직 안 돌렸다
+  if (err?.code === '42703' || err?.code === '42P01' || /column .* does not exist|schema cache/i.test(msg)) {
+    return '이 기능에 필요한 DB 준비가 아직이에요. 대시보드 SQL Editor에서 supabase/APPLY_LATEST.sql을 Run 해주세요.';
+  }
   if (/bucket not found/i.test(msg)) {
     return '사진 창고가 아직 없어요. 대시보드 SQL Editor에서 supabase/APPLY_LATEST.sql을 Run 해주세요.';
   }

@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useSession } from './session';
 import { useRecordsStore, CATEGORY_LABELS, relativeDay, type RecordCategory } from './records';
 import { useEventsStore, formatTime } from './events';
+import { coversDay } from './events';
 import { toISO } from './finance';
 import { getSync, setSync } from '../lib/storage';
 
@@ -86,15 +87,16 @@ export function useFamilyNews(): { items: NewsItem[]; unread: number; markSeen: 
     t.setDate(t.getDate() + 1);
     const tomorrow = toISO(t);
     const soon: NewsItem[] = events
-      .filter((e) => e.date === today || e.date === tomorrow)
+      // 며칠짜리 일정은 그 사이 날에도 걸린다 (coversDay)
+      .filter((e) => coversDay(e, today) || coversDay(e, tomorrow))
       .sort((a, b) => (a.date + (a.time || '99')).localeCompare(b.date + (b.time || '99')))
       .map((e) => ({
         id: `e-${e.id}`,
         kind: 'event',
-        title: e.date === today ? '오늘 일정이 있어요' : '내일 일정이 있어요',
+        title: coversDay(e, today) ? '오늘 일정이 있어요' : '내일 일정이 있어요',
         desc: e.time ? `${formatTime(e.time)}에 ${e.title}` : e.title,
         author: e.createdBy,
-        time: e.date === today ? '오늘' : '내일',
+        time: coversDay(e, today) ? '오늘' : '내일',
         unread: false,
       }));
 

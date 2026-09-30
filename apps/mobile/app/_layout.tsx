@@ -14,6 +14,7 @@ import { AlertHost } from '../components/AppAlert';
 import { hydrateStorage } from '../lib/storage';
 import { useRecordsStore } from '../store/records';
 import { useEventsStore } from '../store/events';
+import { usePlacesStore } from '../store/places';
 import { attachFinanceSettings, detachFinanceSettings } from '../store/financeSettings';
 import { useSession } from '../store/session';
 import { decideRoute, whereFrom, REQUIRE_AUTH } from '../lib/authGate';
@@ -165,9 +166,11 @@ function RootLayoutNav() {
     if (familyId && userId) {
       loadRecords(familyId, userId);
       loadEvents(familyId, userId);
+      usePlacesStore.getState().load(familyId);
     } else {
       clearRecords();
       clearEvents();
+      usePlacesStore.getState().clear();
     }
   }, [familyId, session?.user?.id]);
 

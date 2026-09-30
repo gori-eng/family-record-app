@@ -12,6 +12,10 @@ export type AppEvent = {
   id: string;
   date: string;
   time: string;
+  /** 끝나는 날. 없으면 하루짜리 */
+  endDate?: string;
+  /** 끝나는 시각. 없으면 '' */
+  endTime?: string;
   title: string;
   location?: string;
   members: string[];
@@ -29,6 +33,8 @@ export function toAppEvent(row: EventRow): AppEvent {
     // DATE는 'YYYY-MM-DD'로 온다. 혹시 시각이 붙어 오면 잘라낸다
     date: String(row.event_date).slice(0, 10),
     time: row.event_time ?? '',
+    endDate: row.end_date ? String(row.end_date).slice(0, 10) : undefined,
+    endTime: row.end_time ?? '',
     title: row.title,
     location: row.location ?? undefined,
     members: row.members ?? [],
@@ -45,6 +51,9 @@ const toRow = (familyId: string, userId: string, e: EventInput): CalendarEventIn
   family_id: familyId,
   event_date: e.date,
   event_time: e.time ?? '',
+  // 끝나는 날·시각은 정했을 때만 보낸다 — 00014를 아직 안 돌린 DB에서도 보통 일정은 저장되게
+  ...(e.endDate ? { end_date: e.endDate } : {}),
+  ...(e.endTime ? { end_time: e.endTime } : {}),
   title: e.title,
   location: e.location ?? null,
   members: e.members ?? [],
@@ -76,10 +85,16 @@ export async function insertEvent(familyId: string, userId: string, e: EventInpu
   return toAppEvent(data as EventRow);
 }
 
-export async function updateEvent(id: string, patch: Partial<EventInput>): Promise<void> {
+export async function updateEvent(id: string, patch: Partial<EventInput> & { clearEnd?: boolean }): Promise<void> {
   const row: Partial<CalendarEventInsert> = {};
   if (patch.date !== undefined) row.event_date = patch.date;
   if (patch.time !== undefined) row.event_time = patch.time;
+  // 고칠 때는 값이 있거나 원래 있던 걸 지우는 경우만. 둘 다 비면 칸을 건드리지 않는다 (00014 전 DB 대비)
+  if (patch.endDate) row.end_date = patch.endDate;
+  else if (patch.endDate === undefined && patch.endTime === undefined) { /* 건드리지 않음 */ }
+  else if (patch.clearEnd) row.end_date = null;
+  if (patch.endTime) row.end_time = patch.endTime;
+  else if (patch.clearEnd) row.end_time = '';
   if (patch.title !== undefined) row.title = patch.title;
   if (patch.location !== undefined) row.location = patch.location ?? null;
   if (patch.members !== undefined) row.members = patch.members;

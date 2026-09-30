@@ -19,6 +19,7 @@ import {
   deleteEvent as dbDelete, deleteAllEvents,
 } from '@core/supabase';
 import { showAlert } from '../components/AppAlert';
+import { dbErrorText } from '../lib/dbErrors';
 // 날짜 헬퍼는 가계부에서 먼저 만들었다. 일정도 **같은 규칙**을 써야
 // 정렬·월별 집계가 어긋나지 않으므로 새로 만들지 않고 가져다 쓴다.
 import { toISO, todayISO, isISODate } from './finance';
@@ -37,6 +38,10 @@ export type CalendarEvent = {
   date: string;
   /** 'HH:MM'. 비어 있으면 하루 종일 일정 */
   time: string;
+  /** 끝나는 날 'YYYY-MM-DD'. 없으면 하루짜리 (여행·출장처럼 며칠이면 넣는다) */
+  endDate?: string;
+  /** 끝나는 시각 'HH:MM'. 없으면 '' */
+  endTime?: string;
   title: string;
   location?: string;
   /** 함께하는 사람의 짧은 이름들. 비어 있으면 '가족 모두' */
@@ -72,12 +77,11 @@ const pendingDeletes = new Set<string>();
 const pendingPatches = new Map<string, Partial<NewEvent>>();
 
 function failed(action: string, e: unknown) {
-  const msg = String((e as Error)?.message ?? e);
   showAlert(
     `${action} 저장하지 못했어요`,
-    /fetch|network/i.test(msg)
-      ? '인터넷 연결을 확인하고 다시 해주세요.'
-      : `방금 한 건 저장되지 않았어요.\n\n${msg}`
+    `방금 한 건 저장되지 않았어요.
+
+${dbErrorText(e)}`
   );
 }
 
@@ -163,7 +167,10 @@ export const useEventsStore = create<EventsState>((set, get) => ({
       pendingPatches.set(id, { ...(pendingPatches.get(id) ?? {}), ...patch });
       return;
     }
-    dbUpdate(id, patch).catch((e) => {
+    // 원래 끝나는 날·시각이 있었는데 이번에 비웠으면 DB 칸도 지운다 (없었으면 칸을 건드리지 않는다 — 00014 전 DB 대비)
+    const hadEnd = !!(before?.endDate || before?.endTime);
+    const clearEnd = hadEnd && !patch.endDate && !patch.endTime && (patch.endDate !== undefined || patch.endTime !== undefined);
+    dbUpdate(id, { ...patch, clearEnd }).catch((e) => {
       if (before) set((state) => ({ events: state.events.map((x) => (x.id === id ? before : x)) }));
       failed('고친 일정을', e);
     });
@@ -235,11 +242,24 @@ export const useEventsStore = create<EventsState>((set, get) => ({
 // 선택자 안에서 filter를 하면 매번 새 배열이 생겨 화면이 무한히 다시 그려진다.
 // 그래서 통째로(`state.events`) 받아 useMemo로 거른다.
 
-/** 그 날의 일정, 시간순 */
+/** 이 일정이 그 날에 걸쳐 있나 (며칠짜리면 사이의 모든 날) */
+export const coversDay = (e: CalendarEvent, date: string) =>
+  e.date <= date && date <= (e.endDate && e.endDate > e.date ? e.endDate : e.date);
+
+/** 며칠짜리 일정에서 "몇째 날"인지. 하루짜리면 null */
+export const dayIndexOf = (e: CalendarEvent, date: string): { nth: number; total: number } | null => {
+  if (!e.endDate || e.endDate <= e.date) return null;
+  const ms = 86_400_000;
+  const total = Math.round((new Date(`${e.endDate}T00:00:00`).getTime() - new Date(`${e.date}T00:00:00`).getTime()) / ms) + 1;
+  const nth = Math.round((new Date(`${date}T00:00:00`).getTime() - new Date(`${e.date}T00:00:00`).getTime()) / ms) + 1;
+  return { nth, total };
+};
+
+/** 그 날의 일정, 시간순. 며칠짜리 일정은 그 사이 날마다 보인다 */
 export function useEventsOn(date: string): CalendarEvent[] {
   const events = useEventsStore((s) => s.events);
   return useMemo(
-    () => events.filter((e) => e.date === date).sort(byTime),
+    () => events.filter((e) => coversDay(e, date)).sort(byTime),
     [events, date]
   );
 }
@@ -257,7 +277,18 @@ export function useEventDaysInMonth(ym: string): Set<string> {
   const events = useEventsStore((s) => s.events);
   return useMemo(() => {
     const days = new Set<string>();
-    for (const e of events) if (e.date.startsWith(ym)) days.add(e.date);
+    for (const e of events) {
+      const end = e.endDate && e.endDate > e.date ? e.endDate : e.date;
+      if (end < `${ym}-01` || e.date > `${ym}-31`) continue;
+      // 시작부터 끝까지 하루씩 (그 달 안의 날만)
+      const d = new Date(`${e.date}T00:00:00`);
+      const last = new Date(`${end}T00:00:00`);
+      while (d <= last) {
+        const iso = toISO(d);
+        if (iso.startsWith(ym)) days.add(iso);
+        d.setDate(d.getDate() + 1);
+      }
+    }
     return days;
   }, [events, ym]);
 }

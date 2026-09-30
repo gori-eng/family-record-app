@@ -79,6 +79,10 @@ export type CalendarEvent = {
   event_date: string;
   /** 'HH:MM'. 빈 문자열이면 하루 종일 */
   event_time: string;
+  /** 끝나는 날 'YYYY-MM-DD'. 없으면 하루짜리 (00014) */
+  end_date: string | null;
+  /** 끝나는 시각 'HH:MM'. 비면 없음 */
+  end_time: string;
   title: string;
   location: string | null;
   /** 함께하는 사람의 짧은 이름들. 비면 가족 전체 */
@@ -147,6 +151,8 @@ export type CalendarEventInsert = {
   family_id: string;
   event_date: string;
   event_time?: string;
+  end_date?: string | null;
+  end_time?: string;
   title: string;
   location?: string | null;
   members?: string[];
@@ -198,6 +204,12 @@ export type Database = {
         // 조인 관계는 쓰지 않으므로 비워둔다 (타입 요구사항 충족용)
         Relationships: [];
       };
+      family_places: {
+        Row: { id: string; family_id: string; name: string; use_count: number; last_used_at: string; created_by: string | null };
+        Insert: { family_id: string; name: string; use_count?: number; last_used_at?: string; created_by?: string | null };
+        Update: { name?: string; use_count?: number; last_used_at?: string };
+        Relationships: [];
+      };
       finance_settings: {
         Row: FinanceSettingsRow;
         Insert: FinanceSettingsInsert;
@@ -247,6 +259,11 @@ export type Database = {
       merge_families: {
         Args: { p_source: string; p_target: string };
         Returns: { moved_records: number; moved_events: number; moved_members: number; skipped_duplicates: number }[];
+      };
+      /** 자주 가는 곳 하나 썼다 — 있으면 횟수+1, 없으면 새로 (00014) */
+      touch_place: {
+        Args: { p_family_id: string; p_name: string };
+        Returns: undefined;
       };
       /** RLS 재귀를 피하려고 만든 함수. 정책 안에서만 쓴다 */
       my_family_ids: {

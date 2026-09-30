@@ -1,6 +1,8 @@
 import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, Modal, Animated, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
+import { Linking, Platform } from 'react-native';
+import { usePlacesStore, usePlaceSuggestions } from '../../store/places';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { showAlert } from '../../components/AppAlert';
 import { useFamilyMembers, useMe, useCanDelete } from '../../store/family';
@@ -8,7 +10,7 @@ import { eulreul } from '../../lib/korean';
 import { parseLooseDate } from '../../lib/dates';
 import { LoadingRows, useEventsReady } from '../../components/Loading';
 import {
-  useEventsStore, useEventsOn, useEventDaysInMonth,
+  useEventsStore, useEventsOn, useEventDaysInMonth, dayIndexOf, toISO,
   EVENT_COLORS, formatTime, formatEventDate, membersLabel, normalizeTime, todayISO,
   type CalendarEvent,
 } from '../../store/events';
@@ -17,6 +19,9 @@ const tomorrowISO = () => { const d = new Date(); d.setDate(d.getDate() + 1); re
 
 /** 시간 입력을 한 번에 채우는 버튼 — 자주 쓰는 시간대 */
 const TIME_CHIPS = ['09:00', '12:00', '15:00', '18:00', '20:00'];
+
+/** 며칠 뒤의 'YYYY-MM-DD' */
+const addDaysISO = (iso: string, n: number) => { const d = new Date(`${iso}T00:00:00`); d.setDate(d.getDate() + n); return toISO(d); };
 
 export default function CalendarScreen() {
   // 지우기는 적은 사람과 관리자만 (store/family.ts · DB 정책 00008)
@@ -50,7 +55,16 @@ export default function CalendarScreen() {
   /** 일정 날짜 — 새 일정은 고른 날, 고칠 땐 그 일정의 날. 여기서 바꿀 수 있다 (점검 B8) */
   const [fDate, setFDate] = useState(todayISO());
   const [fTime, setFTime] = useState('');
+  /** 며칠짜리 일정 — 켜면 끝나는 날·시각 칸이 나온다 (구글 캘린더처럼) */
+  const [fMultiDay, setFMultiDay] = useState(false);
+  const [fEndDate, setFEndDate] = useState('');
+  const [fEndTime, setFEndTime] = useState('');
   const [fLocation, setFLocation] = useState('');
+  /** 장소 칸에 손을 대고 있는 동안만 추천을 펼친다 */
+  const [placeFocus, setPlaceFocus] = useState(false);
+  const placeSuggestions = usePlaceSuggestions(fLocation);
+  const rememberPlace = usePlacesStore((s) => s.remember);
+  const forgetPlace = usePlacesStore((s) => s.forget);
   const [fMembers, setFMembers] = useState<string[]>([]);
   const [fMemo, setFMemo] = useState('');
   const [fColor, setFColor] = useState(EVENT_COLORS[0]);
@@ -88,6 +102,7 @@ export default function CalendarScreen() {
 
   const resetForm = () => {
     setFTitle(''); setFTime(''); setFLocation(''); setFMembers([]); setFMemo(''); setFColor(EVENT_COLORS[0]);
+    setFMultiDay(false); setFEndDate(''); setFEndTime(''); setPlaceFocus(false);
   };
 
   /** 새 일정 — 지금 고른 날짜에 넣는다 */
@@ -99,6 +114,10 @@ export default function CalendarScreen() {
     setFDate(event.date);
     setFTitle(event.title);
     setFTime(event.time);
+    const multi = !!event.endDate && event.endDate > event.date;
+    setFMultiDay(multi || !!event.endTime);
+    setFEndDate(multi ? event.endDate! : '');
+    setFEndTime(event.endTime ?? '');
     setFLocation(event.location ?? '');
     setFMembers(event.members);
     setFMemo(event.memo ?? '');
@@ -127,9 +146,29 @@ export default function CalendarScreen() {
       showAlert('몇 시인지 못 알아들었어요', "'오후 6시'나 '18:00'처럼 적어주세요. 시간이 없으면 비워두면 하루 종일이 돼요.");
       return;
     }
+    // 끝나는 날·시각 — 켰을 때만. 시작보다 앞이면 되묻는다
+    let endDate: string | undefined;
+    let endTime = '';
+    if (fMultiDay) {
+      if (fEndDate.trim()) {
+        const parsed = parseLooseDate(fEndDate);
+        if (!parsed) { showAlert('끝나는 날을 한 번 봐주세요', '2026.10.5처럼 적어주세요.'); return; }
+        if (parsed < date) { showAlert('끝나는 날이 시작보다 앞이에요', '시작한 날이거나 그 뒤여야 해요.'); return; }
+        endDate = parsed > date ? parsed : undefined;
+      }
+      if (fEndTime.trim()) {
+        if (!normalizeTime(fEndTime)) { showAlert('끝나는 시각을 못 알아들었어요', "'오후 8시'나 '20:00'처럼 적어주세요."); return; }
+        endTime = normalizeTime(fEndTime);
+        if (!endDate && fTime.trim() && endTime < normalizeTime(fTime)) {
+          showAlert('끝나는 시각이 시작보다 앞이에요', '같은 날이면 시작 시각 뒤여야 해요.'); return;
+        }
+      }
+    }
     const payload = {
       date,
       time: normalizeTime(fTime),
+      endDate,
+      endTime,
       title,
       location: fLocation.trim() || undefined,
       members: fMembers,
@@ -139,6 +178,8 @@ export default function CalendarScreen() {
     };
     if (editing) updateEvent(editing.id, payload);
     else addEvent(payload);
+    // 장소를 적었으면 자주 가는 곳에 쌓는다 — 다음엔 몇 글자만 쳐도 펼쳐 준다
+    if (payload.location) rememberPlace(payload.location);
     // 고른 날짜도 그 일정의 날로 따라간다 — 저장한 게 바로 보이게
     setSelectedDate(date);
     setCurrentYear(Number(date.slice(0, 4)));
@@ -206,6 +247,30 @@ export default function CalendarScreen() {
   const isCurrentMonth = ym === todayISO().slice(0, 7);
   const monthEventCount = events.filter((e) => e.date.startsWith(ym)).length;
 
+  /** 장소를 지도에서 — 앱을 따로 붙이지 않고 지도 앱(웹)에 검색어로 넘긴다 */
+  const openMap = (place: string) => {
+    const q = encodeURIComponent(place);
+    const naver = `https://map.naver.com/p/search/${q}`;
+    const google = `https://www.google.com/maps/search/?api=1&query=${q}`;
+    showAlert(place, '어느 지도로 볼까요?', [
+      { text: '네이버 지도', onPress: () => Linking.openURL(naver).catch(() => {}) },
+      { text: '구글 지도', onPress: () => Linking.openURL(google).catch(() => {}) },
+      { text: '그냥 둘게요', style: 'cancel' },
+    ]);
+  };
+
+  /** 상세에 보여줄 '언제' 한 줄 — 하루짜리 / 시간 있는 하루 / 며칠짜리 */
+  const whenLine = (e: CalendarEvent) => {
+    const multi = !!e.endDate && e.endDate > e.date;
+    if (multi) {
+      const start = `${formatEventDate(e.date)}${e.time ? ` ${formatTime(e.time)}` : ''}`;
+      const end = `${formatEventDate(e.endDate!)}${e.endTime ? ` ${formatTime(e.endTime)}` : ''}`;
+      return `${start}부터 ${end}까지`;
+    }
+    if (!e.time) return `${formatEventDate(e.date)} 하루 종일`;
+    return `${formatEventDate(e.date)} ${formatTime(e.time)}${e.endTime ? `부터 ${formatTime(e.endTime)}까지` : ''}`;
+  };
+
   // 통합 검색에서 일정을 누르면 `openId`를 싣고 온다 — 그 날짜로 옮기고 상세를 한 번 연다
   const { openId } = useLocalSearchParams<{ openId?: string }>();
   const router = useRouter();
@@ -249,15 +314,17 @@ export default function CalendarScreen() {
                   <View style={styles.detailIconBox}><FontAwesome name="clock-o" size={15} color="#A0A0A0" /></View>
                   <View>
                     <Text style={styles.detailLabel}>언제</Text>
-                    <Text style={styles.detailValue}>
-                      {formatEventDate(showDetail.date)} {formatTime(showDetail.time)}
-                    </Text>
+                    <Text style={styles.detailValue}>{whenLine(showDetail)}</Text>
                   </View>
                 </View>
                 {!!showDetail.location && (
                   <View style={styles.detailRow}>
                     <View style={styles.detailIconBox}><FontAwesome name="map-marker" size={15} color="#A0A0A0" /></View>
-                    <View><Text style={styles.detailLabel}>어디서</Text><Text style={styles.detailValue}>{showDetail.location}</Text></View>
+                    <TouchableOpacity activeOpacity={0.7} onPress={() => openMap(showDetail.location!)}>
+                      <Text style={styles.detailLabel}>어디서</Text>
+                      <Text style={styles.detailValue}>{showDetail.location}</Text>
+                      <Text style={styles.detailMapHint}>눌러서 지도에서 보기</Text>
+                    </TouchableOpacity>
                   </View>
                 )}
                 <View style={styles.detailRow}>
@@ -338,9 +405,58 @@ export default function CalendarScreen() {
                     </TouchableOpacity>
                   </View>
 
+                  <TouchableOpacity style={styles.toggleRow} activeOpacity={0.7} onPress={() => setFMultiDay((v) => !v)}>
+                    <FontAwesome name={fMultiDay ? 'check-square' : 'square-o'} size={18} color={fMultiDay ? '#4A8C6F' : '#BBBBBB'} />
+                    <Text style={styles.toggleText}>끝나는 날이나 시각도 정할래요</Text>
+                  </TouchableOpacity>
+                  {fMultiDay && (
+                    <View style={styles.endBox}>
+                      <Text style={styles.addLabel}>언제 끝나요?</Text>
+                      <View style={styles.chipRow}>
+                        {([['같은 날', ''], ['다음 날', addDaysISO(parseLooseDate(fDate) ?? todayISO(), 1)], ['이틀 뒤', addDaysISO(parseLooseDate(fDate) ?? todayISO(), 2)]] as const).map(([label, iso]) => (
+                          <TouchableOpacity key={label} style={[styles.chip, fEndDate === iso && styles.chipOn]}
+                            activeOpacity={0.7} onPress={() => setFEndDate(iso)}>
+                            <Text style={[styles.chipText, fEndDate === iso && styles.chipTextOn]}>{label}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                      <TextInput style={styles.addInput} placeholder="비워두면 같은 날에 끝나요" placeholderTextColor="#A0A0A0"
+                        value={fEndDate} onChangeText={setFEndDate} />
+                      <Text style={styles.addLabel}>몇 시에 끝나요?</Text>
+                      <TextInput style={styles.addInput} placeholder="비워두면 시각은 안 적어요" placeholderTextColor="#A0A0A0"
+                        value={fEndTime} onChangeText={setFEndTime} />
+                    </View>
+                  )}
+
                   <Text style={styles.addLabel}>어디서?</Text>
-                  <TextInput style={styles.addInput} placeholder="예) 정자동 한강갈비" placeholderTextColor="#A0A0A0"
-                    value={fLocation} onChangeText={setFLocation} />
+                  <View style={styles.placeInputRow}>
+                    <TextInput style={[styles.addInput, styles.placeInput]} placeholder="예) 정자동 한강갈비" placeholderTextColor="#A0A0A0"
+                      value={fLocation} onChangeText={setFLocation}
+                      onFocus={() => setPlaceFocus(true)} onBlur={() => setTimeout(() => setPlaceFocus(false), 150)} />
+                    {!!fLocation.trim() && (
+                      <TouchableOpacity style={styles.mapBtn} activeOpacity={0.7} onPress={() => openMap(fLocation.trim())} accessibilityLabel="지도에서 보기">
+                        <FontAwesome name="map-o" size={15} color="#2D5A3F" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                  {placeFocus && placeSuggestions.length > 0 && (
+                    <View style={styles.suggestBox}>
+                      <Text style={styles.suggestTitle}>{fLocation.trim() ? '이곳 아닌가요?' : '자주 가는 곳'}</Text>
+                      {placeSuggestions.map((p) => (
+                        <View key={p.id} style={styles.suggestRow}>
+                          <TouchableOpacity style={styles.suggestMain} activeOpacity={0.7}
+                            onPress={() => { setFLocation(p.name); setPlaceFocus(false); }}>
+                            <FontAwesome name="map-marker" size={13} color="#9C8B75" />
+                            <Text style={styles.suggestText}>{p.name}</Text>
+                            {p.useCount > 1 && <Text style={styles.suggestCount}>{p.useCount}번</Text>}
+                          </TouchableOpacity>
+                          <TouchableOpacity style={styles.suggestX} activeOpacity={0.7} onPress={() => forgetPlace(p.id)} accessibilityLabel={`${p.name} 목록에서 빼기`}>
+                            <FontAwesome name="times" size={12} color="#BBBBBB" />
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                    </View>
+                  )}
 
                   <Text style={styles.addLabel}>누구랑? 안 고르면 가족 모두예요</Text>
                   <View style={styles.chipRow}>
@@ -450,7 +566,11 @@ export default function CalendarScreen() {
               <TouchableOpacity key={ev.id} style={styles.eventCard} activeOpacity={0.7} onPress={() => openDetail(ev)}>
                 <View style={[styles.eventColorBar, { backgroundColor: ev.color }]} />
                 <View style={styles.eventContent}>
-                  <Text style={styles.eventTime}>{formatTime(ev.time)}</Text>
+                  <Text style={styles.eventTime}>
+                    {dayIndexOf(ev, selectedDate)
+                      ? `${dayIndexOf(ev, selectedDate)!.total}일 중 ${dayIndexOf(ev, selectedDate)!.nth}째 날`
+                      : `${formatTime(ev.time)}${ev.endTime ? `부터 ${formatTime(ev.endTime)}까지` : ''}`}
+                  </Text>
                   <Text style={styles.eventName}>{ev.title}</Text>
                   <View style={styles.eventMetaRow}>
                     {!!ev.location && (
@@ -565,6 +685,21 @@ const styles = StyleSheet.create({
   addTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
   addDate: { fontSize: 14, color: '#7A6B55', marginBottom: 16, fontFamily: 'Pretendard' },
   addLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6, marginBottom: 12 },
+  toggleText: { fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard' },
+  endBox: { backgroundColor: '#F6F5F1', borderRadius: 12, padding: 12, marginBottom: 12 },
+  placeInputRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  placeInput: { flex: 1 },
+  mapBtn: { width: 46, height: 46, borderRadius: 12, backgroundColor: '#EFF6F1', alignItems: 'center', justifyContent: 'center' },
+  suggestBox: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingVertical: 6, marginTop: -6, marginBottom: 14 },
+  suggestTitle: { fontSize: 11, color: '#9C8B75', fontFamily: 'Pretendard', paddingHorizontal: 14, paddingVertical: 4 },
+  suggestRow: { flexDirection: 'row', alignItems: 'center' },
+  suggestMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 10 },
+  suggestText: { flex: 1, fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard' },
+  suggestCount: { fontSize: 11, color: '#9C8B75', fontFamily: 'Pretendard' },
+  suggestX: { paddingHorizontal: 14, paddingVertical: 10 },
+  detailMapHint: { fontSize: 11, color: '#4A8C6F', fontFamily: 'Pretendard', marginTop: 2 },
+  eventDayIndex: { fontSize: 11, color: '#9C8B75', fontFamily: 'Pretendard', marginBottom: 2 },
   addInput: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 12, fontFamily: 'Pretendard' },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   chip: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, backgroundColor: '#F4F2EE', borderWidth: 1, borderColor: '#EAEAEA' },
