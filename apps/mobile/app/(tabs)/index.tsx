@@ -1,5 +1,5 @@
 import { iga } from '../../lib/korean';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, Modal, Animated, Pressable } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, Modal, Animated, Pressable, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -202,6 +202,24 @@ export default function HomeScreen() {
           <Text style={s.dateText}>{familyCount > 1 ? `${familyInfo.name}의 ` : ''}{dateStr} {dayName}</Text>
         </Animated.View>
 
+        {/* 아직 혼자인 가족 — 초대가 설정 깊숙이 숨어 있어 아무도 안내하지 않았다 (제품 검토 🔴) */}
+        {familyInfo.isReal && familyInfo.memberCount === 1 && !!familyInfo.inviteCode && (
+          <TouchableOpacity style={s.inviteCard} activeOpacity={0.8} onPress={async () => {
+            try {
+              await Share.share({ message: `우리 가족 기록장에 같이 적어요. familog 앱을 열고 초대 코드 ${familyInfo.inviteCode}를 넣으면 들어올 수 있어요.` });
+            } catch {
+              router.push('/settings/members' as any);
+            }
+          }}>
+            <View style={s.inviteIcon}><FontAwesome name="envelope-o" size={18} color="#2D5A3F" /></View>
+            <View style={{ flex: 1 }}>
+              <Text style={s.inviteTitle}>아직 혼자예요</Text>
+              <Text style={s.inviteSub}>초대 코드 {familyInfo.inviteCode}를 가족에게 보내볼까요? 누르면 바로 보낼 수 있어요</Text>
+            </View>
+            <FontAwesome name="chevron-right" size={12} color="#4A8C6F" />
+          </TouchableOpacity>
+        )}
+
         {/* 오늘의 일정 */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
@@ -291,7 +309,7 @@ export default function HomeScreen() {
               { icon: 'film', label: '영화', route: '/(tabs)/records/movies' },
             ].filter((q) => !q.category || canSee(q.category)).map((q, i) => (
               <TouchableOpacity key={i} style={s.quickChip} activeOpacity={0.7}
-                onPress={() => router.push(q.route as any)}>
+                onPress={() => router.push({ pathname: q.route as any, params: { new: '1' } })}>
                 <FontAwesome name={q.icon as any} size={15} color="#666" />
                 <Text style={s.quickLabel}>{q.label}</Text>
               </TouchableOpacity>
@@ -367,6 +385,10 @@ const s = StyleSheet.create({
 
   // 1. Hero — 한 줄
   hero: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 28 },
+  inviteCard: { flexDirection: 'row', alignItems: 'center', gap: 12, marginHorizontal: 20, marginBottom: 24, padding: 16, backgroundColor: '#EFF6F1', borderRadius: 16, borderWidth: 1, borderColor: '#D5E6DB' },
+  inviteIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
+  inviteTitle: { fontSize: 15, color: '#1F1F1F', fontFamily: 'PretendardBold', marginBottom: 2 },
+  inviteSub: { fontSize: 13, color: '#4A4A4A', fontFamily: 'Pretendard', lineHeight: 18 },
   greetingLine: { fontSize: 26, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.5 },
   dateText: { fontSize: 13, color: '#A0A0A0', marginTop: 4, fontFamily: 'Pretendard' },
 

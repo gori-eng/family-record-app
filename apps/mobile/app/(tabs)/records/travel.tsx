@@ -1,10 +1,10 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState, useRef, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
-import { useOpenParam } from '../../../lib/useOpenParam';
+import { useOpenParam, useNewParam } from '../../../lib/useOpenParam';
 import { usePhotoDraft, PhotoPickerRow, PhotoGallery, PhotoThumb } from '../../../components/Photos';
 import { photosOf } from '../../../lib/photos';
 import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
@@ -168,11 +168,14 @@ export default function TravelScreen() {
   // 홈·가족 소식·통합 검색에서 '이 기록 열어줘'를 싣고 오면 상세를 한 번 열어준다
   useOpenParam(trips, (r) => openDetail({ ...r.data, id: r.id, recordedBy: r.recordedBy }));
 
+  // 홈 '바로 적기'에서 왔으면 폼을 바로 연다 (칩 누르고 또 + 누르지 않게)
+  useNewParam(() => openCreate());
+
   return (
     <>
       <Stack.Screen options={{ title: '여행 기록' }} />
       <View style={s.container}>
-        <Modal visible={!!selectedItem} transparent statusBarTranslucent animationType="none">
+        <Modal visible={!!selectedItem} transparent statusBarTranslucent animationType="none" onRequestClose={closeDetail}>
           <View style={s.modalWrap}>
             <Animated.View style={[s.modalBg, { opacity: modalBg }]}>
               <Pressable style={{ flex: 1 }} onPress={closeDetail} />
@@ -238,7 +241,7 @@ export default function TravelScreen() {
               )}
               {selectedItem && (
                 <>
-                  <EditRecordRow onPress={startEdit} />
+                  <EditRecordRow id={selectedItem.id} onPress={startEdit} />
                   <DeleteRecordRow id={selectedItem.id} onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
                 </>
               )}
@@ -246,7 +249,9 @@ export default function TravelScreen() {
           </View>
         </Modal>
 
-        <Modal visible={showCreate} transparent statusBarTranslucent animationType="none">
+        <Modal visible={showCreate} transparent statusBarTranslucent animationType="none" onRequestClose={closeCreate}>
+          {/* 휴대폰에서 키보드가 저장 버튼을 가리지 않게 (제품 검토 🔴) */}
+          <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={s.modalWrap}>
             <Animated.View style={[s.modalBg, { opacity: createBg }]}>
               <Pressable style={{ flex: 1 }} onPress={closeCreate} />
@@ -254,7 +259,7 @@ export default function TravelScreen() {
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
               <Text style={s.modalTitle}>{editingId ? '여행 기록 고치기' : '새 여행 기록'}</Text>
-              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }} keyboardShouldPersistTaps="handled">
               <Text style={s.createLabel}>어디로</Text>
               <TextInput
                 style={s.createInput}
@@ -319,6 +324,7 @@ export default function TravelScreen() {
               </ScrollView>
             </Animated.View>
           </View>
+                  </KeyboardAvoidingView>
         </Modal>
 
         <ScrollView showsVerticalScrollIndicator={false}>

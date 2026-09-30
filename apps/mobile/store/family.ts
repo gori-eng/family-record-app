@@ -186,6 +186,20 @@ export function useCanDelete(): (authorId?: string) => boolean {
 }
 
 /**
+ * 이 기록을 내가 고칠 수 있는지 — 쓴 사람·관리자, 또는 가족 설정에서 "서로 고치기"를 켰을 때 (00015).
+ * DB 정책 `records_update`와 같은 규칙. 가계부는 화면이 따로 늘 허용한다(한 집 장부).
+ */
+export function useCanEdit(): (authorId?: string) => boolean {
+  const userId = useSession((s) => s.userId);
+  const role = useSession((s) => s.me?.role ?? null);
+  const allow = useSession((s) => !!s.family?.allow_family_edit);
+  return useCallback(
+    (authorId?: string) => allow || canDeleteRecord({ authorId, myUserId: userId, myRole: role }),
+    [userId, role, allow]
+  );
+}
+
+/**
  * 이 카테고리를 내가 볼 수 있는지 — **돈(가계부)·몸(건강)은 어른만** (00010).
  * 규칙은 core `canView`, DB 정책 `records_select`도 같은 규칙이다.
  * 화면은 이걸로 메뉴를 숨기고, DB는 아이 계정에 그 기록을 아예 내주지 않는다.

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { showAlert } from './AppAlert';
 import { useRecordsStore, type FamilyRecord } from '../store/records';
 import { eulreul } from '../lib/korean';
-import { useCanDelete } from '../store/family';
+import { useCanDelete, useCanEdit } from '../store/family';
 import { removePhotoFilesWhenUnused, photosOf } from '../lib/photos';
 import { isPhotoInUse } from './Photos';
 
@@ -107,7 +107,7 @@ export function DeleteRecordRow({
     return (
       <View style={s.noRow}>
         <FontAwesome name="lock" size={12} color="#9C8B75" />
-        <Text style={s.noRowText}>지우기는 쓴 사람과 관리자만 할 수 있어요</Text>
+        <Text style={s.noRowText}>고치기와 지우기는 쓴 사람과 관리자만 할 수 있어요</Text>
       </View>
     );
   }
@@ -125,7 +125,11 @@ export function DeleteRecordRow({
  * 다시 써야 했다. 작성 폼을 값이 채워진 채로 다시 여는 방식이라(가계부·캘린더와 같다)
  * 편집 전용 폼을 따로 만들지 않는다.
  */
-export function EditRecordRow({ onPress, label = '고치기' }: { onPress: () => void; label?: string }) {
+export function EditRecordRow({ onPress, id, label = '고치기' }: { onPress: () => void; id?: string; label?: string }) {
+  const canEdit = useCanEdit();
+  const authorId = useRecordsStore((st) => (id ? st.records.find((r) => r.id === id)?.authorId : undefined));
+  // 못 고치면 줄을 숨긴다 (지우기 줄이 이유를 말해준다 — 두 번 말하지 않는다)
+  if (id && !canEdit(authorId)) return null;
   return (
     <TouchableOpacity style={s.editRow} activeOpacity={0.7} onPress={onPress}>
       <FontAwesome name="pencil" size={13} color="#2D5A3F" />

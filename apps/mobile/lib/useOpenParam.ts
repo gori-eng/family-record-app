@@ -8,7 +8,7 @@
  * 목록이 아직 안 불러와졌으면 불러와질 때까지 기다렸다가 연다.
  */
 import { useEffect, useRef } from 'react';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 export function useOpenParam<T extends { id: string; title: string }>(
   items: T[],
@@ -26,4 +26,24 @@ export function useOpenParam<T extends { id: string; title: string }>(
     // open은 화면마다 매번 새로 만들어지는 함수라 넣지 않는다 (넣으면 매번 다시 돈다)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, items]);
+}
+
+/**
+ * 홈 '바로 적기'에서 `new=1`을 싣고 오면 작성 폼을 한 번 연다.
+ * 칩 이름이 "바로 적기"인데 화면만 열고 + 를 또 눌러야 했다 (제품 검토).
+ */
+export function useNewParam(open: () => void) {
+  const { new: fresh } = useLocalSearchParams<{ new?: string }>();
+  const router = useRouter();
+  const done = useRef(false);
+  useEffect(() => {
+    // 파라미터가 지워지면 다음 '바로 적기'를 또 받을 수 있게 (탭 화면은 남아 있으니까)
+    if (!fresh) { done.current = false; return; }
+    if (done.current) return;
+    done.current = true;
+    // 화면이 다 그려진 다음 한 박자 뒤에 연다 (모달이 마운트 전에 열리지 않게)
+    const t = setTimeout(() => { open(); router.setParams({ new: undefined } as any); }, 250);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fresh]);
 }

@@ -1,10 +1,10 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
-import { useOpenParam } from '../../../lib/useOpenParam';
+import { useOpenParam, useNewParam } from '../../../lib/useOpenParam';
 import { useFinanceSettings, recurringDateIn, type RecurringItem } from '../../../store/financeSettings';
 import { useFamilyMembers, useMe, useCanDelete } from '../../../store/family';
 import {
@@ -422,12 +422,15 @@ function FinanceScreen() {
     openDetail(r.id);
   });
 
+  // 홈 '바로 적기'에서 왔으면 폼을 바로 연다 (칩 누르고 또 + 누르지 않게)
+  useNewParam(() => openForm());
+
   return (
     <>
       <Stack.Screen options={{ title: '가계부' }} />
       <View style={styles.container}>
         {/* 거래 상세 — 수정 / 복제 / 삭제 */}
-        <Modal visible={!!selectedRecord} transparent statusBarTranslucent animationType="none">
+        <Modal visible={!!selectedRecord} transparent statusBarTranslucent animationType="none" onRequestClose={closeDetail}>
           <View style={styles.modalWrap}>
             <Animated.View style={[styles.modalBg, { opacity: modalBg }]}>
               <Pressable style={{ flex: 1 }} onPress={closeDetail} />
@@ -519,7 +522,9 @@ function FinanceScreen() {
         </Modal>
 
         {/* 거래 작성 / 수정 */}
-        <Modal visible={showForm} transparent statusBarTranslucent animationType="none">
+        <Modal visible={showForm} transparent statusBarTranslucent animationType="none" onRequestClose={closeForm}>
+          {/* 휴대폰에서 키보드가 저장 버튼을 가리지 않게 (제품 검토 🔴) */}
+          <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={styles.modalWrap}>
             <Animated.View style={[styles.modalBg, { opacity: formBg }]}>
               <Pressable style={{ flex: 1 }} onPress={closeForm} />
@@ -527,7 +532,7 @@ function FinanceScreen() {
             <Animated.View style={[styles.modalSheet, { transform: [{ translateY: formSlide }] }]}>
               <View style={styles.modalHandle} />
               <Text style={styles.modalTitle}>{editingId ? '거래 고치기' : '새 거래'}</Text>
-              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 480 }}>
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 480 }} keyboardShouldPersistTaps="handled">
                 <View style={styles.pillRow}>
                   {([['지출', 'expense'], ['수입', 'income']] as const).map(([label, val]) => (
                     <TouchableOpacity
@@ -566,6 +571,7 @@ function FinanceScreen() {
                 <View style={styles.amountWrap}>
                   <TextInput
                     style={styles.amountInput}
+                    autoFocus={!editingId}
                     placeholder="0"
                     placeholderTextColor="#CFC7BA"
                     keyboardType="numeric"
@@ -676,6 +682,7 @@ function FinanceScreen() {
               </ScrollView>
             </Animated.View>
           </View>
+                  </KeyboardAvoidingView>
         </Modal>
 
         <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -696,27 +703,6 @@ function FinanceScreen() {
             )}
           </View>
 
-          {/* 카드 명세서에서 한 번에 불러오기 */}
-          <TouchableOpacity
-            style={styles.importRow}
-            activeOpacity={0.7}
-            onPress={() => router.push('/(tabs)/records/finance-import' as any)}>
-            <FontAwesome name="file-excel-o" size={14} color="#4A8C6F" />
-            <Text style={styles.importRowText}>카드 명세서에서 불러오기</Text>
-            <FontAwesome name="chevron-right" size={11} color="#9CB3A4" />
-          </TouchableOpacity>
-
-          {/* 매달 넣는 거래 관리 */}
-          <TouchableOpacity
-            style={[styles.importRow, { marginTop: 8 }]}
-            activeOpacity={0.7}
-            onPress={() => setShowRecurring(true)}>
-            <FontAwesome name="repeat" size={14} color="#4A8C6F" />
-            <Text style={styles.importRowText}>
-              매달 넣는 거래{settings.recurring.length ? ` ${settings.recurring.length}건` : ''}
-            </Text>
-            <FontAwesome name="chevron-right" size={11} color="#9CB3A4" />
-          </TouchableOpacity>
 
           {/* 검색 중에는 달 구분 없이 결과만 */}
           {searchResults !== null ? (
@@ -746,7 +732,7 @@ function FinanceScreen() {
                         {formatDay(t.date)}, {metaLine(t)}
                       </Text>
                     </View>
-                    <Text style={[styles.transAmount, { color: t.type === 'income' ? '#4AA86B' : '#4A8C6F' }]}>
+                    <Text style={[styles.transAmount, { color: t.type === 'income' ? '#4AA86B' : '#1F1F1F' }]}>
                       {formatAmount(t.amount, t.type)}
                     </Text>
                   </TouchableOpacity>
@@ -880,6 +866,28 @@ function FinanceScreen() {
             </TouchableOpacity>
           )}
 
+          {/* 카드 명세서에서 한 번에 불러오기 */}
+          <TouchableOpacity
+            style={styles.importRow}
+            activeOpacity={0.7}
+            onPress={() => router.push('/(tabs)/records/finance-import' as any)}>
+            <FontAwesome name="file-excel-o" size={14} color="#4A8C6F" />
+            <Text style={styles.importRowText}>카드 명세서에서 불러오기</Text>
+            <FontAwesome name="chevron-right" size={11} color="#9CB3A4" />
+          </TouchableOpacity>
+
+          {/* 매달 넣는 거래 관리 */}
+          <TouchableOpacity
+            style={[styles.importRow, { marginTop: 8, marginBottom: 12 }]}
+            activeOpacity={0.7}
+            onPress={() => setShowRecurring(true)}>
+            <FontAwesome name="repeat" size={14} color="#4A8C6F" />
+            <Text style={styles.importRowText}>
+              매달 넣는 거래{settings.recurring.length ? ` ${settings.recurring.length}건` : ''}
+            </Text>
+            <FontAwesome name="chevron-right" size={11} color="#9CB3A4" />
+          </TouchableOpacity>
+
           {/* 전월 대비 — 실제 계산값 */}
           {prevExpense > 0 && summary.expense > 0 && (
             <View style={styles.aiHint}>
@@ -952,7 +960,7 @@ function FinanceScreen() {
                           {t.memo ? '. 메모 있어요' : ''}
                         </Text>
                       </View>
-                      <Text style={[styles.transAmount, { color: t.type === 'income' ? '#4AA86B' : '#4A8C6F' }]}>
+                      <Text style={[styles.transAmount, { color: t.type === 'income' ? '#4AA86B' : '#1F1F1F' }]}>
                         {formatAmount(t.amount, t.type)}
                       </Text>
                     </TouchableOpacity>

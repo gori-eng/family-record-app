@@ -19,6 +19,7 @@ import {
   deleteEvent as dbDelete, deleteAllEvents,
 } from '@core/supabase';
 import { showAlert } from '../components/AppAlert';
+import { nameColor } from '../lib/nameColor';
 import { dbErrorText } from '../lib/dbErrors';
 // 날짜 헬퍼는 가계부에서 먼저 만들었다. 일정도 **같은 규칙**을 써야
 // 정렬·월별 집계가 어긋나지 않으므로 새로 만들지 않고 가져다 쓴다.
@@ -267,6 +268,36 @@ export function useEventsOn(date: string): CalendarEvent[] {
 /** 오늘 일정 — 홈 화면 "오늘의 일정"용 */
 export function useTodayEvents(): CalendarEvent[] {
   return useEventsOn(todayISO());
+}
+
+/** 일정의 색 — "누구 일정인지"로 정한다 (운영자 결정 2026-09-30). 참여자 첫 사람, 없으면 적은 사람 */
+export const eventColor = (e: CalendarEvent) => nameColor(e.members[0] ?? e.createdBy);
+
+/**
+ * 그 달의 날짜마다 걸린 일정의 색 (최대 3개) — 달력 칸 아래 점으로. 누구 일정인지 한눈에
+ */
+export function useEventDotsInMonth(ym: string): Map<string, string[]> {
+  const events = useEventsStore((s) => s.events);
+  return useMemo(() => {
+    const dots = new Map<string, string[]>();
+    for (const e of events) {
+      const end = e.endDate && e.endDate > e.date ? e.endDate : e.date;
+      if (end < `${ym}-01` || e.date > `${ym}-31`) continue;
+      const d = new Date(`${e.date}T00:00:00`);
+      const last = new Date(`${end}T00:00:00`);
+      const c = eventColor(e);
+      while (d <= last) {
+        const iso = toISO(d);
+        if (iso.startsWith(ym)) {
+          const list = dots.get(iso) ?? [];
+          if (!list.includes(c) && list.length < 3) list.push(c);
+          dots.set(iso, list);
+        }
+        d.setDate(d.getDate() + 1);
+      }
+    }
+    return dots;
+  }, [events, ym]);
 }
 
 /**

@@ -61,6 +61,7 @@ export default function TabLayout() {
         name="calendar"
         options={{
           title: '캘린더',
+          headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="calendar" color={color} />,
         }}
       />

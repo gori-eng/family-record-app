@@ -1,16 +1,17 @@
-import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, Modal, Animated, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, Modal, Animated, Pressable, KeyboardAvoidingView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
 import { Linking, Platform } from 'react-native';
 import { usePlacesStore, usePlaceSuggestions } from '../../store/places';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { showAlert } from '../../components/AppAlert';
-import { useFamilyMembers, useMe, useCanDelete } from '../../store/family';
+import { useFamilyMembers, useMe, useCanDelete, useCanEdit } from '../../store/family';
 import { eulreul } from '../../lib/korean';
 import { parseLooseDate } from '../../lib/dates';
+import { nameColor } from '../../lib/nameColor';
 import { LoadingRows, useEventsReady } from '../../components/Loading';
 import {
-  useEventsStore, useEventsOn, useEventDaysInMonth, dayIndexOf, toISO,
+  useEventsStore, useEventsOn, useEventDaysInMonth, useEventDotsInMonth, eventColor, dayIndexOf, toISO,
   EVENT_COLORS, formatTime, formatEventDate, membersLabel, normalizeTime, todayISO,
   type CalendarEvent,
 } from '../../store/events';
@@ -26,6 +27,7 @@ const addDaysISO = (iso: string, n: number) => { const d = new Date(`${iso}T00:0
 export default function CalendarScreen() {
   // 지우기는 적은 사람과 관리자만 (store/family.ts · DB 정책 00008)
   const canDelete = useCanDelete();
+  const canEdit = useCanEdit();
   const ready = useEventsReady();
   /** 로그인했으면 진짜 가족, 아니면 예시 (store/family.ts) */
   const MEMBERS = useFamilyMembers();
@@ -43,6 +45,7 @@ export default function CalendarScreen() {
 
   const ym = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
   const eventDays = useEventDaysInMonth(ym);
+  const eventDots = useEventDotsInMonth(ym);
   const selectedEvents = useEventsOn(selectedDate);
 
   const [showDetail, setShowDetail] = useState<CalendarEvent | null>(null);
@@ -173,7 +176,7 @@ export default function CalendarScreen() {
       location: fLocation.trim() || undefined,
       members: fMembers,
       memo: fMemo.trim() || undefined,
-      color: fColor,
+      color: nameColor(fMembers[0] ?? CURRENT_USER),
       createdBy: editing ? editing.createdBy : CURRENT_USER,
     };
     if (editing) updateEvent(editing.id, payload);
@@ -292,7 +295,8 @@ export default function CalendarScreen() {
 
   return (
     <View style={styles.container}>
-      <Modal visible={!!showDetail || showForm} transparent statusBarTranslucent animationType="none">
+      <Modal visible={!!showDetail || showForm} transparent statusBarTranslucent animationType="none" onRequestClose={closeModal}>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.modalWrap}>
           <Animated.View style={[styles.modalBgLayer, { opacity: modalBg }]}>
             <Pressable style={{ flex: 1 }} onPress={closeModal} />
@@ -304,7 +308,7 @@ export default function CalendarScreen() {
             {showDetail && (
               <>
                 <View style={styles.detailHeader}>
-                  <View style={[styles.detailColorDot, { backgroundColor: showDetail.color }]} />
+                  <View style={[styles.detailColorDot, { backgroundColor: eventColor(showDetail) }]} />
                   <Text style={styles.detailTitle}>{showDetail.title}</Text>
                   <TouchableOpacity onPress={closeModal} activeOpacity={0.7}>
                     <FontAwesome name="times" size={20} color="#4A4A4A" />
@@ -348,10 +352,12 @@ export default function CalendarScreen() {
                 </View>
 
                 <View style={styles.detailActions}>
+                  {canEdit(showDetail.authorId) && (
                   <TouchableOpacity style={styles.detailBtn} activeOpacity={0.7} onPress={() => openEdit(showDetail)}>
                     <FontAwesome name="pencil" size={14} color="#2D5A3F" />
                     <Text style={styles.detailBtnText}>고치기</Text>
                   </TouchableOpacity>
+                  )}
                   {canDelete(showDetail.authorId) && (
                     <TouchableOpacity style={[styles.detailBtn, styles.detailBtnDanger]} activeOpacity={0.7} onPress={() => handleDelete(showDetail)}>
                       <FontAwesome name="trash-o" size={14} color="#D94040" />
@@ -373,7 +379,7 @@ export default function CalendarScreen() {
                 </View>
                 <Text style={styles.addDate}>{parseLooseDate(fDate) ? formatEventDate(parseLooseDate(fDate)!) : '날짜를 적어주세요'}</Text>
 
-                <ScrollView style={{ maxHeight: 460 }} showsVerticalScrollIndicator={false}>
+                <ScrollView style={{ maxHeight: 460 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                   <Text style={styles.addLabel}>언제</Text>
                   <View style={styles.chipRow}>
                     {([['고른 날', selectedDate], ['오늘', todayISO()], ['내일', tomorrowISO()]] as const).map(([label, iso]) => (
@@ -470,16 +476,6 @@ export default function CalendarScreen() {
                     })}
                   </View>
 
-                  <Text style={styles.addLabel}>색</Text>
-                  <View style={styles.colorRow}>
-                    {EVENT_COLORS.map((c) => (
-                      <TouchableOpacity key={c} activeOpacity={0.7} onPress={() => setFColor(c)}
-                        style={[styles.colorDot, { backgroundColor: c }, fColor === c && styles.colorDotOn]}>
-                        {fColor === c && <FontAwesome name="check" size={12} color="#FFFFFF" />}
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-
                   <Text style={styles.addLabel}>메모</Text>
                   <TextInput style={[styles.addInput, { minHeight: 80, textAlignVertical: 'top' }]}
                     placeholder="챙길 것이나 기억하고 싶은 것" placeholderTextColor="#A0A0A0"
@@ -493,6 +489,7 @@ export default function CalendarScreen() {
             )}
           </Animated.View>
         </View>
+      </KeyboardAvoidingView>
       </Modal>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -542,7 +539,11 @@ export default function CalendarScreen() {
                   selected && !todayCell && styles.selectedText,
                 ]}>{day}</Text>
                 {eventDays.has(dateOf(day)) && (
-                  <View style={[styles.eventIndicator, todayCell && styles.eventIndicatorToday]} />
+                  <View style={styles.dotRow}>
+                    {(eventDots.get(dateOf(day)) ?? ['#4A8C6F']).map((c) => (
+                      <View key={c} style={[styles.eventIndicator, { backgroundColor: c }, todayCell && styles.eventIndicatorToday]} />
+                    ))}
+                  </View>
                 )}
               </TouchableOpacity>
             );
@@ -564,7 +565,7 @@ export default function CalendarScreen() {
           ) : (
             selectedEvents.map((ev) => (
               <TouchableOpacity key={ev.id} style={styles.eventCard} activeOpacity={0.7} onPress={() => openDetail(ev)}>
-                <View style={[styles.eventColorBar, { backgroundColor: ev.color }]} />
+                <View style={[styles.eventColorBar, { backgroundColor: eventColor(ev) }]} />
                 <View style={styles.eventContent}>
                   <Text style={styles.eventTime}>
                     {dayIndexOf(ev, selectedDate)
@@ -620,7 +621,7 @@ const styles = StyleSheet.create({
   todayChipText: { fontSize: 12, fontWeight: '600', color: '#2D5A3F', fontFamily: 'Pretendard' },
   weekHeader: { flexDirection: 'row', paddingHorizontal: 20, marginBottom: 4 },
   weekDay: { flex: 1, textAlign: 'center', fontSize: 13, fontWeight: '600', color: '#9C8B75', fontFamily: 'Pretendard' },
-  sundayColor: { color: '#4A8C6F' },
+  sundayColor: { color: '#C25A5A' },
   saturdayColor: { color: '#4A90C8' },
   calendarGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, marginBottom: 16 },
   dayCell: { width: `${100 / 7}%`, aspectRatio: 1, justifyContent: 'center', alignItems: 'center', position: 'relative' as const },
@@ -629,7 +630,8 @@ const styles = StyleSheet.create({
   dayText: { fontSize: 15, color: '#1F1F1F', fontFamily: 'Pretendard' },
   todayText: { color: '#FFFFFF', fontWeight: '700', fontFamily: 'PretendardBold' },
   selectedText: { color: '#2D5A3F', fontWeight: '700' },
-  eventIndicator: { width: 5, height: 5, borderRadius: 3, backgroundColor: '#4A8C6F', position: 'absolute' as const, bottom: '15%' },
+  dotRow: { flexDirection: 'row', gap: 3, position: 'absolute' as const, bottom: '14%' },
+  eventIndicator: { width: 5, height: 5, borderRadius: 3, backgroundColor: '#4A8C6F' },
   eventIndicatorToday: { backgroundColor: '#FFFFFF' },
 
   aiCalHint: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginHorizontal: 20, marginBottom: 16, backgroundColor: '#EFF6F1', borderRadius: 12, padding: 12, borderWidth: 1, borderColor: '#D8E8DE' },
