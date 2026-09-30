@@ -119,7 +119,7 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
     setBusy(true);
     try {
       const { family, member } = await createFamily(
-        familyName.trim(), display.trim(), userId!, full.trim() || undefined
+        familyName.trim(), display.trim(), userId!, full.trim() || undefined, role
       );
       setFamily(family, [member]);
       setMadeFamily(family);
@@ -191,7 +191,7 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
           <Text style={s.code}>{madeFamily.invite_code}</Text>
           <View style={s.copyRow}>
             <FontAwesome name="copy" size={12} color="#2D5A3F" />
-            <Text style={s.copyText}>눌러서 복사</Text>
+            <Text style={s.copyText}>{Platform.OS === 'web' ? '눌러서 복사' : '눌러서 가족에게 보내기'}</Text>
           </View>
         </TouchableOpacity>
 
@@ -279,7 +279,7 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
         </>
       )}
 
-      {!creating && (
+      {(
         <>
           <Text style={s.label}>나는 이 가족에서</Text>
           <View style={s.roleRow}>

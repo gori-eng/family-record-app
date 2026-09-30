@@ -54,6 +54,9 @@ export function useAuth() {
 
 SplashScreen.preventAutoHideAsync();
 
+/** 재설정 링크로 들어온 상태 — 가드가 홈으로 끌고 가지 않게 */
+const recoveryRef = { current: false };
+
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     Pretendard: require('../assets/fonts/Pretendard-Regular.otf'),
@@ -81,8 +84,10 @@ export default function RootLayout() {
       });
 
     // Listen for auth changes
-    const { data: { subscription } } = onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = onAuthStateChange((event, session) => {
       setSession(session);
+      // 비밀번호 재설정 링크로 들어왔다 — 새 비밀번호 화면으로 (가드는 이 화면을 예외로 둔다)
+      if (event === 'PASSWORD_RECOVERY') recoveryRef.current = true;
     });
 
     return () => subscription.unsubscribe();
@@ -192,6 +197,9 @@ function RootLayoutNav() {
 
   // 길 안내 — 무엇을 어디로 보낼지는 lib/authGate.ts가 정한다 (Node에서 검증됨)
   useEffect(() => {
+    // 비밀번호 재설정 화면에서는 가드가 움직이지 않는다 (복구 세션이 있어 '로그인됨'으로 보이기 때문)
+    if ((segments as string[]).includes('reset-password')) return;
+    if (recoveryRef.current) { recoveryRef.current = false; router.replace('/(auth)/reset-password' as never); return; }
     const to = decideRoute({
       authReady: !isLoading,
       signedIn: !!session,

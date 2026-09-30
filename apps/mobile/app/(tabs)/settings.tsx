@@ -5,7 +5,9 @@ import { showAlert } from '../../components/AppAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { signOut, leaveFamily, deleteFamily } from '@core/supabase';
+import { signOut, leaveFamily, deleteFamily, setFamilyEditPolicy } from '@core/supabase';
+import { Linking } from 'react-native';
+import { PRIVACY_URL, TERMS_URL, HAS_LEGAL } from '../../constants/legal';
 import { useFamilyInfo, useMe, useFullName } from '../../store/family';
 import { useSession, useMyFamilies } from '../../store/session';
 import { useRecordsStore } from '../../store/records';
@@ -35,6 +37,7 @@ export default function SettingsScreen() {
   const clearSession = useSession((s) => s.clear);
   const refreshSession = useSession((s) => s.refresh);
   const isAdmin = useSession((st) => st.me?.role === 'admin');
+  const allowFamilyEdit = useSession((st) => !!st.family?.allow_family_edit);
   const recordCount = useRecordsStore((st) => st.records.length);
   const eventCount = useEventsStore((st) => st.events.length);
 
@@ -149,6 +152,19 @@ export default function SettingsScreen() {
         ...(families.length > 1
           ? [{ icon: 'compress', label: '가족 합치기', subtitle: '두 가족을 하나로', action: () => router.push('/settings/merge-family' as any) }]
           : []),
+        // 서로의 기록 고치기 — 관리자만 켜고 끈다 (00015). 기본은 쓴 사람과 관리자만
+        ...(family.isReal && isAdmin && currentFamilyId
+          ? [{ icon: 'pencil-square-o', label: '서로의 기록 고치기', subtitle: allowFamilyEdit ? '가족 누구나 고칠 수 있어요' : '쓴 사람과 관리자만',
+              action: () => {
+                const next = !allowFamilyEdit;
+                showAlert(next ? '가족 누구나 서로의 기록을 고치게 할까요?' : '쓴 사람과 관리자만 고치게 할까요?',
+                  next ? '아이가 부모 기록을 고칠 수도 있어요. 가족끼리 서로 믿고 쓰는 집이면 켜두세요.' : '가계부는 이 설정과 상관없이 어른이면 누구나 고칠 수 있어요.',
+                  [{ text: '그냥 둘게요', style: 'cancel' }, { text: next ? '켜기' : '끄기', onPress: async () => {
+                    try { await setFamilyEditPolicy(currentFamilyId!, next); await refreshSession(); }
+                    catch (e: any) { showAlert('바꾸지 못했어요', String(e?.message ?? e)); }
+                  } }]);
+              } }]
+          : []),
         // 진짜 가족이 있을 때만. 혼자 남은 관리자는 지우기, 그 밖에는 나가기
         ...(family.isReal && currentFamilyId
           ? [soleAdmin
@@ -161,8 +177,10 @@ export default function SettingsScreen() {
       title: '내 정보',
       items: [
         { icon: 'user', label: '내 프로필', action: () => router.push('/settings/profile') },
-        { icon: 'bell', label: '알림', subtitle: '준비 중', action: () => router.push('/settings/notifications') },
         { icon: 'lock', label: '개인정보 보호', subtitle: '무엇이 지켜지나요', action: () => router.push('/settings/privacy') },
+        { icon: 'file-text-o', label: '개인정보 처리방침', subtitle: HAS_LEGAL ? undefined : '곧 올라와요',
+          action: () => HAS_LEGAL ? Linking.openURL(PRIVACY_URL) : showAlert('아직 올리는 중이에요', '처리방침 페이지가 곧 올라와요.') },
+        ...(TERMS_URL ? [{ icon: 'file-text-o', label: '이용약관', action: () => Linking.openURL(TERMS_URL) }] : []),
       ],
     },
     {

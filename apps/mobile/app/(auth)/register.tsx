@@ -3,6 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingVi
 import { showAlert } from '../../components/AppAlert';
 import { Link, useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
+import { Linking } from 'react-native';
+import { PRIVACY_URL, TERMS_URL, HAS_LEGAL } from '../../constants/legal';
 import { signUpWithEmail } from '@core/supabase';
 import { goAfterAuth, authErrorMessage } from '../../lib/afterAuth';
 
@@ -12,12 +14,14 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [agreed, setAgreed] = useState(false);
   const router = useRouter();
 
   const handleRegister = async () => {
     if (!email || !password) { showAlert('이메일과 비밀번호를 적어주세요', '둘 다 있어야 가입할 수 있어요.'); return; }
     if (password !== confirmPassword) { showAlert('비밀번호가 서로 달라요', '확인 칸에 같은 비밀번호를 한 번 더 적어주세요.'); return; }
     if (password.length < 6) { showAlert('비밀번호를 조금만 더 길게', '6자 이상이면 돼요.'); return; }
+    if (!agreed) { showAlert('동의가 필요해요', '개인정보 처리방침에 동의해야 가입할 수 있어요.'); return; }
     setLoading(true);
     try {
       const data = await signUpWithEmail(email.trim(), password);
@@ -65,6 +69,15 @@ export default function RegisterScreen() {
               value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry={!showPassword} />
           </View>
 
+          <TouchableOpacity style={s.agreeRow} activeOpacity={0.7} onPress={() => setAgreed((v) => !v)}>
+            <FontAwesome name={agreed ? 'check-square' : 'square-o'} size={20} color={agreed ? '#4A8C6F' : '#BBBBBB'} />
+            <Text style={s.agreeText}>
+              <Text style={s.agreeLink} onPress={() => HAS_LEGAL && Linking.openURL(PRIVACY_URL)}>개인정보 처리방침</Text>
+              {TERMS_URL ? <>과 <Text style={s.agreeLink} onPress={() => Linking.openURL(TERMS_URL)}>이용약관</Text></> : null}
+              에 동의해요
+            </Text>
+          </TouchableOpacity>
+
           <TouchableOpacity style={[s.submitBtn, loading && s.submitBtnDisabled]} onPress={handleRegister}
             disabled={loading} activeOpacity={0.8}>
             <Text style={s.submitBtnText}>{loading ? '가입하고 있어요' : '가입하기'}</Text>
@@ -84,6 +97,9 @@ export default function RegisterScreen() {
 }
 
 const s = StyleSheet.create({
+  agreeRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, marginBottom: 14 },
+  agreeText: { flex: 1, fontSize: 14, color: '#4A4A4A', fontFamily: 'Pretendard' },
+  agreeLink: { color: '#4A8C6F', fontFamily: 'PretendardBold' },
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   scrollContent: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 28, paddingVertical: 48 },
   brand: { alignItems: 'center', marginBottom: 52 },

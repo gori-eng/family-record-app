@@ -81,27 +81,11 @@ export default function LoginScreen() {
           >
             <Text style={s.loginBtnText}>{loading ? '들어가고 있어요' : '로그인'}</Text>
           </TouchableOpacity>
-
-          {/* Divider */}
-          <View style={s.divider}>
-            <View style={s.dividerLine} />
-            <Text style={s.dividerText}>또는</Text>
-            <View style={s.dividerLine} />
-          </View>
-
-          {/* Social */}
-          <View style={s.socialRow}>
-            <TouchableOpacity style={s.socialBtn} activeOpacity={0.7}
-              onPress={() => showAlert('구글 로그인은 준비 중이에요', '지금은 이메일로 들어와 주세요.')}>
-              <FontAwesome name="google" size={18} color="#4285F4" />
-              <Text style={s.socialText}>Google</Text>
+          <Link href="/(auth)/forgot-password" asChild>
+            <TouchableOpacity style={s.forgotBtn} activeOpacity={0.7}>
+              <Text style={s.forgotText}>비밀번호를 잊었어요</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[s.socialBtn, s.appleBtn]} activeOpacity={0.7}
-              onPress={() => showAlert('Apple 로그인은 준비 중이에요', '지금은 이메일로 들어와 주세요.')}>
-              <FontAwesome name="apple" size={18} color="#FFFFFF" />
-              <Text style={s.appleText}>Apple</Text>
-            </TouchableOpacity>
-          </View>
+          </Link>
         </View>
 
         {/* Register */}
@@ -153,6 +137,8 @@ const s = StyleSheet.create({
   loginBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 
   // Divider
+  forgotBtn: { alignItems: 'center', paddingVertical: 14 },
+  forgotText: { color: '#4A8C6F', fontSize: 14, fontFamily: 'Pretendard' },
   divider: { flexDirection: 'row', alignItems: 'center', marginVertical: 24 },
   dividerLine: { flex: 1, height: 1, backgroundColor: '#EAEAEA' },
   dividerText: { color: '#B0B0B0', paddingHorizontal: 16, fontSize: 13, fontFamily: 'Pretendard' },

@@ -6,6 +6,8 @@ export {
   signOut,
   getSession,
   onAuthStateChange,
+  requestPasswordReset,
+  updatePassword,
 } from './supabase/auth';
 export {
   fetchMyFamilies,
@@ -21,6 +23,9 @@ export {
   removeMember,
   fetchMyMemberships,
   mergeFamilies,
+  updateMyKin,
+  setFamilyEditPolicy,
+  deleteMyAccount,
 } from './supabase/family';
 export type { MergeResult } from './supabase/family';
 export {

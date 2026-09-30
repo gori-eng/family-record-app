@@ -69,6 +69,8 @@ export type MemberCard = {
   full: string;
   color: string;
   role: string;
+  /** 관리자 권한이 있는지 (자리와 별개) */
+  isAdmin: boolean;
   /** 로그인한 나 자신인지 */
   isMe: boolean;
   /** 프로필에서 고른 이모지. 없으면 이름 첫 글자를 보여준다 */
@@ -105,6 +107,7 @@ export function useMemberCards(): MemberCard[] {
         full: m.full,
         color: m.color,
         role: sampleRoles[i] ?? '가족',
+        isAdmin: i === 0,
         isMe: m.display === SAMPLE_ME,
         avatar: null,
         memberId: null,
@@ -115,7 +118,8 @@ export function useMemberCards(): MemberCard[] {
       display: m.display_name,
       full: m.full_name || m.display_name,
       color: MEMBER_COLORS[m.display_name] ?? FALLBACK_COLORS[i % FALLBACK_COLORS.length],
-      role: ROLE_LABEL[m.role] ?? '가족',
+      role: ROLE_LABEL[m.kin ?? (m.role === 'admin' ? 'parent' : m.role)] ?? '가족',
+      isAdmin: m.role === 'admin',
       isMe: !!me && m.id === me.id,
       avatar: m.avatar_url,
       memberId: m.id,

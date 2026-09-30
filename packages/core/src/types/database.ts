@@ -26,8 +26,10 @@ export type Family = {
   name: string;
   invite_code: string;
   avatar_url: string | null;
+  /** 가족 누구나 서로의 기록을 고칠 수 있게 할지 (00015). 기본 false = 쓴 사람과 관리자만 */
+  allow_family_edit: boolean;
   created_at: string;
-  created_by: string;
+  created_by: string | null;
 }
 
 export type FamilyMember = {
@@ -39,7 +41,10 @@ export type FamilyMember = {
   /** 프로필·구성원 목록에 보여줄 이름 (김지수). 겹쳐도 된다. */
   full_name: string;
   avatar_url: string | null;
+  /** 권한 — admin이면 관리자 */
   role: FamilyRole;
+  /** 가족 안의 자리 (부모·자녀·조부모). 관리자도 자리가 있다 (00015) */
+  kin: 'parent' | 'child' | 'elder' | null;
   joined_at: string;
 }
 
@@ -122,8 +127,9 @@ export type FinanceSettingsRow = {
 
 export type FamilyInsert = {
   name: string;
-  created_by: string;
+  created_by?: string | null;
   avatar_url?: string | null;
+  allow_family_edit?: boolean;
 };
 
 export type FamilyMemberInsert = {
@@ -132,6 +138,7 @@ export type FamilyMemberInsert = {
   display_name: string;
   full_name?: string;
   role?: FamilyRole;
+  kin?: 'parent' | 'child' | 'elder' | null;
   avatar_url?: string | null;
 };
 
@@ -223,7 +230,7 @@ export type Database = {
       /** 초대 코드로 가족에 합류 (00004 마이그레이션) */
       /** 가족 만들기 + 만든 사람을 첫 구성원으로 (00006) */
       create_family_with_me: {
-        Args: { p_name: string; p_display_name: string; p_full_name?: string };
+        Args: { p_name: string; p_display_name: string; p_full_name?: string; p_kin?: string };
         Returns: { family_id: string; member_id: string; invite_code: string }[];
       };
       join_family_by_code: {
@@ -259,6 +266,11 @@ export type Database = {
       merge_families: {
         Args: { p_source: string; p_target: string };
         Returns: { moved_records: number; moved_events: number; moved_members: number; skipped_duplicates: number }[];
+      };
+      /** 내 계정 지우기 — 관리자로 남은 가족이 있으면 거절 (00015) */
+      delete_my_account: {
+        Args: Record<string, never>;
+        Returns: undefined;
       };
       /** 자주 가는 곳 하나 썼다 — 있으면 횟수+1, 없으면 새로 (00014) */
       touch_place: {

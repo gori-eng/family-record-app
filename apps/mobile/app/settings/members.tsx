@@ -23,8 +23,6 @@ import { useRecordsStore } from '../../store/records';
 const ROLE_BADGE: Record<string, { bg: string; fg: string }> = {
   '관리자': { bg: '#EFF6F1', fg: '#2D5A3F' },
   '부모': { bg: '#E3F0FA', fg: '#2D6FA8' },
-  '부': { bg: '#E3F0FA', fg: '#2D6FA8' },
-  '모': { bg: '#FCE4EC', fg: '#AD3A5A' },
   '자녀': { bg: '#E8F5E9', fg: '#2E7D32' },
   '조부모': { bg: '#F3E8F5', fg: '#7B3FA0' },
   '손님': { bg: '#F4F2EE', fg: '#7A6B55' },
@@ -166,6 +164,12 @@ export default function MembersScreen() {
             <View style={s.info}>
               <View style={s.nameRow}>
                 <Text style={s.name}>{m.full}</Text>
+                {m.isAdmin && (
+                  <View style={s.adminBadge}>
+                    <FontAwesome name="star" size={9} color="#2D5A3F" />
+                    <Text style={s.adminBadgeText}>관리자</Text>
+                  </View>
+                )}
                 <View style={[s.roleBadge, { backgroundColor: ROLE_BADGE[m.role]?.bg ?? '#EAEAEA' }]}>
                   <Text style={[s.roleBadgeText, { color: ROLE_BADGE[m.role]?.fg ?? '#666' }]}>{m.role}</Text>
                 </View>
@@ -191,6 +195,8 @@ export default function MembersScreen() {
 }
 
 const s = StyleSheet.create({
+  adminBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#EFF6F1', borderRadius: 8, paddingHorizontal: 7, paddingVertical: 2 },
+  adminBadgeText: { fontSize: 11, color: '#2D5A3F', fontFamily: 'PretendardBold' },
   container: { flex: 1, backgroundColor: '#F9F8F5', padding: 20 },
   subtitle: { fontSize: 14, color: '#7A6B55', marginBottom: 16, fontFamily: 'Pretendard' },
 

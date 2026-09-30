@@ -86,6 +86,8 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
      * ⚠️ 구글 로그인(OAuth)을 붙이면 **웹에서는 켜야** 한다 — 로그인 후
      *    `#access_token=...`을 달고 돌아오기 때문이다.
      */
-    detectSessionInUrl: false,
+    // 웹은 켠다 — 비밀번호 재설정 메일의 링크가 `#access_token=...type=recovery`를 달고 돌아온다 (2026-09-30).
+    // 휴대폰은 딥링크로 따로 받는다
+    detectSessionInUrl: typeof window !== 'undefined' && typeof document !== 'undefined',
   },
 });

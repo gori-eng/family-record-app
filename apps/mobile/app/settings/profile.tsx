@@ -1,9 +1,9 @@
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Modal, Animated, Pressable } from 'react-native';
 import { showAlert } from '../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useState, useRef, useEffect } from 'react';
-import { getSession, updateMyName, renameMe } from '@core/supabase';
+import { getSession, updateMyName, renameMe, deleteMyAccount, updateMyKin } from '@core/supabase';
 import { useSession } from '../../store/session';
 import { ROLE_LABEL } from '../../store/family';
 import { useRecordsStore } from '../../store/records';
@@ -37,6 +37,7 @@ import { Platform } from 'react-native';
 const EMOJIS = ['😀', '😎', '🥰', '🤓', '😺', '🐶', '🦊', '🐰', '🌸', '🌿', '⭐', '❤️', '🌈', '🎨', '🍀', '🦄'];
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const me = useSession((st) => st.me);
   const patchMe = useSession((st) => st.patchMe);
 
@@ -103,6 +104,36 @@ export default function ProfileScreen() {
     } finally {
       setUploadingAvatar(false);
     }
+  };
+
+  /** 가족 안의 자리 — 권한(관리자)과 별개 (00015). 자녀로 바꾸면 돈·건강이 안 보이니 한 번 묻는다 */
+  const changeKin = (k: 'parent' | 'child' | 'elder') => {
+    if (!me || (me.kin ?? 'parent') === k) return;
+    const apply = async () => {
+      try { await updateMyKin(me.id, k); patchMe({ kin: k }); }
+      catch (e) { showAlert('바꾸지 못했어요', dbErrorText(e)); }
+    };
+    if (k === 'child' && me.role !== 'admin') {
+      showAlert('자녀로 바꿀까요?', '자녀는 가계부와 건강 기록을 볼 수 없어요. 다시 부모로 돌리려면 관리자가 바꿔줘야 해요.', [
+        { text: '그냥 둘게요', style: 'cancel' }, { text: '자녀로', onPress: apply },
+      ]);
+      return;
+    }
+    apply();
+  };
+
+  /** 계정 지우기 (애플 5.1.1(v)). 관리자로 남은 가족이 있으면 DB가 거절한다 */
+  const askDeleteAccount = () => {
+    showAlert('계정을 지울까요?', '가족의 기록은 그대로 남고, 내 계정과 로그인만 사라져요. 혼자 남은 가족이 있으면 그 가족은 함께 지워져요.\n\n되돌릴 수 없어요.', [
+      { text: '그냥 둘게요', style: 'cancel' },
+      { text: '지우기', style: 'destructive', onPress: () => showAlert('정말 지울까요?', '다시 쓰려면 새로 가입해야 해요.', [
+        { text: '그냥 둘게요', style: 'cancel' },
+        { text: '계정 지우기', style: 'destructive', onPress: async () => {
+          try { await deleteMyAccount(); useSession.getState().clear(); router.replace('/(auth)/login' as never); }
+          catch (e) { showAlert('지우지 못했어요', dbErrorText(e)); }
+        } },
+      ]) },
+    ]);
   };
 
   const nextShort = shortName.trim();
@@ -236,11 +267,18 @@ export default function ProfileScreen() {
         </View>
         <Text style={s.help}>로그인할 때 쓰는 주소예요</Text>
 
-        <Text style={s.label}>역할</Text>
-        <View style={s.readonly}>
-          <Text style={s.readonlyText}>{ROLE_LABEL[me.role] ?? '가족'}</Text>
+        <Text style={s.label}>나는 이 가족에서</Text>
+        <View style={s.kinRow}>
+          {([['parent', '부모'], ['child', '자녀'], ['elder', '조부모']] as const).map(([k, label]) => {
+            const on = (me.kin ?? 'parent') === k;
+            return (
+              <TouchableOpacity key={k} style={[s.kinChip, on && s.kinChipOn]} activeOpacity={0.7} onPress={() => changeKin(k)}>
+                <Text style={[s.kinText, on && s.kinTextOn]}>{label}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
-        <Text style={s.help}>역할은 가족에 들어올 때 정해져요</Text>
+        <Text style={s.help}>{me.role === 'admin' ? '이 가족의 관리자이기도 해요. 관리자는 가족 구성원에서 넘길 수 있어요' : '자녀로 두면 가계부와 건강 기록은 보이지 않아요'}</Text>
 
         <TouchableOpacity
           style={[s.saveBtn, (!changed || saving) && s.saveBtnOff]}
@@ -249,6 +287,10 @@ export default function ProfileScreen() {
           onPress={save}
         >
           <Text style={s.saveBtnText}>{saving ? '저장하고 있어요' : changed ? '저장하기' : '바뀐 게 없어요'}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={s.deleteRow} activeOpacity={0.7} onPress={askDeleteAccount}>
+          <Text style={s.deleteText}>계정 지우기</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -325,6 +367,13 @@ const s = StyleSheet.create({
   help: { fontSize: 12, color: '#888888', marginTop: 6, marginBottom: 20, lineHeight: 17, fontFamily: 'Pretendard' },
 
   saveBtn: { backgroundColor: '#4A8C6F', borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
+  kinRow: { flexDirection: 'row', gap: 8, marginBottom: 6 },
+  kinChip: { flex: 1, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', alignItems: 'center' },
+  kinChipOn: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
+  kinText: { fontSize: 14, color: '#4A4A4A', fontFamily: 'Pretendard' },
+  kinTextOn: { color: '#FFFFFF', fontFamily: 'PretendardBold' },
+  deleteRow: { alignItems: 'center', paddingVertical: 18, marginTop: 24 },
+  deleteText: { fontSize: 13, color: '#9C8B75', fontFamily: 'Pretendard', textDecorationLine: 'underline' },
   saveBtnOff: { backgroundColor: '#B8CFC3' },
   saveBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', fontFamily: 'PretendardBold' },
 

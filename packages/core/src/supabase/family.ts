@@ -63,12 +63,15 @@ export async function createFamily(
   /** 지금은 쓰지 않는다 — 함수가 `auth.uid()`로 직접 확인한다. 호출부 호환을 위해 남겨둠 */
   _userId?: string,
   /** 프로필에 뜰 이름 (김지수). 비우면 짧은 이름을 그대로 쓴다 */
-  fullName?: string
+  fullName?: string,
+  /** 가족 안의 자리 — 만든 사람도 고른다 (00015). 딸이 만들 수도 있다 */
+  kin: 'parent' | 'child' | 'elder' = 'parent'
 ): Promise<{ family: Family; member: FamilyMember }> {
   const { data, error } = await supabase.rpc('create_family_with_me', {
     p_name: name.trim(),
     p_display_name: displayName.trim(),
     p_full_name: fullName?.trim() || displayName.trim(),
+    p_kin: kin,
   });
   if (error) throw error;
 
@@ -218,4 +221,26 @@ export async function mergeFamilies(sourceId: string, targetId: string): Promise
     movedMembers: row?.moved_members ?? 0,
     skippedDuplicates: row?.skipped_duplicates ?? 0,
   };
+}
+
+/** 내 자리(부모·자녀·조부모)를 고친다 — 권한(role)은 관리자만 바꾸므로 여기선 kin만 */
+export async function updateMyKin(memberId: string, kin: 'parent' | 'child' | 'elder'): Promise<void> {
+  const { error } = await supabase.from('family_members').update({ kin }).eq('id', memberId);
+  if (error) throw error;
+}
+
+/** 가족 설정: 서로의 기록을 고칠 수 있게 (관리자만 — families_update 정책) */
+export async function setFamilyEditPolicy(familyId: string, allow: boolean): Promise<void> {
+  const { error } = await supabase.from('families').update({ allow_family_edit: allow }).eq('id', familyId);
+  if (error) throw error;
+}
+
+/**
+ * 내 계정 지우기 (00015). 관리자로 남은 가족이 있으면 DB가 거절한다.
+ * 성공하면 세션은 사라지므로 호출부가 로그인 화면으로 보낸다.
+ */
+export async function deleteMyAccount(): Promise<void> {
+  const { error } = await supabase.rpc('delete_my_account');
+  if (error) throw error;
+  try { await supabase.auth.signOut(); } catch { /* 이미 없는 계정 */ }
 }
