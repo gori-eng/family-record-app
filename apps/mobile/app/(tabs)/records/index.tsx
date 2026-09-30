@@ -57,7 +57,7 @@ export default function RecordsScreen() {
                 <FontAwesome name={cat.icon as any} size={22} color="#4A4A4A" />
               </View>
               <Text style={styles.cardLabel}>{cat.label}</Text>
-              <Text style={styles.cardCount}>{counts[cat.screen as RecordCategory] ?? 0}개</Text>
+              <Text style={styles.cardCount}>{(counts[cat.screen as RecordCategory] ?? 0) ? `${counts[cat.screen as RecordCategory]}개` : '처음이에요'}</Text>
             </TouchableOpacity>
           ))}
         </View>

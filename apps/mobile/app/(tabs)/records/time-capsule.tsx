@@ -398,7 +398,8 @@ const s = StyleSheet.create({
   modalLabel: { fontSize: 13, color: '#767676', width: 60, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   letter: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', backgroundColor: '#FFF8F0', borderRadius: 14, padding: 16, marginTop: 6, borderWidth: 1, borderColor: '#F5E8D8' },
-  letterText: { flex: 1, fontSize: 15, color: '#1F1F1F', lineHeight: 24, fontFamily: 'Pretendard' },
+  // 열린 편지는 손글씨로 — 봉인이 풀리는 순간이 이 앱의 정체성이다
+  letterText: { flex: 1, fontSize: 19, color: '#1F1F1F', lineHeight: 30, fontFamily: 'GaeguBold' },
   sealedBox: { alignItems: 'center', gap: 8, backgroundColor: '#F4F2EE', borderRadius: 14, padding: 20, marginTop: 6 },
   sealedText: { fontSize: 13, color: '#7A6B55', textAlign: 'center', lineHeight: 19, fontFamily: 'Pretendard' },
   sealedAction: { fontSize: 13, color: '#2D5A3F', fontFamily: 'PretendardBold', marginTop: 4 },

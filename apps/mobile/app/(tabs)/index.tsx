@@ -140,7 +140,7 @@ export default function HomeScreen() {
           <Animated.View style={[s.notifModal, { transform: [{ translateY: modalSlideAnim }] }]}>
             <View style={s.notifHandle} />
             <View style={s.notifHeader}>
-              <Text style={s.notifTitle}>알림</Text>
+              <Text style={s.notifTitle}>가족 소식</Text>
               <TouchableOpacity onPress={closeNotif} activeOpacity={0.7} style={s.notifClose}>
                 <FontAwesome name="times" size={18} color="#888" />
               </TouchableOpacity>
@@ -273,7 +273,7 @@ export default function HomeScreen() {
           <View style={s.section}>
             <View style={s.sectionHeader}>
               <View>
-                <Text style={s.sectionTitle}>그때 오늘</Text>
+                <Text style={[s.sectionTitle, s.handTitle]}>그때 오늘</Text>
                 <Text style={s.sectionSub}>오늘과 같은 날에 남겨둔 기록이에요</Text>
               </View>
             </View>
@@ -396,6 +396,8 @@ const s = StyleSheet.create({
   section: { paddingHorizontal: 20, marginBottom: 32 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 16 },
   sectionTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.3 },
+  // 손글씨는 딱 두 곳 — 그때 오늘, 타임캡슐 편지 (그 밖엔 가독성 때문에 안 쓴다)
+  handTitle: { fontFamily: 'GaeguBold', fontSize: 22, color: '#2D5A3F', letterSpacing: 0 },
   sectionSub: { fontSize: 12, color: '#767676', marginTop: 2 },
   seeAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 4 },
   seeAllText: { fontSize: 13, color: '#4A8C6F', fontWeight: '600' },

@@ -987,7 +987,7 @@ function FinanceScreen() {
             (예전엔 한 글자마다 DB에 썼다: 50만 원 = 6번 저장. 점검 B4) */}
         <Modal visible={showBudget} transparent statusBarTranslucent animationType="fade">
           <View style={styles.centerWrap}>
-            <Pressable style={styles.centerBg} onPress={commitBudget} />
+            <Pressable style={styles.centerBg} onPress={() => setShowBudget(false)} />
             <View style={styles.centerSheet}>
               <Text style={styles.centerTitle}>예산 정하기</Text>
               <Text style={styles.centerDesc}>
@@ -1027,6 +1027,9 @@ function FinanceScreen() {
               <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={commitBudget}>
                 <Text style={styles.createSubmitText}>다 정했어요</Text>
               </TouchableOpacity>
+              <TouchableOpacity style={styles.budgetCancel} activeOpacity={0.7} onPress={() => setShowBudget(false)}>
+                <Text style={styles.budgetCancelText}>그냥 둘게요</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -1053,8 +1056,11 @@ function FinanceScreen() {
                         </Text>
                       </View>
                       <Text style={styles.recurItemAmount}>{formatAmount(item.amount, item.type)}</Text>
-                      <TouchableOpacity activeOpacity={0.7} onPress={() => settings.removeRecurring(item.id)}>
-                        <FontAwesome name="times" size={14} color="#C4BDB2" />
+                      <TouchableOpacity activeOpacity={0.7} hitSlop={12} accessibilityLabel="매달 넣기에서 빼기"
+                        onPress={() => showAlert('매달 넣기에서 뺄까요?', `${item.desc}${eulreul(item.desc)} 더는 자동으로 넣지 않아요. 이미 넣은 거래는 그대로예요.`, [
+                          { text: '그냥 둘게요', style: 'cancel' }, { text: '빼기', style: 'destructive', onPress: () => settings.removeRecurring(item.id) },
+                        ])}>
+                        <FontAwesome name="times" size={16} color="#8A7A62" />
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -1163,7 +1169,9 @@ const styles = StyleSheet.create({
   balanceAmount: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
   chartContainer: { gap: 10 },
   chartRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  chartLabel: { width: 44, fontSize: 12, color: '#4A4A4A', fontFamily: 'Pretendard' } as any,
+  chartLabel: { width: 56, fontSize: 12, color: '#4A4A4A', fontFamily: 'Pretendard' } as any,
+  budgetCancel: { alignItems: 'center', paddingVertical: 12 },
+  budgetCancelText: { fontSize: 14, color: '#6B6B6B', fontFamily: 'Pretendard' },
   chartLabelActive: { color: '#4A8C6F', fontFamily: 'PretendardBold' },
   chartBarBg: { flex: 1, height: 10, backgroundColor: '#F1EFEA', borderRadius: 5 },
   chartBar: { height: 10, borderRadius: 5 },
