@@ -4,6 +4,7 @@
  * 흐름: 파일 선택 → (필요하면 열 맞추기) → 카드별 사용자 지정 → 미리보기 → 확인 후 저장
  * 파싱·중복판정은 store/statementImport.ts, 기억해둘 설정은 store/financeSettings.ts에 있다.
  */
+import { ro } from '../../../lib/korean';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Platform, Modal, Pressable,
@@ -359,7 +360,7 @@ function FinanceImportScreen() {
               ))}
               {unassigned.length > 0 && (
                 <Text style={s.warn}>
-                  아직 {unassigned.length}장이 지정되지 않았어요. 지정하지 않으면 '{CURRENT_USER}'로 들어가요.
+                  아직 {unassigned.length}장이 지정되지 않았어요. 지정하지 않으면 '{CURRENT_USER}'{ro(CURRENT_USER)} 들어가요.
                 </Text>
               )}
             </View>

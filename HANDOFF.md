@@ -169,7 +169,8 @@ pnpm --filter mobile exec expo start --web
 
 ### 남은 것 (우선순위 순)
 
-1. **`supabase/APPLY_LATEST.sql` Run (00012)** — 가족 합치기가 이걸로 동작한다. 시험 가족으로 먼저 해볼 것
+1. **`supabase/APPLY_LATEST.sql` Run (00013)** — 보안 점검(내부 함수 잠그기·자녀 재합류·이름 규칙)
+1-1. **애플 심사 대비** — 계정 삭제, 개인정보 처리방침, '준비 중' 버튼 정리
 2. **앱 아이콘·스플래시 그림** — 지금은 Expo 기본 그림. 1024×1024 PNG 하나가 필요하다 (코드로 못 만든다)
 3. **EAS 빌드** — 개발자 계정(Apple $99/년, Google $25) 준비 후 `npx eas init` → `eas build --profile preview`
 4. 휴대폰 푸시 알림·구글 로그인·확인 메일 SMTP — EAS와 함께

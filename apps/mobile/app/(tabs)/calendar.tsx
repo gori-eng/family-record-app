@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, Modal, Animated, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { showAlert } from '../../components/AppAlert';
 import { useFamilyMembers, useMe, useCanDelete } from '../../store/family';
 import { eulreul } from '../../lib/korean';
@@ -57,6 +57,8 @@ export default function CalendarScreen() {
 
   // 삭제 되돌리기 — 실수로 지워도 10초 안에 살릴 수 있다
   const [undoItem, setUndoItem] = useState<CalendarEvent | null>(null);
+  /** 지운 순간의 가족 — 캘린더는 탭이라 가족을 바꿔도 화면이 남는다 (점검 L1) */
+  const undoFamily = useRef<string | null>(null);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (undoTimer.current) clearTimeout(undoTimer.current); }, []);
 
@@ -155,6 +157,7 @@ export default function CalendarScreen() {
           removeEvent(event.id);
           closeModal();
           setUndoItem(event);
+          undoFamily.current = useEventsStore.getState().familyId;
           if (undoTimer.current) clearTimeout(undoTimer.current);
           undoTimer.current = setTimeout(() => setUndoItem(null), 10000);
         },
@@ -164,6 +167,11 @@ export default function CalendarScreen() {
 
   const handleUndo = () => {
     if (!undoItem) return;
+    if (useEventsStore.getState().familyId !== undoFamily.current) {
+      setUndoItem(null);
+      showAlert('다른 가족을 보고 있어요', '지운 일정은 그 가족으로 돌아가서만 되돌릴 수 있어요. 이번엔 되돌리지 않았어요.');
+      return;
+    }
     restoreEvent(undoItem);
     setUndoItem(null);
     if (undoTimer.current) clearTimeout(undoTimer.current);
@@ -200,6 +208,7 @@ export default function CalendarScreen() {
 
   // 통합 검색에서 일정을 누르면 `openId`를 싣고 온다 — 그 날짜로 옮기고 상세를 한 번 연다
   const { openId } = useLocalSearchParams<{ openId?: string }>();
+  const router = useRouter();
   const openedFor = useRef('');
   useEffect(() => {
     if (!openId || openedFor.current === openId) return;
@@ -210,6 +219,9 @@ export default function CalendarScreen() {
     setCurrentYear(Number(ev.date.slice(0, 4)));
     setCurrentMonth(Number(ev.date.slice(5, 7)) - 1);
     openDetail(ev);
+    // 캘린더는 탭이라 화면이 남는다. 주소에 openId가 남아 있으면 같은 일정을 다시 눌러도 안 열린다 (점검 L3)
+    router.setParams({ openId: undefined } as any);
+    openedFor.current = '';
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openId, events]);
 

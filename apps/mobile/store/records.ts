@@ -170,6 +170,11 @@ export const useRecordsStore = create<RecordsState>((set, get) => ({
   clear: () => set({ records: [], familyId: null, userId: null, ready: false, error: null }),
 
   addRecord: (input) => {
+    // 쓴 사람이 비면 누가 쓴 기록인지 영영 모른다 — 가족 정보를 아직 못 불러온 순간이다 (점검 M3)
+    if (get().familyId && !input.recordedBy.trim()) {
+      showAlert('잠깐만요', '가족 정보를 불러오는 중이에요. 조금 뒤에 다시 저장해주세요.');
+      return { id: '', category: input.category, title: input.title, createdAt: Date.now(), recordedBy: '', data: input.data };
+    }
     const record: FamilyRecord = {
       id: tempId(),
       category: input.category,
@@ -314,6 +319,8 @@ export const useRecordsStore = create<RecordsState>((set, get) => ({
       }
       // 진짜 id를 받아오려고 한 번 다시 읽는다
       const rows = await fetchRecords(familyId);
+      // 그사이 다른 가족으로 바꿨으면 이 결과를 새 가족 화면에 덮지 않는다 (점검 M2)
+      if (get().familyId !== familyId) return;
       set({ records: rows.map(fromDb) });
     })().catch((e) => failed('되살린 기록을', e));
   },
@@ -332,6 +339,7 @@ export const useRecordsStore = create<RecordsState>((set, get) => ({
         });
       }
       const rows = await fetchRecords(familyId);
+      if (get().familyId !== familyId) return;
       set({ records: rows.map(fromDb) });
     })().catch((e) => failed('되살린 기록을', e));
   },

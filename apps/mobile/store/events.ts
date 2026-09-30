@@ -206,7 +206,10 @@ export const useEventsStore = create<EventsState>((set, get) => ({
         const { id: _id, ...rest } = e;
         await insertEvent(familyId, userId, rest);
       }
-      set({ events: (await fetchEvents(familyId)) as CalendarEvent[] });
+      const rows = (await fetchEvents(familyId)) as CalendarEvent[];
+      // 그사이 다른 가족으로 바꿨으면 새 가족 화면에 덮지 않는다 (점검 M2)
+      if (get().familyId !== familyId) return;
+      set({ events: rows });
     })().catch((e) => failed('되살린 일정을', e));
   },
 
@@ -220,7 +223,10 @@ export const useEventsStore = create<EventsState>((set, get) => ({
         const { id: _id, ...rest } = e;
         await insertEvent(familyId, userId, rest);
       }
-      set({ events: (await fetchEvents(familyId)) as CalendarEvent[] });
+      const rows = (await fetchEvents(familyId)) as CalendarEvent[];
+      // 그사이 다른 가족으로 바꿨으면 새 가족 화면에 덮지 않는다 (점검 M2)
+      if (get().familyId !== familyId) return;
+      set({ events: rows });
     })().catch((e) => failed('되살린 일정을', e));
   },
 }));

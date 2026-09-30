@@ -158,6 +158,18 @@ export async function pickAndUpload(
   return { paths, failed, canceled: false };
 }
 
+/**
+ * 기록이 아직 이 사진을 쓰고 있지 않은지 확인한 뒤에 지운다 (2026-09-30 점검 M1).
+ * 기록 저장·삭제는 뒤에서 DB로 가고, **실패하면 보관소가 옛 기록을 되살린다.**
+ * 그때 사진을 먼저 지워버리면 되살아난 기록의 사진이 영영 깨진다.
+ * 그래서 몇 초 기다렸다가, 보관소의 어떤 기록도 이 경로를 쓰지 않을 때만 지운다.
+ */
+export function removePhotoFilesWhenUnused(paths: string[] | undefined, isUsed: (path: string) => boolean, delayMs = 8000) {
+  const list = (paths ?? []).filter(Boolean);
+  if (!list.length) return;
+  setTimeout(() => removePhotoFiles(list.filter((p) => !isUsed(p))), delayMs);
+}
+
 /** 정리용 — 실패해도 사용자를 막지 않는다 (못 지운 파일은 창고에 남을 뿐이다) */
 export function removePhotoFiles(paths: string[] | undefined) {
   const list = (paths ?? []).filter(Boolean);

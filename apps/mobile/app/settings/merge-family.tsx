@@ -20,6 +20,7 @@ import { useRecordsStore } from '../../store/records';
 import { useEventsStore } from '../../store/events';
 import { fetchMyMemberships, fetchRecords, fetchEvents, fetchMembers, mergeFamilies, type Family } from '@core/supabase';
 import { dbErrorText } from '../../lib/dbErrors';
+import { attachFinanceSettings } from '../../store/financeSettings';
 import { ro, iga, eulreul, euneun } from '../../lib/korean';
 
 type Membership = { family_id: string; role: string; display_name: string };
@@ -102,6 +103,8 @@ export default function MergeFamilyScreen() {
       await Promise.all([
         useRecordsStore.getState().load(target.id, userId),
         useEventsStore.getState().load(target.id, userId),
+        // 합치기가 두 가족의 가계부 설정을 합쳤다 — 옛 값을 들고 있다가 다음 저장 때 덮지 않게 다시 받는다
+        attachFinanceSettings(target.id),
       ]);
       const parts = [
         r.movedRecords ? `기록 ${r.movedRecords}개` : '',

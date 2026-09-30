@@ -13,7 +13,8 @@ import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal, Act
 import { FontAwesome } from '@expo/vector-icons';
 import { useRef, useState } from 'react';
 import { showAlert } from './AppAlert';
-import { usePhotoUrl, pickAndUpload, removePhotoFiles, MAX_PHOTOS } from '../lib/photos';
+import { usePhotoUrl, pickAndUpload, removePhotoFiles, removePhotoFilesWhenUnused, photosOf, MAX_PHOTOS } from '../lib/photos';
+import { useRecordsStore } from '../store/records';
 import { useSession } from '../store/session';
 import { dbErrorText } from '../lib/dbErrors';
 
@@ -28,30 +29,50 @@ export function usePhotoDraft() {
   const current = useRef<string[]>([]);
   const original = useRef<string[]>([]);
   const uploaded = useRef<string[]>([]);
+  /** 폼을 새로 열거나 닫을 때마다 바뀐다 — 올리는 도중에 닫은 폼의 사진이 다음 폼에 끼지 않게 (점검 L4) */
+  const generation = useRef(0);
 
   const setPhotos = (next: string[]) => { current.current = next; setPhotosState(next); };
 
   return {
     photos,
     /** 폼을 열 때 — 새 기록이면 빈 목록, 고치기면 그 기록의 사진 */
-    reset: (initial: string[] = []) => { original.current = initial; uploaded.current = []; setPhotos(initial); },
-    add: (paths: string[]) => { uploaded.current = [...uploaded.current, ...paths]; setPhotos([...current.current, ...paths]); },
+    reset: (initial: string[] = []) => { generation.current += 1; original.current = initial; uploaded.current = []; setPhotos(initial); },
+    /** 지금 폼의 번호 — 올리기를 시작할 때 받아두었다가 끝났을 때 비교한다 */
+    token: () => generation.current,
+    add: (paths: string[], token?: number) => {
+      if (token !== undefined && token !== generation.current) {
+        // 올리는 사이에 폼이 닫혔거나 다른 폼이 열렸다 — 어디에도 붙지 않을 사진이니 치운다
+        removePhotoFiles(paths);
+        return;
+      }
+      uploaded.current = [...uploaded.current, ...paths];
+      setPhotos([...current.current, ...paths]);
+    },
     remove: (path: string) => setPhotos(current.current.filter((p) => p !== path)),
     /** 저장했을 때 — 빼낸 원래 사진, 올렸다가 뺀 사진을 창고에서 지운다 */
     commit: () => {
       const keep = new Set(current.current);
-      removePhotoFiles([...original.current, ...uploaded.current].filter((p) => !keep.has(p)));
+      // 이번에 올렸다가 뺀 사진은 어떤 기록에도 적힌 적이 없어 바로 지워도 된다
+      removePhotoFiles(uploaded.current.filter((p) => !keep.has(p)));
+      // 원래 기록에 있던 사진은 **저장이 확실히 된 뒤에** — 저장이 실패하면 옛 기록이 되살아나며 이 사진을 다시 쓴다
+      removePhotoFilesWhenUnused(original.current.filter((p) => !keep.has(p)), isPhotoInUse);
       original.current = current.current;
       uploaded.current = [];
     },
     /** 저장하지 않고 닫았을 때 — 이번에 올린 사진만 치운다 (원래 사진은 그대로) */
     discard: () => {
+      generation.current += 1;
       removePhotoFiles(uploaded.current);
       uploaded.current = [];
     },
   };
 }
 export type PhotoDraft = ReturnType<typeof usePhotoDraft>;
+
+/** 보관소의 어떤 기록이 이 사진을 쓰고 있나 */
+export const isPhotoInUse = (path: string) =>
+  useRecordsStore.getState().records.some((r) => photosOf(r.data).includes(path));
 
 // ── 한 장 ───────────────────────────────────────────────
 export function PhotoImage({ path, style, contain }: { path: string; style: any; contain?: boolean }) {
@@ -86,12 +107,13 @@ export function PhotoPickerRow({ draft, max = MAX_PHOTOS }: { draft: PhotoDraft;
       return;
     }
     setBusy({ done: 0, total: 0 });
+    const token = draft.token();
     try {
       const res = await pickAndUpload(familyId, {
         from, limit: left,
         onProgress: (done, total) => setBusy({ done, total }),
       });
-      if (res.paths.length) draft.add(res.paths);
+      if (res.paths.length) draft.add(res.paths, token);
       if (res.failed) {
         showAlert(`사진 ${res.failed}장을 올리지 못했어요`, '인터넷 연결을 확인하고 다시 골라주세요.');
       }

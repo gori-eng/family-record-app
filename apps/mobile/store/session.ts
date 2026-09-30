@@ -84,6 +84,8 @@ export const useSession = create<SessionState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const families = await fetchMyFamilies();
+      // 기다리는 사이 로그아웃·다른 사람 로그인이 있었으면 이 결과는 버린다 (점검 L4)
+      if (get().userId !== userId) return;
       if (!families.length) {
         // 로그인은 했지만 아직 가족이 없다 → 온보딩으로 보낸다
         set({ families: [], family: null, members: [], me: null, ready: true, loading: false });
@@ -93,6 +95,7 @@ export const useSession = create<SessionState>((set, get) => ({
       const lastId = recallFamily(userId);
       const family = families.find((f) => f.id === lastId) ?? families[0];
       const members = await fetchMembers(family.id);
+      if (get().userId !== userId) return;
       set({
         families,
         family,
@@ -114,10 +117,16 @@ export const useSession = create<SessionState>((set, get) => ({
     rememberFamily(userId, familyId);
     // 구성원을 불러오는 동안 **예전 가족의 구성원이 새 가족 이름 아래 보이지 않게** 먼저 비운다
     set({ family: next, members: [], me: null });
-    const members = await fetchMembers(familyId);
-    // 그사이 또 바꿨으면 늦게 온 결과는 버린다
-    if (get().family?.id !== familyId) return;
-    set({ members, me: members.find((m) => m.user_id === userId) ?? null });
+    try {
+      const members = await fetchMembers(familyId);
+      // 그사이 또 바꿨으면 늦게 온 결과는 버린다
+      if (get().family?.id !== familyId) return;
+      set({ members, me: members.find((m) => m.user_id === userId) ?? null });
+    } catch (e: any) {
+      // 구성원을 못 불러오면 '나'가 비어 기록이 **쓴 사람 없이** 저장된다 (점검 M3).
+      // 오류로 남겨두면 들어오는 문(_layout)이 3초 뒤 다시 불러온다 — 마지막에 본 가족은 이미 이 가족으로 적어뒀다
+      if (get().family?.id === familyId) set({ error: String(e?.message ?? e) });
+    }
   },
 
   setFamily: (family, members) => {

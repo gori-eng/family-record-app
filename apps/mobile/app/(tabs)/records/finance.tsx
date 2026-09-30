@@ -41,7 +41,7 @@ function FinanceScreen() {
   // 창고에서 거래 기록만 꺼낸다 (거래 1건 = 기록 1건).
   const records = useRecordsByCategory<Transaction>('finance');
   const addRecord = useRecordsStore((s) => s.addRecord);
-  const patchRecordData = useRecordsStore((s) => s.patchRecordData);
+  const updateRecord = useRecordsStore((s) => s.updateRecord);
   const removeRecord = useRecordsStore((s) => s.removeRecord);
 
   const selectedRecord = useMemo(
@@ -67,6 +67,8 @@ function FinanceScreen() {
   // 삭제 되돌리기
   const [undoItem, setUndoItem] = useState<FamilyRecord<Transaction> | null>(null);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** 지운 순간의 가족 — 가족을 바꾼 뒤 되돌리면 엉뚱한 가족에 들어간다 (점검 L1) */
+  const undoFamily = useRef<string | null>(null);
 
   const modalBg = useRef(new Animated.Value(0)).current;
   const modalSlide = useRef(new Animated.Value(500)).current;
@@ -174,7 +176,9 @@ function FinanceScreen() {
     };
 
     if (editingId) {
-      patchRecordData(editingId, data);
+      // 제목도 같이 — 예전엔 data만 고쳐서 홈·소식·검색에 **고치기 전 내역**이 계속 보였다 (2026-09-30 점검)
+      const existing = records.find((r) => r.id === editingId);
+      updateRecord(editingId, { title: desc, data: { ...(existing?.data ?? {}), ...data } });
     } else {
       addRecord({ category: 'finance', title: desc, recordedBy: CURRENT_USER, data });
     }
@@ -190,6 +194,7 @@ function FinanceScreen() {
       removeRecord(record.id);
       closeDetail();
       setUndoItem(record);
+      undoFamily.current = useRecordsStore.getState().familyId;
       if (undoTimer.current) clearTimeout(undoTimer.current);
       // "어? 지웠네" 하고 반응할 시간을 넉넉히 준다 (Gmail도 10초 정도를 쓴다)
       undoTimer.current = setTimeout(() => setUndoItem(null), 10000);
@@ -203,6 +208,11 @@ function FinanceScreen() {
 
   const handleUndo = () => {
     if (!undoItem) return;
+    if (useRecordsStore.getState().familyId !== undoFamily.current) {
+      setUndoItem(null);
+      showAlert('다른 가족을 보고 있어요', '지운 거래는 그 가족으로 돌아가서만 되돌릴 수 있어요. 이번엔 되돌리지 않았어요.');
+      return;
+    }
     addRecord({
       category: 'finance',
       title: undoItem.title,

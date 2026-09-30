@@ -5,7 +5,8 @@ import { showAlert } from './AppAlert';
 import { useRecordsStore, type FamilyRecord } from '../store/records';
 import { eulreul } from '../lib/korean';
 import { useCanDelete } from '../store/family';
-import { removePhotoFiles, photosOf } from '../lib/photos';
+import { removePhotoFilesWhenUnused, photosOf } from '../lib/photos';
+import { isPhotoInUse } from './Photos';
 
 /**
  * 기록 지우기 — 화면 여덟 곳이 같이 쓴다.
@@ -25,11 +26,14 @@ export function useRecordDelete(what = '기록') {
   const addRecordsRaw = useRecordsStore((s) => s.addRecordsRaw);
 
   const [undoItem, setUndoItem] = useState<FamilyRecord | null>(null);
+  /** 지운 순간의 가족 — 가족을 바꾼 뒤 되돌리면 **엉뚱한 가족에** 들어간다 (점검 L1) */
+  const undoFamily = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** 되돌릴 수 있는 동안 기다리는 기록 — 시간이 지나면 그 기록의 사진을 창고에서 치운다 */
   const pending = useRef<FamilyRecord | null>(null);
   const finish = () => {
-    if (pending.current) removePhotoFiles(photosOf(pending.current.data));
+    // 지우기가 DB에서 실패했으면 보관소가 기록을 되살려 둔다 — 그 기록이 쓰는 사진은 남긴다 (점검 M1)
+    if (pending.current) removePhotoFilesWhenUnused(photosOf(pending.current.data), isPhotoInUse, 0);
     pending.current = null;
   };
   // 화면을 떠나면 되돌리기도 끝난 것이다
@@ -52,6 +56,7 @@ export function useRecordDelete(what = '기록') {
           // 앞서 지운 게 아직 기다리고 있으면 그건 이제 끝낸다 (되돌리기 바는 하나뿐이다)
           finish();
           pending.current = record;
+          undoFamily.current = useRecordsStore.getState().familyId;
           setUndoItem(record);
           if (timer.current) clearTimeout(timer.current);
           timer.current = setTimeout(() => { setUndoItem(null); finish(); }, 10000);
@@ -62,6 +67,11 @@ export function useRecordDelete(what = '기록') {
 
   const undo = () => {
     if (!undoItem) return;
+    if (useRecordsStore.getState().familyId !== undoFamily.current) {
+      setUndoItem(null);
+      showAlert('다른 가족을 보고 있어요', '지운 기록은 그 가족으로 돌아가서만 되돌릴 수 있어요. 이번엔 되돌리지 않았어요.');
+      return;
+    }
     // 되돌리면 DB에 다시 넣는다. id는 새로 받지만 내용은 그대로다
     addRecordsRaw([undoItem]);
     pending.current = null;   // 되살렸으니 사진도 그대로 둔다

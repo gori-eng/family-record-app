@@ -1,3 +1,4 @@
+import { iga } from '../lib/korean';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, StyleSheet, Platform, Share } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -92,6 +93,8 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
   const checkNames = (): string | null => {
     if (!display.trim()) return '기록에 뜰 이름을 적어주세요. 짧게 부르는 이름이 좋아요.';
     if (display.trim().length > 10) return '기록에 뜰 이름은 10자까지가 좋아요. 매일 화면에 뜨는 이름이라서요.';
+    // 가계부 거래 지문이 '이름|날짜|…' 모양이라 | 가 섞이면 지문이 깨진다 (DB도 막는다 — 00013)
+    if (display.includes('|')) return '이름에 | 기호는 쓸 수 없어요.';
     return null;
   };
 
@@ -179,7 +182,7 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
         <View style={s.doneIcon}>
           <FontAwesome name="home" size={30} color="#2D5A3F" />
         </View>
-        <Text style={s.title}>{madeFamily.name}이 생겼어요</Text>
+        <Text style={s.title}>{madeFamily.name}{iga(madeFamily.name)} 생겼어요</Text>
         <Text style={s.lead}>
           이 코드를 가족에게 보내주세요.{'\n'}코드를 받은 사람은 같은 기록을 함께 보게 돼요.
         </Text>

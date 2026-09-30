@@ -100,6 +100,12 @@ function load(): FinanceSettingsData {
  * 있으면 **가족 공유 설정(DB)**에, 없으면(로그인 전) 이 기기(localStorage)에 저장한다.
  */
 let attachedFamily: string | null = null;
+/**
+ * 가족 설정을 DB에서 **받아온 적이 있는지** (점검 M4).
+ * 받아오지 못한 채(인터넷 끊김) 예산 하나를 고치면, 한 줄을 통째로 덮는 저장이라
+ * 배우자가 정해둔 예산·매달 넣는 거래·카드 주인이 빈 값으로 사라진다. 그래서 받아오기 전엔 저장하지 않는다.
+ */
+let loadedFamily: string | null = null;
 
 /**
  * 스토어에는 함수도 섞여 있다(`{ ...get(), cardOwners }`로 부르므로).
@@ -119,6 +125,13 @@ function pickData(s: FinanceSettingsData): FinanceSettingsData {
 function save(s: FinanceSettingsData) {
   const data = pickData(s);
   if (attachedFamily) {
+    if (loadedFamily !== attachedFamily) {
+      showAlert('가계부 설정을 아직 못 불러왔어요', '가족이 정해둔 설정을 덮지 않으려고 이번 변경은 저장하지 않았어요. 인터넷을 확인하고 잠시 뒤 다시 해주세요.');
+      const fid = attachedFamily;
+      // 다시 받아와서 화면을 가족 설정으로 되돌린다
+      attachFinanceSettings(fid);
+      return;
+    }
     saveFinanceSettings(attachedFamily, data).catch((e) => {
       showAlert(
         '가계부 설정을 저장하지 못했어요',
@@ -268,6 +281,7 @@ export function restoreFinanceSettings(data: Partial<FinanceSettingsData>) {
 export async function attachFinanceSettings(familyId: string) {
   const switching = attachedFamily !== null && attachedFamily !== familyId;
   attachedFamily = familyId;
+  if (switching) loadedFamily = null;
   // 다른 가족으로 바꾸는 중이면 먼저 비운다 — 이전 가족의 예산이 새 가족에 보이지 않게
   if (switching) useFinanceSettings.setState(EMPTY);
   try {
@@ -279,6 +293,7 @@ export async function attachFinanceSettings(familyId: string) {
       // 처음 연결될 때만 — 이 기기(로그인 전)에 있던 설정을 가족 설정으로 올린다
       await saveFinanceSettings(familyId, pickData(useFinanceSettings.getState()));
     }
+    loadedFamily = familyId;
     // 가족을 바꾼 경우엔 올리지 않는다. 올리면 **이전 가족의 예산이 새 가족으로 복사된다.**
   } catch {
     /* 불러오지 못하면 지금 값을 그대로 쓴다 — 다음 저장 때 올라간다 */
@@ -288,5 +303,6 @@ export async function attachFinanceSettings(familyId: string) {
 /** 로그아웃 등으로 가족이 없어졌을 때 — 이 기기에 있던 값으로 돌아간다 */
 export function detachFinanceSettings() {
   attachedFamily = null;
+  loadedFamily = null;
   useFinanceSettings.setState(load());
 }
