@@ -8,7 +8,7 @@ import { useEventsStore } from '../store/events';
  * 예전엔 앱을 켜면 기록을 받아오기 **전에** "아직 기록이 없어요"가 먼저 보였다가 기록이
  * 번쩍 나타났다(2026-09-29 점검 B11). 없다고 말하려면 정말 없는지 확인한 뒤여야 한다.
  */
-export function LoadingRows({ label = '불러오는 중이에요' }: { label?: string }) {
+export function LoadingRows({ label = '불러오고 있어요' }: { label?: string }) {
   return (
     <View style={s.wrap}>
       <ActivityIndicator color="#4A8C6F" />

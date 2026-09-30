@@ -113,12 +113,12 @@ function HealthScreen() {
     // 날짜는 비워도 되지만, 적었으면 알아들을 수 있어야 한다
     const date = formDate.trim() ? parseLooseDate(formDate) : '';
     if (date === null) {
-      showAlert('검진일을 한 번 봐주세요', '2026.4.26처럼 적어주세요. 비워도 괜찮아요.');
+      showAlert('받은 날을 한 번 봐주세요', '2026.4.26처럼 적어주세요. 비워두면 오늘로 적어요.');
       return;
     }
     const nextDate = formNext.trim() ? parseLooseDate(formNext) : '';
     if (nextDate === null) {
-      showAlert('다음 검진일을 한 번 봐주세요', '2026.10.26처럼 적어주세요. 비워도 괜찮아요.');
+      showAlert('다음 검진 날짜를 한 번 봐주세요', '2026.10.26처럼 적어주세요. 몰라도 비워두면 돼요.');
       return;
     }
     const fields = {
@@ -170,18 +170,18 @@ function HealthScreen() {
               <View style={s.modalHandle} />
               {selectedItem && (
                 <View style={s.modalContent}>
-                  <Text style={s.modalTitle}>{selectedItem.member} · {selectedItem.type}</Text>
+                  <Text style={s.modalTitle}>{selectedItem.member}의 {selectedItem.type}</Text>
                   <View style={s.modalRow}>
-                    <Text style={s.modalLabel}>누구</Text>
-                    <Text style={s.modalValue}>{selectedItem.member}{selectedItem.member === CURRENT_USER ? ' (나)' : ''}</Text>
+                    <Text style={s.modalLabel}>누구의 기록</Text>
+                    <Text style={s.modalValue}>{selectedItem.member === CURRENT_USER ? '나' : selectedItem.member}</Text>
                   </View>
                   <View style={s.modalRow}>
                     <Text style={s.modalLabel}>적은 사람</Text>
-                    <Text style={s.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
+                    <Text style={s.modalValue}>{selectedItem.recordedBy === CURRENT_USER ? '나' : selectedItem.recordedBy}</Text>
                   </View>
                   {selectedItem.date ? (
                     <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>검진일</Text>
+                      <Text style={s.modalLabel}>받은 날</Text>
                       <Text style={s.modalValue}>{showDate(selectedItem.date)}</Text>
                     </View>
                   ) : null}
@@ -201,7 +201,7 @@ function HealthScreen() {
                   ) : null}
                   {selectedItem.nextDate ? (
                     <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>다음</Text>
+                      <Text style={s.modalLabel}>다음 검진</Text>
                       <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                         <FontAwesome name="calendar" size={13} color="#9C8B75" />
                         <Text style={s.modalValue}>{showDate(selectedItem.nextDate)}</Text>
@@ -229,7 +229,7 @@ function HealthScreen() {
               <View style={s.modalHandle} />
               <Text style={s.modalTitle}>{editingId ? '건강 기록 고치기' : '새 건강 기록'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
-              <Text style={s.createLabel}>누구의 기록인가요</Text>
+              <Text style={s.createLabel}>누구의 기록인가요?</Text>
               <View style={s.memberRow}>
                 {MEMBERS.map(m => (
                   <TouchableOpacity
@@ -242,21 +242,21 @@ function HealthScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              <Text style={s.authorHint}>적는 사람: {CURRENT_USER} (나)</Text>
-              <Text style={s.createLabel}>어떤 검진</Text>
-              <TextInput style={s.createInput} placeholder="예: 건강검진, 치과, 예방접종" placeholderTextColor="#BFAE99"
+              <Text style={s.authorHint}>내가 적는 기록이에요</Text>
+              <Text style={s.createLabel}>어떤 검진이었나요?</Text>
+              <TextInput style={s.createInput} placeholder="예) 치과 정기검진" placeholderTextColor="#BFAE99"
                 value={formType} onChangeText={setFormType} />
-              <Text style={s.createLabel}>검진일 (비우면 오늘)</Text>
-              <TextInput style={s.createInput} placeholder="예: 2026.4.26" placeholderTextColor="#BFAE99"
+              <Text style={s.createLabel}>언제 받았나요?</Text>
+              <TextInput style={s.createInput} placeholder="비워두면 오늘로 적어요" placeholderTextColor="#BFAE99"
                 value={formDate} onChangeText={setFormDate} />
               <Text style={s.createLabel}>결과</Text>
               <TextInput style={s.createInput} placeholder="예) 정상, 충치 1개" placeholderTextColor="#BFAE99"
                 value={formResult} onChangeText={setFormResult} />
-              <Text style={s.createLabel}>다음 검진일 (선택) — 적어두면 위에서 알려줘요</Text>
-              <TextInput style={s.createInput} placeholder="예: 2026.10.26" placeholderTextColor="#BFAE99"
+              <Text style={s.createLabel}>다음 검진은 언제인가요?</Text>
+              <TextInput style={s.createInput} placeholder="적어두면 다가올 때 알려줄게요" placeholderTextColor="#BFAE99"
                 value={formNext} onChangeText={setFormNext} />
               <Text style={s.createLabel}>메모</Text>
-              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="처방, 주의할 점, 의사 선생님 말씀" placeholderTextColor="#BFAE99" multiline
+              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="처방이나 의사 선생님 말씀을 적어두세요" placeholderTextColor="#BFAE99" multiline
                 value={formNotes} onChangeText={setFormNotes} />
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
@@ -274,10 +274,10 @@ function HealthScreen() {
               <View style={{ flex: 1 }}>
                 {upcoming.map((r) => {
                   const d = daysUntil(r.data.nextDate);
-                  const when = d === 0 ? '오늘' : d === 1 ? '내일' : `${d}일 뒤`;
+                  const when = d === 0 ? '오늘이에요' : d === 1 ? '내일이에요' : `${d}일 남았어요`;
                   return (
                     <Text key={r.id} style={s.upcomingText}>
-                      {r.data.member} {r.data.type} · {formatKoreanDate(r.data.nextDate)} ({when})
+                      {r.data.member}의 {r.data.type}, {formatKoreanDate(r.data.nextDate)}. {when}
                     </Text>
                   );
                 })}
@@ -304,12 +304,12 @@ function HealthScreen() {
                         </View>
                       ) : null}
                     </View>
-                    <Text style={s.type}>{[r.type, showDate(r.date)].filter(Boolean).join(' · ')}</Text>
+                    <Text style={s.type}>{r.date ? `${showDate(r.date)}에 받은 ${r.type}` : r.type}</Text>
                     {r.notes ? <Text style={s.notes} numberOfLines={1}>{r.notes}</Text> : null}
                     {r.nextDate ? (
                       <View style={s.nextRow}>
                         <FontAwesome name="calendar" size={10} color="#9C8B75" />
-                        <Text style={s.nextDate}>다음: {showDate(r.nextDate)}</Text>
+                        <Text style={s.nextDate}>다음 검진 {showDate(r.nextDate)}</Text>
                       </View>
                     ) : null}
                   </View>

@@ -14,7 +14,7 @@ import {
   comma, formatAmount, parseAmount, fingerprint, frequentEntries, guessFromHistory,
   normalizeMerchant,
 } from '../../../store/finance';
-import { ro } from '../../../lib/korean';
+import { ro, iga, eulreul } from '../../../lib/korean';
 import { withGrownupsOnly } from '../../../components/GrownupsOnly';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 
@@ -42,6 +42,13 @@ function FinanceScreen() {
   const records = useRecordsByCategory<Transaction>('finance');
   const addRecord = useRecordsStore((s) => s.addRecord);
   const updateRecord = useRecordsStore((s) => s.updateRecord);
+  /** 목록 아래 작은 줄 — "식비 · 카드 · 륜호"처럼 늘어놓지 않고 "륜호가 카드로 쓴 식비"로 말한다 */
+  const metaLine = (t: Transaction) => {
+    const who = t.ownerMember ? `${t.ownerMember}${iga(t.ownerMember)} ` : '';
+    if (t.type === 'income') return `${who}받은 ${t.category}`;
+    const how = t.method ? `${t.method}${ro(t.method)} ` : '';
+    return `${who}${how}쓴 ${t.category}`;
+  };
   const removeRecord = useRecordsStore((s) => s.removeRecord);
 
   const selectedRecord = useMemo(
@@ -152,7 +159,7 @@ function FinanceScreen() {
       return;
     }
     if (!isISODate(formDate)) {
-      showAlert('날짜를 한 번 봐주세요', '2026-09-22처럼 적어주세요. 오늘·어제 버튼을 눌러도 돼요.');
+      showAlert('날짜를 한 번 봐주세요', '2026-09-22처럼 적거나, 오늘이나 어제 버튼을 눌러주세요.');
       return;
     }
     const desc = formDesc.trim() || formCategory;
@@ -201,7 +208,7 @@ function FinanceScreen() {
     };
     showAlert(
       '이 거래 지울까요?',
-      `${record.data.desc} · ${formatAmount(record.data.amount, record.data.type)}\n지워도 바로 되돌릴 수 있어요.`,
+      `${record.data.desc}, ${formatAmount(record.data.amount, record.data.type)}\n지워도 바로 되돌릴 수 있어요.`,
       [{ text: '그냥 둘게요', style: 'cancel' }, { text: '지우기', style: 'destructive', onPress: doDelete }]
     );
   };
@@ -358,8 +365,8 @@ function FinanceScreen() {
       method: t.method, ownerMember: t.ownerMember || CURRENT_USER, day, memo: t.memo,
     });
     showAlert(
-      '매달 반복으로 등록했어요',
-      `${t.desc} · 매달 ${day}일\n새 달이 되면 한 번 눌러 바로 넣을 수 있어요.`
+      '매달 넣는 거래로 적어뒀어요',
+      `${t.desc}${eulreul(t.desc)} 매달 ${day}일에 넣을게요.\n새 달이 되면 한 번만 눌러주세요.`
     );
   };
 
@@ -434,7 +441,7 @@ function FinanceScreen() {
                     {formatAmount(sel.amount, sel.type)}
                   </Text>
                   <View style={styles.modalRow}>
-                    <Text style={styles.modalLabel}>카테고리</Text>
+                    <Text style={styles.modalLabel}>항목</Text>
                     <Text style={styles.modalValue}>{sel.category}</Text>
                   </View>
                   <View style={styles.modalRow}>
@@ -442,20 +449,19 @@ function FinanceScreen() {
                     <Text style={styles.modalValue}>{formatDay(sel.date)}</Text>
                   </View>
                   <View style={styles.modalRow}>
-                    <Text style={styles.modalLabel}>결제수단</Text>
+                    <Text style={styles.modalLabel}>낸 방법</Text>
                     <Text style={styles.modalValue}>{sel.method}</Text>
                   </View>
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>쓴 사람</Text>
                     <Text style={styles.modalValue}>
-                      {sel.ownerMember || selectedRecord.recordedBy}
-                      {(sel.ownerMember || selectedRecord.recordedBy) === CURRENT_USER ? ' (나)' : ''}
+                      {(sel.ownerMember || selectedRecord.recordedBy) === CURRENT_USER ? '나' : (sel.ownerMember || selectedRecord.recordedBy)}
                     </Text>
                   </View>
                   {/* 기록한 사람이 쓴 사람과 다를 때만 보여준다 */}
                   {sel.ownerMember && sel.ownerMember !== selectedRecord.recordedBy && (
                     <View style={styles.modalRow}>
-                      <Text style={styles.modalLabel}>기록</Text>
+                      <Text style={styles.modalLabel}>적은 사람</Text>
                       <Text style={styles.modalValue}>{selectedRecord.recordedBy}</Text>
                     </View>
                   )}
@@ -469,7 +475,7 @@ function FinanceScreen() {
                     <View style={styles.sourceTag}>
                       <FontAwesome name="file-text-o" size={10} color="#4A8C6F" />
                       <Text style={styles.sourceTagText}>
-                        명세서에서 가져옴{sel.sourceFile ? ` · ${sel.sourceFile}` : ''}
+                        {sel.sourceFile ? `${sel.sourceFile}에서 가져왔어요` : '카드 명세서에서 가져왔어요'}
                       </Text>
                     </View>
                   )}
@@ -480,7 +486,7 @@ function FinanceScreen() {
                       activeOpacity={0.7}
                       onPress={() => { const r = selectedRecord; closeDetail(); setTimeout(() => openForm({ edit: r }), 260); }}>
                       <FontAwesome name="pencil" size={13} color="#2D5A3F" />
-                      <Text style={styles.actionText}>수정</Text>
+                      <Text style={styles.actionText}>고치기</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.actionBtn}
@@ -494,7 +500,7 @@ function FinanceScreen() {
                       activeOpacity={0.7}
                       onPress={() => { const d = sel; closeDetail(); setTimeout(() => registerRecurring(d), 260); }}>
                       <FontAwesome name="repeat" size={13} color="#2D5A3F" />
-                      <Text style={styles.actionText}>매달</Text>
+                      <Text style={styles.actionText}>매달 넣기</Text>
                     </TouchableOpacity>
                     {canDelete(selectedRecord.authorId) && (
                       <TouchableOpacity
@@ -502,7 +508,7 @@ function FinanceScreen() {
                         activeOpacity={0.7}
                         onPress={() => handleDelete(selectedRecord)}>
                         <FontAwesome name="trash-o" size={13} color="#D94040" />
-                        <Text style={[styles.actionText, { color: '#D94040' }]}>삭제</Text>
+                        <Text style={[styles.actionText, { color: '#D94040' }]}>지우기</Text>
                       </TouchableOpacity>
                     )}
                   </View>
@@ -520,7 +526,7 @@ function FinanceScreen() {
             </Animated.View>
             <Animated.View style={[styles.modalSheet, { transform: [{ translateY: formSlide }] }]}>
               <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>{editingId ? '거래 수정' : '새 거래 기록'}</Text>
+              <Text style={styles.modalTitle}>{editingId ? '거래 고치기' : '새 거래'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 480 }}>
                 <View style={styles.pillRow}>
                   {([['지출', 'expense'], ['수입', 'income']] as const).map(([label, val]) => (
@@ -537,7 +543,7 @@ function FinanceScreen() {
                 {/* 자주 쓴 내역 — 탭 한 번으로 전부 채워진다 */}
                 {quickEntries.length > 0 && (
                   <>
-                    <Text style={styles.createLabel}>자주 쓴 내역 — 탭하면 한 번에 채워져요</Text>
+                    <Text style={styles.createLabel}>자주 쓰는 곳, 누르면 한 번에 채워져요</Text>
                     <View style={styles.quickGrid}>
                       {quickEntries.map((q) => (
                         <TouchableOpacity
@@ -576,13 +582,13 @@ function FinanceScreen() {
                 <Text style={styles.createLabel}>내역</Text>
                 <TextInput
                   style={styles.createInput}
-                  placeholder="예: 이마트 장보기 (비우면 카테고리명으로 저장)"
+                  placeholder="예) 이마트 장보기"
                   placeholderTextColor="#BFAE99"
                   value={formDesc}
                   onChangeText={onDescChange}
                 />
 
-                <Text style={styles.createLabel}>카테고리</Text>
+                <Text style={styles.createLabel}>어디에 썼나요?</Text>
                 <View style={styles.catGrid}>
                   {activeCategories.map((c) => {
                     const on = formCategory === c.name;
@@ -623,7 +629,7 @@ function FinanceScreen() {
 
                 {formType === 'expense' && (
                   <>
-                    <Text style={styles.createLabel}>결제수단</Text>
+                    <Text style={styles.createLabel}>어떻게 냈나요?</Text>
                     <View style={styles.pillRow}>
                       {PAYMENT_METHODS.map((m) => (
                         <TouchableOpacity
@@ -639,7 +645,7 @@ function FinanceScreen() {
                 )}
 
                 {/* 쓴 사람 — 가족이 같이 쓸 때 누구 지출인지 구분한다 */}
-                <Text style={styles.createLabel}>쓴 사람</Text>
+                <Text style={styles.createLabel}>누가 썼나요?</Text>
                 <View style={styles.catGrid}>
                   {MEMBERS.map((m) => (
                     <TouchableOpacity
@@ -648,16 +654,16 @@ function FinanceScreen() {
                       activeOpacity={0.7}
                       onPress={() => setFormOwner(m)}>
                       <Text style={[styles.catChipText, formOwner === m && styles.catChipTextActive]}>
-                        {m}{m === CURRENT_USER ? ' (나)' : ''}
+                        {m === CURRENT_USER ? '나' : m}
                       </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
 
-                <Text style={styles.createLabel}>메모 (선택)</Text>
+                <Text style={styles.createLabel}>메모</Text>
                 <TextInput
                   style={[styles.createInput, { height: 70, textAlignVertical: 'top' }]}
-                  placeholder="나중에 볼 때 도움이 될 내용을 남겨보세요"
+                  placeholder="나중에 떠올릴 수 있게 한마디 남겨두세요"
                   placeholderTextColor="#BFAE99"
                   multiline
                   value={formMemo}
@@ -665,7 +671,7 @@ function FinanceScreen() {
                 />
 
                 <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={handleSave}>
-                  <Text style={styles.createSubmitText}>{editingId ? '수정 저장' : '저장하기'}</Text>
+                  <Text style={styles.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
                 </TouchableOpacity>
               </ScrollView>
             </Animated.View>
@@ -678,7 +684,7 @@ function FinanceScreen() {
             <FontAwesome name="search" size={13} color="#9CB3A4" />
             <TextInput
               style={styles.searchInput}
-              placeholder="내역·메모·카테고리로 찾기"
+              placeholder="가게 이름이나 메모로 찾기"
               placeholderTextColor="#B0A89C"
               value={query}
               onChangeText={setQuery}
@@ -717,9 +723,9 @@ function FinanceScreen() {
             <>
               <Text style={styles.searchCount}>
                 {searchResults.length > 0
-                  ? `'${query.trim()}' 검색 결과 ${searchResults.length}건 · ${comma(
+                  ? `'${query.trim()}' ${searchResults.length}건, 모두 ${comma(
                       searchResults.filter((r) => r.data.type === 'expense').reduce((a, r) => a + r.data.amount, 0)
-                    )}원`
+                    )}원 썼어요`
                   : `'${query.trim()}'${ro(query.trim())} 찾은 기록이 없어요`}
               </Text>
               {searchResults.map((record) => {
@@ -737,7 +743,7 @@ function FinanceScreen() {
                     <View style={styles.transInfo}>
                       <Text style={styles.transDesc}>{t.desc}</Text>
                       <Text style={styles.transCat}>
-                        {formatDay(t.date)} · {[t.category, t.ownerMember].filter(Boolean).join(' · ')}
+                        {formatDay(t.date)}, {metaLine(t)}
                       </Text>
                     </View>
                     <Text style={[styles.transAmount, { color: t.type === 'income' ? '#4AA86B' : '#4A8C6F' }]}>
@@ -774,18 +780,18 @@ function FinanceScreen() {
 
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
-                <Text style={styles.summaryLabel}>수입</Text>
-                <Text style={[styles.summaryAmount, { color: '#4AA86B' }]}>+{comma(summary.income)}원</Text>
+                <Text style={styles.summaryLabel}>들어온 돈</Text>
+                <Text style={[styles.summaryAmount, { color: '#4AA86B' }]}>{summary.income ? '+' : ''}{comma(summary.income)}원</Text>
               </View>
               <View style={styles.summaryDivider} />
               <View style={styles.summaryItem}>
-                <Text style={styles.summaryLabel}>지출</Text>
-                <Text style={[styles.summaryAmount, { color: '#4A8C6F' }]}>-{comma(summary.expense)}원</Text>
+                <Text style={styles.summaryLabel}>나간 돈</Text>
+                <Text style={[styles.summaryAmount, { color: '#4A8C6F' }]}>{summary.expense ? '-' : ''}{comma(summary.expense)}원</Text>
               </View>
             </View>
 
             <View style={styles.balanceRow}>
-              <Text style={styles.balanceLabel}>잔액</Text>
+              <Text style={styles.balanceLabel}>남은 돈</Text>
               <Text style={styles.balanceAmount}>{comma(summary.balance)}원</Text>
             </View>
 
@@ -812,7 +818,7 @@ function FinanceScreen() {
                   </View>
                 </>
               ) : (
-                <Text style={styles.budgetEmpty}>예산을 정해두면 얼마 남았는지 바로 보여요 · 설정하기</Text>
+                <Text style={styles.budgetEmpty}>예산을 정해두면 얼마 남았는지 바로 보여요. 눌러서 정하기</Text>
               )}
             </TouchableOpacity>
 
@@ -866,7 +872,7 @@ function FinanceScreen() {
             <TouchableOpacity style={styles.recurRow} activeOpacity={0.7} onPress={addRecurringToMonth}>
               <FontAwesome name="repeat" size={13} color="#2D5A3F" />
               <Text style={styles.recurText}>
-                매달 넣는 {pendingRecurring.length}건이 아직 없어요 · 한 번에 넣기
+                이번 달에 안 넣은 매달 거래가 {pendingRecurring.length}건 있어요. 눌러서 한 번에 넣기
               </Text>
               <Text style={styles.recurAmount}>
                 {comma(pendingRecurring.filter((r) => r.type === 'expense').reduce((a, r) => a + r.amount, 0))}원
@@ -879,10 +885,9 @@ function FinanceScreen() {
             <View style={styles.aiHint}>
               <FontAwesome name={diff > 0 ? 'arrow-up' : 'arrow-down'} size={12} color={diff > 0 ? '#C25A5A' : '#4A8C6F'} />
               <Text style={styles.aiHintText}>
-                전월 지출 {comma(prevExpense)}원 대비{' '}
                 {diff === 0
-                  ? '변동이 없어요.'
-                  : `${comma(Math.abs(diff))}원 ${diff > 0 ? '늘었어요' : '줄었어요'} (${Math.abs(Math.round((diff / prevExpense) * 100))}%).`}
+                  ? '지난달과 똑같이 썼어요.'
+                  : `지난달보다 ${comma(Math.abs(diff))}원 ${diff > 0 ? '더' : '덜'} 썼어요. ${Math.abs(Math.round((diff / prevExpense) * 100))}% ${diff > 0 ? '늘었어요' : '줄었어요'}.`}
               </Text>
             </View>
           )}
@@ -943,8 +948,8 @@ function FinanceScreen() {
                       <View style={styles.transInfo}>
                         <Text style={styles.transDesc}>{t.desc}</Text>
                         <Text style={styles.transCat}>
-                          {[t.category, t.method, t.ownerMember].filter(Boolean).join(' · ')}
-                          {t.memo ? ' · 메모' : ''}
+                          {metaLine(t)}
+                          {t.memo ? '. 메모 있어요' : ''}
                         </Text>
                       </View>
                       <Text style={[styles.transAmount, { color: t.type === 'income' ? '#4AA86B' : '#4A8C6F' }]}>
@@ -966,7 +971,7 @@ function FinanceScreen() {
         {undoItem && (
           <View style={styles.undoBar}>
             <Text style={styles.undoText} numberOfLines={1}>
-              '{undoItem.data.desc}' 삭제됨
+              '{undoItem.data.desc}' 지웠어요
             </Text>
             <TouchableOpacity style={styles.undoBtn} activeOpacity={0.7} onPress={handleUndo}>
               <FontAwesome name="undo" size={12} color="#FFFFFF" />
@@ -983,7 +988,7 @@ function FinanceScreen() {
             <View style={styles.centerSheet}>
               <Text style={styles.centerTitle}>예산 정하기</Text>
               <Text style={styles.centerDesc}>
-                한 달에 얼마까지 쓸지 정해두면, 남은 금액이 요약에 바로 보여요.
+                한 달에 얼마까지 쓸지 정해두면 남은 돈을 바로 보여줄게요.
               </Text>
               <Text style={styles.createLabel}>한 달 전체</Text>
               <View style={styles.amountWrap}>
@@ -997,7 +1002,7 @@ function FinanceScreen() {
                 />
                 <Text style={styles.amountWon}>원</Text>
               </View>
-              <Text style={styles.createLabel}>카테고리별 (비워두면 설정 안 함)</Text>
+              <Text style={styles.createLabel}>항목별로도 정할까요? 비워두면 안 정해요</Text>
               <ScrollView style={{ maxHeight: 220 }} showsVerticalScrollIndicator={false}>
                 {EXPENSE_CATEGORIES.map((c) => (
                   <View key={c.name} style={styles.budgetCatRow}>
@@ -1030,7 +1035,7 @@ function FinanceScreen() {
             <View style={styles.centerSheet}>
               <Text style={styles.centerTitle}>매달 넣는 거래</Text>
               <Text style={styles.centerDesc}>
-                거래를 눌러 '매달'을 고르면 여기에 등록돼요. 새 달이 되면 한 번에 넣을 수 있어요.
+                거래를 열고 '매달 넣기'를 누르면 여기에 모여요. 새 달이 되면 한 번에 넣을 수 있어요.
               </Text>
               {settings.recurring.length === 0 ? (
                 <Text style={styles.recurEmpty}>아직 매달 넣는 거래가 없어요</Text>
@@ -1041,7 +1046,7 @@ function FinanceScreen() {
                       <View style={{ flex: 1 }}>
                         <Text style={styles.recurItemDesc}>{item.desc}</Text>
                         <Text style={styles.recurItemMeta}>
-                          매달 {item.day}일 · {item.category} · {item.ownerMember}
+                          매달 {item.day}일, {item.ownerMember}{iga(item.ownerMember)} 쓰는 {item.category}
                         </Text>
                       </View>
                       <Text style={styles.recurItemAmount}>{formatAmount(item.amount, item.type)}</Text>

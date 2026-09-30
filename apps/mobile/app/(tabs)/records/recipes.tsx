@@ -176,13 +176,13 @@ export default function RecipesScreen() {
                     <PhotoGallery photos={photosOf(selectedItem)} />
                     {selectedItem.origin ? (
                       <View style={s.modalRow}>
-                        <Text style={s.modalLabel}>유래</Text>
+                        <Text style={s.modalLabel}>배운 곳</Text>
                         <Text style={s.modalValue}>{selectedItem.origin}</Text>
                       </View>
                     ) : null}
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>적은 사람</Text>
-                      <Text style={s.modalValue}>{selectedItem.author}{selectedItem.author === CURRENT_USER ? ' (나)' : ''}</Text>
+                      <Text style={s.modalValue}>{selectedItem.author === CURRENT_USER ? '나' : selectedItem.author}</Text>
                     </View>
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>난이도</Text>
@@ -198,7 +198,7 @@ export default function RecipesScreen() {
                     <View style={s.sectionDivider} />
                     <View style={s.sectionHeader}>
                       <FontAwesome name="list-ul" size={13} color="#4A8C6F" />
-                      <Text style={s.sectionTitle}>재료 ({selectedItem.ingredients?.length || 0})</Text>
+                      <Text style={s.sectionTitle}>재료 {selectedItem.ingredients?.length || 0}가지</Text>
                     </View>
                     {(selectedItem.ingredients || []).map((ing: string, i: number) => (
                       <View key={i} style={s.ingRow}>
@@ -210,7 +210,7 @@ export default function RecipesScreen() {
                     <View style={s.sectionDivider} />
                     <View style={s.sectionHeader}>
                       <FontAwesome name="cutlery" size={13} color="#4A8C6F" />
-                      <Text style={s.sectionTitle}>조리 순서</Text>
+                      <Text style={s.sectionTitle}>만드는 순서</Text>
                     </View>
                     {(selectedItem.steps || []).map((step: string, i: number) => (
                       <View key={i} style={s.stepRow}>
@@ -250,8 +250,8 @@ export default function RecipesScreen() {
               <Text style={s.createLabel}>레시피 이름</Text>
               <TextInput style={s.createInput} placeholder="예) 할머니 장조림" placeholderTextColor="#BFAE99"
                 value={formName} onChangeText={setFormName} />
-              <Text style={s.createLabel}>유래 / 출처</Text>
-              <TextInput style={s.createInput} placeholder="예: 할머니로부터 전수" placeholderTextColor="#BFAE99"
+              <Text style={s.createLabel}>누구에게 배웠나요?</Text>
+              <TextInput style={s.createInput} placeholder="예) 할머니께 배웠어요" placeholderTextColor="#BFAE99"
                 value={formOrigin} onChangeText={setFormOrigin} />
               <Text style={s.createLabel}>난이도</Text>
               <View style={s.pillRow}>
@@ -267,9 +267,9 @@ export default function RecipesScreen() {
                 ))}
               </View>
               <Text style={s.createLabel}>걸리는 시간</Text>
-              <TextInput style={s.createInput} placeholder="예: 30분" placeholderTextColor="#BFAE99"
+              <TextInput style={s.createInput} placeholder="예) 30분" placeholderTextColor="#BFAE99"
                 value={formTime} onChangeText={setFormTime} />
-              <Text style={s.createLabel}>완성 사진 (선택)</Text>
+              <Text style={s.createLabel}>완성 사진</Text>
               <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>재료</Text>
               <TextInput
@@ -280,7 +280,7 @@ export default function RecipesScreen() {
                 value={formIngredients}
                 onChangeText={setFormIngredients}
               />
-              <Text style={s.createLabel}>조리 순서</Text>
+              <Text style={s.createLabel}>만드는 순서</Text>
               <TextInput
                 style={[s.createInput, { height: 140, textAlignVertical: 'top' }]}
                 placeholder={'만드는 순서를 한 줄에 하나씩 적어주세요\n예) 들기름에 묵은지를 볶는다\n돼지고기를 넣고 함께 볶는다'}
@@ -289,10 +289,10 @@ export default function RecipesScreen() {
                 value={formSteps}
                 onChangeText={setFormSteps}
               />
-              <Text style={s.createLabel}>꿀팁 (선택)</Text>
+              <Text style={s.createLabel}>우리 집만의 비법</Text>
               <TextInput
                 style={[s.createInput, { height: 70, textAlignVertical: 'top' }]}
-                placeholder="레시피만의 비법이 있다면 적어주세요"
+                placeholder="있다면 살짝 적어주세요"
                 placeholderTextColor="#BFAE99"
                 multiline
                 value={formTip}
@@ -310,8 +310,8 @@ export default function RecipesScreen() {
           <View style={s.header}>
             <Text style={s.subtitle}>우리 집 손맛을 모아둬요</Text>
             <View style={s.statsRow}>
-              <View style={s.stat}><Text style={s.statNum}>{recipes.length}</Text><Text style={s.statLabel}>총 레시피</Text></View>
-              <View style={s.stat}><Text style={s.statNum}>{inheritedCount}</Text><Text style={s.statLabel}>세대 전수</Text></View>
+              <View style={s.stat}><Text style={s.statNum}>{recipes.length}</Text><Text style={s.statLabel}>모든 레시피</Text></View>
+              <View style={s.stat}><Text style={s.statNum}>{inheritedCount}</Text><Text style={s.statLabel}>물려받은 맛</Text></View>
             </View>
           </View>
 
@@ -334,12 +334,11 @@ export default function RecipesScreen() {
                     <Text style={[s.difficulty, { color: DIFF_COLOR[r.difficulty] }]}>{say(DIFFICULTY_LABEL, r.difficulty)}</Text>
                     {r.time ? (
                       <>
-                        <Text style={s.dot}>·</Text>
-                        <FontAwesome name="clock-o" size={11} color="#9C8B75" />
+                        <FontAwesome name="clock-o" size={11} color="#9C8B75" style={s.metaIcon} />
                         <Text style={s.time}>{r.time}</Text>
                       </>
                     ) : null}
-                    <Text style={s.dot}>·</Text>
+                    <FontAwesome name="user-o" size={11} color="#9C8B75" style={s.metaIcon} />
                     <Text style={s.author}>{r.author}</Text>
                   </View>
                 </View>
@@ -386,7 +385,7 @@ const s = StyleSheet.create({
   origin: { fontSize: 12, color: '#A0A0A0', marginBottom: 6, fontFamily: 'Pretendard' },
   meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 4 },
   difficulty: { fontSize: 12, fontWeight: '600' },
-  dot: { color: '#D4C8B0' },
+  metaIcon: { marginLeft: 8 },
   time: { fontSize: 11, color: '#7A6B55' },
   author: { fontSize: 11, color: '#7A6B55' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },

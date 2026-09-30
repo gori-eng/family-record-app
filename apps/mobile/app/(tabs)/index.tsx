@@ -1,3 +1,4 @@
+import { iga } from '../../lib/korean';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, Modal, Animated, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
@@ -149,7 +150,7 @@ export default function HomeScreen() {
                 <View style={s.notifEmpty}>
                   <FontAwesome name="bell-o" size={28} color="#D0D0D0" />
                   <Text style={s.notifEmptyTitle}>아직 새 소식이 없어요</Text>
-                  <Text style={s.notifEmptySub}>가족이 기록을 남기거나 일정이 다가오면 여기 모여요</Text>
+                  <Text style={s.notifEmptySub}>가족이 뭔가 남기거나 일정이 다가오면 여기서 알려줄게요</Text>
                 </View>
               )}
               {news.items.map(n => (
@@ -198,15 +199,15 @@ export default function HomeScreen() {
         {/* 1. Hero — 한 줄 인사 */}
         <Animated.View style={[s.hero, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           <Text style={s.greetingLine}>{me ? `${me}님, ${greeting}` : greeting}</Text>
-          <Text style={s.dateText}>{dateStr} {dayName}{familyCount > 1 ? ` · ${familyInfo.name}` : ''}</Text>
+          <Text style={s.dateText}>{familyCount > 1 ? `${familyInfo.name}의 ` : ''}{dateStr} {dayName}</Text>
         </Animated.View>
 
         {/* 오늘의 일정 */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
             <View>
-              <Text style={s.sectionTitle}>오늘의 일정</Text>
-              <Text style={s.sectionSub}>{todayEvents.length > 0 ? `${todayEvents.length}개의 일정` : '비어 있는 하루'}</Text>
+              <Text style={s.sectionTitle}>오늘 일정</Text>
+              <Text style={s.sectionSub}>{todayEvents.length > 0 ? `${todayEvents.length}개 있어요` : '느긋한 하루예요'}</Text>
             </View>
             <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')} style={s.seeAllBtn}>
               <Text style={s.seeAllText}>전체</Text>
@@ -214,12 +215,12 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           {todayEvents.length === 0 && !eventsReady ? (
-            <LoadingRows label="오늘 일정을 보는 중이에요" />
+            <LoadingRows label="오늘 일정을 살펴보고 있어요" />
           ) : todayEvents.length === 0 ? (
             <TouchableOpacity style={s.emptyState} activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')}>
               <FontAwesome name="calendar-o" size={32} color="#D0D0D0" />
               <Text style={s.emptyTitle}>오늘은 일정이 없어요</Text>
-              <Text style={s.emptySub}>눌러서 캘린더에 하나 적어볼까요?</Text>
+              <Text style={s.emptySub}>약속이 생기면 눌러서 적어두세요</Text>
             </TouchableOpacity>
           ) : (
           <View style={s.timeline}>
@@ -255,7 +256,7 @@ export default function HomeScreen() {
             <View style={s.sectionHeader}>
               <View>
                 <Text style={s.sectionTitle}>그때 오늘</Text>
-                <Text style={s.sectionSub}>같은 날, 지난해에 남긴 기록</Text>
+                <Text style={s.sectionSub}>오늘과 같은 날에 남겨둔 기록이에요</Text>
               </View>
             </View>
             {yearsAgo.map(({ rec, years }) => {
@@ -268,7 +269,7 @@ export default function HomeScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={s.memoryTitle} numberOfLines={1}>{rec.title}</Text>
-                    <Text style={s.memoryMeta}>{years}년 전 오늘 · {CATEGORY_LABELS[rec.category]} · {rec.recordedBy}</Text>
+                    <Text style={s.memoryMeta}>{years}년 전 오늘, {rec.recordedBy}{iga(rec.recordedBy)} 남긴 {CATEGORY_LABELS[rec.category]}</Text>
                   </View>
                   <FontAwesome name="chevron-right" size={11} color="#D4C8B0" />
                 </TouchableOpacity>
@@ -279,7 +280,7 @@ export default function HomeScreen() {
 
         {/* 빠른 기록 */}
         <View style={s.quickSection}>
-          <Text style={s.quickTitle}>빠른 기록</Text>
+          <Text style={s.quickTitle}>바로 적기</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.quickScroll}>
             {[
               { icon: 'pencil', label: '일기', route: '/(tabs)/records/parenting' },
@@ -303,7 +304,7 @@ export default function HomeScreen() {
           <View style={s.sectionHeader}>
             <View>
               <Text style={s.sectionTitle}>최근 기록</Text>
-              <Text style={s.sectionSub}>가족이 남긴 기록들</Text>
+              <Text style={s.sectionSub}>가족이 요즘 남긴 것들</Text>
             </View>
             <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/records')} style={s.seeAllBtn}>
               <Text style={s.seeAllText}>전체</Text>
@@ -311,12 +312,12 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           {recent.length === 0 && !recordsReady ? (
-            <LoadingRows label="기록을 꺼내오는 중이에요" />
+            <LoadingRows label="기록을 꺼내오고 있어요" />
           ) : recent.length === 0 ? (
             <TouchableOpacity style={s.emptyState} activeOpacity={0.7} onPress={() => router.push('/(tabs)/records')}>
               <FontAwesome name="pencil-square-o" size={32} color="#D0D0D0" />
               <Text style={s.emptyTitle}>아직 기록이 없어요</Text>
-              <Text style={s.emptySub}>첫 번째 가족 기록을 남겨보세요</Text>
+              <Text style={s.emptySub}>오늘 있었던 일부터 하나 남겨볼까요?</Text>
             </TouchableOpacity>
           ) : (
           <View style={s.recordGrid}>

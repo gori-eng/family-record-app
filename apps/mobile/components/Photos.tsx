@@ -126,7 +126,7 @@ export function PhotoPickerRow({ draft, max = MAX_PHOTOS }: { draft: PhotoDraft;
 
   const add = () => {
     if (left <= 0) {
-      showAlert(`사진은 ${max}장까지예요`, '빼고 싶은 사진의 ✕를 누르면 다른 사진을 넣을 수 있어요.');
+      showAlert(`사진은 ${max}장까지예요`, '빼고 싶은 사진 구석의 작은 엑스를 누르면 다른 사진을 넣을 수 있어요.');
       return;
     }
     // 웹에는 카메라 화면이 없다 — 바로 고르기

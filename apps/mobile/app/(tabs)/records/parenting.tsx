@@ -121,12 +121,12 @@ export default function ParentingScreen() {
     }
     const title = formTitle.trim();
     if (!title) {
-      showAlert('오늘의 제목을 적어주세요', '"첫 걸음마"처럼 짧게 한 줄이면 돼요.');
+      showAlert('제목을 붙여주세요', '"첫 걸음마"처럼 짧으면 돼요.');
       return;
     }
     const date = parseLooseDate(formDate);
     if (!date) {
-      showAlert('날짜를 한 번 봐주세요', '2026.9.22처럼 적어주세요. 오늘·어제 버튼을 눌러도 돼요.');
+      showAlert('날짜를 한 번 봐주세요', '2026.9.22처럼 적거나, 위의 오늘이나 어제 버튼을 눌러주세요.');
       return;
     }
     const data: ParentingEntry = {
@@ -169,7 +169,7 @@ export default function ParentingScreen() {
       const n = e.data.milestones?.length ?? 0;
       if (n) byChild.set(e.data.child, (byChild.get(e.data.child) ?? 0) + n);
     }
-    return [...byChild.entries()].map(([c, n]) => `${c}: ${n}개`).join(String.fromCharCode(10));
+    return [...byChild.entries()].map(([c, n]) => `${c} ${n}개`).join(String.fromCharCode(10));
   }, [entries]);
   /** 이번 달 쓴 일기 수 */
   const thisMonthCount = useMemo(() => {
@@ -210,7 +210,7 @@ export default function ParentingScreen() {
                   </View>
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>적은 사람</Text>
-                    <Text style={styles.modalValue}>{selected.recordedBy}{selected.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
+                    <Text style={styles.modalValue}>{selected.recordedBy === CURRENT_USER ? '나' : selected.recordedBy}</Text>
                   </View>
                   {sel.content ? (
                     <View style={styles.modalRow}>
@@ -220,7 +220,7 @@ export default function ParentingScreen() {
                   ) : null}
                   {sel.milestones && sel.milestones.length > 0 && (
                     <View style={styles.modalRow}>
-                      <Text style={styles.modalLabel}>마일스톤</Text>
+                      <Text style={styles.modalLabel}>처음 해낸 일</Text>
                       <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                         {sel.milestones.map((ms: string, mi: number) => (
                           <View key={mi} style={styles.milestoneBadge}>
@@ -270,7 +270,7 @@ export default function ParentingScreen() {
               )}
               <TextInput
                 style={styles.createInput}
-                placeholder={children.length ? '다른 아이면 이름을 적어주세요' : '아이 이름 (예: 지우)'}
+                placeholder={children.length ? '다른 아이라면 이름을 적어주세요' : '아이 이름을 적어주세요. 예) 지우'}
                 placeholderTextColor="#BFAE99"
                 value={formChild}
                 onChangeText={setFormChild}
@@ -309,12 +309,12 @@ export default function ParentingScreen() {
                 value={formContent}
                 onChangeText={setFormContent}
               />
-              <Text style={styles.createLabel}>사진 (선택)</Text>
+              <Text style={styles.createLabel}>사진</Text>
               <PhotoPickerRow draft={photoDraft} />
-              <Text style={styles.createLabel}>마일스톤 태그</Text>
+              <Text style={styles.createLabel}>처음 해낸 일이 있었나요?</Text>
               <TextInput
                 style={styles.createInput}
-                placeholder="쉼표로 구분 (예: 첫 자전거, 생일)"
+                placeholder="쉼표로 나눠 적어요. 예) 첫 자전거, 첫 생일"
                 placeholderTextColor="#BFAE99"
                 value={formMilestones}
                 onChangeText={setFormMilestones}
@@ -333,12 +333,12 @@ export default function ParentingScreen() {
             <TouchableOpacity style={styles.statCard} onPress={() => setActiveChild('전체')} activeOpacity={0.7}>
               <FontAwesome name="book" size={18} color="#4A8C6F" />
               <Text style={styles.statNumber}>{entries.length}</Text>
-              <Text style={styles.statLabel}>총 기록</Text>
+              <Text style={styles.statLabel}>모든 일기</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.statCard} onPress={() => showAlert('마일스톤', milestoneByChild || '아직 마일스톤이 없어요.')} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.statCard} onPress={() => showAlert('처음 해낸 일', milestoneByChild || '아직 적어둔 게 없어요.')} activeOpacity={0.7}>
               <FontAwesome name="trophy" size={18} color="#E6A817" />
               <Text style={styles.statNumber}>{milestoneCount}</Text>
-              <Text style={styles.statLabel}>마일스톤</Text>
+              <Text style={styles.statLabel}>처음 해낸 일</Text>
             </TouchableOpacity>
             <View style={styles.statCard}>
               <FontAwesome name="calendar" size={18} color="#4A90C8" />

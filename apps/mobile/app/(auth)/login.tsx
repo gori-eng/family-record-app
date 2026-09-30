@@ -79,7 +79,7 @@ export default function LoginScreen() {
             disabled={loading}
             activeOpacity={0.8}
           >
-            <Text style={s.loginBtnText}>{loading ? '로그인 중...' : '로그인'}</Text>
+            <Text style={s.loginBtnText}>{loading ? '들어가고 있어요' : '로그인'}</Text>
           </TouchableOpacity>
 
           {/* Divider */}

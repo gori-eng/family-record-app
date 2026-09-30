@@ -52,3 +52,10 @@ export const gwawa = (word: string): string => {
   if (j === null) return '와';
   return j === 0 ? '와' : '과';
 };
+
+/** '부모예요' / '손님이에요' — 받침이 있으면 '이에요' */
+export const ieyo = (word: string): string => {
+  const j = jongseong(word);
+  if (j === null) return '예요';
+  return j === 0 ? '예요' : '이에요';
+};

@@ -71,10 +71,10 @@ export default function ExportScreen() {
         `사진 ${count}장을 담았어요`,
         `${name}
 
-폴더는 기록 종류, 파일 이름은 날짜와 제목이에요.` +
+기록 종류별로 폴더를 나누고, 파일 이름은 날짜와 제목으로 붙였어요.` +
           (failed ? `
 
-${failed}장은 받지 못해 빠졌어요. 인터넷을 확인하고 다시 해보세요.` : '')
+${failed}장은 받지 못했어요. 인터넷을 확인하고 한 번 더 해주세요.` : '')
       );
     } catch (e: any) {
       showAlert('사진을 담지 못했어요', String(e?.message ?? e));
@@ -112,7 +112,7 @@ ${failed}장은 받지 못해 빠졌어요. 인터넷을 확인하고 다시 해
     if (result.ok) {
       showAlert(
         '기록을 파일로 담았어요',
-        `${name}\n\n기록 ${backup.records.length}개 · 일정 ${backup.events.length}개가 들어 있어요.\n` +
+        `${name}\n\n기록 ${backup.records.length}개와 일정 ${backup.events.length}개가 들어 있어요.\n` +
           (result.how === 'share'
             ? '파일 앱이나 메일에 두면 휴대폰을 바꿔도 되살릴 수 있어요.'
             : '이 파일만 있으면 언제든 되살릴 수 있으니, 다른 곳에도 한 부 두세요.')
@@ -177,8 +177,9 @@ ${failed}장은 받지 못해 빠졌어요. 인터넷을 확인하고 다시 해
       const lines = [
         `기록 ${r.addedRecords}개를 되살렸어요.`,
         r.skippedRecords > 0 ? `이미 있던 ${r.skippedRecords}개는 그대로 뒀어요.` : '',
-        `일정은 ${r.addedEvents}개${r.skippedEvents > 0 ? ` (이미 있던 ${r.skippedEvents}개는 그대로)` : ''}.`,
-        r.financeSettingsRestored ? '가계부 설정(예산·반복 거래)도 파일 것으로 바꿨어요.' : '',
+        `일정 ${r.addedEvents}개를 되살렸어요.`,
+        r.skippedEvents > 0 ? `이미 있던 일정 ${r.skippedEvents}개는 그대로 뒀어요.` : '',
+        r.financeSettingsRestored ? '예산과 매달 넣는 거래도 파일에 있던 대로 바꿨어요.' : '',
       ].filter(Boolean);
       showAlert('다 됐어요', lines.join('\n'));
     };
@@ -187,7 +188,7 @@ ${failed}장은 받지 못해 빠졌어요. 인터넷을 확인하고 다시 해
       showAlert(
         '지금 기록을 모두 지우고 바꿀까요?',
         `지금 앱에 있는 기록 ${mine.total}개와 일정 ${mine.events}개가 사라지고, ` +
-          `파일에 있는 기록 ${pending.summary.totalRecords}개와 일정 ${pending.summary.totalEvents}개로 바뀝니다.\n\n` +
+          `파일에 있는 기록 ${pending.summary.totalRecords}개와 일정 ${pending.summary.totalEvents}개로 바뀌어요.\n\n` +
           '이건 되돌릴 수 없어요. 지금 것을 먼저 파일로 담아두는 게 안전해요.',
         [
           { text: '그만둘게요', style: 'cancel' },
@@ -203,7 +204,7 @@ ${failed}장은 받지 못해 빠졌어요. 인터넷을 확인하고 다시 해
 
   return (
     <>
-      <Stack.Screen options={{ title: '기록 내보내기' }} />
+      <Stack.Screen options={{ title: '기록 지키기' }} />
 
       {/* 백업 파일 미리보기 — 되살리기 전에 무엇이 들었는지 보여준다 */}
       <Modal visible={!!pending} transparent statusBarTranslucent animationType="none">
@@ -229,7 +230,7 @@ ${failed}장은 받지 못해 빠졌어요. 인터넷을 확인하고 다시 해
                   </View>
                   <Text style={s.fileMeta}>
                     {formatMoment(pending.summary.exportedAt)}
-                    {pending.summary.exportedBy ? ` · ${pending.summary.exportedBy}님이 내보냄` : ''}
+                    {pending.summary.exportedBy ? `에 ${pending.summary.exportedBy}님이 담았어요` : ''}
                   </Text>
 
                   <View style={s.tallyRow}>
@@ -326,10 +327,10 @@ ${failed}장은 받지 못해 빠졌어요. 인터넷을 확인하고 다시 해
             <FontAwesome name="download" size={20} color="#2D5A3F" />
           </View>
           <View style={s.info}>
-            <Text style={s.cardTitle}>파일로 담기 (JSON)</Text>
+            <Text style={s.cardTitle}>파일로 담아두기</Text>
             <Text style={s.cardDesc}>
-              기록·일정·가계부 설정을 파일 한 장에 담아 내려받아요. familog가 없어도 열어볼 수 있는 형식이에요.
-              사진은 가족 창고에 그대로 두고, 파일에는 어느 사진인지만 적어요.
+              기록과 일정, 가계부 설정을 파일 하나에 담아요. familog가 없어도 열어볼 수 있어요.
+              사진은 따로 두고, 어느 사진인지만 적어둬요.
             </Text>
           </View>
           <FontAwesome name="chevron-right" size={12} color="#B0A590" />
@@ -344,7 +345,7 @@ ${failed}장은 받지 못해 빠졌어요. 인터넷을 확인하고 다시 해
             <View style={s.info}>
               <Text style={s.cardTitle}>백업 파일에서 되살리기</Text>
               <Text style={s.cardDesc}>
-                담아둔 파일을 골라 기록을 되살려요. 무엇이 들었는지 먼저 보여드리고, 확인을 받고 나서 넣어요.
+                담아둔 파일을 고르면 기록을 되살려요. 무엇이 들었는지 먼저 보여주고, 괜찮다고 하면 넣을게요.
               </Text>
             </View>
             <FontAwesome name="chevron-right" size={12} color="#B0A590" />
@@ -365,7 +366,7 @@ ${failed}장은 받지 못해 빠졌어요. 인터넷을 확인하고 다시 해
             <FontAwesome name="book" size={20} color="#2D5A3F" />
           </View>
           <View style={s.info}>
-            <Text style={s.cardTitle}>기록책으로 뽑기 (PDF)</Text>
+            <Text style={s.cardTitle}>기록책으로 만들기</Text>
             <Text style={s.cardDesc}>표지와 차례가 있는 책으로 엮어요. 사진도 함께 넣고, 인쇄해서 부모님께 드릴 수도 있어요.</Text>
           </View>
           <FontAwesome name="chevron-right" size={12} color="#B0A590" />
@@ -377,12 +378,12 @@ ${failed}장은 받지 못해 빠졌어요. 인터넷을 확인하고 다시 해
             <FontAwesome name="photo" size={20} color="#2D5A3F" />
           </View>
           <View style={s.info}>
-            <Text style={s.cardTitle}>사진 모아 담기 (ZIP)</Text>
+            <Text style={s.cardTitle}>사진 한꺼번에 받기</Text>
             <Text style={s.cardDesc}>
               {zipping
-                ? `받는 중… ${zipping.done}/${zipping.total}`
+                ? `사진을 받고 있어요 ${zipping.done}/${zipping.total}`
                 : photoPlan.length
-                  ? `기록에 붙인 사진 ${photoPlan.length}장을 한 파일로 내려받아요. 폴더는 기록 종류, 이름은 날짜와 제목이에요.`
+                  ? `기록에 붙인 사진 ${photoPlan.length}장을 한 파일로 받아요. 기록 종류별로 폴더를 나눠둘게요.`
                   : '기록에 사진을 붙이면 여기서 한꺼번에 내려받을 수 있어요.'}
             </Text>
           </View>
@@ -392,7 +393,7 @@ ${failed}장은 받지 못해 빠졌어요. 인터넷을 확인하고 다시 해
         <View style={s.infoBox}>
           <FontAwesome name="info-circle" size={14} color="#7A6B55" />
           <Text style={s.infoText}>
-            담은 파일은 특정 기기나 프로그램에 묶이지 않는 표준 형식(JSON)이에요.
+            담은 파일은 어느 기기에서나 열리는 형식이에요.
             메모장으로 열어도 읽을 수 있고, 다른 프로그램으로 옮길 수도 있어요.
           </Text>
         </View>

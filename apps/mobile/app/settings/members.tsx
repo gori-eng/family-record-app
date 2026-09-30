@@ -6,7 +6,7 @@ import { Stack, useRouter } from 'expo-router';
 import { useMemberCards, useFamilyInfo, type MemberCard } from '../../store/family';
 import { useSession } from '../../store/session';
 import { setMemberRole, removeMember } from '@core/supabase';
-import { ro, eulreul } from '../../lib/korean';
+import { ro, eulreul, ieyo } from '../../lib/korean';
 import { dbErrorText } from '../../lib/dbErrors';
 import { useRecordsStore } from '../../store/records';
 
@@ -100,7 +100,7 @@ export default function MembersScreen() {
   };
 
   const openMember = (m: MemberCard) => {
-    const info = `기록에는 '${m.display}'${ro(m.display)} 남아요.\n역할: ${m.role}`;
+    const info = `기록에는 '${m.display}'${ro(m.display)} 남아요.\n역할은 ${m.role}${ieyo(m.role)}.`;
     // 관리자는 다른 사람의 역할을 바로잡을 수 있다. 나 자신·예시 가족은 보기만
     if (!isAdmin || m.isMe || !m.memberId) {
       showAlert(
@@ -115,7 +115,7 @@ export default function MembersScreen() {
     ] as const)
       .filter(([key]) => key !== m.roleKey)
       .map(([key, text]) => ({ text, onPress: () => changeRole(m, key) }));
-    showAlert(m.full, info + '\n\n자녀는 가계부·건강 기록을 볼 수 없어요.', [
+    showAlert(m.full, info + '\n\n자녀는 가계부와 건강 기록을 볼 수 없어요.', [
       ...options,
       { text: '관리자 넘기기', onPress: () => confirmHandOver(m) },
       { text: '가족에서 내보내기', style: 'destructive', onPress: () => confirmRemove(m) },
@@ -132,7 +132,7 @@ export default function MembersScreen() {
       return;
     }
     try {
-      await Share.share({ message: `familog에 초대합니다! 초대 코드: ${family.inviteCode}` });
+      await Share.share({ message: `우리 가족 기록장에 같이 적어요. familog 앱을 열고 초대 코드 ${family.inviteCode}를 넣으면 들어올 수 있어요.` });
     } catch {
       showAlert('초대 코드', `${family.inviteCode}\n\n이 코드를 가족에게 보내주세요.`);
     }
@@ -143,7 +143,7 @@ export default function MembersScreen() {
       <Stack.Screen options={{ title: '가족 구성원' }} />
       <ScrollView style={s.container} contentContainerStyle={{ paddingBottom: 32 }}>
         <Text style={s.subtitle}>
-          {family.isReal ? `${family.name} · ${members.length}명` : `예시 가족 · ${members.length}명`}
+          {family.isReal ? `${family.name} 가족 ${members.length}명` : `예시 가족 ${members.length}명`}
         </Text>
 
         {!family.isReal && (

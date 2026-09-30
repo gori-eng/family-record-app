@@ -92,7 +92,7 @@ export function useFamilyNews(): { items: NewsItem[]; unread: number; markSeen: 
         id: `e-${e.id}`,
         kind: 'event',
         title: e.date === today ? '오늘 일정이 있어요' : '내일 일정이 있어요',
-        desc: e.time ? `${formatTime(e.time)} · ${e.title}` : `하루 종일 · ${e.title}`,
+        desc: e.time ? `${formatTime(e.time)}에 ${e.title}` : e.title,
         author: e.createdBy,
         time: e.date === today ? '오늘' : '내일',
         unread: false,

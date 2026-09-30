@@ -51,7 +51,7 @@ export function BookSheet({ visible, onClose }: { visible: boolean; onClose: () 
 
   const make = async () => {
     if (!chosen.length) {
-      showAlert('넣을 칸을 골라주세요', '적어도 한 칸은 있어야 책이 돼요.');
+      showAlert('넣을 기록을 골라주세요', '적어도 한 가지는 있어야 책이 돼요.');
       return;
     }
     setBusy(true);
@@ -70,7 +70,7 @@ export function BookSheet({ visible, onClose }: { visible: boolean; onClose: () 
       onClose();
       if (Platform.OS === 'web') {
         // 인쇄 창은 브라우저가 띄운다 — 거기서 무엇을 골라야 하는지 알려준다
-        showAlert('인쇄 창이 열렸어요', "대상(프린터)에서 'PDF로 저장'을 고르면 파일로 남아요.");
+        showAlert('인쇄 창이 열렸어요', "프린터를 고르는 칸에서 'PDF로 저장'을 고르면 파일로 남아요.");
       }
     } finally {
       setBusy(false);
@@ -84,7 +84,7 @@ export function BookSheet({ visible, onClose }: { visible: boolean; onClose: () 
         <View style={s.sheet}>
           <View style={s.handle} />
           <Text style={s.title}>기록책 만들기</Text>
-          <Text style={s.sub}>표지와 차례가 있는 책으로 엮어 PDF로 뽑아요. 넣을 칸을 골라주세요.</Text>
+          <Text style={s.sub}>표지와 차례가 있는 책으로 엮어줄게요. 어떤 기록을 넣을까요?</Text>
 
           {available.length === 0 ? (
             <Text style={s.empty}>아직 책에 넣을 기록이 없어요</Text>
@@ -105,14 +105,14 @@ export function BookSheet({ visible, onClose }: { visible: boolean; onClose: () 
           {photoCount > 0 && (
             <TouchableOpacity style={s.toggleRow} activeOpacity={0.7} onPress={() => setWithPhotos((v) => !v)}>
               <FontAwesome name={withPhotos ? 'check-square' : 'square-o'} size={18} color={withPhotos ? '#4A8C6F' : '#BBBBBB'} />
-              <Text style={s.toggleText}>사진도 넣기 ({photoCount}장)</Text>
+              <Text style={s.toggleText}>사진 {photoCount}장도 넣기</Text>
             </TouchableOpacity>
           )}
 
           <TouchableOpacity style={[s.btn, (busy || !chosen.length) && s.btnOff]} activeOpacity={0.8}
             disabled={busy || !chosen.length} onPress={make}>
             {busy ? <ActivityIndicator color="#FFFFFF" /> : (
-              <Text style={s.btnText}>{chosen.length ? `기록 ${chosen.length}개로 책 만들기` : '칸을 골라주세요'}</Text>
+              <Text style={s.btnText}>{chosen.length ? `기록 ${chosen.length}개로 책 만들기` : '넣을 기록을 골라주세요'}</Text>
             )}
           </TouchableOpacity>
           <TouchableOpacity style={s.cancel} activeOpacity={0.7} onPress={onClose} disabled={busy}>

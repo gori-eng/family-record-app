@@ -211,7 +211,7 @@ export default function GoalsScreen() {
                       </View>
                     ) : null}
                     <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>달성률</Text>
+                      <Text style={s.modalLabel}>얼마나 왔나요</Text>
                       <View style={{ flex: 1 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                           <View style={{ flex: 1, height: 8, backgroundColor: '#EAEAEA', borderRadius: 4 }}>
@@ -223,7 +223,7 @@ export default function GoalsScreen() {
                     </View>
                     {sel.target ? (
                       <View style={s.modalRow}>
-                        <Text style={s.modalLabel}>목표일</Text>
+                        <Text style={s.modalLabel}>언제까지</Text>
                         <Text style={s.modalValue}>{sel.target}</Text>
                       </View>
                     ) : null}
@@ -243,7 +243,7 @@ export default function GoalsScreen() {
                         <View style={s.subHeader}>
                           <FontAwesome name="check-square-o" size={13} color="#4A8C6F" />
                           <Text style={s.subTitle}>
-                            세부 마일스톤 ({sel.milestones.filter((m) => m.done).length}/{sel.milestones.length}) · 눌러서 체크
+                            작은 목표 {sel.milestones.filter((m) => m.done).length}/{sel.milestones.length}, 해낸 건 눌러서 체크해요
                           </Text>
                         </View>
                         {sel.milestones.map((m, i) => (
@@ -278,7 +278,7 @@ export default function GoalsScreen() {
 
                     {selReached ? (
                       <TouchableOpacity style={s.reopenBtn} activeOpacity={0.7} onPress={() => reopen(selected)}>
-                        <Text style={s.reopenText}>다시 진행 중으로</Text>
+                        <Text style={s.reopenText}>아직 덜 끝났어요</Text>
                       </TouchableOpacity>
                     ) : (
                       <TouchableOpacity style={s.doneBtn} activeOpacity={0.7} onPress={() => markReached(selected)}>
@@ -319,16 +319,16 @@ export default function GoalsScreen() {
               <View style={s.modalHandle} />
               <Text style={s.modalTitle}>{editingId ? '목표 고치기' : '새 가족 목표'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }}>
-              <Text style={s.createLabel}>목표 제목</Text>
+              <Text style={s.createLabel}>어떤 목표인가요?</Text>
               <TextInput style={s.createInput} placeholder="예) 올해 가족 여행 세 번 가기" placeholderTextColor="#BFAE99"
                 value={formTitle} onChangeText={setFormTitle} />
               <Text style={s.createLabel}>설명</Text>
               <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="왜 하고 싶은지, 어떻게 할지 적어도 좋아요" placeholderTextColor="#BFAE99" multiline
                 value={formDesc} onChangeText={setFormDesc} />
-              <Text style={s.createLabel}>목표 시점</Text>
-              <TextInput style={s.createInput} placeholder="예: 2027.12" placeholderTextColor="#BFAE99"
+              <Text style={s.createLabel}>언제까지 해볼까요?</Text>
+              <TextInput style={s.createInput} placeholder="예) 2027년 12월" placeholderTextColor="#BFAE99"
                 value={formTarget} onChangeText={setFormTarget} />
-              <Text style={s.createLabel}>세부 마일스톤 — 적어두면 하나씩 체크하며 채워요</Text>
+              <Text style={s.createLabel}>작은 목표로 나눠볼까요?</Text>
               <TextInput
                 style={[s.createInput, { height: 110, textAlignVertical: 'top' }]}
                 value={formMilestones}
@@ -337,14 +337,14 @@ export default function GoalsScreen() {
                 placeholderTextColor="#BFAE99"
                 multiline
               />
-              <Text style={s.createLabel}>사진 (선택)</Text>
+              <Text style={s.createLabel}>사진</Text>
               <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>메모</Text>
               <TextInput
                 style={[s.createInput, { height: 80, textAlignVertical: 'top' }]}
                 value={formNotes}
                 onChangeText={setFormNotes}
-                placeholder="진행 상황, 함께하는 가족, 보상 등을 자유롭게"
+                placeholder="다 해내면 뭘 할지, 누구랑 할지 적어도 좋아요"
                 placeholderTextColor="#BFAE99"
                 multiline
               />
@@ -360,7 +360,7 @@ export default function GoalsScreen() {
           <View style={s.summary}>
             <View style={s.summaryCard}>
               <Text style={s.summaryNum}>{summary.total}</Text>
-              <Text style={s.summaryLabel}>전체 목표</Text>
+              <Text style={s.summaryLabel}>모든 목표</Text>
             </View>
             <View style={s.summaryCard}>
               <Text style={[s.summaryNum, { color: '#4AA86B' }]}>{summary.done}</Text>
@@ -396,9 +396,9 @@ export default function GoalsScreen() {
                   </View>
                   <View style={s.progressMeta}>
                     <Text style={s.progressPct}>
-                      {p}%{(g.milestones ?? []).length ? ` · ${g.milestones.filter((m) => m.done).length}/${g.milestones.length}` : ''}
+                      {p}%{(g.milestones ?? []).length ? `  작은 목표 ${g.milestones.filter((m) => m.done).length}/${g.milestones.length}` : ''}
                     </Text>
-                    {g.target ? <Text style={s.targetDate}>목표: {g.target}</Text> : null}
+                    {g.target ? <Text style={s.targetDate}>{g.target}까지</Text> : null}
                   </View>
                 </View>
               </TouchableOpacity>

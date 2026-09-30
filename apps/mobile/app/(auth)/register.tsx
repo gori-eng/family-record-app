@@ -67,7 +67,7 @@ export default function RegisterScreen() {
 
           <TouchableOpacity style={[s.submitBtn, loading && s.submitBtnDisabled]} onPress={handleRegister}
             disabled={loading} activeOpacity={0.8}>
-            <Text style={s.submitBtnText}>{loading ? '가입 중...' : '가입하기'}</Text>
+            <Text style={s.submitBtnText}>{loading ? '가입하고 있어요' : '가입하기'}</Text>
           </TouchableOpacity>
         </View>
 

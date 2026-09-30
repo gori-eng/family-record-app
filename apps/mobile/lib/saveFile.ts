@@ -34,7 +34,7 @@ export async function saveTextFile(
       await Sharing.shareAsync(file.uri, { mimeType, dialogTitle: '백업 파일을 어디에 둘까요?', UTI: 'public.json' });
       return { ok: true, how: 'share' };
     } catch (e: unknown) {
-      return { ok: false, reason: `파일을 만들지 못했어요. (${String((e as Error)?.message ?? e)})` };
+      return { ok: false, reason: `파일을 만들지 못했어요.\n${String((e as Error)?.message ?? e)}` };
     }
   }
 
@@ -54,7 +54,7 @@ export async function saveTextFile(
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     return { ok: true, how: 'download' };
   } catch (e: unknown) {
-    return { ok: false, reason: `파일을 만들지 못했어요. (${String((e as Error)?.message ?? e)})` };
+    return { ok: false, reason: `파일을 만들지 못했어요.\n${String((e as Error)?.message ?? e)}` };
   }
 }
 
@@ -137,7 +137,7 @@ export async function saveBinaryFile(
       await Sharing.shareAsync(file.uri, { mimeType, dialogTitle: '파일을 어디에 둘까요?' });
       return { ok: true, how: 'share' };
     } catch (e: unknown) {
-      return { ok: false, reason: `파일을 만들지 못했어요. (${String((e as Error)?.message ?? e)})` };
+      return { ok: false, reason: `파일을 만들지 못했어요.\n${String((e as Error)?.message ?? e)}` };
     }
   }
   try {
@@ -153,6 +153,6 @@ export async function saveBinaryFile(
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     return { ok: true, how: 'download' };
   } catch (e: unknown) {
-    return { ok: false, reason: `파일을 만들지 못했어요. (${String((e as Error)?.message ?? e)})` };
+    return { ok: false, reason: `파일을 만들지 못했어요.\n${String((e as Error)?.message ?? e)}` };
   }
 }

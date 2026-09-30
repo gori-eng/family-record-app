@@ -211,7 +211,7 @@ export default function ProfileScreen() {
             <Avatar avatar={avatar} initial={me.display_name} size={88} />
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.7} onPress={openEmoji} disabled={uploadingAvatar}>
-            <Text style={s.changePhoto}>{uploadingAvatar ? '올리는 중…' : '사진이나 이모지 고르기'}</Text>
+            <Text style={s.changePhoto}>{uploadingAvatar ? '사진을 올리고 있어요' : '사진이나 이모지 고르기'}</Text>
           </TouchableOpacity>
           <Text style={s.photoNote}>가족 목록에서 이름 옆에 보여요</Text>
         </View>
@@ -227,12 +227,12 @@ export default function ProfileScreen() {
         <Text style={s.help}>
           {shortChanged && nextShort
             ? `저장하면 지금까지 쓴 기록 ${myRecordCount}개도 '${nextShort}'${ro(nextShort)} 함께 바뀌어요`
-            : `기록·일정·가계부에 이 이름으로 남아요${family ? ` · ${family.name}에서만 쓰는 이름이에요` : ''}`}
+            : `기록과 일정, 가계부에 이 이름으로 남아요.${family ? ` ${family.name}에서만 쓰는 이름이에요.` : ''}`}
         </Text>
 
         <Text style={s.label}>이메일</Text>
         <View style={s.readonly}>
-          <Text style={s.readonlyText}>{email || '…'}</Text>
+          <Text style={s.readonlyText}>{email || '불러오고 있어요'}</Text>
         </View>
         <Text style={s.help}>로그인할 때 쓰는 주소예요</Text>
 
@@ -248,7 +248,7 @@ export default function ProfileScreen() {
           disabled={!changed || saving}
           onPress={save}
         >
-          <Text style={s.saveBtnText}>{saving ? '저장하는 중…' : changed ? '저장하기' : '바뀐 게 없어요'}</Text>
+          <Text style={s.saveBtnText}>{saving ? '저장하고 있어요' : changed ? '저장하기' : '바뀐 게 없어요'}</Text>
         </TouchableOpacity>
       </ScrollView>
 

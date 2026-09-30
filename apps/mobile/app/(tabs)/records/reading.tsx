@@ -139,7 +139,7 @@ export default function ReadingScreen() {
     } else {
       const clamped = Math.max(0, Math.min(99, Math.round(editProgress)));
       patchRecordData(selectedId, { status: '읽는 중', progress: clamped, notes: editNotes });
-      showAlert('저장했어요', '어디까지 읽었는지와 메모를 남겨뒀어요.');
+      showAlert('저장했어요', '어디까지 읽었는지 적어뒀어요.');
     }
     closeDetail();
   };
@@ -216,16 +216,16 @@ export default function ReadingScreen() {
                   <Text style={styles.modalTitle}>{selectedItem.title}</Text>
                   <PhotoGallery photos={photosOf(selectedItem)} />
                   <View style={styles.modalRow}>
-                    <Text style={styles.modalLabel}>저자</Text>
+                    <Text style={styles.modalLabel}>지은이</Text>
                     <Text style={styles.modalValue}>{selectedItem.author}</Text>
                   </View>
                   <View style={styles.modalRow}>
-                    <Text style={styles.modalLabel}>읽는 이</Text>
+                    <Text style={styles.modalLabel}>읽는 사람</Text>
                     <Text style={styles.modalValue}>{selectedItem.reader}</Text>
                   </View>
                   <View style={styles.modalRow}>
-                    <Text style={styles.modalLabel}>작성자</Text>
-                    <Text style={styles.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
+                    <Text style={styles.modalLabel}>적은 사람</Text>
+                    <Text style={styles.modalValue}>{selectedItem.recordedBy === CURRENT_USER ? '나' : selectedItem.recordedBy}</Text>
                   </View>
                   <View style={styles.modalRow}>
                     <Text style={styles.modalLabel}>상태</Text>
@@ -240,14 +240,14 @@ export default function ReadingScreen() {
                   {/* ⚠️ `rating && …`로 쓰면 0일 때 숫자 0이 글자로 그려져 휴대폰이 죽는다 (글자는 Text 안에만) */}
                   {!!selectedItem.rating && (
                     <View style={styles.modalRow}>
-                      <Text style={styles.modalLabel}>평점</Text>
+                      <Text style={styles.modalLabel}>별점</Text>
                       <StarRating rating={selectedItem.rating} />
                     </View>
                   )}
                   {selectedItem.status === '읽는 중' ? (
                     <>
                       <View style={styles.editDivider} />
-                      <Text style={styles.editSectionTitle}>독서 상태</Text>
+                      <Text style={styles.editSectionTitle}>지금 이 책은</Text>
                       <View style={styles.editStatusRow}>
                         {(['읽는 중', '완독'] as const).map(s => (
                           <TouchableOpacity
@@ -266,7 +266,7 @@ export default function ReadingScreen() {
 
                       {editStatus === '읽는 중' ? (
                         <>
-                          <Text style={styles.editLabel}>진척도</Text>
+                          <Text style={styles.editLabel}>어디까지 읽었나요</Text>
                           <View style={styles.progressEditRow}>
                             <TouchableOpacity style={styles.stepBtn} activeOpacity={0.7}
                               onPress={() => setEditProgress(p => Math.max(0, p - 5))}>
@@ -292,7 +292,7 @@ export default function ReadingScreen() {
                         </>
                       ) : (
                         <>
-                          <Text style={styles.editLabel}>평점</Text>
+                          <Text style={styles.editLabel}>별점</Text>
                           <View style={styles.ratingEditRow}>
                             {[1, 2, 3, 4, 5].map(n => (
                               <TouchableOpacity key={n} activeOpacity={0.7} onPress={() => setEditRating(n)}>
@@ -303,17 +303,17 @@ export default function ReadingScreen() {
                                 />
                               </TouchableOpacity>
                             ))}
-                            <Text style={styles.ratingEditText}>{editRating > 0 ? `${editRating}점` : '평가해주세요'}</Text>
+                            <Text style={styles.ratingEditText}>{editRating > 0 ? `별 ${editRating}개` : '별을 눌러주세요'}</Text>
                           </View>
                         </>
                       )}
 
-                      <Text style={styles.editLabel}>특이사항 / 메모</Text>
+                      <Text style={styles.editLabel}>메모</Text>
                       <TextInput
                         style={[styles.createInput, { height: 90, textAlignVertical: 'top', marginBottom: 12 }]}
                         value={editNotes}
                         onChangeText={setEditNotes}
-                        placeholder="기억에 남는 문장, 인상 등을 적어보세요"
+                        placeholder="기억에 남는 문장이나 느낌을 적어두세요"
                         placeholderTextColor="#BFAE99"
                         multiline
                       />
@@ -334,7 +334,7 @@ export default function ReadingScreen() {
               )}
               {selectedId && (
                 <>
-                  <EditRecordRow onPress={startEdit} label="제목·저자·상태 고치기" />
+                  <EditRecordRow onPress={startEdit} label="책 정보 고치기" />
                   <DeleteRecordRow id={selectedId} onPress={() => askDelete(selectedId, { after: closeDetail })} label="이 책 지우기" />
                 </>
               )}
@@ -359,9 +359,9 @@ export default function ReadingScreen() {
                 value={formTitle}
                 onChangeText={setFormTitle}
               />
-              <Text style={styles.createLabel}>사진 (선택) — 표지, 밑줄 친 페이지</Text>
+              <Text style={styles.createLabel}>표지나 밑줄 친 페이지</Text>
               <PhotoPickerRow draft={photoDraft} />
-              <Text style={styles.createLabel}>저자</Text>
+              <Text style={styles.createLabel}>지은이</Text>
               <TextInput
                 style={styles.createInput}
                 placeholder="누가 썼나요?"
@@ -382,7 +382,7 @@ export default function ReadingScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              <Text style={styles.authorHint}>작성자: {CURRENT_USER} (나)</Text>
+              <Text style={styles.authorHint}>내가 적는 기록이에요</Text>
               <Text style={styles.createLabel}>상태</Text>
               <View style={styles.pillRow}>
                 {(['읽고 싶은', '읽는 중', '완독'] as const).map(label => (

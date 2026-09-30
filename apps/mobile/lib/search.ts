@@ -136,9 +136,12 @@ export function snippetOf(pieces: string[], title: string, terms: string[]): str
     const flat = p.replace(/\s+/g, ' ').trim();
     const i = flat.toLowerCase().indexOf(hit);
     if (i < 0 || flat.length <= 40) return flat;
-    const start = Math.max(0, i - 14);
-    const end = Math.min(flat.length, i + hit.length + 22);
-    return `${start > 0 ? '…' : ''}${flat.slice(start, end)}${end < flat.length ? '…' : ''}`;
+    // 찾은 낱말 앞뒤만 보여준다. 말줄임표 대신 **낱말 경계**에서 잘라 어색하게 끊기지 않게
+    let start = Math.max(0, i - 14);
+    let end = Math.min(flat.length, i + hit.length + 22);
+    if (start > 0) { const sp = flat.indexOf(' ', start); if (sp !== -1 && sp < i) start = sp + 1; }
+    if (end < flat.length) { const sp = flat.lastIndexOf(' ', end); if (sp > i + hit.length) end = sp; }
+    return flat.slice(start, end);
   }
   return '';
 }

@@ -60,11 +60,11 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
     // ── 아직 DB에 없는 것들 ──────────────────────────────
     if (msg.includes('create_family_with_me') || msg.includes('join_family_by_code') || code === 'PGRST202') {
       return '가족을 만드는 기능이 아직 데이터베이스에 없어요.' + BR +
-        'Supabase 대시보드 > SQL Editor에서 supabase/APPLY_LATEST.sql 을 붙여넣고 Run 해주세요.';
+        'Supabase 대시보드의 SQL Editor에서 supabase/APPLY_LATEST.sql을 붙여넣고 Run 해주세요.';
     }
     if (msg.includes('full_name')) {
       return '아직 데이터베이스 준비가 안 됐어요.' + BR +
-        'Supabase 대시보드 > SQL Editor에서 supabase/APPLY_LATEST.sql 을 붙여넣고 Run 해주세요.';
+        'Supabase 대시보드의 SQL Editor에서 supabase/APPLY_LATEST.sql을 붙여넣고 Run 해주세요.';
     }
 
     // ── 사람이 고칠 수 있는 것들 ─────────────────────────
@@ -92,7 +92,7 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
   /** 이름 두 칸 검사 — 두 화면이 같이 쓴다 */
   const checkNames = (): string | null => {
     if (!display.trim()) return '기록에 뜰 이름을 적어주세요. 짧게 부르는 이름이 좋아요.';
-    if (display.trim().length > 10) return '기록에 뜰 이름은 10자까지가 좋아요. 매일 화면에 뜨는 이름이라서요.';
+    if (display.trim().length > 10) return '기록에 뜰 이름은 10글자까지예요. 매일 화면에 뜨는 이름이라 짧을수록 좋아요.';
     // 가계부 거래 지문이 '이름|날짜|…' 모양이라 | 가 섞이면 지문이 깨진다 (DB도 막는다 — 00013)
     if (display.includes('|')) return '이름에 | 기호는 쓸 수 없어요.';
     return null;
@@ -169,7 +169,7 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
     }
     // 휴대폰 — 공유 시트로 카톡·문자에 바로 보낸다 (예전엔 웹 전용 복사라 알림창만 떴다, 점검 B12)
     try {
-      await Share.share({ message: `familog 초대 코드: ${madeFamily.invite_code}` + String.fromCharCode(10) + "앱에서 '초대 코드로 들어가기'에 넣어주세요." });
+      await Share.share({ message: `우리 가족 기록장에 같이 적어요. familog 앱을 열고 초대 코드 ${madeFamily.invite_code}를 넣으면 들어올 수 있어요.` });
     } catch {
       showAlert('초대 코드', madeFamily.invite_code);
     }
@@ -196,7 +196,7 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
         </TouchableOpacity>
 
         <Text style={s.codeNote}>
-          설정 &gt; 가족 관리에서 언제든 다시 볼 수 있어요.
+          설정의 가족 관리에서 언제든 다시 볼 수 있어요.
         </Text>
 
         <TouchableOpacity style={s.primaryBtn} activeOpacity={0.8} onPress={() => router.replace('/(tabs)')}>
@@ -221,7 +221,7 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
         <Text style={s.title}>{adding ? '가족을 하나 더 더해요' : '함께 쓸 가족을 정해요'}</Text>
         {adding ? (
           <Text style={s.lead}>
-            친가·처가처럼 다른 가족과도 따로 기록을 모을 수 있어요.{'\n'}새로 만들거나, 받은 초대 코드로 들어가요.
+            친가나 처가처럼 다른 가족과도 따로 기록을 모을 수 있어요.{'\n'}새로 만들거나, 받은 초대 코드로 들어가요.
           </Text>
         ) : (
           <Text style={s.lead}>
@@ -268,13 +268,13 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
       {creating ? (
         <>
           <Text style={s.label}>가족 이름</Text>
-          <TextInput style={s.input} placeholder="예: 김씨네" placeholderTextColor="#A0A0A0"
+          <TextInput style={s.input} placeholder="예) 김씨네" placeholderTextColor="#A0A0A0"
             value={familyName} onChangeText={setFamilyName} />
         </>
       ) : (
         <>
           <Text style={s.label}>초대 코드</Text>
-          <TextInput style={[s.input, s.codeInput]} placeholder="예: ABC12345" placeholderTextColor="#A0A0A0"
+          <TextInput style={[s.input, s.codeInput]} placeholder="예) ABC12345" placeholderTextColor="#A0A0A0"
             value={inviteCode} onChangeText={setInviteCode} autoCapitalize="characters" />
         </>
       )}
@@ -299,14 +299,14 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
       )}
 
       <Text style={s.label}>기록에 뜰 이름</Text>
-      <TextInput style={s.input} placeholder="예: 지수" placeholderTextColor="#A0A0A0"
+      <TextInput style={s.input} placeholder="예) 지수" placeholderTextColor="#A0A0A0"
         value={display} onChangeText={setDisplay} />
       <Text style={s.hint}>
         가계부나 일기에 "누가 썼는지"로 뜨는 이름이에요. 가족 안에서 겹치지 않게, 짧게 부르는 이름이 좋아요.
       </Text>
 
-      <Text style={s.label}>프로필에 뜰 이름 (선택)</Text>
-      <TextInput style={s.input} placeholder="예: 김지수" placeholderTextColor="#A0A0A0"
+      <Text style={s.label}>프로필에 뜰 이름</Text>
+      <TextInput style={s.input} placeholder="예) 김지수" placeholderTextColor="#A0A0A0"
         value={full} onChangeText={setFull} />
       <Text style={s.hint}>비워두면 위에 적은 이름을 그대로 써요.</Text>
 
@@ -316,7 +316,7 @@ export default function FamilySetup({ adding = false }: { adding?: boolean }) {
         disabled={busy}
         onPress={creating ? handleCreate : handleJoin}>
         <Text style={s.primaryBtnText}>
-          {busy ? '잠시만요...' : creating ? '가족 만들기' : '들어가기'}
+          {busy ? '잠시만요' : creating ? '가족 만들기' : '들어가기'}
         </Text>
       </TouchableOpacity>
     </ScrollView>

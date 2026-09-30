@@ -12,7 +12,7 @@ export default function NotFoundScreen() {
         <View style={styles.iconCircle}>
           <FontAwesome name="map-signs" size={40} color="#4A8C6F" />
         </View>
-        <Text style={styles.title}>페이지를 찾을 수 없어요</Text>
+        <Text style={styles.title}>이 화면은 없어요</Text>
         <Text style={styles.subtitle}>주소가 잘못됐거나{'\n'}없어진 화면이에요.</Text>
 
         <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={() => router.replace('/(tabs)')}>

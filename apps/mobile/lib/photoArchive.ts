@@ -81,10 +81,10 @@ export async function buildPhotoArchive(
   const readme = [
     'familog 사진 묶음',
     `만든 날: ${input.today}`,
-    `사진 ${entries.length}장` + (failed ? ` (못 받은 사진 ${failed}장)` : ''),
+    `사진 ${entries.length}장` + (failed ? `, 받지 못한 사진 ${failed}장` : ''),
     '',
-    '폴더는 기록 종류, 파일 이름은 날짜_제목_번호 순이에요.',
-    '기록 글은 "파일로 담기 (JSON)"로 따로 담아두세요.',
+    '기록 종류마다 폴더를 나눴고, 파일 이름은 날짜와 제목이에요.',
+    '기록 글은 앱의 파일로 담아두기에서 따로 담아두세요.',
   ].join('\n');
   entries.push({ name: '읽어보세요.txt', data: new TextEncoder().encode(readme) });
   return { zip: buildZip(entries), count: entries.length - 1, failed };

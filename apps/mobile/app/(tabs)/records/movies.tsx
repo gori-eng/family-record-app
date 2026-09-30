@@ -196,14 +196,14 @@ export default function MoviesScreen() {
     const rated = movies.filter((m) => m.data.rating > 0);
     const avg = rated.length
       ? (rated.reduce((sum, m) => sum + m.data.rating, 0) / rated.length).toFixed(1)
-      : '–';
+      : '0.0';
     const together = rated.filter((m) => (m.data.watchedWith?.length ?? 0) >= 3).length;
     return { total: rated.length, avg, together, wish: movies.length - rated.length };
   }, [movies]);
 
   const sel = selected?.data ?? null;
   const emptyByFilter: Record<string, [string, string]> = {
-    '보고 싶은': ['보고 싶은 영화가 아직 없어요', '새 기록에서 "아직 안 봤어요"를 고르면 여기 모여요'],
+    '보고 싶은': ['보고 싶은 영화가 아직 없어요', '적을 때 아직 안 봤어요를 고르면 여기 모여요'],
     '최근 관람': ['아직 본 영화가 없어요', '함께 본 영화를 하나 남겨볼까요?'],
     '평점 높은순': ['아직 별점을 매긴 영화가 없어요', '본 영화에 별점을 남기면 순서대로 보여요'],
   };
@@ -249,7 +249,7 @@ export default function MoviesScreen() {
                       </View>
                       {sel.watchedWith?.length ? (
                         <View style={s.modalRow}>
-                          <Text style={s.modalLabel}>함께</Text>
+                          <Text style={s.modalLabel}>함께 본 사람</Text>
                           <Text style={s.modalValue}>{sel.watchedWith.join(', ')}</Text>
                         </View>
                       ) : null}
@@ -269,11 +269,11 @@ export default function MoviesScreen() {
                   )}
                   <View style={s.modalRow}>
                     <Text style={s.modalLabel}>적은 사람</Text>
-                    <Text style={s.modalValue}>{selected.recordedBy}{selected.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
+                    <Text style={s.modalValue}>{selected.recordedBy === CURRENT_USER ? '나' : selected.recordedBy}</Text>
                   </View>
                   {sel.review ? (
                     <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>한줄평</Text>
+                      <Text style={s.modalLabel}>한 줄 감상</Text>
                       <Text style={s.modalValue}>{sel.review}</Text>
                     </View>
                   ) : null}
@@ -314,22 +314,22 @@ export default function MoviesScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              <Text style={s.createLabel}>사진 (선택) — 티켓, 포스터, 함께 본 날</Text>
+              <Text style={s.createLabel}>티켓이나 포스터 사진</Text>
               <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>장르</Text>
               <TextInput
                 style={s.createInput}
-                placeholder="예: 애니메이션, SF, 드라마"
+                placeholder="예) 애니메이션, 드라마"
                 placeholderTextColor="#BFAE99"
                 value={formGenre}
                 onChangeText={setFormGenre}
               />
               {formWatched ? (
                 <>
-                  <Text style={s.createLabel}>본 날 (비우면 오늘)</Text>
+                  <Text style={s.createLabel}>언제 봤나요?</Text>
                   <TextInput
                     style={s.createInput}
-                    placeholder="예: 2026.4.26"
+                    placeholder="비워두면 오늘로 적어요"
                     placeholderTextColor="#BFAE99"
                     value={formDate}
                     onChangeText={setFormDate}
@@ -359,7 +359,7 @@ export default function MoviesScreen() {
                       </TouchableOpacity>
                     ))}
                   </View>
-                  <Text style={s.createLabel}>한줄평</Text>
+                  <Text style={s.createLabel}>한 줄 감상</Text>
                   <TextInput
                     style={[s.createInput, { height: 80, textAlignVertical: 'top' }]}
                     placeholder="어땠나요? 한 줄이면 돼요"
@@ -370,7 +370,7 @@ export default function MoviesScreen() {
                   />
                 </>
               ) : (
-                <Text style={s.authorHint}>'보고 싶어요' 목록에 담아둘게요. 보고 나서 별점을 매기면 본 영화가 돼요.</Text>
+                <Text style={s.authorHint}>보고 싶은 영화로 담아둘게요. 보고 나서 별을 매기면 본 영화로 옮겨가요.</Text>
               )}
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : formWatched ? '저장하기' : '보고 싶은 영화로 담기'}</Text>
@@ -384,7 +384,7 @@ export default function MoviesScreen() {
           <View style={s.statsRow}>
             <View style={s.stat}><Text style={s.statNum}>{stats.total}</Text><Text style={s.statLabel}>본 영화</Text></View>
             <View style={s.stat}><Text style={s.statNum}>{stats.avg}</Text><Text style={s.statLabel}>평균 별점</Text></View>
-            <View style={s.stat}><Text style={s.statNum}>{stats.wish}</Text><Text style={s.statLabel}>보고 싶은</Text></View>
+            <View style={s.stat}><Text style={s.statNum}>{stats.wish}</Text><Text style={s.statLabel}>보고 싶은 영화</Text></View>
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filterRow}>
@@ -408,7 +408,7 @@ export default function MoviesScreen() {
                   <Text style={s.title}>{m.title}</Text>
                   {/* 안 적은 항목은 빈 줄을 남기지 않는다 */}
                   {(m.genre || m.date) ? (
-                    <Text style={s.genre}>{[m.genre, showDate(m.date)].filter(Boolean).join(' · ')}</Text>
+                    <Text style={s.genre}>{[m.genre, m.date ? `${showDate(m.date)}에 봤어요` : ''].filter(Boolean).join(', ')}</Text>
                   ) : null}
                   <View style={s.meta}>
                     {m.rating > 0 ? (

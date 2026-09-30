@@ -24,8 +24,8 @@ export default function NotificationsScreen() {
           <Text style={s.title}>휴대폰 알림은 아직 준비 중이에요</Text>
           <Text style={s.desc}>
             휴대폰으로 알림을 보내려면 앱을 휴대폰에 설치할 수 있어야 해요.{'\n'}
-            그전까지는 홈 위쪽 종(🔔)을 눌러보세요. 가족이 새로 남긴 기록과{'\n'}
-            오늘·내일 일정이 모여 있어요.
+            그전까지는 홈 위쪽의 종 모양을 눌러보세요. 가족이 새로 남긴 기록과{'\n'}
+            오늘과 내일 일정이 모여 있어요.
           </Text>
         </View>
       </ScrollView>

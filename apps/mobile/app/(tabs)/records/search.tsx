@@ -126,7 +126,7 @@ export default function SearchScreen() {
           value={query}
           onChangeText={(v) => { setQuery(v); setFilter('all'); }}
           onSubmitEditing={() => remember(query)}
-          placeholder="이름, 가게, 책 제목, 메모 속 한 낱말도"
+          placeholder="이름이나 가게, 메모 속 한 낱말로"
           placeholderTextColor="#A0A0A0"
           autoFocus
           returnKeyType="search"
@@ -160,10 +160,10 @@ export default function SearchScreen() {
           )}
           <View style={s.block}>
             <Text style={s.blockTitle}>이렇게 찾아보세요</Text>
-            <Text style={s.tip}>· 사람 이름으로 — 그 사람이 쓰거나 함께한 기록</Text>
-            <Text style={s.tip}>· 가게·장소 이름으로 — 가계부 내역, 여행지, 일정 장소</Text>
-            <Text style={s.tip}>· 메모 속 한 낱말로 — 재료, 책 한 구절, 검진 결과</Text>
-            <Text style={s.tip}>· 낱말 두 개를 띄어 쓰면 둘 다 들어간 것만 — 예) 이마트 예은</Text>
+            <Text style={s.tip}>가족 이름을 넣으면 그 사람이 쓰거나 함께한 기록이 나와요.</Text>
+            <Text style={s.tip}>가게나 장소 이름으로도 찾아요. 가계부, 여행, 일정까지요.</Text>
+            <Text style={s.tip}>메모 속 한 낱말도 괜찮아요. 재료나 책 한 구절처럼요.</Text>
+            <Text style={s.tip}>두 낱말을 띄어 쓰면 둘 다 들어간 것만 보여줘요. 예) 이마트 예은</Text>
           </View>
         </ScrollView>
       ) : tooShort ? (
@@ -197,8 +197,8 @@ export default function SearchScreen() {
               const isEvent = h.kind === 'event';
               const ui = isEvent ? null : CATEGORY_UI[h.category as RecordCategory];
               const meta = isEvent
-                ? `일정 · ${formatEventDate(h.date)} ${formatTime(h.time)}`
-                : `${CATEGORY_LABELS[h.category as RecordCategory] ?? ''} · ${h.who} · ${whenOf(h.when)}`;
+                ? `${formatEventDate(h.date)} ${formatTime(h.time)} 일정`
+                : `${h.who}${iga(h.who)} ${whenOf(h.when)}에 남긴 ${CATEGORY_LABELS[h.category as RecordCategory] ?? '기록'}`;
               return (
                 <TouchableOpacity key={`${h.kind}-${h.id}`} style={s.row} activeOpacity={0.7} onPress={() => openHit(h)}>
                   <View style={[s.icon, ui ? { backgroundColor: ui.bg } : s.eventIcon]}>

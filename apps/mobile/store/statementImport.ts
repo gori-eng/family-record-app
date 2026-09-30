@@ -321,7 +321,7 @@ export function toTransaction(c: ImportCandidate, sourceFile: string): Transacti
     desc: c.merchant,
     date: c.date,
     method: c.months > 1 ? `카드 ${c.months}개월 할부` : '카드',
-    memo: c.months > 1 ? `${c.months}개월 할부 · 총 ${c.amount.toLocaleString('ko-KR')}원` : '',
+    memo: c.months > 1 ? `${c.months}개월 할부, 모두 ${c.amount.toLocaleString('ko-KR')}원` : '',
     ownerMember: c.ownerMember,
     source: 'csv',
     importKey: c.importKey,
@@ -358,7 +358,7 @@ export function toInstallments(c: ImportCandidate, sourceFile: string): Transact
       desc: `${c.merchant} (${i + 1}/${n})`,
       date,
       method: `카드 ${n}개월 할부`,
-      memo: `${n}개월 할부 ${i + 1}회차 · 총 ${c.amount.toLocaleString('ko-KR')}원`,
+      memo: `${n}개월 할부 중 ${i + 1}번째, 모두 ${c.amount.toLocaleString('ko-KR')}원`,
       ownerMember: c.ownerMember,
       source: 'csv' as const,
       // 회차마다 다른 지문이어야 중복 판정이 제대로 된다

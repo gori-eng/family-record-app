@@ -37,7 +37,7 @@ export async function printBook(html: string, fileName: string): Promise<PrintRe
       await Sharing.shareAsync(dest.uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf', dialogTitle: '기록책을 어디에 둘까요?' });
       return { ok: true };
     } catch (e: unknown) {
-      return { ok: false, reason: `기록책을 만들지 못했어요. (${String((e as Error)?.message ?? e)})` };
+      return { ok: false, reason: `기록책을 만들지 못했어요.\n${String((e as Error)?.message ?? e)}` };
     }
   }
 
@@ -60,6 +60,6 @@ export async function printBook(html: string, fileName: string): Promise<PrintRe
     win.print();
     return { ok: true };
   } catch (e: unknown) {
-    return { ok: false, reason: `기록책을 만들지 못했어요. (${String((e as Error)?.message ?? e)})` };
+    return { ok: false, reason: `기록책을 만들지 못했어요.\n${String((e as Error)?.message ?? e)}` };
   }
 }

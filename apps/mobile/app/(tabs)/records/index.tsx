@@ -33,16 +33,16 @@ export default function RecordsScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>소중한 순간들</Text>
+        <Text style={styles.title}>우리 가족 기록장</Text>
         <Text style={styles.subtitle}>
-          가족만의 특별한 이야기와 기록 · 총 {totalRecords}개
+          {totalRecords ? `지금까지 ${totalRecords}개를 함께 남겼어요` : '아직 비어 있어요. 하나씩 채워가요'}
         </Text>
 
         {/* 통합 검색 입구 — 눌러서 검색 화면으로 (여기서 바로 치게 하면 결과를 보여줄 자리가 없다) */}
         <TouchableOpacity style={styles.searchEntry} activeOpacity={0.7} onPress={() => router.push('/(tabs)/records/search' as any)}
           accessibilityLabel="기록 찾기">
           <FontAwesome name="search" size={14} color="#888888" />
-          <Text style={styles.searchEntryText}>모든 기록에서 찾기</Text>
+          <Text style={styles.searchEntryText}>기억나는 낱말로 찾아보기</Text>
         </TouchableOpacity>
 
         <View style={styles.grid}>

@@ -1,3 +1,4 @@
+import { iga } from '../../../lib/korean';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput } from 'react-native';
 import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
@@ -126,11 +127,11 @@ export default function TimeCapsuleScreen() {
     }
     const targetISO = parseLooseDate(formTarget);
     if (!targetISO) {
-      showAlert('개봉일을 한 번 봐주세요', '2036.5.15처럼 적어주세요. 그날이 되면 저절로 열려요.');
+      showAlert('여는 날을 한 번 봐주세요', '2036.5.15처럼 적어주세요. 그날이 되면 저절로 열려요.');
       return;
     }
     if (targetISO <= todayISO()) {
-      showAlert('개봉일이 오늘이거나 지난 날이에요', '봉인해 두려면 내일 이후 날짜로 적어주세요.');
+      showAlert('여는 날이 너무 가까워요', '봉인하려면 내일 이후 날짜로 적어주세요.');
       return;
     }
     const existing = editingId ? capsules.find((c) => c.id === editingId) : null;
@@ -216,19 +217,19 @@ export default function TimeCapsuleScreen() {
                   <View style={s.modalContent}>
                     <Text style={s.modalTitle}>{sel.title}</Text>
                     <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>유형</Text>
+                      <Text style={s.modalLabel}>어떤 날</Text>
                       <Text style={s.modalValue}>{sel.type}</Text>
                     </View>
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>쓴 사람</Text>
-                      <Text style={s.modalValue}>{sel.author}{sel.author === CURRENT_USER ? ' (나)' : ''}</Text>
+                      <Text style={s.modalValue}>{sel.author === CURRENT_USER ? '나' : sel.author}</Text>
                     </View>
                     <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>봉인일</Text>
+                      <Text style={s.modalLabel}>봉인한 날</Text>
                       <Text style={s.modalValue}>{sel.sealed}</Text>
                     </View>
                     <View style={s.modalRow}>
-                      <Text style={s.modalLabel}>개봉일</Text>
+                      <Text style={s.modalLabel}>열리는 날</Text>
                       <Text style={s.modalValue}>{sel.targetISO ? formatKoreanDate(sel.targetISO) : sel.target}</Text>
                     </View>
                     <View style={s.modalRow}>
@@ -244,7 +245,7 @@ export default function TimeCapsuleScreen() {
                     {selOpen ? (
                       <View style={s.letter}>
                         <FontAwesome name="envelope-open-o" size={14} color="#7A6B55" />
-                        <Text style={s.letterText}>{sel.message || '(편지 내용이 비어 있어요)'}</Text>
+                        <Text style={s.letterText}>{sel.message || '편지가 비어 있어요'}</Text>
                         {/* 사진도 편지처럼 열린 뒤에만 보인다 */}
                         <PhotoGallery photos={photosOf(sel)} />
                       </View>
@@ -256,7 +257,7 @@ export default function TimeCapsuleScreen() {
                         </Text>
                         {sel.author === CURRENT_USER && (
                           <TouchableOpacity activeOpacity={0.7} onPress={() => openEarly(selected)}>
-                            <Text style={s.sealedAction}>내가 쓴 편지예요 · 미리 열어보기</Text>
+                            <Text style={s.sealedAction}>내가 쓴 편지라 미리 열어볼 수 있어요</Text>
                           </TouchableOpacity>
                         )}
                       </View>
@@ -290,13 +291,13 @@ export default function TimeCapsuleScreen() {
               <Text style={s.createLabel}>편지</Text>
               <TextInput style={[s.createInput, { height: 140, textAlignVertical: 'top' }]} placeholder="몇 년 뒤의 우리에게 하고 싶은 말" placeholderTextColor="#BFAE99" multiline numberOfLines={5}
                 value={formMessage} onChangeText={setFormMessage} />
-              <Text style={s.createLabel}>사진 (선택) — 편지와 함께 잠들어요</Text>
+              <Text style={s.createLabel}>편지와 함께 넣을 사진</Text>
               <PhotoPickerRow draft={photoDraft} />
-              <Text style={s.createLabel}>개봉일 — 이날이 되면 저절로 열려요</Text>
-              <TextInput style={s.createInput} placeholder="예: 2036.5.15" placeholderTextColor="#BFAE99"
+              <Text style={s.createLabel}>언제 열어볼까요?</Text>
+              <TextInput style={s.createInput} placeholder="예) 2036.5.15" placeholderTextColor="#BFAE99"
                 value={formTarget} onChangeText={setFormTarget} />
-              <Text style={s.createLabel}>어떤 날인가요 (선택)</Text>
-              <TextInput style={s.createInput} placeholder="예: 성인식, 생일, 결혼기념일" placeholderTextColor="#BFAE99"
+              <Text style={s.createLabel}>어떤 날인가요?</Text>
+              <TextInput style={s.createInput} placeholder="예) 첫째 성인식" placeholderTextColor="#BFAE99"
                 value={formType} onChangeText={setFormType} />
               <TouchableOpacity style={s.createSubmit} activeOpacity={0.7} onPress={handleSave}>
                 <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '봉인하기'}</Text>
@@ -312,8 +313,8 @@ export default function TimeCapsuleScreen() {
             <View style={s.introContent}>
               <Text style={s.introTitle}>몇 년 뒤의 가족에게 편지를 남겨요</Text>
               <Text style={s.introDesc}>
-                개봉일이 되면 저절로 열려요. 그 전엔 쓴 사람만 미리 열어볼 수 있어요.
-                {capsules.length ? ` · 봉인 ${capsules.length - openedCount} · 열림 ${openedCount}` : ''}
+                정한 날이 되면 저절로 열려요. 그 전엔 쓴 사람만 미리 열어볼 수 있어요.
+                {capsules.length ? `\n지금 ${capsules.length - openedCount}개가 잠들어 있고, ${openedCount}개가 열렸어요.` : ''}
               </Text>
             </View>
           </View>
@@ -330,7 +331,7 @@ export default function TimeCapsuleScreen() {
                 </View>
                 <View style={s.info}>
                   <Text style={s.capsuleTitle}>{c.title}</Text>
-                  <Text style={s.capsuleType}>{c.type} · {c.author}</Text>
+                  <Text style={s.capsuleType}>{c.author}{iga(c.author)} 남긴 {c.type} 편지</Text>
                   <View style={s.dateRow}>
                     <FontAwesome name={open ? 'unlock' : 'lock'} size={11} color={open ? '#4AA86B' : '#4A8C6F'} />
                     <Text style={[s.dateText, { color: open ? '#4AA86B' : '#4A8C6F' }]}>{whenLabel(c)}</Text>

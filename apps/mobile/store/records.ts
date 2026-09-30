@@ -172,7 +172,7 @@ export const useRecordsStore = create<RecordsState>((set, get) => ({
   addRecord: (input) => {
     // 쓴 사람이 비면 누가 쓴 기록인지 영영 모른다 — 가족 정보를 아직 못 불러온 순간이다 (점검 M3)
     if (get().familyId && !input.recordedBy.trim()) {
-      showAlert('잠깐만요', '가족 정보를 불러오는 중이에요. 조금 뒤에 다시 저장해주세요.');
+      showAlert('잠깐만요', '가족 정보를 불러오고 있어요. 조금 뒤에 다시 저장해주세요.');
       return { id: '', category: input.category, title: input.title, createdAt: Date.now(), recordedBy: '', data: input.data };
     }
     const record: FamilyRecord = {

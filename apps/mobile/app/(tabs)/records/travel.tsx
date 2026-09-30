@@ -40,10 +40,10 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   '가고 싶은': { bg: '#F3E5F5', text: '#7B1FA2' },
 };
 
-/** 함께 간 사람을 한 줄로 — 안 고르면 '가족 전체' */
+/** 함께 간 사람을 한 줄로 — 안 고르면 '가족 모두' */
 const membersLabel = (m: string[] | string | undefined) => {
-  if (Array.isArray(m)) return m.length ? m.join(', ') : '가족 전체';
-  return m && m !== '전체' ? m : '가족 전체';
+  if (Array.isArray(m)) return m.length ? m.join(', ') : '가족 모두';
+  return m && m !== '전체' ? m : '가족 모두';
 };
 
 export default function TravelScreen() {
@@ -215,11 +215,11 @@ export default function TravelScreen() {
                     ) : null}
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>적은 사람</Text>
-                      <Text style={s.modalValue}>{selectedItem.recordedBy}{selectedItem.recordedBy === CURRENT_USER ? ' (나)' : ''}</Text>
+                      <Text style={s.modalValue}>{selectedItem.recordedBy === CURRENT_USER ? '나' : selectedItem.recordedBy}</Text>
                     </View>
                     {selectedItem.highlight ? (
                       <View style={s.modalRow}>
-                        <Text style={s.modalLabel}>한 줄로</Text>
+                        <Text style={s.modalLabel}>한 줄 소감</Text>
                         <Text style={s.modalValue}>{selectedItem.highlight}</Text>
                       </View>
                     ) : null}
@@ -258,12 +258,12 @@ export default function TravelScreen() {
               <Text style={s.createLabel}>어디로</Text>
               <TextInput
                 style={s.createInput}
-                placeholder="예: 제주도, 오사카"
+                placeholder="예) 제주도"
                 placeholderTextColor="#BFAE99"
                 value={formDest}
                 onChangeText={setFormDest}
               />
-              <Text style={s.createLabel}>상태</Text>
+              <Text style={s.createLabel}>어떤 여행인가요?</Text>
               <View style={s.statusPicker}>
                 {['다녀옴', '계획 중', '가고 싶은'].map((st) => (
                   <TouchableOpacity
@@ -278,12 +278,12 @@ export default function TravelScreen() {
               <Text style={s.createLabel}>언제</Text>
               <TextInput
                 style={s.createInput}
-                placeholder="예: 2026.7.10 ~ 7.13"
+                placeholder="예) 2026.7.10 ~ 7.13"
                 placeholderTextColor="#BFAE99"
                 value={formDate}
                 onChangeText={setFormDate}
               />
-              <Text style={s.createLabel}>누구랑 (안 고르면 가족 전체)</Text>
+              <Text style={s.createLabel}>누구랑 갔나요?</Text>
               <View style={s.memberRow}>
                 {MEMBERS.map((m) => {
                   const on = formMembers.includes(m);
@@ -294,7 +294,7 @@ export default function TravelScreen() {
                   );
                 })}
               </View>
-              <Text style={s.createLabel}>사진 (선택)</Text>
+              <Text style={s.createLabel}>사진</Text>
               <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>한 줄 소감</Text>
               <TextInput
@@ -307,7 +307,7 @@ export default function TravelScreen() {
               <Text style={s.createLabel}>여행 일지</Text>
               <TextInput
                 style={[s.createInput, { height: 160, textAlignVertical: 'top' }]}
-                placeholder={'다녀온 코스, 인상 깊었던 순간, 다음에 갈 때 챙길 점을 자유롭게'}
+                placeholder={'어디를 들렀는지, 뭐가 좋았는지 편하게 적어두세요'}
                 placeholderTextColor="#BFAE99"
                 multiline
                 value={formJournal}
@@ -358,7 +358,7 @@ export default function TravelScreen() {
                   </View>
                   {/* 안 적은 항목은 빈 줄을 남기지 않고 아예 숨긴다 */}
                   {(t.country || t.date) ? (
-                    <Text style={s.country}>{[t.country, t.date].filter(Boolean).join(' · ')}</Text>
+                    <Text style={s.country}>{[t.country, t.date].filter(Boolean).join(', ')}</Text>
                   ) : null}
                   {t.highlight ? (
                     <Text style={s.highlight} numberOfLines={1}>{t.highlight}</Text>

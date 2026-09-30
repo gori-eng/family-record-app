@@ -16,10 +16,10 @@ import { Stack } from 'expo-router';
 
 const PROTECTED = [
   { icon: 'home', title: '우리 가족 기록은 우리 가족만 봐요', desc: '다른 가족은 우리 기록을 볼 수도, 고칠 수도 없어요.' },
-  { icon: 'trash-o', title: '지우기는 쓴 사람과 관리자만', desc: '아이가 실수로 부모의 기록을 지우는 일이 없어요.' },
+  { icon: 'trash-o', title: '지우기는 쓴 사람과 관리자만 해요', desc: '아이가 실수로 부모의 기록을 지우는 일이 없어요.' },
   { icon: 'user-secret', title: '역할은 스스로 바꿀 수 없어요', desc: '관리자는 가족을 만든 사람뿐이에요.' },
   { icon: 'key', title: '초대 코드가 있어야 들어와요', desc: '코드를 모르면 우리 가족에 들어올 수 없어요.' },
-  { icon: 'child', title: '가계부·건강 기록은 어른만 봐요', desc: '자녀 역할인 가족에게는 이 두 가지가 보이지 않아요.' },
+  { icon: 'child', title: '가계부와 건강 기록은 어른만 봐요', desc: '자녀 역할인 가족에게는 이 두 가지가 보이지 않아요.' },
 ];
 
 const NOT_YET = [
@@ -58,7 +58,7 @@ export default function PrivacyScreen() {
         ))}
         <Text style={s.note}>
           역할은 가족에 들어올 때 스스로 골라요. 아이가 '부모'를 골랐다면 관리자가
-          설정 › 가족 구성원에서 '자녀'로 바로잡아 주세요.
+          설정의 가족 구성원에서 '자녀'로 바로잡아 주세요.
         </Text>
       </ScrollView>
     </>

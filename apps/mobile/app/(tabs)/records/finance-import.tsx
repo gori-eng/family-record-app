@@ -4,7 +4,7 @@
  * 흐름: 파일 선택 → (필요하면 열 맞추기) → 카드별 사용자 지정 → 미리보기 → 확인 후 저장
  * 파싱·중복판정은 store/statementImport.ts, 기억해둘 설정은 store/financeSettings.ts에 있다.
  */
-import { ro } from '../../../lib/korean';
+import { ro, iga } from '../../../lib/korean';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Platform, Modal, Pressable,
@@ -185,7 +185,7 @@ function FinanceImportScreen() {
       headerSignature: sig,
     });
     setShowMapper(false);
-    showAlert('열 맞추기를 저장했어요', '다음에 같은 모양의 파일을 넣으면 자동으로 맞춰져요.');
+    showAlert('칸을 기억해뒀어요', '다음에 같은 모양의 파일을 넣으면 알아서 맞출게요.');
   };
 
   /** 카테고리 교정 — 고친 결과를 기억해 다음 가져오기 때 바로 적용한다. */
@@ -236,7 +236,7 @@ function FinanceImportScreen() {
     }
     showAlert(
       `${count}건을 가져왔어요`,
-      `${comma(willAdd.reduce((s, c) => s + c.amount, 0))}원이 가계부에 추가됐어요.`,
+      `${comma(willAdd.reduce((s, c) => s + c.amount, 0))}원을 가계부에 넣었어요.`,
       [{ text: '가계부로 가기', onPress: () => router.replace('/(tabs)/records/finance' as any) }]
     );
     setCandidates(null);
@@ -254,17 +254,24 @@ function FinanceImportScreen() {
             <View style={s.introIcon}>
               <FontAwesome name="file-excel-o" size={28} color="#4A8C6F" />
             </View>
-            <Text style={s.introTitle}>카드 명세서를 불러오세요</Text>
+            <Text style={s.introTitle}>카드 명세서를 넣어주세요</Text>
             <Text style={s.introDesc}>
-              카드사 홈페이지에서 내려받은 이용내역 파일(.xlsx / .csv)을 고르면{'\n'}
-              거래를 하나씩 읽어 가계부에 넣어드려요.
+              카드사 홈페이지에서 받은 이용내역 엑셀 파일을 고르면{'\n'}
+              거래를 하나씩 읽어서 가계부에 넣을게요.
             </Text>
             <View style={s.noteBox}>
-              <Text style={s.noteTitle}>이렇게 처리해요</Text>
-              <Text style={s.noteLine}>· 취소된 거래는 자동으로 빼요</Text>
-              <Text style={s.noteLine}>· 이미 들어있는 거래는 건너뛰어요 (여러 번 넣어도 안전)</Text>
-              <Text style={s.noteLine}>· 카드가 여러 장이면 카드별로 쓴 사람을 지정할 수 있어요</Text>
-              <Text style={s.noteLine}>· 넣기 전에 미리보기로 확인할 수 있어요</Text>
+              <Text style={s.noteTitle}>이렇게 넣어요</Text>
+              {[
+                '취소된 거래는 알아서 빼요',
+                '이미 넣은 거래는 건너뛰니까 여러 번 넣어도 괜찮아요',
+                '카드가 여러 장이면 카드마다 누가 썼는지 고를 수 있어요',
+                '넣기 전에 먼저 보여줄게요',
+              ].map((line) => (
+                <View key={line} style={s.noteRow}>
+                  <FontAwesome name="check" size={10} color="#4A8C6F" />
+                  <Text style={s.noteLine}>{line}</Text>
+                </View>
+              ))}
             </View>
 
             {/* 기억해둔 설정 */}
@@ -274,21 +281,21 @@ function FinanceImportScreen() {
               <View style={s.memoryBox}>
                 <Text style={s.memoryTitle}>기억하고 있어요</Text>
                 {Object.entries(settings.cardOwners).map(([k, v]) => (
-                  <Text key={k} style={s.memoryLine}>· 카드 ···{k} → {v}</Text>
+                  <Text key={k} style={s.memoryLine}>끝자리 {k} 카드는 {v}{iga(v)} 써요</Text>
                 ))}
                 {settings.savedProfiles.map((p) => (
-                  <Text key={p.id} style={s.memoryLine}>· 열 맞추기: {p.label}</Text>
+                  <Text key={p.id} style={s.memoryLine}>{p.label} 파일의 칸 모양</Text>
                 ))}
                 {Object.keys(settings.categoryOverrides).length > 0 && (
                   <Text style={s.memoryLine}>
-                    · 카테고리 교정 {Object.keys(settings.categoryOverrides).length}건
+                    고쳐둔 가게 항목 {Object.keys(settings.categoryOverrides).length}곳
                   </Text>
                 )}
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() =>
-                    showAlert('기억한 설정을 지울까요?', '카드 지정·열 맞추기·카테고리 교정이 모두 지워져요.', [
-                      { text: '취소', style: 'cancel' },
+                    showAlert('기억해둔 걸 모두 지울까요?', '카드 주인, 파일의 칸 모양, 고쳐둔 가게 항목을 모두 잊어요.', [
+                      { text: '그냥 둘게요', style: 'cancel' },
                       { text: '지우기', style: 'destructive', onPress: () => settings.resetAll() },
                     ])
                   }>
@@ -311,7 +318,7 @@ function FinanceImportScreen() {
               </Text>
             )}
             <Text style={s.tested}>
-              신한카드 명세서로 검증했어요. 다른 카드사는 열을 한 번 맞춰주면 그 뒤로 자동이에요.
+              신한카드 명세서로 확인했어요. 다른 카드사는 처음 한 번만 칸을 맞춰주세요.
             </Text>
           </View>
         )}
@@ -323,7 +330,7 @@ function FinanceImportScreen() {
               <FontAwesome name="file-excel-o" size={14} color="#4A8C6F" />
               <Text style={s.fileName} numberOfLines={1}>{fileName}</Text>
               <TouchableOpacity activeOpacity={0.7} onPress={() => setShowMapper(true)}>
-                <Text style={s.changeFile}>열 맞추기</Text>
+                <Text style={s.changeFile}>칸 맞추기</Text>
               </TouchableOpacity>
               <TouchableOpacity activeOpacity={0.7} onPress={() => { setCandidates(null); setRawRows([]); }}>
                 <Text style={s.changeFile}>다른 파일</Text>
@@ -334,13 +341,13 @@ function FinanceImportScreen() {
             <View style={s.card}>
               <Text style={s.cardTitle}>카드마다 누가 썼는지 골라주세요</Text>
               <Text style={s.cardDesc}>
-                파일에 카드 {cards.length}장이 들어 있어요. 한 번 지정하면 다음부터 자동으로 붙어요.
+                파일에 카드 {cards.length}장이 들어 있어요. 한 번 골라두면 다음부턴 알아서 붙일게요.
               </Text>
               {cards.map((c) => (
                 <View key={c.key} style={s.cardRow}>
                   <View style={s.cardTag}>
                     <FontAwesome name="credit-card" size={11} color="#4A8C6F" />
-                    <Text style={s.cardTagText}>···{c.key}</Text>
+                    <Text style={s.cardTagText}>끝자리 {c.key}</Text>
                     <Text style={s.cardCount}>{c.count}건</Text>
                   </View>
                   <View style={s.ownerPicks}>
@@ -360,7 +367,7 @@ function FinanceImportScreen() {
               ))}
               {unassigned.length > 0 && (
                 <Text style={s.warn}>
-                  아직 {unassigned.length}장이 지정되지 않았어요. 지정하지 않으면 '{CURRENT_USER}'{ro(CURRENT_USER)} 들어가요.
+                  아직 {unassigned.length}장을 안 골랐어요. 안 고르면 '{CURRENT_USER}'{ro(CURRENT_USER)} 들어가요.
                 </Text>
               )}
             </View>
@@ -371,7 +378,7 @@ function FinanceImportScreen() {
                 <Text style={s.cardTitle}>할부는 어떻게 적을까요?</Text>
                 <Text style={s.cardDesc}>
                   정답이 없어요. 명세서와 숫자를 맞추려면 '결제한 달에 전액',{'\n'}
-                  통장에서 빠지는 돈에 맞추려면 '매달 나눠서'를 고르세요.
+                  통장에서 빠지는 돈에 맞추려면 '매달 나눠서'를 골라주세요.
                 </Text>
                 <View style={s.policyRow}>
                   {([['결제한 달에 전액', 'full'], ['매달 나눠서', 'split']] as const).map(([label, val]) => (
@@ -391,12 +398,12 @@ function FinanceImportScreen() {
 
             {/* 요약 */}
             <View style={s.card}>
-              <Text style={s.cardTitle}>이렇게 들어갑니다</Text>
+              <Text style={s.cardTitle}>이렇게 들어가요</Text>
               <View style={s.sumRow}>
-                <SumChip label="추가" value={willAdd.length} tone="add" />
-                {sum.dup > 0 && <SumChip label="이미 있음" value={sum.dup} tone="mute" />}
-                {sum.similar > 0 && <SumChip label="확인 필요" value={sum.similar} tone="warn" />}
-                {sum.cancelled > 0 && <SumChip label="취소 건" value={sum.cancelled} tone="mute" />}
+                <SumChip label="새로 넣을 거래" value={willAdd.length} tone="add" />
+                {sum.dup > 0 && <SumChip label="이미 있어요" value={sum.dup} tone="mute" />}
+                {sum.similar > 0 && <SumChip label="한 번 봐주세요" value={sum.similar} tone="warn" />}
+                {sum.cancelled > 0 && <SumChip label="취소된 거래" value={sum.cancelled} tone="mute" />}
               </View>
               <View style={s.totalRow}>
                 <Text style={s.totalLabel}>가져올 금액</Text>
@@ -404,7 +411,7 @@ function FinanceImportScreen() {
               </View>
             </View>
 
-            <Text style={s.sectionTitle}>미리보기 — 카테고리를 눌러 고칠 수 있어요</Text>
+            <Text style={s.sectionTitle}>미리 보기. 항목을 누르면 고칠 수 있어요</Text>
             {candidates.map((c) => {
               const forced = forceAdd.has(c.line);
               const will = !c.skip && (!c.duplicate || forced);
@@ -422,17 +429,16 @@ function FinanceImportScreen() {
                     <Text style={[s.rowDesc, !will && s.rowTextOff]} numberOfLines={1}>{c.merchant}</Text>
                     <TouchableOpacity activeOpacity={0.7} disabled={!!c.skip} onPress={() => setEditingLine(c.line)}>
                       <Text style={s.rowMeta}>
-                        {c.date ? formatDay(c.date) : '날짜 없음'} · <Text style={s.rowCat}>{c.category}</Text> · {c.ownerMember}
-                        {c.cardKey ? ` · ···${c.cardKey}` : ''}
-                        {c.months > 1 ? ` · ${c.months}개월 할부` : ''}
+                        {c.date ? formatDay(c.date) : '날짜를 못 읽었어요'}, {c.ownerMember}{iga(c.ownerMember)} 쓴 <Text style={s.rowCat}>{c.category}</Text>
+                        {c.months > 1 ? `, ${c.months}개월 할부` : ''}
                       </Text>
                     </TouchableOpacity>
                     {c.skip && <Text style={s.reasonSkip}>{skipLabel(c.skip)}</Text>}
                     {!c.skip && c.duplicate && (
                       <TouchableOpacity activeOpacity={0.7} onPress={() => toggleForce(c.line)}>
                         <Text style={[s.reasonDup, forced && s.reasonForced]}>
-                          {c.duplicate.reason === '같은거래' ? '이미 가계부에 있어요' : '손으로 적은 비슷한 거래가 있어요'}
-                          {' · '}<Text style={s.reasonAction}>{forced ? '넣지 않기' : '그래도 넣기'}</Text>
+                          {c.duplicate.reason === '같은거래' ? '이미 가계부에 있어요. ' : '손으로 적은 비슷한 거래가 있어요. '}
+                          <Text style={s.reasonAction}>{forced ? '넣지 않기' : '그래도 넣기'}</Text>
                         </Text>
                       </TouchableOpacity>
                     )}
@@ -454,9 +460,9 @@ function FinanceImportScreen() {
         <View style={s.modalWrap}>
           <Pressable style={s.modalBg} onPress={() => setShowMapper(false)} />
           <View style={s.modalSheet}>
-            <Text style={s.modalTitle}>열 맞추기</Text>
+            <Text style={s.modalTitle}>칸 맞추기</Text>
             <Text style={s.modalDesc}>
-              이 파일의 어느 열이 무엇인지 알려주세요. 한 번만 하면 다음부터 자동이에요.
+              파일의 어느 칸이 무엇인지 알려주세요. 한 번만 하면 다음부턴 알아서 맞출게요.
             </Text>
             <ScrollView style={{ maxHeight: 340 }} showsVerticalScrollIndicator={false}>
               {COLUMN_FIELDS.map((f) => {
@@ -471,18 +477,18 @@ function FinanceImportScreen() {
                       activeOpacity={0.7}
                       onPress={() => setMappingField(mappingField === f.key ? null : f.key)}>
                       <Text style={[s.mapPickText, !cur && s.mapPickTextEmpty]}>
-                        {cur ?? '자동 / 선택 안 함'}
+                        {cur ?? '알아서 찾기'}
                       </Text>
                       <FontAwesome name="caret-down" size={12} color="#888888" />
                     </TouchableOpacity>
                     {mappingField === f.key && (
                       <View style={s.mapOptions}>
                         <TouchableOpacity style={s.mapOption} activeOpacity={0.7} onPress={() => setColumn(f.key, null)}>
-                          <Text style={s.mapOptionText}>자동 / 선택 안 함</Text>
+                          <Text style={s.mapOptionText}>알아서 찾기</Text>
                         </TouchableOpacity>
                         {headers.map((h) => (
                           <TouchableOpacity key={h} style={s.mapOption} activeOpacity={0.7} onPress={() => setColumn(f.key, h)}>
-                            <Text style={s.mapOptionText}>{h || '(이름 없는 열)'}</Text>
+                            <Text style={s.mapOptionText}>{h || '이름 없는 칸'}</Text>
                           </TouchableOpacity>
                         ))}
                       </View>
@@ -510,7 +516,7 @@ function FinanceImportScreen() {
           <View style={s.modalSheet}>
             <Text style={s.modalTitle} numberOfLines={1}>{editingRow?.merchant}</Text>
             <Text style={s.modalDesc}>
-              카테고리를 고르면 이 가게는 다음에도 같은 카테고리로 들어가요.
+              항목을 고르면 이 가게는 다음에도 그 항목으로 들어가요.
             </Text>
             <View style={s.catGrid}>
               {EXPENSE_CATEGORIES.map((cat) => (
@@ -580,6 +586,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: '#EAEAEA', marginTop: 22, gap: 6,
   },
   noteTitle: { fontSize: 13, color: '#2D5A3F', fontFamily: 'PretendardBold', marginBottom: 2 },
+  noteRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   noteLine: { fontSize: 13, color: '#4A4A4A', fontFamily: 'Pretendard', lineHeight: 20 },
   memoryBox: {
     alignSelf: 'stretch', backgroundColor: '#EFF6F1', borderRadius: 14, padding: 16,

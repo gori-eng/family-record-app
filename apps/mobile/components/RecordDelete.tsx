@@ -45,7 +45,7 @@ export function useRecordDelete(what = '기록') {
     if (!record) return;
     const name = record.title || what;
 
-    showAlert(`이 ${what} 지울까요?`, `'${name}'${eulreul(name)} 지웁니다. 바로 되돌릴 수 있어요.`, [
+    showAlert(`이 ${what} 지울까요?`, `'${name}'${eulreul(name)} 지울게요. 바로 되돌릴 수 있어요.`, [
       { text: '그냥 둘게요', style: 'cancel' },
       {
         text: '지우기',

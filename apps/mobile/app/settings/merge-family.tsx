@@ -68,7 +68,7 @@ export default function MergeFamilyScreen() {
         recs.length ? `기록 ${recs.length}개` : '',
         evs.length ? `일정 ${evs.length}개` : '',
         `구성원 ${mems.length}명`,
-      ].filter(Boolean).join(' · ');
+      ].filter(Boolean).join(', ');
       showAlert(
         `${source.name}${eulreul(source.name)} ${target.name}에 합칠까요?`,
         `${source.name}의 ${what}${iga(what)} ${target.name}${ro(target.name)} 들어오고, ${source.name}${euneun(source.name)} 사라져요.${renameNote}\n\n되돌릴 수 없어요. 먼저 파일로 담아두는 게 안전해요.`,
@@ -110,7 +110,7 @@ export default function MergeFamilyScreen() {
         r.movedRecords ? `기록 ${r.movedRecords}개` : '',
         r.movedEvents ? `일정 ${r.movedEvents}개` : '',
         r.movedMembers ? `새 구성원 ${r.movedMembers}명` : '',
-      ].filter(Boolean).join(' · ');
+      ].filter(Boolean).join(', ');
       showAlert(
         `${target.name} 하나가 됐어요`,
         (parts ? `${parts}${iga(parts)} 들어왔어요.` : '들어온 기록은 없었어요.') +
@@ -131,7 +131,7 @@ export default function MergeFamilyScreen() {
       <ScrollView style={s.container} contentContainerStyle={s.content}>
         <Text style={s.intro}>
           다른 가족을 <Text style={s.bold}>{target?.name ?? '지금 가족'}</Text>에 합쳐요.
-          기록·일정·구성원이 넘어오고, 합쳐진 가족은 사라져요.
+          기록과 일정, 구성원이 넘어오고, 합쳐진 가족은 사라져요.
         </Text>
 
         {memberships === null ? (
@@ -179,7 +179,7 @@ export default function MergeFamilyScreen() {
           <FontAwesome name="info-circle" size={14} color="#7A6B55" />
           <Text style={s.infoText}>
             같은 사람이 두 가족에서 다른 이름이면, 합쳐진 가족의 기록 속 이름이 남는 가족의 이름으로 바뀌어요.
-            다른 두 사람이 같은 이름이면 기록이 섞이지 않게 합치기 전에 한쪽 이름을 바꿔달라고 알려드려요.
+            다른 두 사람이 같은 이름이면 기록이 섞이지 않게, 합치기 전에 한쪽 이름을 바꿔달라고 알려줄게요.
             사진은 그대로 보여요.
           </Text>
         </View>

@@ -119,7 +119,7 @@ export default function CalendarScreen() {
     }
     const date = parseLooseDate(fDate);
     if (!date) {
-      showAlert('날짜를 한 번 봐주세요', '2026.10.3처럼 적어주세요. 위의 오늘·내일 버튼을 눌러도 돼요.');
+      showAlert('날짜를 한 번 봐주세요', '2026.10.3처럼 적거나, 위의 오늘이나 내일 버튼을 눌러주세요.');
       return;
     }
     // "저녁" 같은 말은 시간으로 못 알아듣는다 — 조용히 하루 종일로 바꾸지 말고 물어본다
@@ -148,7 +148,7 @@ export default function CalendarScreen() {
   };
 
   const handleDelete = (event: CalendarEvent) => {
-    showAlert('이 일정을 지울까요?', `'${event.title}'${eulreul(event.title)} 캘린더에서 뺍니다. 바로 되돌릴 수 있어요.`, [
+    showAlert('이 일정을 지울까요?', `'${event.title}'${eulreul(event.title)} 캘린더에서 뺄게요. 바로 되돌릴 수 있어요.`, [
       { text: '그냥 둘게요', style: 'cancel' },
       {
         text: '지우기',
@@ -250,7 +250,7 @@ export default function CalendarScreen() {
                   <View>
                     <Text style={styles.detailLabel}>언제</Text>
                     <Text style={styles.detailValue}>
-                      {formatEventDate(showDetail.date)} · {formatTime(showDetail.time)}
+                      {formatEventDate(showDetail.date)} {formatTime(showDetail.time)}
                     </Text>
                   </View>
                 </View>
@@ -275,7 +275,7 @@ export default function CalendarScreen() {
                   <View>
                     <Text style={styles.detailLabel}>적어둔 사람</Text>
                     <Text style={styles.detailValue}>
-                      {showDetail.createdBy}{showDetail.createdBy === CURRENT_USER ? ' (나)' : ''}
+                      {showDetail.createdBy === CURRENT_USER ? '나' : showDetail.createdBy}
                     </Text>
                   </View>
                 </View>
@@ -319,11 +319,11 @@ export default function CalendarScreen() {
                   <TextInput style={styles.addInput} placeholder="2026-10-03" placeholderTextColor="#A0A0A0"
                     value={fDate} onChangeText={setFDate} />
 
-                  <Text style={styles.addLabel}>무슨 일인가요</Text>
-                  <TextInput style={styles.addInput} placeholder="예: 가족 저녁 식사" placeholderTextColor="#A0A0A0"
+                  <Text style={styles.addLabel}>무슨 일인가요?</Text>
+                  <TextInput style={styles.addInput} placeholder="예) 가족 저녁 식사" placeholderTextColor="#A0A0A0"
                     value={fTitle} onChangeText={setFTitle} />
 
-                  <Text style={styles.addLabel}>몇 시에</Text>
+                  <Text style={styles.addLabel}>몇 시에?</Text>
                   <TextInput style={styles.addInput} placeholder="비워두면 하루 종일" placeholderTextColor="#A0A0A0"
                     value={fTime} onChangeText={setFTime} />
                   <View style={styles.chipRow}>
@@ -338,11 +338,11 @@ export default function CalendarScreen() {
                     </TouchableOpacity>
                   </View>
 
-                  <Text style={styles.addLabel}>어디서 (없으면 비워두세요)</Text>
-                  <TextInput style={styles.addInput} placeholder="예: 정자동 한강갈비" placeholderTextColor="#A0A0A0"
+                  <Text style={styles.addLabel}>어디서?</Text>
+                  <TextInput style={styles.addInput} placeholder="예) 정자동 한강갈비" placeholderTextColor="#A0A0A0"
                     value={fLocation} onChangeText={setFLocation} />
 
-                  <Text style={styles.addLabel}>누구랑 (안 고르면 가족 전체)</Text>
+                  <Text style={styles.addLabel}>누구랑? 안 고르면 가족 모두예요</Text>
                   <View style={styles.chipRow}>
                     {MEMBERS.map((m) => {
                       const on = fMembers.includes(m);
@@ -364,9 +364,9 @@ export default function CalendarScreen() {
                     ))}
                   </View>
 
-                  <Text style={styles.addLabel}>메모 (선택)</Text>
+                  <Text style={styles.addLabel}>메모</Text>
                   <TextInput style={[styles.addInput, { minHeight: 80, textAlignVertical: 'top' }]}
-                    placeholder="챙길 것, 만날 사람, 기억하고 싶은 것" placeholderTextColor="#A0A0A0"
+                    placeholder="챙길 것이나 기억하고 싶은 것" placeholderTextColor="#A0A0A0"
                     value={fMemo} onChangeText={setFMemo} multiline numberOfLines={3} />
 
                   <TouchableOpacity style={styles.addSubmit} activeOpacity={0.8} onPress={handleSave}>
@@ -435,10 +435,10 @@ export default function CalendarScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
-            {formatEventDate(selectedDate)}{selectedDate === todayISO() ? ' · 오늘' : ''}
+            {selectedDate === todayISO() ? '오늘, ' : ''}{formatEventDate(selectedDate)}
           </Text>
           {selectedEvents.length === 0 && !ready ? (
-            <LoadingRows label="일정을 보는 중이에요" />
+            <LoadingRows label="일정을 살펴보고 있어요" />
           ) : selectedEvents.length === 0 ? (
             <TouchableOpacity style={styles.emptyState} activeOpacity={0.7} onPress={openCreate}>
               <FontAwesome name="calendar-plus-o" size={32} color="#D4C8B0" />

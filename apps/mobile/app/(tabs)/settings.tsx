@@ -129,7 +129,7 @@ export default function SettingsScreen() {
       return;
     }
     try {
-      await Share.share({ message: `familog에 초대합니다! 초대 코드: ${family.inviteCode}` });
+      await Share.share({ message: `우리 가족 기록장에 같이 적어요. familog 앱을 열고 초대 코드 ${family.inviteCode}를 넣으면 들어올 수 있어요.` });
     } catch {
       showAlert('초대 코드', `${family.inviteCode}\n\n이 코드를 가족에게 보내주세요.`);
     }
@@ -171,7 +171,7 @@ export default function SettingsScreen() {
         // ⚠️ 여기 있던 '백업 관리'는 아무것도 하지 않으면서 "마지막 백업: 4월 4일",
         //    "백업이 완료되었습니다"를 띄웠다. **기록이 안전하다고 거짓으로 알려주는**
         //    가장 나쁜 종류의 가짜라 지웠다. 실제 백업은 아래 한 곳에서 한다.
-        { icon: 'download', label: '기록 내보내기 · 되살리기', subtitle: '백업',
+        { icon: 'download', label: '기록 담아두기와 되살리기', subtitle: '백업',
           action: () => router.push('/settings/export') },
       ],
     },
@@ -188,7 +188,7 @@ export default function SettingsScreen() {
             <Text style={styles.familySwitchName}>{family.isReal ? family.name : '아직 없어요'}</Text>
           </View>
           <Text style={styles.familySwitchAction}>
-            {families.length > 1 ? `바꾸기 · ${families.length}` : '가족 더하기'}
+            {families.length > 1 ? '다른 가족 보기' : '가족 더하기'}
           </Text>
           <FontAwesome name="chevron-down" size={11} color="#7A6B55" />
         </TouchableOpacity>
@@ -215,7 +215,7 @@ export default function SettingsScreen() {
             <TouchableOpacity style={styles.sheetAdd} activeOpacity={0.7}
               onPress={() => { setShowFamilies(false); router.push('/settings/add-family'); }}>
               <FontAwesome name="plus" size={13} color="#2D5A3F" />
-              <Text style={styles.sheetAddText}>가족 더하기 — 새로 만들거나 초대 코드로</Text>
+              <Text style={styles.sheetAddText}>가족을 하나 더 만들거나, 초대받은 가족에 들어가기</Text>
             </TouchableOpacity>
           </View>
         </View>

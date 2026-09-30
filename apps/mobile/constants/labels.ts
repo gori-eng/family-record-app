@@ -46,6 +46,8 @@ export const GOAL_LABEL: Record<string, string> = {
 
 /** 영화 필터 — '보고 싶은'은 저장값이 아니라 필터 이름이라 화면에서만 쓴다 */
 export const MOVIE_FILTER_LABEL: Record<string, string> = {
+  '최근 관람': '최근에 본',
+  '평점 높은순': '별점 높은 순',
   '보고 싶은': '보고 싶어요',
 };
 

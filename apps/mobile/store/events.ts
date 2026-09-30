@@ -39,7 +39,7 @@ export type CalendarEvent = {
   time: string;
   title: string;
   location?: string;
-  /** 함께하는 사람의 짧은 이름들. 비어 있으면 '가족 전체' */
+  /** 함께하는 사람의 짧은 이름들. 비어 있으면 '가족 모두' */
   members: string[];
   memo?: string;
   /** 카드 왼쪽 색 띠 */
@@ -262,9 +262,9 @@ export function useEventDaysInMonth(ym: string): Set<string> {
   }, [events, ym]);
 }
 
-/** 참여자를 한 줄로 — 비어 있으면 '가족 전체' */
+/** 참여자를 한 줄로 — 비어 있으면 '가족 모두' */
 export const membersLabel = (members: string[]) =>
-  members.length ? members.join(', ') : '가족 전체';
+  members.length ? members.join(', ') : '가족 모두';
 
 /** '18:00' → '오후 6:00', 빈 값 → '하루 종일' */
 export const formatTime = (time: string) => {

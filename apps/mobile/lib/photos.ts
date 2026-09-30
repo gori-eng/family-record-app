@@ -120,8 +120,8 @@ export async function pickAndUpload(
       ? await ImagePicker.requestCameraPermissionsAsync()
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) throw new Error(from === 'camera'
-      ? '카메라를 쓸 수 있게 허락해주세요. 휴대폰 설정 > familog에서 바꿀 수 있어요.'
-      : '사진첩을 볼 수 있게 허락해주세요. 휴대폰 설정 > familog에서 바꿀 수 있어요.');
+      ? '카메라를 쓸 수 있게 허락해주세요. 휴대폰 설정의 familog에서 바꿀 수 있어요.'
+      : '사진첩을 볼 수 있게 허락해주세요. 휴대폰 설정의 familog에서 바꿀 수 있어요.');
   }
 
   const res = from === 'camera'
@@ -217,8 +217,8 @@ export async function pickAndUploadAvatar(familyId: string, from: 'library' | 'c
       ? await ImagePicker.requestCameraPermissionsAsync()
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) throw new Error(from === 'camera'
-      ? '카메라를 쓸 수 있게 허락해주세요. 휴대폰 설정 > familog에서 바꿀 수 있어요.'
-      : '사진첩을 볼 수 있게 허락해주세요. 휴대폰 설정 > familog에서 바꿀 수 있어요.');
+      ? '카메라를 쓸 수 있게 허락해주세요. 휴대폰 설정의 familog에서 바꿀 수 있어요.'
+      : '사진첩을 볼 수 있게 허락해주세요. 휴대폰 설정의 familog에서 바꿀 수 있어요.');
   }
   const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 1 };
   const res = from === 'camera' ? await ImagePicker.launchCameraAsync(opts) : await ImagePicker.launchImageLibraryAsync(opts);

@@ -119,7 +119,7 @@ function body(r: BookRecord, o: BookOptions): string {
       return [
         row('지은이', esc(d.author)),
         row('읽는 사람', esc(d.reader)),
-        row('상태', esc(say(READING_LABEL, d.status)) + (d.status === '읽는 중' && d.progress ? ` · ${esc(d.progress)}%` : '')),
+        row('상태', esc(say(READING_LABEL, d.status)) + (d.status === '읽는 중' && d.progress ? `, ${esc(d.progress)}%까지` : '')),
         row('별점', stars(d.rating)),
         d.notes ? `<p class="text">${para(d.notes)}</p>` : '',
       ].join('');
@@ -153,7 +153,7 @@ function body(r: BookRecord, o: BookOptions): string {
           ? `<div class="sub">재료</div><ul>${d.ingredients.map((x: string) => `<li>${esc(x)}</li>`).join('')}</ul>` : '',
         Array.isArray(d.steps) && d.steps.length
           ? `<div class="sub">만드는 순서</div><ol>${d.steps.map((x: string) => `<li>${esc(x)}</li>`).join('')}</ol>` : '',
-        d.tip ? `<p class="text tip">꿀팁 · ${para(d.tip)}</p>` : '',
+        d.tip ? `<div class="sub">우리 집 비법</div><p class="text tip">${para(d.tip)}</p>` : '',
       ].join('');
     case 'goals': {
       const ms: { label: string; done: boolean }[] = Array.isArray(d.milestones) ? d.milestones : [];
@@ -163,7 +163,7 @@ function body(r: BookRecord, o: BookOptions): string {
       return [
         d.desc ? `<p class="text">${para(d.desc)}</p>` : '',
         row('목표 시점', esc(d.target)),
-        row('지금', `${esc(say(GOAL_LABEL, status))} · ${progress}%`),
+        row('지금', `${esc(say(GOAL_LABEL, status))} ${progress}%`),
         ms.length ? `<ul class="checks">${ms.map((m) => `<li>${m.done ? '☑' : '☐'} ${esc(m.label)}</li>`).join('')}</ul>` : '',
         d.notes ? `<p class="text">${para(d.notes)}</p>` : '',
         ph,
@@ -185,7 +185,7 @@ function body(r: BookRecord, o: BookOptions): string {
         // 🔒 봉인된 편지·사진은 책에도 넣지 않는다
         return [
           row('봉인한 날', esc(d.sealed)),
-          `<p class="text sealed">아직 잠들어 있어요${when ? ` · ${esc(when)}에 열려요` : ''}</p>`,
+          `<p class="text sealed">아직 잠들어 있어요.${when ? ` ${esc(when)}에 열려요.` : ''}</p>`,
         ].join('');
       }
       return [
@@ -216,7 +216,7 @@ function financeChapter(list: BookRecord[]): string {
     const [y, m] = ym.split('-').map(Number);
     return `<section class="entry">
       <h3>${y}년 ${m}월</h3>
-      <div class="money">들어온 돈 ${won(inc)} · 나간 돈 ${won(exp)} · 남은 돈 ${won(inc - exp)}</div>
+      <div class="money">들어온 돈 ${won(inc)}, 나간 돈 ${won(exp)}, 남은 돈 ${won(inc - exp)}</div>
       <table><thead><tr><th>날짜</th><th>내역</th><th>분류</th><th>쓴 사람</th><th class="num">금액</th></tr></thead><tbody>
       ${rows.map((r) => `<tr><td>${esc(String(r.data.date ?? '').slice(5).replace('-', '.'))}</td><td>${esc(r.data.desc || r.title)}</td><td>${esc(r.data.category)}</td><td>${esc(r.data.ownerMember || r.recordedBy)}</td><td class="num">${r.data.type === 'income' ? '+' : ''}${won(r.data.amount)}</td></tr>`).join('')}
       </tbody></table>
@@ -246,7 +246,7 @@ export function buildBookHtml(records: BookRecord[], o: BookOptions): string {
     <h1>${esc(o.familyName || '우리 가족')}의 기록</h1>
     <div class="range">${esc(range)}</div>
     <div class="count">기록 ${total}개</div>
-    <div class="made">${esc(koDate(o.today))}${o.madeBy ? ` · ${esc(o.madeBy)}${iga(o.madeBy)} 엮음` : ''}</div>
+    <div class="made">${esc(koDate(o.today))}${o.madeBy ? `, ${esc(o.madeBy)}${iga(o.madeBy)} 엮었어요` : ''}</div>
   </section>`;
 
   const toc = chapters.length > 1 ? `<section class="toc">
@@ -259,12 +259,12 @@ export function buildBookHtml(records: BookRecord[], o: BookOptions): string {
     const inner = ch.c === 'finance'
       ? financeChapter(ch.list)
       : ch.list.map((r) => `<section class="entry">
-          <div class="meta">${esc(koDate(dayOf(r)) || msDate(r.createdAt))} · ${esc(r.recordedBy)}</div>
+          <div class="meta">${esc(koDate(dayOf(r)) || msDate(r.createdAt))}, ${esc(r.recordedBy)}</div>
           <h3>${esc(r.title)}</h3>
           ${body(r, o)}
         </section>`).join('');
     return `<article class="chapter">
-      <header><h2>${esc(meta.title)}</h2><div class="chapter-sub">${esc(meta.sub)} · ${ch.list.length}개</div></header>
+      <header><h2>${esc(meta.title)}</h2><div class="chapter-sub">${esc(meta.sub)}, ${ch.list.length}개</div></header>
       ${inner}
     </article>`;
   }).join('');
