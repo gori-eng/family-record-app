@@ -193,8 +193,10 @@ export async function removeMember(memberId: string): Promise<void> {
 }
 
 /** 내가 속한 가족마다 나의 역할·짧은 이름 — 합치기 화면에서 "어느 가족의 관리자인가"를 볼 때 */
-export async function fetchMyMemberships(): Promise<Pick<FamilyMember, 'family_id' | 'role' | 'display_name'>[]> {
-  const { data, error } = await supabase.from('family_members').select('family_id, role, display_name');
+export async function fetchMyMemberships(userId: string): Promise<Pick<FamilyMember, 'family_id' | 'role' | 'display_name'>[]> {
+  // ⚠️ RLS는 "우리 가족 구성원 전부"를 돌려준다. 내 줄만 보려면 user_id를 꼭 걸어야 한다 —
+  //    안 걸면 같은 가족의 다른 사람 줄이 먼저 잡혀 "나는 관리자가 아니에요"가 됐다 (2026-09-30)
+  const { data, error } = await supabase.from('family_members').select('family_id, role, display_name').eq('user_id', userId);
   if (error) throw error;
   return (data ?? []) as Pick<FamilyMember, 'family_id' | 'role' | 'display_name'>[];
 }

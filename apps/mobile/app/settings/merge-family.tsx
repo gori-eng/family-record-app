@@ -34,8 +34,9 @@ export default function MergeFamilyScreen() {
 
   const [memberships, setMemberships] = useState<Membership[] | null>(null);
   useEffect(() => {
-    fetchMyMemberships().then(setMemberships).catch(() => setMemberships([]));
-  }, []);
+    if (!userId) return;
+    fetchMyMemberships(userId).then(setMemberships).catch(() => setMemberships([]));
+  }, [userId]);
 
   const roleIn = (familyId: string) => memberships?.find((m) => m.family_id === familyId)?.role ?? null;
   const nameIn = (familyId: string) => memberships?.find((m) => m.family_id === familyId)?.display_name ?? '';
