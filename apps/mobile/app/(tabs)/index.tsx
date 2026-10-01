@@ -226,7 +226,6 @@ export default function HomeScreen() {
           <View style={s.sectionHeader}>
             <View>
               <Text style={s.sectionTitle}>오늘 일정</Text>
-              <Text style={s.sectionSub}>{todayEvents.length > 0 ? `${todayEvents.length}개 있어요` : '느긋한 하루예요'}</Text>
             </View>
             <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')} style={s.seeAllBtn}>
               <Text style={s.seeAllText}>캘린더</Text>
@@ -323,7 +322,6 @@ export default function HomeScreen() {
           <View style={s.sectionHeader}>
             <View>
               <Text style={s.sectionTitle}>최근 기록</Text>
-              <Text style={s.sectionSub}>가족 구성원이 최근에 남긴 게시물을 보여줘요</Text>
             </View>
             <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/records')} style={s.seeAllBtn}>
               <Text style={s.seeAllText}>기록 메뉴</Text>
