@@ -218,12 +218,12 @@ export default function MoviesScreen() {
   const sel = selected?.data ?? null;
   const emptyByFilter: Record<string, [string, string]> = {
     '보고 싶은': ['보고 싶은 영화가 아직 없어요', '적을 때 아직 안 봤어요를 고르면 여기 모여요'],
-    '최근 관람': ['아직 본 영화가 없어요', '함께 본 영화를 하나 남겨볼까요?'],
+    '최근 관람': ['아직 본 영화가 없어요', '+ 버튼을 눌러 영화를 남겨보세요'],
     '평점 높은순': ['아직 별점을 매긴 영화가 없어요', '본 영화에 별점을 남기면 순서대로 보여요'],
   };
   const [emptyTitle, emptySub] = movies.length
-    ? (emptyByFilter[FILTERS[activeFilter]?.label] ?? ['아직 영화 기록이 없어요', '함께 본 영화를 하나 남겨볼까요?'])
-    : ['아직 영화 기록이 없어요', '함께 본 영화를 하나 남겨볼까요?'];
+    ? (emptyByFilter[FILTERS[activeFilter]?.label] ?? ['아직 영화 기록이 없어요', '+ 버튼을 눌러 영화를 남겨보세요'])
+    : ['아직 영화 기록이 없어요', '+ 버튼을 눌러 영화를 남겨보세요'];
 
   // 홈·가족 소식·통합 검색에서 '이 기록 열어줘'를 싣고 오면 상세를 한 번 열어준다
   useOpenParam(movies, (r) => openDetail(r.id));
@@ -274,7 +274,7 @@ export default function MoviesScreen() {
                   ) : (
                     <View style={s.wishBox}>
                       <Text style={s.wishTitle}>아직 안 본 영화예요</Text>
-                      <Text style={s.wishSub}>봤다면 별을 눌러 기록해요</Text>
+                      <Text style={s.wishSub}>보고 나면 별을 눌러 기록해 보세요</Text>
                       <View style={s.ratingPicker}>
                         {[1, 2, 3, 4, 5].map((i) => (
                           <TouchableOpacity key={i} activeOpacity={0.7} onPress={() => rateNow(selected, i)}>
@@ -345,7 +345,7 @@ export default function MoviesScreen() {
               />
               {formWatched ? (
                 <>
-                  <Text style={s.createLabel}>언제 봤나요?</Text>
+                  <Text style={s.createLabel}>본 날</Text>
                   <DateField value={formDate} onChange={setFormDate} placeholder="비워두면 오늘로 적어요" />
                   <Text style={s.createLabel}>별점</Text>
                   <View style={s.ratingPicker}>
@@ -386,7 +386,7 @@ export default function MoviesScreen() {
                 <Text style={s.authorHint}>보고 싶은 영화로 담아둘게요. 보고 나서 별을 매기면 본 영화로 옮겨가요.</Text>
               )}
               <TouchableOpacity style={[s.createSubmit, !canSave && s.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
-                <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : formWatched ? '저장하기' : '보고 싶은 영화로 담기'}</Text>
+                <Text style={s.createSubmitText}>{editingId ? '저장' : formWatched ? '저장' : '보고 싶은 영화로 저장'}</Text>
               </TouchableOpacity>
             </ScrollView>
             </Animated.View>

@@ -26,7 +26,7 @@ const STATUS_OPTIONS = ['전체', '읽는 중', '완독', '읽고 싶은'];
 const EMPTY_BY_STATUS: Record<string, string> = {
   '읽는 중': '지금 읽고 있는 책이 없어요',
   '완독': '아직 다 읽은 책이 없어요',
-  '읽고 싶은': '읽고 싶은 책을 하나 담아둘까요?',
+  '읽고 싶은': '읽고 싶은 책이 아직 없어요',
 };
 
 /** 새로 등록하는 책 표지에 돌아가며 입히는 색 */
@@ -286,7 +286,7 @@ export default function ReadingScreen() {
 
                       {editStatus === '읽는 중' ? (
                         <>
-                          <Text style={styles.editLabel}>어디까지 읽었나요</Text>
+                          <Text style={styles.editLabel}>읽은 만큼</Text>
                           <View style={styles.progressEditRow}>
                             <TouchableOpacity style={styles.stepBtn} activeOpacity={0.7}
                               onPress={() => setEditProgress(p => Math.max(0, p - 5))}>
@@ -333,12 +333,12 @@ export default function ReadingScreen() {
                         style={[styles.createInput, { height: 90, textAlignVertical: 'top', marginBottom: 12 }]}
                         value={editNotes}
                         onChangeText={setEditNotes}
-                        placeholder="기억에 남는 문장이나 느낌을 적어두세요"
+                        placeholder="기억에 남는 문장이나 느낌"
                         placeholderTextColor="#A39682"
                         multiline
                       />
                       <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={saveEdits}>
-                        <Text style={styles.createSubmitText}>{editStatus === '완독' ? '다 읽은 책으로 저장' : '저장하기'}</Text>
+                        <Text style={styles.createSubmitText}>{editStatus === '완독' ? '다 읽은 책으로 저장' : '저장'}</Text>
                       </TouchableOpacity>
                     </>
                   ) : (
@@ -419,7 +419,7 @@ export default function ReadingScreen() {
                 ))}
               </View>
               <TouchableOpacity style={[styles.createSubmit, !canSave && styles.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleCreate}>
-                <Text style={styles.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
+                <Text style={styles.createSubmitText}>{editingId ? '저장' : '저장'}</Text>
               </TouchableOpacity>
             </ScrollView>
             </Animated.View>
@@ -498,7 +498,7 @@ export default function ReadingScreen() {
                 <Text style={styles.emptyText}>
                   {activeStatus === '전체' ? '아직 담아둔 책이 없어요' : (EMPTY_BY_STATUS[activeStatus] ?? '아직 담아둔 책이 없어요')}
                 </Text>
-                <Text style={styles.emptySub}>요즘 읽는 책도, 읽고 싶은 책도 좋아요</Text>
+                <Text style={styles.emptySub}>+ 버튼을 눌러 책을 남겨보세요</Text>
               </View>
             )}
           </View>

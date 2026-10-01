@@ -5,7 +5,7 @@
  * 가드(lib/authGate)는 이 화면을 예외로 두어 홈으로 끌고 가지 않는다.
  */
 import { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { showAlert } from '../../components/AppAlert';
@@ -78,7 +78,7 @@ export default function ResetPasswordScreen() {
             <TextInput style={[s.input, s.inputSolo]} placeholder="같은 비밀번호를 한 번 더" placeholderTextColor="#A39682"
               value={pw2} onChangeText={setPw2} secureTextEntry={!show} />
             <TouchableOpacity style={[s.btn, busy && s.btnOff]} onPress={save} disabled={busy} activeOpacity={0.8}>
-              <Text style={s.btnText}>{busy ? '바꾸고 있어요' : '이 비밀번호로 할게요'}</Text>
+              {busy ? <ActivityIndicator color="#FFFFFF" /> : <Text style={s.btnText}>비밀번호 바꾸기</Text>}
             </TouchableOpacity>
           </>
         )}

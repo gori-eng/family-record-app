@@ -552,7 +552,7 @@ function FinanceScreen() {
                 {/* 자주 쓴 내역 — 탭 한 번으로 전부 채워진다 */}
                 {quickEntries.length > 0 && (
                   <>
-                    <Text style={styles.createLabel}>자주 쓰는 곳, 누르면 한 번에 채워져요</Text>
+                    <Text style={styles.createLabel}>자주 쓰는 곳</Text>
                     <View style={styles.quickGrid}>
                       {quickEntries.map((q) => (
                         <TouchableOpacity
@@ -592,13 +592,13 @@ function FinanceScreen() {
                 <Text style={styles.createLabel}>내역</Text>
                 <TextInput
                   style={styles.createInput}
-                  placeholder="예) 이마트 장보기"
+                  placeholder="예) 마트 장보기"
                   placeholderTextColor="#A39682"
                   value={formDesc}
                   onChangeText={onDescChange}
                 />
 
-                <Text style={styles.createLabel}>어디에 썼나요?</Text>
+                <Text style={styles.createLabel}>항목</Text>
                 <View style={styles.catGrid}>
                   {activeCategories.map((c) => {
                     const on = formCategory === c.name;
@@ -633,7 +633,7 @@ function FinanceScreen() {
 
                 {formType === 'expense' && (
                   <>
-                    <Text style={styles.createLabel}>어떻게 냈나요?</Text>
+                    <Text style={styles.createLabel}>낸 방법</Text>
                     <View style={styles.pillRow}>
                       {PAYMENT_METHODS.map((m) => (
                         <TouchableOpacity
@@ -649,7 +649,7 @@ function FinanceScreen() {
                 )}
 
                 {/* 쓴 사람 — 가족이 같이 쓸 때 누구 지출인지 구분한다 */}
-                <Text style={styles.createLabel}>누가 썼나요?</Text>
+                <Text style={styles.createLabel}>쓴 사람</Text>
                 <View style={styles.catGrid}>
                   {MEMBERS.map((m) => (
                     <TouchableOpacity
@@ -667,7 +667,7 @@ function FinanceScreen() {
                 <Text style={styles.createLabel}>메모</Text>
                 <TextInput
                   style={[styles.createInput, { height: 70, textAlignVertical: 'top' }]}
-                  placeholder="나중에 떠올릴 수 있게 한마디 남겨두세요"
+                  placeholder="나중에 떠올릴 수 있게 한마디"
                   placeholderTextColor="#A39682"
                   multiline
                   value={formMemo}
@@ -675,7 +675,7 @@ function FinanceScreen() {
                 />
 
                 <TouchableOpacity style={[styles.createSubmit, !canSave && styles.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
-                  <Text style={styles.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
+                  <Text style={styles.createSubmitText}>{editingId ? '저장' : '저장'}</Text>
                 </TouchableOpacity>
               </ScrollView>
             </Animated.View>
@@ -758,7 +758,7 @@ function FinanceScreen() {
             </View>
             {!isThisMonth && (
               <TouchableOpacity style={styles.todayChip} activeOpacity={0.7} onPress={() => setViewMonth(monthOf(todayISO()))}>
-                <Text style={styles.todayChipText}>이번 달로 돌아가기</Text>
+                <Text style={styles.todayChipText}>이번 달로</Text>
               </TouchableOpacity>
             )}
 
@@ -802,7 +802,7 @@ function FinanceScreen() {
                   </View>
                 </>
               ) : (
-                <Text style={styles.budgetEmpty}>예산을 정해두면 얼마 남았는지 바로 보여요. 눌러서 정하기</Text>
+                <Text style={styles.budgetEmpty}>눌러서 예산 정하기</Text>
               )}
             </TouchableOpacity>
 
@@ -834,9 +834,7 @@ function FinanceScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-            ) : (
-              <Text style={styles.noChart}>이 달에는 아직 지출 기록이 없어요</Text>
-            )}
+            ) : null}
 
             {/* 구성원별 지출 — 3명이 같이 쓸 때 누가 얼마 썼는지 */}
             {byMember.length > 1 && (
@@ -927,7 +925,7 @@ function FinanceScreen() {
                   <Text style={styles.emptySubtext}>전체 보기로 돌아가기</Text>
                 </TouchableOpacity>
               ) : (
-                <Text style={styles.emptySubtext}>오늘 쓴 것부터 하나 적어볼까요?</Text>
+                <Text style={styles.emptySubtext}>+ 버튼을 눌러 거래를 남겨보세요</Text>
               )}
             </View>
           ) : (
@@ -1008,7 +1006,7 @@ function FinanceScreen() {
                 />
                 <Text style={styles.amountWon}>원</Text>
               </View>
-              <Text style={styles.createLabel}>항목별로도 정할까요? 비워두면 안 정해요</Text>
+              <Text style={styles.createLabel}>항목별 예산</Text>
               <ScrollView style={{ maxHeight: 220 }} showsVerticalScrollIndicator={false}>
                 {EXPENSE_CATEGORIES.map((c) => (
                   <View key={c.name} style={styles.budgetCatRow}>
@@ -1028,7 +1026,7 @@ function FinanceScreen() {
                 ))}
               </ScrollView>
               <TouchableOpacity style={styles.createSubmit} activeOpacity={0.7} onPress={commitBudget}>
-                <Text style={styles.createSubmitText}>다 정했어요</Text>
+                <Text style={styles.createSubmitText}>저장</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.budgetCancel} activeOpacity={0.7} onPress={() => setShowBudget(false)}>
                 <Text style={styles.budgetCancelText}>그냥 둘게요</Text>
@@ -1180,7 +1178,6 @@ const styles = StyleSheet.create({
   chartBar: { height: 10, borderRadius: 5 },
   chartAmount: { width: 74, fontSize: 12, color: '#4A4A4A', textAlign: 'right', fontFamily: 'Pretendard' },
   chartPct: { width: 34, fontSize: 12, color: '#7A6B55', textAlign: 'right', fontFamily: 'Pretendard' },
-  noChart: { fontSize: 13, color: '#7A6B55', textAlign: 'center', paddingVertical: 8, fontFamily: 'Pretendard' },
   memberRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: '#F4F0E8' },
   memberChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#F9F8F5', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6 },
   memberName: { fontSize: 12, color: '#4A4A4A', fontFamily: 'PretendardBold' },
@@ -1263,7 +1260,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF',
     borderRadius: 12, paddingHorizontal: 14, marginBottom: 16,
   },
-  amountInput: { flex: 1, paddingVertical: 12, fontSize: 24, color: '#1F1F1F', fontFamily: 'PretendardBold', textAlign: 'right' },
+  // minWidth 0: 웹 input은 기본 폭이 있어 flex로 줄어들지 않는다 → '원'이 시트 밖으로 밀려 폼 전체가 옆으로 스크롤됐다
+  amountInput: { flex: 1, minWidth: 0, paddingVertical: 12, fontSize: 24, color: '#1F1F1F', fontFamily: 'PretendardBold', textAlign: 'right' },
   amountWon: { fontSize: 16, color: '#4A4A4A', marginLeft: 6, fontFamily: 'Pretendard' },
   quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   quickChip: {

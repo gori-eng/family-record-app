@@ -258,7 +258,7 @@ export default function GoalsScreen() {
                         <View style={s.subHeader}>
                           <FontAwesome name="check-square-o" size={13} color="#4A8C6F" />
                           <Text style={s.subTitle}>
-                            작은 목표 {sel.milestones.filter((m) => m.done).length}/{sel.milestones.length}, 해낸 건 눌러서 체크해요
+                            작은 목표 {sel.milestones.filter((m) => m.done).length}/{sel.milestones.length}, 해낸 것은 눌러서 체크해 보세요
                           </Text>
                         </View>
                         {sel.milestones.map((m, i) => (
@@ -336,18 +336,18 @@ export default function GoalsScreen() {
               <View style={s.modalHandle} />
               <Text style={s.modalTitle}>{editingId ? '목표 고치기' : '새 가족 목표'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }} keyboardShouldPersistTaps="handled">
-              <Text style={s.createLabel}>어떤 목표인가요?</Text>
+              <Text style={s.createLabel}>목표</Text>
               <TextInput style={s.createInput} placeholder="예) 올해 가족 여행 세 번 가기" placeholderTextColor="#A39682"
                 value={formTitle} onChangeText={setFormTitle} />
               <Text style={s.createLabel}>사진</Text>
               <PhotoPickerRow draft={photoDraft} />
               <Text style={s.createLabel}>설명</Text>
-              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="왜 하고 싶은지, 어떻게 할지 적어도 좋아요" placeholderTextColor="#A39682" multiline
+              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="왜 하고 싶은지, 어떻게 할지" placeholderTextColor="#A39682" multiline
                 value={formDesc} onChangeText={setFormDesc} />
-              <Text style={s.createLabel}>언제까지 해볼까요?</Text>
+              <Text style={s.createLabel}>언제까지</Text>
               <TextInput style={s.createInput} placeholder="예) 2027년 12월" placeholderTextColor="#A39682"
                 value={formTarget} onChangeText={setFormTarget} />
-              <Text style={s.createLabel}>작은 목표로 나눠볼까요?</Text>
+              <Text style={s.createLabel}>작은 목표</Text>
               <TextInput
                 style={[s.createInput, { height: 110, textAlignVertical: 'top' }]}
                 value={formMilestones}
@@ -361,12 +361,12 @@ export default function GoalsScreen() {
                 style={[s.createInput, { height: 80, textAlignVertical: 'top' }]}
                 value={formNotes}
                 onChangeText={setFormNotes}
-                placeholder="다 해내면 뭘 할지, 누구랑 할지 적어도 좋아요"
+                placeholder="다 해내면 뭘 할지, 누구랑 할지"
                 placeholderTextColor="#A39682"
                 multiline
               />
               <TouchableOpacity style={[s.createSubmit, !canSave && s.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
-                <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
+                <Text style={s.createSubmitText}>{editingId ? '저장' : '저장'}</Text>
               </TouchableOpacity>
               </ScrollView>
             </Animated.View>
@@ -414,7 +414,7 @@ export default function GoalsScreen() {
               <View style={s.empty}>
                 <FontAwesome name="trophy" size={32} color="#D6CDBF" />
                 <Text style={s.emptyText}>아직 가족 목표가 없어요</Text>
-                <Text style={s.emptySub}>올해 가족이 함께 해보고 싶은 걸 하나 적어볼까요?</Text>
+                <Text style={s.emptySub}>+ 버튼을 눌러 목표를 남겨보세요</Text>
               </View>
             )}
           </View>

@@ -215,7 +215,7 @@ export default function HomeScreen() {
             <View style={s.inviteIcon}><FontAwesome name="envelope-o" size={18} color="#2D5A3F" /></View>
             <View style={{ flex: 1 }}>
               <Text style={s.inviteTitle}>아직 혼자예요</Text>
-              <Text style={s.inviteSub}>초대 코드 {familyInfo.inviteCode}를 가족에게 보내볼까요? 누르면 바로 보낼 수 있어요</Text>
+              <Text style={s.inviteSub}>카드를 눌러 가족에게 초대 코드를 보내 보세요</Text>
             </View>
             <FontAwesome name="chevron-right" size={12} color="#4A8C6F" />
           </TouchableOpacity>
@@ -233,7 +233,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           {todayEvents.length === 0 && !eventsReady ? (
-            <LoadingRows label="오늘 일정을 살펴보고 있어요" />
+            <LoadingRows label="일정을 불러오고 있어요" />
           ) : todayEvents.length === 0 ? (
             <TouchableOpacity style={s.emptyState} activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')}>
               <FontAwesome name="calendar-o" size={32} color="#D6CDBF" />
@@ -274,7 +274,7 @@ export default function HomeScreen() {
             <View style={s.sectionHeader}>
               <View>
                 <Text style={[s.sectionTitle, s.handTitle]}>그때 오늘</Text>
-                <Text style={s.sectionSub}>오늘과 같은 날에 남겨둔 기록이에요</Text>
+                <Text style={s.sectionSub}>지난해 같은 날에 남긴 기록이에요</Text>
               </View>
             </View>
             {yearsAgo.map(({ rec, years }) => {
@@ -329,7 +329,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           {recent.length === 0 && !recordsReady ? (
-            <LoadingRows label="기록을 꺼내오고 있어요" />
+            <LoadingRows label="기록을 불러오고 있어요" />
           ) : recent.length === 0 ? (
             <TouchableOpacity style={s.emptyState} activeOpacity={0.7} onPress={() => router.push('/(tabs)/records')}>
               <FontAwesome name="pencil-square-o" size={32} color="#D6CDBF" />

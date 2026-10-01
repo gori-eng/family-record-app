@@ -290,12 +290,12 @@ export default function ParentingScreen() {
               )}
               <TextInput
                 style={styles.createInput}
-                placeholder={children.length ? '다른 아이라면 이름을 적어주세요' : '아이 이름을 적어주세요. 예) 지우'}
+                placeholder={children.length ? '다른 아이라면 이름을 적어주세요' : '아이 이름'}
                 placeholderTextColor="#A39682"
                 value={formChild}
                 onChangeText={setFormChild}
               />
-              <Text style={styles.createLabel}>언제</Text>
+              <Text style={styles.createLabel}>날짜</Text>
               <View style={styles.childPicker}>
                 {([['오늘', todayISO()], ['어제', daysAgoISO(1)], ['그제', daysAgoISO(2)]] as const).map(([label, iso]) => (
                   <TouchableOpacity key={label} style={[styles.filterChip, formDate === iso && styles.filterChipActive]}
@@ -325,16 +325,16 @@ export default function ParentingScreen() {
                 value={formContent}
                 onChangeText={setFormContent}
               />
-              <Text style={styles.createLabel}>처음 해낸 일이 있었나요?</Text>
+              <Text style={styles.createLabel}>처음 해낸 일</Text>
               <TextInput
                 style={styles.createInput}
-                placeholder="쉼표로 나눠 적어요. 예) 첫 자전거, 첫 생일"
+                placeholder="있다면 쉼표로 나눠 적어주세요"
                 placeholderTextColor="#A39682"
                 value={formMilestones}
                 onChangeText={setFormMilestones}
               />
               <TouchableOpacity style={[styles.createSubmit, !canSave && styles.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
-                <Text style={styles.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
+                <Text style={styles.createSubmitText}>{editingId ? '저장' : '저장'}</Text>
               </TouchableOpacity>
             </ScrollView>
             </Animated.View>
@@ -346,7 +346,8 @@ export default function ParentingScreen() {
           <SummaryLine icon="child" text={summaryOf(entries.length, thisMonthCount, milestoneCount)}
             onPress={milestoneCount ? () => showAlert('처음 해낸 일', milestoneByChild || '아직 적어둔 게 없어요.') : undefined} />
 
-          {/* Child Filter */}
+          {/* Child Filter — 아이가 아직 없으면 '전체' 칩 하나만 남아 어색해서 숨긴다 */}
+          {children.length > 0 && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterContainer}>
             {['전체', ...children].map((name, i) => (
               <TouchableOpacity
@@ -360,6 +361,7 @@ export default function ParentingScreen() {
               </TouchableOpacity>
             ))}
           </ScrollView>
+          )}
 
           {/* Timeline */}
           <View style={styles.timeline}>
@@ -408,7 +410,7 @@ export default function ParentingScreen() {
                 <Text style={styles.emptyText}>
                   {activeChild === '전체' ? '아직 육아 일기가 없어요' : `${activeChild}의 일기가 아직 없어요`}
                 </Text>
-                <Text style={styles.emptySub}>오늘 아이와 있었던 일, 한 줄이면 충분해요</Text>
+                <Text style={styles.emptySub}>+ 버튼을 눌러 일기를 남겨보세요</Text>
               </View>
             )}
           </View>
@@ -422,7 +424,7 @@ export default function ParentingScreen() {
           activeOpacity={0.8}
           onPress={() => openForm()}
         >
-          <FontAwesome name="pencil" size={20} color="#FFFFFF" />
+          <FontAwesome name="plus" size={20} color="#FFFFFF" />
         </TouchableOpacity>
         {undoBar}
       </View>

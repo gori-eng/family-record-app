@@ -19,7 +19,7 @@ import { SummaryLine } from '../../../components/SummaryLine';
 const EMPTY_BY_FILTER: Record<string, string> = {
   '다녀옴': '아직 다녀온 여행이 없어요',
   '계획 중': '아직 잡아둔 여행이 없어요',
-  '가고 싶은': '가고 싶은 곳을 하나 적어볼까요?',
+  '가고 싶은': '가고 싶은 곳이 아직 없어요',
 };
 
 type Trip = {
@@ -299,7 +299,7 @@ export default function TravelScreen() {
               />
               <Text style={s.createLabel}>사진</Text>
               <PhotoPickerRow draft={photoDraft} />
-              <Text style={s.createLabel}>어떤 여행인가요?</Text>
+              <Text style={s.createLabel}>여행 상태</Text>
               <View style={s.statusPicker}>
                 {['다녀옴', '계획 중', '가고 싶은'].map((st) => (
                   <TouchableOpacity
@@ -311,10 +311,10 @@ export default function TravelScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              <Text style={s.createLabel}>언제</Text>
+              <Text style={s.createLabel}>날짜</Text>
               <DateField value={formDate} onChange={setFormDate} placeholder="떠난 날" />
-              <DateField value={formDateEnd} onChange={setFormDateEnd} placeholder="돌아온 날 (하루면 비워두세요)" />
-              <Text style={s.createLabel}>누구랑 갔나요?</Text>
+              <DateField value={formDateEnd} onChange={setFormDateEnd} placeholder="돌아온 날, 하루면 비워두세요" />
+              <Text style={s.createLabel}>누구랑</Text>
               <View style={s.memberRow}>
                 {MEMBERS.map((m) => {
                   const on = formMembers.includes(m);
@@ -336,14 +336,14 @@ export default function TravelScreen() {
               <Text style={s.createLabel}>여행 일지</Text>
               <TextInput
                 style={[s.createInput, { height: 160, textAlignVertical: 'top' }]}
-                placeholder={'어디를 들렀는지, 뭐가 좋았는지 편하게 적어두세요'}
+                placeholder={'어디를 들렀는지, 뭐가 좋았는지'}
                 placeholderTextColor="#A39682"
                 multiline
                 value={formJournal}
                 onChangeText={setFormJournal}
               />
               <TouchableOpacity style={[s.createSubmit, !canSave && s.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
-                <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
+                <Text style={s.createSubmitText}>{editingId ? '저장' : '저장'}</Text>
               </TouchableOpacity>
               </ScrollView>
             </Animated.View>
@@ -404,7 +404,7 @@ export default function TravelScreen() {
                 <Text style={s.emptyText}>
                   {filter === '전체' ? '아직 여행 기록이 없어요' : (EMPTY_BY_FILTER[filter] ?? '아직 여행 기록이 없어요')}
                 </Text>
-                <Text style={s.emptySub}>다녀온 곳도, 언젠가 가고 싶은 곳도 좋아요</Text>
+                <Text style={s.emptySub}>+ 버튼을 눌러 여행을 남겨보세요</Text>
               </View>
             )}
           </View>

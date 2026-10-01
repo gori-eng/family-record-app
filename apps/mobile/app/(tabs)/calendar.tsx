@@ -394,11 +394,11 @@ export default function CalendarScreen() {
                   </View>
                   <DateField value={fDate} onChange={setFDate} allowEmpty={false} />
 
-                  <Text style={styles.addLabel}>무슨 일인가요?</Text>
+                  <Text style={styles.addLabel}>일정 이름</Text>
                   <TextInput style={styles.addInput} placeholder="예) 가족 저녁 식사" placeholderTextColor="#A39682"
                     value={fTitle} onChangeText={setFTitle} />
 
-                  <Text style={styles.addLabel}>몇 시에?</Text>
+                  <Text style={styles.addLabel}>시작 시각</Text>
                   <TextInput style={styles.addInput} placeholder="비워두면 하루 종일" placeholderTextColor="#A39682"
                     value={fTime} onChangeText={setFTime} />
                   <View style={styles.chipRow}>
@@ -415,11 +415,11 @@ export default function CalendarScreen() {
 
                   <TouchableOpacity style={styles.toggleRow} activeOpacity={0.7} onPress={() => setFMultiDay((v) => !v)}>
                     <FontAwesome name={fMultiDay ? 'check-square' : 'square-o'} size={18} color={fMultiDay ? '#4A8C6F' : '#A39682'} />
-                    <Text style={styles.toggleText}>끝나는 날이나 시각도 정할래요</Text>
+                    <Text style={styles.toggleText}>끝나는 날과 시각 정하기</Text>
                   </TouchableOpacity>
                   {fMultiDay && (
                     <View style={styles.endBox}>
-                      <Text style={styles.addLabel}>언제 끝나요?</Text>
+                      <Text style={styles.addLabel}>끝나는 날</Text>
                       <View style={styles.chipRow}>
                         {([['같은 날', ''], ['다음 날', addDaysISO(parseLooseDate(fDate) ?? todayISO(), 1)], ['이틀 뒤', addDaysISO(parseLooseDate(fDate) ?? todayISO(), 2)]] as const).map(([label, iso]) => (
                           <TouchableOpacity key={label} style={[styles.chip, fEndDate === iso && styles.chipOn]}
@@ -429,15 +429,15 @@ export default function CalendarScreen() {
                         ))}
                       </View>
                       <DateField value={fEndDate} onChange={setFEndDate} placeholder="비워두면 같은 날에 끝나요" />
-                      <Text style={styles.addLabel}>몇 시에 끝나요?</Text>
+                      <Text style={styles.addLabel}>끝나는 시각</Text>
                       <TextInput style={styles.addInput} placeholder="비워두면 시각은 안 적어요" placeholderTextColor="#A39682"
                         value={fEndTime} onChangeText={setFEndTime} />
                     </View>
                   )}
 
-                  <Text style={styles.addLabel}>어디서?</Text>
+                  <Text style={styles.addLabel}>장소</Text>
                   <View style={styles.placeInputRow}>
-                    <TextInput style={[styles.addInput, styles.placeInput]} placeholder="예) 정자동 한강갈비" placeholderTextColor="#A39682"
+                    <TextInput style={[styles.addInput, styles.placeInput]} placeholder="예) 동네 공원" placeholderTextColor="#A39682"
                       value={fLocation} onChangeText={setFLocation}
                       onFocus={() => setPlaceFocus(true)} onBlur={() => setTimeout(() => setPlaceFocus(false), 150)} />
                     {!!fLocation.trim() && (
@@ -465,7 +465,7 @@ export default function CalendarScreen() {
                     </View>
                   )}
 
-                  <Text style={styles.addLabel}>누구랑? 안 고르면 가족 모두예요</Text>
+                  <Text style={styles.addLabel}>누구랑</Text>
                   <View style={styles.chipRow}>
                     {MEMBERS.map((m) => {
                       const on = fMembers.includes(m);
@@ -483,7 +483,7 @@ export default function CalendarScreen() {
                     value={fMemo} onChangeText={setFMemo} multiline numberOfLines={3} />
 
                   <TouchableOpacity style={styles.addSubmit} activeOpacity={0.8} onPress={handleSave}>
-                    <Text style={styles.addSubmitText}>{editing ? '고친 내용 저장' : '캘린더에 넣기'}</Text>
+                    <Text style={styles.addSubmitText}>{editing ? '저장' : '일정 만들기'}</Text>
                   </TouchableOpacity>
                 </ScrollView>
               </>
@@ -501,7 +501,7 @@ export default function CalendarScreen() {
           <TouchableOpacity onPress={goToToday} activeOpacity={0.7} style={{ alignItems: 'center' }}>
             <Text style={styles.monthTitle}>{currentYear}년 {currentMonth + 1}월</Text>
             <Text style={styles.monthSub}>
-              {monthEventCount > 0 ? `일정 ${monthEventCount}개` : '아직 비어 있어요'}
+              {monthEventCount > 0 ? `일정 ${monthEventCount}개` : '일정 없음'}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => goMonth(1)} style={styles.navButton} activeOpacity={0.7}>
@@ -512,7 +512,7 @@ export default function CalendarScreen() {
         {!isCurrentMonth && (
           <TouchableOpacity style={styles.todayChip} onPress={goToToday} activeOpacity={0.7}>
             <FontAwesome name="calendar-check-o" size={12} color="#2D5A3F" />
-            <Text style={styles.todayChipText}>오늘로 돌아가기</Text>
+            <Text style={styles.todayChipText}>오늘로</Text>
           </TouchableOpacity>
         )}
 
@@ -570,12 +570,12 @@ export default function CalendarScreen() {
             {selectedDate === todayISO() ? '오늘, ' : ''}{formatEventDate(selectedDate)}
           </Text>
           {selectedEvents.length === 0 && !ready ? (
-            <LoadingRows label="일정을 살펴보고 있어요" />
+            <LoadingRows label="일정을 불러오고 있어요" />
           ) : selectedEvents.length === 0 ? (
             <TouchableOpacity style={styles.emptyState} activeOpacity={0.7} onPress={openCreate}>
               <FontAwesome name="calendar-plus-o" size={32} color="#D6CDBF" />
-              <Text style={styles.emptyText}>아직 적어둔 일정이 없어요</Text>
-              <Text style={styles.emptySubtext}>여기를 눌러 하나 적어볼까요?</Text>
+              <Text style={styles.emptyText}>일정이 없는 날이에요</Text>
+              <Text style={styles.emptySubtext}>카드를 눌러 일정을 생성해 보세요</Text>
             </TouchableOpacity>
           ) : (
             selectedEvents.map((ev) => (

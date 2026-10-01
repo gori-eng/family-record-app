@@ -243,7 +243,7 @@ function HealthScreen() {
               <View style={s.modalHandle} />
               <Text style={s.modalTitle}>{editingId ? '건강 기록 고치기' : '새 건강 기록'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }} keyboardShouldPersistTaps="handled">
-              <Text style={s.createLabel}>누구의 기록인가요?</Text>
+              <Text style={s.createLabel}>누구의 기록</Text>
               <View style={s.memberRow}>
                 {MEMBERS.map(m => (
                   <TouchableOpacity
@@ -257,21 +257,21 @@ function HealthScreen() {
                 ))}
               </View>
               <Text style={s.authorHint}>적는 사람: {CURRENT_USER} (나)</Text>
-              <Text style={s.createLabel}>어떤 검진이었나요?</Text>
+              <Text style={s.createLabel}>검진 종류</Text>
               <TextInput style={s.createInput} placeholder="예) 치과 정기검진" placeholderTextColor="#A39682"
                 value={formType} onChangeText={setFormType} />
-              <Text style={s.createLabel}>언제 받았나요?</Text>
+              <Text style={s.createLabel}>받은 날</Text>
               <DateField value={formDate} onChange={setFormDate} placeholder="비워두면 오늘로 적어요" />
               <Text style={s.createLabel}>결과</Text>
               <TextInput style={s.createInput} placeholder="예) 정상, 충치 1개" placeholderTextColor="#A39682"
                 value={formResult} onChangeText={setFormResult} />
-              <Text style={s.createLabel}>다음 검진은 언제인가요?</Text>
-              <DateField value={formNext} onChange={setFormNext} placeholder="적어두면 다가올 때 알려줄게요" />
+              <Text style={s.createLabel}>다음 검진</Text>
+              <DateField value={formNext} onChange={setFormNext} placeholder="있다면 골라주세요" />
               <Text style={s.createLabel}>메모</Text>
-              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="처방이나 의사 선생님 말씀을 적어두세요" placeholderTextColor="#A39682" multiline
+              <TextInput style={[s.createInput, { height: 80, textAlignVertical: 'top' }]} placeholder="처방이나 의사 선생님 말씀" placeholderTextColor="#A39682" multiline
                 value={formNotes} onChangeText={setFormNotes} />
               <TouchableOpacity style={[s.createSubmit, !canSave && s.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
-                <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
+                <Text style={s.createSubmitText}>{editingId ? '저장' : '저장'}</Text>
               </TouchableOpacity>
             </ScrollView>
             </Animated.View>
@@ -334,7 +334,7 @@ function HealthScreen() {
               <View style={s.empty}>
                 <FontAwesome name="heartbeat" size={32} color="#D6CDBF" />
                 <Text style={s.emptyText}>아직 건강 기록이 없어요</Text>
-                <Text style={s.emptySub}>검진 결과를 남겨두면 다음에 찾기 쉬워요</Text>
+                <Text style={s.emptySub}>+ 버튼을 눌러 검진 기록을 남겨보세요</Text>
               </View>
             )}
           </View>

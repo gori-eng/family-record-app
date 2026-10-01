@@ -35,14 +35,14 @@ export default function RecordsScreen() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>우리 가족 기록장</Text>
         <Text style={styles.subtitle}>
-          {totalRecords ? `지금까지 ${totalRecords}개를 함께 남겼어요` : '아직 비어 있어요. 하나씩 채워가요'}
+          {totalRecords ? `기록 ${totalRecords}개` : '아직 기록이 없어요'}
         </Text>
 
         {/* 통합 검색 입구 — 눌러서 검색 화면으로 (여기서 바로 치게 하면 결과를 보여줄 자리가 없다) */}
         <TouchableOpacity style={styles.searchEntry} activeOpacity={0.7} onPress={() => router.push('/(tabs)/records/search' as any)}
           accessibilityLabel="기록 찾기">
           <FontAwesome name="search" size={14} color="#7A6B55" />
-          <Text style={styles.searchEntryText}>기억나는 낱말로 찾아보기</Text>
+          <Text style={styles.searchEntryText}>기록 검색</Text>
         </TouchableOpacity>
 
         <View style={styles.grid}>
@@ -57,7 +57,7 @@ export default function RecordsScreen() {
                 <FontAwesome name={cat.icon as any} size={22} color="#4A4A4A" />
               </View>
               <Text style={styles.cardLabel}>{cat.label}</Text>
-              <Text style={styles.cardCount}>{(counts[cat.screen as RecordCategory] ?? 0) ? `${counts[cat.screen as RecordCategory]}개` : '처음이에요'}</Text>
+              <Text style={styles.cardCount}>{(counts[cat.screen as RecordCategory] ?? 0) ? `${counts[cat.screen as RecordCategory]}개` : '아직 없어요'}</Text>
             </TouchableOpacity>
           ))}
         </View>

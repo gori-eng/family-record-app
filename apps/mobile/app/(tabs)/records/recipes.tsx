@@ -269,8 +269,8 @@ export default function RecipesScreen() {
                 value={formName} onChangeText={setFormName} />
               <Text style={s.createLabel}>완성 사진</Text>
               <PhotoPickerRow draft={photoDraft} />
-              <Text style={s.createLabel}>누구에게 배웠나요?</Text>
-              <TextInput style={s.createInput} placeholder="예) 할머니께 배웠어요" placeholderTextColor="#A39682"
+              <Text style={s.createLabel}>배운 곳</Text>
+              <TextInput style={s.createInput} placeholder="예) 할머니" placeholderTextColor="#A39682"
                 value={formOrigin} onChangeText={setFormOrigin} />
               <Text style={s.createLabel}>난이도</Text>
               <View style={s.pillRow}>
@@ -316,7 +316,7 @@ export default function RecipesScreen() {
                 onChangeText={setFormTip}
               />
               <TouchableOpacity style={[s.createSubmit, !canSave && s.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
-                <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '저장하기'}</Text>
+                <Text style={s.createSubmitText}>{editingId ? '저장' : '저장'}</Text>
               </TouchableOpacity>
               </ScrollView>
             </Animated.View>
@@ -326,7 +326,6 @@ export default function RecipesScreen() {
 
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.header}>
-            <Text style={s.subtitle}>우리 집 손맛을 모아둬요</Text>
             <SummaryLine icon="cutlery" text={summaryOf(recipes.length, inheritedCount)} />
           </View>
 
@@ -366,7 +365,7 @@ export default function RecipesScreen() {
               <View style={s.empty}>
                 <FontAwesome name="cutlery" size={32} color="#D6CDBF" />
                 <Text style={s.emptyText}>아직 적어둔 레시피가 없어요</Text>
-                <Text style={s.emptySub}>우리 집 손맛, 잊기 전에 하나 남겨볼까요?</Text>
+                <Text style={s.emptySub}>+ 버튼을 눌러 레시피를 남겨보세요</Text>
               </View>
             )}
           </View>

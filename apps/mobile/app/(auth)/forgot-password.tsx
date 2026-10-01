@@ -5,7 +5,7 @@
  * 링크는 웹이면 `/reset-password`, 휴대폰이면 `familog://reset-password`로 돌아온다.
  */
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { showAlert } from '../../components/AppAlert';
 import { requestPasswordReset } from '@core/supabase';
@@ -47,7 +47,7 @@ export default function ForgotPasswordScreen() {
         <TextInput style={s.input} placeholder="example@email.com" placeholderTextColor="#A39682"
           value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoFocus />
         <TouchableOpacity style={[s.btn, busy && s.btnOff]} onPress={send} disabled={busy} activeOpacity={0.8}>
-          <Text style={s.btnText}>{busy ? '보내고 있어요' : '링크 보내기'}</Text>
+          {busy ? <ActivityIndicator color="#FFFFFF" /> : <Text style={s.btnText}>링크 보내기</Text>}
         </TouchableOpacity>
         <Link href="/(auth)/login" asChild>
           <TouchableOpacity style={s.back}><Text style={s.backText}>로그인으로 돌아가기</Text></TouchableOpacity>

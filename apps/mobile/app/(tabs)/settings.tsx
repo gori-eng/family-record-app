@@ -178,7 +178,7 @@ export default function SettingsScreen() {
       title: '내 정보',
       items: [
         { icon: 'user', label: '내 프로필', action: () => router.push('/settings/profile') },
-        { icon: 'lock', label: '개인정보 보호', subtitle: '무엇이 지켜지나요', action: () => router.push('/settings/privacy') },
+        { icon: 'lock', label: '개인정보 보호', action: () => router.push('/settings/privacy') },
         { icon: 'file-text-o', label: '개인정보 처리방침', subtitle: HAS_LEGAL ? undefined : '곧 올라와요',
           action: () => HAS_LEGAL ? Linking.openURL(PRIVACY_URL) : showAlert('아직 올리는 중이에요', '처리방침 페이지가 곧 올라와요.') },
         ...(TERMS_URL ? [{ icon: 'file-text-o', label: '이용약관', action: () => Linking.openURL(TERMS_URL) }] : []),
@@ -234,7 +234,7 @@ export default function SettingsScreen() {
             <TouchableOpacity style={styles.sheetAdd} activeOpacity={0.7}
               onPress={() => { setShowFamilies(false); router.push('/settings/add-family'); }}>
               <FontAwesome name="plus" size={13} color="#2D5A3F" />
-              <Text style={styles.sheetAddText}>가족을 하나 더 만들거나, 초대받은 가족에 들어가기</Text>
+              <Text style={styles.sheetAddText}>가족 만들기 또는 초대 코드로 들어가기</Text>
             </TouchableOpacity>
           </View>
         </View>

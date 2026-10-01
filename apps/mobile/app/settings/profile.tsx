@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Modal, Animated, Pressable } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Modal, Animated, Pressable, ActivityIndicator } from 'react-native';
 import { showAlert } from '../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
@@ -244,17 +244,17 @@ export default function ProfileScreen() {
           <TouchableOpacity activeOpacity={0.7} onPress={openEmoji} disabled={uploadingAvatar}>
             <Text style={s.changePhoto}>{uploadingAvatar ? '사진을 올리고 있어요' : '사진이나 이모지 고르기'}</Text>
           </TouchableOpacity>
-          <Text style={s.photoNote}>가족 목록에서 이름 옆에 보여요</Text>
+          <Text style={s.photoNote}>가족 구성원 목록에 보여요</Text>
         </View>
 
         <Text style={s.label}>이름</Text>
         <TextInput style={s.input} value={fullName} onChangeText={setFullName}
-          placeholder="예) 김지수" placeholderTextColor="#A39682" />
+          placeholder="이름" placeholderTextColor="#A39682" />
         <Text style={s.help}>프로필과 가족 구성원 목록에 보여요</Text>
 
         <Text style={s.label}>기록에 남는 이름</Text>
         <TextInput style={s.input} value={shortName} onChangeText={setShortName} maxLength={10}
-          placeholder="예) 지수" placeholderTextColor="#A39682" autoCorrect={false} />
+          placeholder="부르는 이름" placeholderTextColor="#A39682" autoCorrect={false} />
         <Text style={s.help}>
           {shortChanged && nextShort
             ? `저장하면 지금까지 쓴 기록 ${myRecordCount}개도 '${nextShort}'${ro(nextShort)} 함께 바뀌어요`
@@ -286,7 +286,7 @@ export default function ProfileScreen() {
           disabled={!changed || saving}
           onPress={save}
         >
-          <Text style={s.saveBtnText}>{saving ? '저장하고 있어요' : changed ? '저장하기' : '바뀐 게 없어요'}</Text>
+          {saving ? <ActivityIndicator color="#FFFFFF" /> : <Text style={s.saveBtnText}>저장</Text>}
         </TouchableOpacity>
 
         <TouchableOpacity style={s.deleteRow} activeOpacity={0.7} onPress={askDeleteAccount}>

@@ -293,8 +293,7 @@ ${failed}장은 받지 못했어요. 인터넷을 확인하고 한 번 더 해�
 
       <ScrollView style={s.container} contentContainerStyle={{ paddingBottom: 40 }}>
         <Text style={s.subtitle}>
-          가족이 남긴 기록은 familog 안에만 있어서는 안 돼요.{'\n'}
-          파일로 한 부 담아 손에 쥐고 있으면 무슨 일이 있어도 남아요.
+          기록을 파일로 한 부 담아두면 무슨 일이 있어도 남아요.
         </Text>
 
         {/* 지금 갖고 있는 것 */}
@@ -331,7 +330,7 @@ ${failed}장은 받지 못했어요. 인터넷을 확인하고 한 번 더 해�
           </View>
           <View style={s.info}>
             <Text style={s.cardTitle}>기록책으로 만들기</Text>
-            <Text style={s.cardDesc}>표지와 차례가 있는 책으로 엮어요. 사진도 함께 넣고, 인쇄해서 부모님께 드릴 수도 있어요.</Text>
+            <Text style={s.cardDesc}>표지와 차례가 있는 책으로 엮어 PDF로 남겨요.</Text>
           </View>
           <FontAwesome name="chevron-right" size={12} color="#A39682" />
         </TouchableOpacity>
@@ -344,8 +343,7 @@ ${failed}장은 받지 못했어요. 인터넷을 확인하고 한 번 더 해�
           <View style={s.info}>
             <Text style={s.cardTitle}>파일로 담아두기</Text>
             <Text style={s.cardDesc}>
-              기록과 일정, 가계부 설정을 파일 하나에 담아요. familog가 없어도 열어볼 수 있어요.
-              사진은 따로 두고, 어느 사진인지만 적어둬요.
+              기록과 일정, 가계부 설정을 파일 하나에 담아요. 사진은 따로 받아요.
             </Text>
           </View>
           <FontAwesome name="chevron-right" size={12} color="#A39682" />
@@ -360,7 +358,7 @@ ${failed}장은 받지 못했어요. 인터넷을 확인하고 한 번 더 해�
             <View style={s.info}>
               <Text style={s.cardTitle}>백업 파일에서 되살리기</Text>
               <Text style={s.cardDesc}>
-                담아둔 파일을 고르면 기록을 되살려요. 무엇이 들었는지 먼저 보여주고, 괜찮다고 하면 넣을게요.
+                담아둔 파일을 고르면 내용을 먼저 보여주고, 확인 뒤에 넣어요.
               </Text>
             </View>
             <FontAwesome name="chevron-right" size={12} color="#A39682" />
@@ -383,8 +381,8 @@ ${failed}장은 받지 못했어요. 인터넷을 확인하고 한 번 더 해�
               {zipping
                 ? `사진을 받고 있어요 ${zipping.done}/${zipping.total}`
                 : photoPlan.length
-                  ? `기록에 붙인 사진 ${photoPlan.length}장을 한 파일로 받아요. 기록 종류별로 폴더를 나눠둘게요.`
-                  : '기록에 사진을 붙이면 여기서 한꺼번에 내려받을 수 있어요.'}
+                  ? `사진 ${photoPlan.length}장을 기록 종류별 폴더로 나눠 한 파일로 받아요.`
+                  : '기록에 사진을 붙이면 여기서 한꺼번에 받을 수 있어요.'}
             </Text>
           </View>
           <FontAwesome name="chevron-right" size={12} color="#A39682" />
@@ -393,8 +391,7 @@ ${failed}장은 받지 못했어요. 인터넷을 확인하고 한 번 더 해�
         <View style={s.infoBox}>
           <FontAwesome name="info-circle" size={14} color="#7A6B55" />
           <Text style={s.infoText}>
-            담은 파일은 어느 기기에서나 열리는 형식이에요.
-            메모장으로 열어도 읽을 수 있고, 다른 프로그램으로 옮길 수도 있어요.
+            담은 파일은 어느 기기에서나 열 수 있는 형식이에요.
           </Text>
         </View>
       </ScrollView>

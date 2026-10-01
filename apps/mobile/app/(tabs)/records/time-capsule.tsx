@@ -306,13 +306,13 @@ export default function TimeCapsuleScreen() {
               <Text style={s.createLabel}>편지</Text>
               <TextInput style={[s.createInput, { height: 140, textAlignVertical: 'top' }]} placeholder="몇 년 뒤의 우리에게 하고 싶은 말" placeholderTextColor="#A39682" multiline numberOfLines={5}
                 value={formMessage} onChangeText={setFormMessage} />
-              <Text style={s.createLabel}>언제 열어볼까요?</Text>
+              <Text style={s.createLabel}>여는 날</Text>
               <DateField value={formTarget} onChange={setFormTarget} placeholder="열어볼 날을 골라주세요" allowEmpty={false} />
-              <Text style={s.createLabel}>어떤 날인가요?</Text>
+              <Text style={s.createLabel}>어떤 날</Text>
               <TextInput style={s.createInput} placeholder="예) 첫째 성인식" placeholderTextColor="#A39682"
                 value={formType} onChangeText={setFormType} />
               <TouchableOpacity style={[s.createSubmit, !canSave && s.submitDisabled]} disabled={!canSave} activeOpacity={0.7} onPress={handleSave}>
-                <Text style={s.createSubmitText}>{editingId ? '고친 내용 저장' : '봉인하기'}</Text>
+                <Text style={s.createSubmitText}>{editingId ? '저장' : '봉인하기'}</Text>
               </TouchableOpacity>
             </ScrollView>
             </Animated.View>
@@ -359,7 +359,7 @@ export default function TimeCapsuleScreen() {
               <View style={s.empty}>
                 <FontAwesome name="clock-o" size={32} color="#D6CDBF" />
                 <Text style={s.emptyText}>아직 타임캡슐이 없어요</Text>
-                <Text style={s.emptySub}>몇 년 뒤의 우리 가족에게 편지를 남겨볼까요?</Text>
+                <Text style={s.emptySub}>+ 버튼을 눌러 편지를 남겨보세요</Text>
               </View>
             )}
           </View>

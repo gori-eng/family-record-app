@@ -411,7 +411,7 @@ function FinanceImportScreen() {
               </View>
             </View>
 
-            <Text style={s.sectionTitle}>미리 보기. 항목을 누르면 고칠 수 있어요</Text>
+            <Text style={s.sectionTitle}>미리 보기</Text>
             {candidates.map((c) => {
               const forced = forceAdd.has(c.line);
               const will = !c.skip && (!c.duplicate || forced);

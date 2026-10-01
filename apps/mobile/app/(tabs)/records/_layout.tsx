@@ -46,7 +46,7 @@ export default function RecordsLayout() {
       <Stack.Screen name="goals" options={{ title: '가족 목표' }} />
       <Stack.Screen name="health" options={{ title: '건강 기록' }} />
       <Stack.Screen name="time-capsule" options={{ title: '타임캡슐' }} />
-      <Stack.Screen name="search" options={{ title: '기록 찾기' }} />
+      <Stack.Screen name="search" options={{ title: '기록 검색' }} />
     </Stack>
   );
 }

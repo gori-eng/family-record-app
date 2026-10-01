@@ -1,5 +1,5 @@
 import { iga } from '../lib/korean';
-import { View, Text, TouchableOpacity, TextInput, ScrollView, StyleSheet, Platform, Share } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, StyleSheet, Platform, Share, ActivityIndicator } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
@@ -247,7 +247,7 @@ export default function FamilySetup({ adding = false, initialCode }: { adding?: 
           </View>
           <View style={{ flex: 1 }}>
             <Text style={s.choiceTitle}>가족 새로 만들기</Text>
-            <Text style={s.choiceDesc}>내가 처음이에요. 만들면 초대 코드가 생겨요.</Text>
+            <Text style={s.choiceDesc}>만들면 초대 코드가 생겨요</Text>
           </View>
           <FontAwesome name="chevron-right" size={12} color="#A39682" />
         </TouchableOpacity>
@@ -258,7 +258,7 @@ export default function FamilySetup({ adding = false, initialCode }: { adding?: 
           </View>
           <View style={{ flex: 1 }}>
             <Text style={s.choiceTitle}>초대 코드로 들어가기</Text>
-            <Text style={s.choiceDesc}>가족에게 받은 코드가 있어요.</Text>
+            <Text style={s.choiceDesc}>가족에게 받은 코드로 들어가요</Text>
           </View>
           <FontAwesome name="chevron-right" size={12} color="#A39682" />
         </TouchableOpacity>
@@ -311,7 +311,7 @@ export default function FamilySetup({ adding = false, initialCode }: { adding?: 
       )}
 
       <Text style={s.label}>기록에 남을 이름</Text>
-      <TextInput style={s.input} placeholder="예) 지수" placeholderTextColor="#A39682"
+      <TextInput style={s.input} placeholder="부르는 이름" placeholderTextColor="#A39682"
         value={display} onChangeText={setDisplay} maxLength={10} />
       <Text style={s.hint}>가족이 부르는 이름이면 돼요. 프로필 이름은 나중에 바꿀 수 있어요.</Text>
 
@@ -320,9 +320,9 @@ export default function FamilySetup({ adding = false, initialCode }: { adding?: 
         activeOpacity={0.8}
         disabled={busy}
         onPress={creating ? handleCreate : handleJoin}>
-        <Text style={s.primaryBtnText}>
-          {busy ? '잠시만요' : creating ? '가족 만들기' : '들어가기'}
-        </Text>
+        {busy ? <ActivityIndicator color="#FFFFFF" /> : (
+          <Text style={s.primaryBtnText}>{creating ? '가족 만들기' : '들어가기'}</Text>
+        )}
       </TouchableOpacity>
     </ScrollView>
   );
