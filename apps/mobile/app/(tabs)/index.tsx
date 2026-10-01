@@ -229,7 +229,7 @@ export default function HomeScreen() {
               <Text style={s.sectionSub}>{todayEvents.length > 0 ? `${todayEvents.length}개 있어요` : '느긋한 하루예요'}</Text>
             </View>
             <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')} style={s.seeAllBtn}>
-              <Text style={s.seeAllText}>전체</Text>
+              <Text style={s.seeAllText}>캘린더</Text>
               <FontAwesome name="arrow-right" size={11} color="#4A8C6F" />
             </TouchableOpacity>
           </View>
@@ -238,8 +238,8 @@ export default function HomeScreen() {
           ) : todayEvents.length === 0 ? (
             <TouchableOpacity style={s.emptyState} activeOpacity={0.7} onPress={() => router.push('/(tabs)/calendar')}>
               <FontAwesome name="calendar-o" size={32} color="#D6CDBF" />
-              <Text style={s.emptyTitle}>오늘은 일정이 없어요</Text>
-              <Text style={s.emptySub}>약속이 생기면 눌러서 적어두세요</Text>
+              <Text style={s.emptyTitle}>일정이 없는 날이에요</Text>
+              <Text style={s.emptySub}>카드를 눌러 일정을 생성해 보세요</Text>
             </TouchableOpacity>
           ) : (
           <View style={s.timeline}>
@@ -299,7 +299,7 @@ export default function HomeScreen() {
 
         {/* 빠른 기록 */}
         <View style={s.quickSection}>
-          <Text style={s.quickTitle}>바로 적기</Text>
+          <Text style={s.quickTitle}>빠른 기록</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.quickScroll}>
             {[
               { icon: 'pencil', label: '일기', route: '/(tabs)/records/parenting' },
@@ -323,10 +323,10 @@ export default function HomeScreen() {
           <View style={s.sectionHeader}>
             <View>
               <Text style={s.sectionTitle}>최근 기록</Text>
-              <Text style={s.sectionSub}>가족이 요즘 남긴 것들</Text>
+              <Text style={s.sectionSub}>가족 구성원이 최근에 남긴 게시물을 보여줘요</Text>
             </View>
             <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/records')} style={s.seeAllBtn}>
-              <Text style={s.seeAllText}>전체</Text>
+              <Text style={s.seeAllText}>기록 메뉴</Text>
               <FontAwesome name="arrow-right" size={11} color="#4A8C6F" />
             </TouchableOpacity>
           </View>
@@ -336,7 +336,7 @@ export default function HomeScreen() {
             <TouchableOpacity style={s.emptyState} activeOpacity={0.7} onPress={() => router.push('/(tabs)/records')}>
               <FontAwesome name="pencil-square-o" size={32} color="#D6CDBF" />
               <Text style={s.emptyTitle}>아직 기록이 없어요</Text>
-              <Text style={s.emptySub}>오늘 있었던 일부터 하나 남겨볼까요?</Text>
+              <Text style={s.emptySub}>카드를 눌러 기록을 남겨보세요</Text>
             </TouchableOpacity>
           ) : (
           <View style={s.recordGrid}>

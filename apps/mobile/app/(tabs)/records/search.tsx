@@ -159,10 +159,9 @@ export default function SearchScreen() {
           <View style={s.block}>
             <Text style={s.blockTitle}>이렇게 찾아보세요</Text>
             {[
-              '가족 이름을 넣으면 그 사람이 쓰거나 함께한 기록이 나와요.',
-              '가게나 장소 이름으로도 찾아요. 가계부, 여행, 일정까지요.',
+              '가족 구성원의 이름을 검색하면 그 사람이 작성하거나 함께한 기록이 나와요.',
+              '가게나 장소 이름으로도 일정을 찾을 수 있어요. 가계부, 여행, 일정도 포함해요.',
               '메모 속 한 낱말도 괜찮아요. 재료나 책 한 구절처럼요.',
-              '두 낱말을 띄어 쓰면 둘 다 들어간 것만 보여줘요. 예) 이마트 예은',
             ].map((line) => (
               <View key={line} style={s.tipRow}>
                 <Text style={s.tipBullet}>•</Text>
