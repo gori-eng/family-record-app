@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import { showAlert } from '../../components/AppAlert';
 import { Link, useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
@@ -80,7 +80,7 @@ export default function RegisterScreen() {
 
           <TouchableOpacity style={[s.submitBtn, loading && s.submitBtnDisabled]} onPress={handleRegister}
             disabled={loading} activeOpacity={0.8}>
-            <Text style={s.submitBtnText}>{loading ? '가입하고 있어요' : '가입하기'}</Text>
+            {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={s.submitBtnText}>가입하기</Text>}
           </TouchableOpacity>
         </View>
 

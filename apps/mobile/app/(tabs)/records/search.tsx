@@ -126,8 +126,6 @@ export default function SearchScreen() {
           value={query}
           onChangeText={(v) => { setQuery(v); setFilter('all'); }}
           onSubmitEditing={() => remember(query)}
-          placeholder="이름이나 가게, 메모 속 한 낱말로"
-          placeholderTextColor="#A39682"
           autoFocus
           returnKeyType="search"
           autoCorrect={false}
@@ -160,10 +158,17 @@ export default function SearchScreen() {
           )}
           <View style={s.block}>
             <Text style={s.blockTitle}>이렇게 찾아보세요</Text>
-            <Text style={s.tip}>가족 이름을 넣으면 그 사람이 쓰거나 함께한 기록이 나와요.</Text>
-            <Text style={s.tip}>가게나 장소 이름으로도 찾아요. 가계부, 여행, 일정까지요.</Text>
-            <Text style={s.tip}>메모 속 한 낱말도 괜찮아요. 재료나 책 한 구절처럼요.</Text>
-            <Text style={s.tip}>두 낱말을 띄어 쓰면 둘 다 들어간 것만 보여줘요. 예) 이마트 예은</Text>
+            {[
+              '가족 이름을 넣으면 그 사람이 쓰거나 함께한 기록이 나와요.',
+              '가게나 장소 이름으로도 찾아요. 가계부, 여행, 일정까지요.',
+              '메모 속 한 낱말도 괜찮아요. 재료나 책 한 구절처럼요.',
+              '두 낱말을 띄어 쓰면 둘 다 들어간 것만 보여줘요. 예) 이마트 예은',
+            ].map((line) => (
+              <View key={line} style={s.tipRow}>
+                <Text style={s.tipBullet}>•</Text>
+                <Text style={s.tip}>{line}</Text>
+              </View>
+            ))}
           </View>
         </ScrollView>
       ) : tooShort ? (
@@ -251,7 +256,9 @@ const s = StyleSheet.create({
   },
   recentText: { fontSize: 13, color: '#1F1F1F', fontFamily: 'Pretendard' },
   recentX: { paddingHorizontal: 8, paddingVertical: 6 },
-  tip: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard', lineHeight: 22 },
+  tipRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 2 },
+  tipBullet: { fontSize: 13, color: '#4A8C6F', lineHeight: 22, fontFamily: 'PretendardBold' },
+  tip: { flex: 1, fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard', lineHeight: 22 },
   hint: { textAlign: 'center', color: '#7A6B55', fontSize: 13, fontFamily: 'Pretendard', marginTop: 40 },
   empty: { alignItems: 'center', marginTop: 56, gap: 10, paddingHorizontal: 32 },
   emptyTitle: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', textAlign: 'center' },

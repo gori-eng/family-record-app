@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import { showAlert } from '../../components/AppAlert';
 import { Link, useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
@@ -79,7 +79,7 @@ export default function LoginScreen() {
             disabled={loading}
             activeOpacity={0.8}
           >
-            <Text style={s.loginBtnText}>{loading ? '들어가고 있어요' : '로그인'}</Text>
+            {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={s.loginBtnText}>로그인</Text>}
           </TouchableOpacity>
           <Link href="/(auth)/forgot-password" asChild>
             <TouchableOpacity style={s.forgotBtn} activeOpacity={0.7}>

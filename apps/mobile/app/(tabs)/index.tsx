@@ -151,7 +151,7 @@ export default function HomeScreen() {
                 <View style={s.notifEmpty}>
                   <FontAwesome name="bell-o" size={28} color="#D6CDBF" />
                   <Text style={s.notifEmptyTitle}>아직 새 소식이 없어요</Text>
-                  <Text style={s.notifEmptySub}>가족이 뭔가 남기거나 일정이 다가오면 여기서 알려줄게요</Text>
+                  <Text style={s.notifEmptySub}>가족 게시글이 생기거나, 예정된 일정이 다가오면 알려드려요</Text>
                 </View>
               )}
               {news.items.map(n => (
