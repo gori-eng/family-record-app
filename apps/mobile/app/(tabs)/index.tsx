@@ -1,4 +1,4 @@
-import { iga } from '../../lib/korean';
+import { iga, nthDay } from '../../lib/korean';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, Modal, Animated, Pressable, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
@@ -247,7 +247,7 @@ export default function HomeScreen() {
               <TouchableOpacity key={i} style={s.timelineItem} activeOpacity={0.7}
                 onPress={() => router.push('/(tabs)/calendar')}>
                 <View style={s.timelineLeft}>
-                  <Text style={s.timelineTime}>{ev.endDate && ev.endDate > ev.date ? `${dayIndexOf(ev, todayISO())?.nth ?? 1}째 날` : formatTime(ev.time)}</Text>
+                  <Text style={s.timelineTime}>{ev.endDate && ev.endDate > ev.date ? nthDay(dayIndexOf(ev, todayISO())?.nth ?? 1) : formatTime(ev.time)}</Text>
                   <View style={[s.timelineDot, { backgroundColor: ev.color }]} />
                   {i < todayEvents.length - 1 && <View style={s.timelineLine} />}
                 </View>

@@ -8,7 +8,7 @@ import { usePlacesStore, usePlaceSuggestions } from '../../store/places';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { showAlert } from '../../components/AppAlert';
 import { useFamilyMembers, useMe, useCanDelete, useCanEdit } from '../../store/family';
-import { eulreul } from '../../lib/korean';
+import { eulreul, nthDay } from '../../lib/korean';
 import { parseLooseDate } from '../../lib/dates';
 import { nameColor } from '../../lib/nameColor';
 import { LoadingRows, useEventsReady } from '../../components/Loading';
@@ -448,6 +448,10 @@ export default function CalendarScreen() {
 
                   <Text style={styles.addLabel}>함께하는 사람</Text>
                   <View style={styles.chipRow}>
+                    {/* '가족 모두' = 아무도 안 고른 상태. 기본값이 눈에 보이게 칩으로 둔다 (운영자 피드백) */}
+                    <TouchableOpacity style={[styles.chip, fMembers.length === 0 && styles.chipOn]} activeOpacity={0.7} onPress={() => setFMembers([])}>
+                      <Text style={[styles.chipText, fMembers.length === 0 && styles.chipTextOn]}>가족 모두</Text>
+                    </TouchableOpacity>
                     {MEMBERS.map((m) => {
                       const on = fMembers.includes(m);
                       return (
@@ -572,7 +576,7 @@ export default function CalendarScreen() {
                 <View style={styles.eventWhen}>
                   {dayIndexOf(ev, selectedDate) ? (
                     <>
-                      <Text style={[styles.eventWhenMain, { color: eventColor(ev) }]}>{dayIndexOf(ev, selectedDate)!.nth}째 날</Text>
+                      <Text style={[styles.eventWhenMain, { color: eventColor(ev) }]}>{nthDay(dayIndexOf(ev, selectedDate)!.nth)}</Text>
                       <Text style={styles.eventWhenSub}>{dayIndexOf(ev, selectedDate)!.total}일 중</Text>
                     </>
                   ) : ev.time ? (

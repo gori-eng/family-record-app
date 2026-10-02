@@ -54,6 +54,14 @@ export const gwawa = (word: string): string => {
 };
 
 /** '부모예요' / '손님이에요' — 받침이 있으면 '이에요' */
+/**
+ * 몇째 날 — "1째 날"이 아니라 "첫째 날" (운영자 지적 2026-10-02).
+ * 스물째까지는 우리말 서수로, 그 뒤는 "21일째"로 적는다.
+ */
+const ORDINALS = ['', '첫째', '둘째', '셋째', '넷째', '다섯째', '여섯째', '일곱째', '여덟째', '아홉째', '열째',
+  '열한째', '열두째', '열셋째', '열넷째', '열다섯째', '열여섯째', '열일곱째', '열여덟째', '열아홉째', '스무째'];
+export const nthDay = (n: number): string => (n >= 1 && n < ORDINALS.length ? `${ORDINALS[n]} 날` : `${n}일째`);
+
 export const ieyo = (word: string): string => {
   const j = jongseong(word);
   if (j === null) return '예요';
