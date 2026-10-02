@@ -1,4 +1,5 @@
 import { DateField } from '../../components/DateField';
+import { TimeWheel } from '../../components/TimeWheel';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, Modal, Animated, Pressable, KeyboardAvoidingView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
@@ -17,10 +18,8 @@ import {
   type CalendarEvent,
 } from '../../store/events';
 
-const tomorrowISO = () => { const d = new Date(); d.setDate(d.getDate() + 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
-
-/** 시간 입력을 한 번에 채우는 버튼 — 자주 쓰는 시간대 */
-const TIME_CHIPS = ['09:00', '12:00', '15:00', '18:00', '20:00'];
+/** 일정 이름 칸의 예시 — 지금 시간대에 맞춰 (운영자 지정) */
+const titleHint = () => { const h = new Date().getHours(); return h < 10 ? '아침 잘 챙겨먹기' : h < 15 ? '점심 잘 챙겨먹기' : h < 20 ? '저녁 잘 챙겨먹기' : '숙면 취하기'; };
 
 /** 며칠 뒤의 'YYYY-MM-DD' */
 const addDaysISO = (iso: string, n: number) => { const d = new Date(`${iso}T00:00:00`); d.setDate(d.getDate() + n); return toISO(d); };
@@ -61,10 +60,15 @@ export default function CalendarScreen() {
   /** 일정 날짜 — 새 일정은 고른 날, 고칠 땐 그 일정의 날. 여기서 바꿀 수 있다 (점검 B8) */
   const [fDate, setFDate] = useState(todayISO());
   const [fTime, setFTime] = useState('');
-  /** 며칠짜리 일정 — 켜면 끝나는 날·시각 칸이 나온다 (구글 캘린더처럼) */
+  /** 여러 날에 걸친 일정 — 켜면 끝나는 날 칸이 나온다 */
   const [fMultiDay, setFMultiDay] = useState(false);
   const [fEndDate, setFEndDate] = useState('');
-  const [fEndTime, setFEndTime] = useState('');
+  /** 저장을 눌렀는데 비어 있는 칸 — 시트 아래 작은 안내 + 그 칸으로 스크롤 (운영자 요청: 큰 확인창 대신) */
+  const [formError, setFormError] = useState<string | null>(null);
+  const errorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const formScroll = useRef<ScrollView>(null);
+  /** 칸이 폼 안에서 어디쯤인지 (onLayout으로 잰다) — 비면 그리로 올린다 */
+  const fieldY = useRef<Record<string, number>>({});
   const [fLocation, setFLocation] = useState('');
   /** 장소 칸에 손을 대고 있는 동안만 추천을 펼친다 */
   const [placeFocus, setPlaceFocus] = useState(false);
@@ -108,7 +112,7 @@ export default function CalendarScreen() {
 
   const resetForm = () => {
     setFTitle(''); setFTime(''); setFLocation(''); setFMembers([]); setFMemo(''); setFColor(EVENT_COLORS[0]);
-    setFMultiDay(false); setFEndDate(''); setFEndTime(''); setPlaceFocus(false);
+    setFMultiDay(false); setFEndDate(''); setPlaceFocus(false); setFormError(null);
   };
 
   /** 새 일정 — 지금 고른 날짜에 넣는다 */
@@ -121,9 +125,8 @@ export default function CalendarScreen() {
     setFTitle(event.title);
     setFTime(event.time);
     const multi = !!event.endDate && event.endDate > event.date;
-    setFMultiDay(multi || !!event.endTime);
+    setFMultiDay(multi);
     setFEndDate(multi ? event.endDate! : '');
-    setFEndTime(event.endTime ?? '');
     setFLocation(event.location ?? '');
     setFMembers(event.members);
     setFMemo(event.memo ?? '');
@@ -136,39 +139,29 @@ export default function CalendarScreen() {
   const toggleMember = (name: string) =>
     setFMembers((prev) => (prev.includes(name) ? prev.filter((m) => m !== name) : [...prev, name]));
 
+  /** 비어 있는 칸을 알리고 그 칸으로 올린다 */
+  const fail = (msg: string, field: string) => {
+    setFormError(msg);
+    if (errorTimer.current) clearTimeout(errorTimer.current);
+    errorTimer.current = setTimeout(() => setFormError(null), 2500);
+    const y = fieldY.current[field];
+    if (y !== undefined) formScroll.current?.scrollTo({ y: Math.max(0, y - 8), animated: true });
+  };
+
   const handleSave = () => {
     const title = fTitle.trim();
-    if (!title) {
-      showAlert('일정 이름을 적어주세요', '무슨 일인지 한 줄만 있으면 충분해요.');
-      return;
-    }
+    if (!title) { fail('일정 이름을 적어주세요', 'title'); return; }
     const date = parseLooseDate(fDate);
-    if (!date) {
-      showAlert('날짜를 한 번 봐주세요', '2026.10.3처럼 적거나, 위의 오늘이나 내일 버튼을 눌러주세요.');
-      return;
-    }
-    // "저녁" 같은 말은 시간으로 못 알아듣는다 — 조용히 하루 종일로 바꾸지 말고 물어본다
-    if (fTime.trim() && !normalizeTime(fTime)) {
-      showAlert('몇 시인지 못 알아들었어요', "'오후 6시'나 '18:00'처럼 적어주세요. 시간이 없으면 비워두면 하루 종일이 돼요.");
-      return;
-    }
-    // 끝나는 날·시각 — 켰을 때만. 시작보다 앞이면 되묻는다
+    if (!date) { fail('날짜를 골라주세요', 'date'); return; }
+    // 끝나는 날 — 켰을 때만. 시작보다 앞이면 되묻는다
     let endDate: string | undefined;
-    let endTime = '';
+    const endTime = '';
     if (fMultiDay) {
-      if (fEndDate.trim()) {
-        const parsed = parseLooseDate(fEndDate);
-        if (!parsed) { showAlert('끝나는 날을 한 번 봐주세요', '2026.10.5처럼 적어주세요.'); return; }
-        if (parsed < date) { showAlert('끝나는 날이 시작보다 앞이에요', '시작한 날이거나 그 뒤여야 해요.'); return; }
-        endDate = parsed > date ? parsed : undefined;
-      }
-      if (fEndTime.trim()) {
-        if (!normalizeTime(fEndTime)) { showAlert('끝나는 시각을 못 알아들었어요', "'오후 8시'나 '20:00'처럼 적어주세요."); return; }
-        endTime = normalizeTime(fEndTime);
-        if (!endDate && fTime.trim() && endTime < normalizeTime(fTime)) {
-          showAlert('끝나는 시각이 시작보다 앞이에요', '같은 날이면 시작 시각 뒤여야 해요.'); return;
-        }
-      }
+      if (!fEndDate.trim()) { fail('끝나는 날을 골라주세요', 'end'); return; }
+      const parsed = parseLooseDate(fEndDate);
+      if (!parsed) { fail('끝나는 날을 골라주세요', 'end'); return; }
+      if (parsed < date) { fail('끝나는 날이 시작보다 앞이에요', 'end'); return; }
+      endDate = parsed > date ? parsed : undefined;
     }
     const payload = {
       date,
@@ -380,64 +373,52 @@ export default function CalendarScreen() {
                     <FontAwesome name="times" size={20} color="#4A4A4A" />
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.addDate}>{parseLooseDate(fDate) ? formatEventDate(parseLooseDate(fDate)!) : '날짜를 적어주세요'}</Text>
 
-                <ScrollView style={{ maxHeight: 460 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                  <Text style={styles.addLabel}>언제</Text>
-                  <View style={styles.chipRow}>
-                    {([['고른 날', selectedDate], ['오늘', todayISO()], ['내일', tomorrowISO()]] as const).map(([label, iso]) => (
-                      <TouchableOpacity key={label} style={[styles.chip, fDate === iso && styles.chipOn]}
-                        activeOpacity={0.7} onPress={() => setFDate(iso)}>
-                        <Text style={[styles.chipText, fDate === iso && styles.chipTextOn]}>{label}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                  <DateField value={fDate} onChange={setFDate} allowEmpty={false} />
-
-                  <Text style={styles.addLabel}>일정 이름</Text>
-                  <TextInput style={styles.addInput} placeholder="예) 가족 저녁 식사" placeholderTextColor="#A39682"
-                    value={fTitle} onChangeText={setFTitle} />
-
-                  <Text style={styles.addLabel}>시작 시각</Text>
-                  <TextInput style={styles.addInput} placeholder="비워두면 하루 종일" placeholderTextColor="#A39682"
-                    value={fTime} onChangeText={setFTime} />
-                  <View style={styles.chipRow}>
-                    {TIME_CHIPS.map((t) => (
-                      <TouchableOpacity key={t} style={[styles.chip, fTime === t && styles.chipOn]}
-                        activeOpacity={0.7} onPress={() => setFTime(t)}>
-                        <Text style={[styles.chipText, fTime === t && styles.chipTextOn]}>{formatTime(t)}</Text>
-                      </TouchableOpacity>
-                    ))}
-                    <TouchableOpacity style={[styles.chip, !fTime && styles.chipOn]} activeOpacity={0.7} onPress={() => setFTime('')}>
-                      <Text style={[styles.chipText, !fTime && styles.chipTextOn]}>하루 종일</Text>
-                    </TouchableOpacity>
+                <ScrollView ref={formScroll} style={{ maxHeight: 460 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                  {/* 날짜 — 캘린더에서 고른 날이 기본값 (openCreate가 selectedDate를 넣는다) */}
+                  <View onLayout={(e) => { fieldY.current.date = e.nativeEvent.layout.y; }}>
+                    <Text style={styles.addLabel}>날짜<Text style={styles.req}> *</Text></Text>
+                    <DateField value={fDate} onChange={setFDate} allowEmpty={false} compact />
                   </View>
 
-                  <TouchableOpacity style={styles.toggleRow} activeOpacity={0.7} onPress={() => setFMultiDay((v) => !v)}>
-                    <FontAwesome name={fMultiDay ? 'check-square' : 'square-o'} size={18} color={fMultiDay ? '#4A8C6F' : '#A39682'} />
-                    <Text style={styles.toggleText}>끝나는 날과 시각 정하기</Text>
+                  <View onLayout={(e) => { fieldY.current.title = e.nativeEvent.layout.y; }}>
+                    <Text style={styles.addLabel}>일정 이름<Text style={styles.req}> *</Text></Text>
+                    <TextInput style={styles.addInput} placeholder={`예) ${titleHint()}`} placeholderTextColor="#A39682"
+                      value={fTitle} onChangeText={setFTitle} />
+                  </View>
+
+                  {/* 시각 — 기본은 하루 종일. 켜면 다이얼로 고른다 */}
+                  <TouchableOpacity style={styles.toggleRow} activeOpacity={0.7} onPress={() => setFTime(fTime ? '' : '09:00')}>
+                    <FontAwesome name={fTime ? 'check-square' : 'square-o'} size={18} color={fTime ? '#4A8C6F' : '#A39682'} />
+                    <Text style={styles.toggleText}>{fTime ? `시작 시각 ${formatTime(fTime)}` : '시작 시각 정하기'}</Text>
                   </TouchableOpacity>
-                  {fMultiDay && (
-                    <View style={styles.endBox}>
-                      <Text style={styles.addLabel}>끝나는 날</Text>
-                      <View style={styles.chipRow}>
-                        {([['같은 날', ''], ['다음 날', addDaysISO(parseLooseDate(fDate) ?? todayISO(), 1)], ['이틀 뒤', addDaysISO(parseLooseDate(fDate) ?? todayISO(), 2)]] as const).map(([label, iso]) => (
-                          <TouchableOpacity key={label} style={[styles.chip, fEndDate === iso && styles.chipOn]}
-                            activeOpacity={0.7} onPress={() => setFEndDate(iso)}>
-                            <Text style={[styles.chipText, fEndDate === iso && styles.chipTextOn]}>{label}</Text>
-                          </TouchableOpacity>
-                        ))}
+                  {!!fTime && <TimeWheel value={fTime} onChange={setFTime} />}
+
+                  {/* 여러 날에 걸친 일정 — 다이얼 바로 아래 */}
+                  <View onLayout={(e) => { fieldY.current.end = e.nativeEvent.layout.y; }}>
+                    <TouchableOpacity style={styles.toggleRow} activeOpacity={0.7} onPress={() => setFMultiDay((v) => !v)}>
+                      <FontAwesome name={fMultiDay ? 'check-square' : 'square-o'} size={18} color={fMultiDay ? '#4A8C6F' : '#A39682'} />
+                      <Text style={styles.toggleText}>여러 날에 걸친 일정</Text>
+                    </TouchableOpacity>
+                    {fMultiDay && (
+                      <View style={styles.endBox}>
+                        <Text style={styles.addLabel}>끝나는 날<Text style={styles.req}> *</Text></Text>
+                        <View style={styles.chipRow}>
+                          {([['다음 날', addDaysISO(parseLooseDate(fDate) ?? todayISO(), 1)], ['이틀 뒤', addDaysISO(parseLooseDate(fDate) ?? todayISO(), 2)], ['일주일 뒤', addDaysISO(parseLooseDate(fDate) ?? todayISO(), 7)]] as const).map(([label, iso]) => (
+                            <TouchableOpacity key={label} style={[styles.chip, fEndDate === iso && styles.chipOn]}
+                              activeOpacity={0.7} onPress={() => setFEndDate(iso)}>
+                              <Text style={[styles.chipText, fEndDate === iso && styles.chipTextOn]}>{label}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                        <DateField value={fEndDate} onChange={setFEndDate} placeholder="끝나는 날" compact />
                       </View>
-                      <DateField value={fEndDate} onChange={setFEndDate} placeholder="비워두면 같은 날에 끝나요" />
-                      <Text style={styles.addLabel}>끝나는 시각</Text>
-                      <TextInput style={styles.addInput} placeholder="비워두면 시각은 안 적어요" placeholderTextColor="#A39682"
-                        value={fEndTime} onChangeText={setFEndTime} />
-                    </View>
-                  )}
+                    )}
+                  </View>
 
                   <Text style={styles.addLabel}>장소</Text>
                   <View style={styles.placeInputRow}>
-                    <TextInput style={[styles.addInput, styles.placeInput]} placeholder="예) 동네 공원" placeholderTextColor="#A39682"
+                    <TextInput style={[styles.addInput, styles.placeInput]}
                       value={fLocation} onChangeText={setFLocation}
                       onFocus={() => setPlaceFocus(true)} onBlur={() => setTimeout(() => setPlaceFocus(false), 150)} />
                     {!!fLocation.trim() && (
@@ -465,7 +446,7 @@ export default function CalendarScreen() {
                     </View>
                   )}
 
-                  <Text style={styles.addLabel}>누구랑</Text>
+                  <Text style={styles.addLabel}>함께하는 사람</Text>
                   <View style={styles.chipRow}>
                     {MEMBERS.map((m) => {
                       const on = fMembers.includes(m);
@@ -479,13 +460,20 @@ export default function CalendarScreen() {
 
                   <Text style={styles.addLabel}>메모</Text>
                   <TextInput style={[styles.addInput, { minHeight: 80, textAlignVertical: 'top' }]}
-                    placeholder="챙길 것이나 기억하고 싶은 것" placeholderTextColor="#A39682"
                     value={fMemo} onChangeText={setFMemo} multiline numberOfLines={3} />
 
                   <TouchableOpacity style={styles.addSubmit} activeOpacity={0.8} onPress={handleSave}>
                     <Text style={styles.addSubmitText}>{editing ? '저장' : '일정 만들기'}</Text>
                   </TouchableOpacity>
                 </ScrollView>
+
+                {/* 비어 있는 칸 안내 — 시트 아래 작은 띠. 2.5초 뒤 사라진다 */}
+                {!!formError && (
+                  <View style={styles.errorBar}>
+                    <FontAwesome name="exclamation-circle" size={14} color="#D94040" />
+                    <Text style={styles.errorText}>{formError}</Text>
+                  </View>
+                )}
               </>
             )}
           </Animated.View>
@@ -512,7 +500,7 @@ export default function CalendarScreen() {
         {!isCurrentMonth && (
           <TouchableOpacity style={styles.todayChip} onPress={goToToday} activeOpacity={0.7}>
             <FontAwesome name="calendar-check-o" size={12} color="#2D5A3F" />
-            <Text style={styles.todayChipText}>오늘로</Text>
+            <Text style={styles.todayChipText}>오늘 날짜로</Text>
           </TouchableOpacity>
         )}
 
@@ -580,13 +568,24 @@ export default function CalendarScreen() {
           ) : (
             selectedEvents.map((ev) => (
               <TouchableOpacity key={ev.id} style={styles.eventCard} activeOpacity={0.7} onPress={() => openDetail(ev)}>
+                {/* 왼쪽 시각 칸 — 같은 날 일정이 여럿이어도 시각으로 바로 갈린다 */}
+                <View style={styles.eventWhen}>
+                  {dayIndexOf(ev, selectedDate) ? (
+                    <>
+                      <Text style={[styles.eventWhenMain, { color: eventColor(ev) }]}>{dayIndexOf(ev, selectedDate)!.nth}째 날</Text>
+                      <Text style={styles.eventWhenSub}>{dayIndexOf(ev, selectedDate)!.total}일 중</Text>
+                    </>
+                  ) : ev.time ? (
+                    <>
+                      <Text style={[styles.eventWhenMain, { color: eventColor(ev) }]}>{formatTime(ev.time).replace(/^(오전|오후) /, '')}</Text>
+                      <Text style={styles.eventWhenSub}>{formatTime(ev.time).startsWith('오전') ? '오전' : '오후'}</Text>
+                    </>
+                  ) : (
+                    <Text style={styles.eventWhenAll}>하루 종일</Text>
+                  )}
+                </View>
                 <View style={[styles.eventColorBar, { backgroundColor: eventColor(ev) }]} />
                 <View style={styles.eventContent}>
-                  <Text style={styles.eventTime}>
-                    {dayIndexOf(ev, selectedDate)
-                      ? `${dayIndexOf(ev, selectedDate)!.total}일 중 ${dayIndexOf(ev, selectedDate)!.nth}째 날`
-                      : `${formatTime(ev.time)}${ev.endTime ? `부터 ${formatTime(ev.endTime)}까지` : ''}`}
-                  </Text>
                   <Text style={styles.eventName}>{ev.title}</Text>
                   <View style={styles.eventMetaRow}>
                     {!!ev.location && (
@@ -660,7 +659,11 @@ const styles = StyleSheet.create({
   emptyText: { fontSize: 15, fontWeight: '600', color: '#7A6B55', marginTop: 12, fontFamily: 'Pretendard' },
   emptySubtext: { fontSize: 13, color: '#7A6B55', marginTop: 4, fontFamily: 'Pretendard' },
   eventCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
-  eventColorBar: { width: 4, height: 48, borderRadius: 2 },
+  eventColorBar: { width: 4, height: 44, borderRadius: 2 },
+  eventWhen: { width: 58, alignItems: 'center' },
+  eventWhenMain: { fontSize: 15, fontFamily: 'PretendardBold', color: '#1F1F1F' },
+  eventWhenSub: { fontSize: 11, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: 1 },
+  eventWhenAll: { fontSize: 12, color: '#7A6B55', fontFamily: 'PretendardBold', textAlign: 'center' },
   eventContent: { flex: 1 },
   eventTime: { fontSize: 12, color: '#7A6B55', fontWeight: '600', marginBottom: 2, fontFamily: 'Pretendard' },
   eventName: { fontSize: 15, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
@@ -702,8 +705,10 @@ const styles = StyleSheet.create({
 
   addHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   addTitle: { fontSize: 20, fontWeight: '700', color: '#1F1F1F', fontFamily: 'PretendardBold' },
-  addDate: { fontSize: 14, color: '#7A6B55', marginBottom: 16, fontFamily: 'Pretendard' },
   addLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
+  req: { color: '#D94040', fontSize: 12 },
+  errorBar: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#FCF2F2', borderWidth: 1, borderColor: '#F0D4D4', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 11, marginTop: 8 },
+  errorText: { fontSize: 13, color: '#B03A3A', fontFamily: 'PretendardBold' },
   toggleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6, marginBottom: 12 },
   toggleText: { fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard' },
   endBox: { backgroundColor: '#F4F0E8', borderRadius: 12, padding: 12, marginBottom: 12 },

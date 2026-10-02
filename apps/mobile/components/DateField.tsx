@@ -13,7 +13,7 @@ import { todayISO, toISO } from '../store/finance';
 const WEEK = ['일', '월', '화', '수', '목', '금', '토'];
 
 export function DateField({
-  value, onChange, placeholder = '날짜를 골라주세요', allowEmpty = true, style,
+  value, onChange, placeholder = '날짜를 골라주세요', allowEmpty = true, style, compact = false,
 }: {
   value: string;
   onChange: (iso: string) => void;
@@ -21,6 +21,8 @@ export function DateField({
   /** 비울 수 있는 칸이면 '비우기' 버튼을 보여준다 */
   allowEmpty?: boolean;
   style?: any;
+  /** 달력만 보여준다 (오늘 버튼·직접 적기 숨김) — 캘린더 폼처럼 날짜만 고르면 되는 자리 */
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const iso = parseLooseDate(value);
@@ -36,13 +38,13 @@ export function DateField({
           </TouchableOpacity>
         )}
       </TouchableOpacity>
-      <DatePickerSheet visible={open} value={iso ?? ''} onClose={() => setOpen(false)} onPick={(d) => { onChange(d); setOpen(false); }} />
+      <DatePickerSheet visible={open} value={iso ?? ''} compact={compact} onClose={() => setOpen(false)} onPick={(d) => { onChange(d); setOpen(false); }} />
     </>
   );
 }
 
-export function DatePickerSheet({ visible, value, onPick, onClose }: {
-  visible: boolean; value: string; onPick: (iso: string) => void; onClose: () => void;
+export function DatePickerSheet({ visible, value, onPick, onClose, compact = false }: {
+  visible: boolean; value: string; onPick: (iso: string) => void; onClose: () => void; compact?: boolean;
 }) {
   const start = value || todayISO();
   const [ym, setYm] = useState(start.slice(0, 7));
@@ -98,6 +100,7 @@ export function DatePickerSheet({ visible, value, onPick, onClose }: {
               );
             })}
           </View>
+          {!compact && (
           <View style={s.quick}>
             <TouchableOpacity style={s.quickBtn} activeOpacity={0.7} onPress={() => onPick(today)}><Text style={s.quickText}>오늘</Text></TouchableOpacity>
             <View style={s.typedRow}>
@@ -108,6 +111,7 @@ export function DatePickerSheet({ visible, value, onPick, onClose }: {
               )}
             </View>
           </View>
+          )}
           <TouchableOpacity style={s.close} activeOpacity={0.7} onPress={onClose}><Text style={s.closeText}>닫기</Text></TouchableOpacity>
         </View>
       </View>

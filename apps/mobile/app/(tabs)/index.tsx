@@ -75,7 +75,8 @@ export default function HomeScreen() {
   }, []);
 
   const hour = today.getHours();
-  const greeting = hour < 6 ? '새벽이네요' : hour < 12 ? '좋은 아침이에요' : hour < 18 ? '좋은 오후예요' : '좋은 저녁이에요';
+  // 시간대별 인사 (운영자 지정): 아침 5~11시 / 점심 11~14시 / 오후 14~18시 / 저녁과 밤
+  const greeting = hour >= 5 && hour < 11 ? '좋은 아침이에요' : hour >= 11 && hour < 14 ? '식사는 하셨나요?' : hour >= 14 && hour < 18 ? '좋은 오후예요' : '오늘 하루 잘 마무리하셨나요?';
   const news = useFamilyNews();
   const unreadCount = news.unread;
 
