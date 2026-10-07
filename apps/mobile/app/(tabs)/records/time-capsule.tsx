@@ -280,7 +280,7 @@ export default function TimeCapsuleScreen() {
                 <>
                   {/* 봉인 중엔 쓴 사람만 고친다 — 남이 남의 편지를 미리 읽으면 안 되니까 */}
                   {(!selOpen && sel?.author === CURRENT_USER) && <EditRecordRow id={selected.id} onPress={() => startEdit(selected)} />}
-                  <DeleteRecordRow id={selected.id} onPress={() => askDelete(selected.id, { after: closeDetail })} />
+                  <DeleteRecordRow id={selected.id} label="타임캡슐 삭제하기" onPress={() => askDelete(selected.id, { after: closeDetail })} />
                 </>
               )}
             </Animated.View>
@@ -296,7 +296,7 @@ export default function TimeCapsuleScreen() {
             </Animated.View>
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
-              <Text style={s.modalTitle}>{editingId ? '캡슐 고치기' : '새 타임캡슐'}</Text>
+              <Text style={s.modalTitle}>{editingId ? '캡슐 수정하기' : '새 타임캡슐'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }} keyboardShouldPersistTaps="handled">
               <Text style={s.createLabel}>제목</Text>
               <TextInput style={s.createInput} placeholder="예) 첫째 스무 살 생일에" placeholderTextColor="#A39682"

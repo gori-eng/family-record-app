@@ -351,7 +351,7 @@ export default function CalendarScreen() {
                   {canEdit(showDetail.authorId) && (
                   <TouchableOpacity style={styles.detailBtn} activeOpacity={0.7} onPress={() => openEdit(showDetail)}>
                     <FontAwesome name="pencil" size={14} color="#2D5A3F" />
-                    <Text style={styles.detailBtnText}>고치기</Text>
+                    <Text style={styles.detailBtnText}>수정하기</Text>
                   </TouchableOpacity>
                   )}
                   {canDelete(showDetail.authorId) && (
@@ -368,7 +368,7 @@ export default function CalendarScreen() {
             {showForm && (
               <>
                 <View style={styles.addHeader}>
-                  <Text style={styles.addTitle}>{editing ? '일정 고치기' : '새 일정'}</Text>
+                  <Text style={styles.addTitle}>{editing ? '일정 수정하기' : '새 일정'}</Text>
                   <TouchableOpacity onPress={closeModal} activeOpacity={0.7}>
                     <FontAwesome name="times" size={20} color="#4A4A4A" />
                   </TouchableOpacity>

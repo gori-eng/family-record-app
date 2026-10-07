@@ -45,10 +45,10 @@ export function useRecordDelete(what = '기록') {
     if (!record) return;
     const name = record.title || what;
 
-    showAlert(`이 ${what} 지울까요?`, `'${name}'${eulreul(name)} 지울게요. 바로 되돌릴 수 있어요.`, [
+    showAlert(`이 ${what} 삭제할까요?`, `'${name}'${eulreul(name)} 삭제해요. 바로 되돌릴 수 있어요.`, [
       { text: '그냥 둘게요', style: 'cancel' },
       {
-        text: '지우기',
+        text: '삭제',
         style: 'destructive',
         onPress: () => {
           removeRecord(id);
@@ -81,7 +81,7 @@ export function useRecordDelete(what = '기록') {
 
   const undoBar = undoItem ? (
     <View style={s.undoBar}>
-      <Text style={s.undoText} numberOfLines={1}>'{undoItem.title}' 지웠어요</Text>
+      <Text style={s.undoText} numberOfLines={1}>'{undoItem.title}' 삭제했어요</Text>
       <TouchableOpacity style={s.undoBtn} activeOpacity={0.7} onPress={undo}>
         <FontAwesome name="undo" size={12} color="#FFFFFF" />
         <Text style={s.undoBtnText}>되돌리기</Text>
@@ -99,7 +99,7 @@ export function useRecordDelete(what = '기록') {
  * 이유를 보여준다 — 버튼이 아예 없으면 "왜 나만 못 지우지?"가 된다.
  */
 export function DeleteRecordRow({
-  onPress, id, label = '이 기록 지우기',
+  onPress, id, label = '기록 삭제하기',
 }: { onPress: () => void; id?: string; label?: string }) {
   const canDelete = useCanDelete();
   const authorId = useRecordsStore((st) => (id ? st.records.find((r) => r.id === id)?.authorId : undefined));
@@ -107,7 +107,7 @@ export function DeleteRecordRow({
     return (
       <View style={s.noRow}>
         <FontAwesome name="lock" size={12} color="#7A6B55" />
-        <Text style={s.noRowText}>고치기와 지우기는 쓴 사람과 관리자만 할 수 있어요</Text>
+        <Text style={s.noRowText}>수정과 삭제는 쓴 사람과 관리자만 할 수 있어요</Text>
       </View>
     );
   }
@@ -125,7 +125,7 @@ export function DeleteRecordRow({
  * 다시 써야 했다. 작성 폼을 값이 채워진 채로 다시 여는 방식이라(가계부·캘린더와 같다)
  * 편집 전용 폼을 따로 만들지 않는다.
  */
-export function EditRecordRow({ onPress, id, label = '고치기' }: { onPress: () => void; id?: string; label?: string }) {
+export function EditRecordRow({ onPress, id, label = '수정하기' }: { onPress: () => void; id?: string; label?: string }) {
   const canEdit = useCanEdit();
   const authorId = useRecordsStore((st) => (id ? st.records.find((r) => r.id === id)?.authorId : undefined));
   // 못 고치면 줄을 숨긴다 (지우기 줄이 이유를 말해준다 — 두 번 말하지 않는다)

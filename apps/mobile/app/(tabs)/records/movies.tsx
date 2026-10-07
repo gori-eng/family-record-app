@@ -299,7 +299,7 @@ export default function MoviesScreen() {
               {selected && (
                 <>
                   <EditRecordRow id={selected.id} onPress={() => startEdit(selected)} />
-                  <DeleteRecordRow id={selected.id} onPress={() => askDelete(selected.id, { after: closeDetail })} />
+                  <DeleteRecordRow id={selected.id} label="영화 기록 삭제하기" onPress={() => askDelete(selected.id, { after: closeDetail })} />
                 </>
               )}
             </Animated.View>
@@ -315,7 +315,7 @@ export default function MoviesScreen() {
             </Animated.View>
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
-              <Text style={s.modalTitle}>{editingId ? '영화 기록 고치기' : '새 영화 기록'}</Text>
+              <Text style={s.modalTitle}>{editingId ? '영화 기록 수정하기' : '새 영화 기록'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }} keyboardShouldPersistTaps="handled">
               <Text style={s.createLabel}>영화 제목</Text>
               <TextInput

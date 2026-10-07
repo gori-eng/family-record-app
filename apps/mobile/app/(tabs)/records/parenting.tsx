@@ -255,7 +255,7 @@ export default function ParentingScreen() {
               {selected && (
                 <>
                   <EditRecordRow id={selected.id} onPress={() => startEdit(selected)} />
-                  <DeleteRecordRow id={selected.id} onPress={() => askDelete(selected.id, { after: closeDetail })} />
+                  <DeleteRecordRow id={selected.id} label="일기 삭제하기" onPress={() => askDelete(selected.id, { after: closeDetail })} />
                 </>
               )}
             </Animated.View>
@@ -271,7 +271,7 @@ export default function ParentingScreen() {
             </Animated.View>
             <Animated.View style={[styles.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>{editingId ? '일기 고치기' : '새 육아 일기'}</Text>
+              <Text style={styles.modalTitle}>{editingId ? '일기 수정하기' : '새 육아 일기'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }} keyboardShouldPersistTaps="handled">
               <Text style={styles.createLabel}>아이</Text>
               {children.length > 0 && (

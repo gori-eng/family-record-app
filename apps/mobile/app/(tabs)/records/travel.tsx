@@ -271,7 +271,7 @@ export default function TravelScreen() {
               {selectedItem && (
                 <>
                   <EditRecordRow id={selectedItem.id} onPress={startEdit} />
-                  <DeleteRecordRow id={selectedItem.id} onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
+                  <DeleteRecordRow id={selectedItem.id} label="여행 기록 삭제하기" onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
                 </>
               )}
             </Animated.View>
@@ -287,7 +287,7 @@ export default function TravelScreen() {
             </Animated.View>
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
-              <Text style={s.modalTitle}>{editingId ? '여행 기록 고치기' : '새 여행 기록'}</Text>
+              <Text style={s.modalTitle}>{editingId ? '여행 기록 수정하기' : '새 여행 기록'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }} keyboardShouldPersistTaps="handled">
               <Text style={s.createLabel}>어디로</Text>
               <TextInput

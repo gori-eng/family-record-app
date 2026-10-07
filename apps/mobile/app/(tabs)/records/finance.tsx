@@ -493,7 +493,7 @@ function FinanceScreen() {
                       activeOpacity={0.7}
                       onPress={() => { const r = selectedRecord; closeDetail(); setTimeout(() => openForm({ edit: r }), 260); }}>
                       <FontAwesome name="pencil" size={13} color="#2D5A3F" />
-                      <Text style={styles.actionText}>고치기</Text>
+                      <Text style={styles.actionText}>수정하기</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.actionBtn}
@@ -535,7 +535,7 @@ function FinanceScreen() {
             </Animated.View>
             <Animated.View style={[styles.modalSheet, { transform: [{ translateY: formSlide }] }]}>
               <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>{editingId ? '거래 고치기' : '새 거래'}</Text>
+              <Text style={styles.modalTitle}>{editingId ? '거래 수정하기' : '새 거래'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 480 }} keyboardShouldPersistTaps="handled">
                 <View style={styles.pillRow}>
                   {([['지출', 'expense'], ['수입', 'income']] as const).map(([label, val]) => (

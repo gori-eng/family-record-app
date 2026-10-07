@@ -354,8 +354,8 @@ export default function ReadingScreen() {
               )}
               {selectedId && (
                 <>
-                  <EditRecordRow id={selectedId ?? undefined} onPress={startEdit} label="책 정보 고치기" />
-                  <DeleteRecordRow id={selectedId} onPress={() => askDelete(selectedId, { after: closeDetail })} label="이 책 지우기" />
+                  <EditRecordRow id={selectedId ?? undefined} onPress={startEdit} label="책 정보 수정하기" />
+                  <DeleteRecordRow id={selectedId} label="책 삭제하기" onPress={() => askDelete(selectedId, { after: closeDetail })} />
                 </>
               )}
             </Animated.View>
@@ -371,7 +371,7 @@ export default function ReadingScreen() {
             </Animated.View>
             <Animated.View style={[styles.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>{editingId ? '책 정보 고치기' : '새 책'}</Text>
+              <Text style={styles.modalTitle}>{editingId ? '책 정보 수정하기' : '새 책'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }} keyboardShouldPersistTaps="handled">
               <Text style={styles.createLabel}>책 제목</Text>
               <TextInput

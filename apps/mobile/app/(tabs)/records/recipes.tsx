@@ -13,7 +13,7 @@ import { useMe } from '../../../store/family';
 import { say, DIFFICULTY_LABEL } from '../../../constants/labels';
 import { SummaryLine } from '../../../components/SummaryLine';
 import { IngredientEditor } from '../../../components/IngredientEditor';
-import { type Ingredient, normalizeIngredients, ingredientLabel, cleanIngredients, minutesOf, minutesLabel, instructionsOf } from '../../../lib/recipe';
+import { type Ingredient, normalizeIngredients, amountLabel, cleanIngredients, minutesOf, minutesLabel, instructionsOf } from '../../../lib/recipe';
 
 type Recipe = {
   /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
@@ -106,8 +106,8 @@ export default function RecipesScreen() {
     setTimeout(() => openCreate(record), 260);
   };
 
-  // 요리 이름이 비면 저장 버튼을 흐리게. 검사는 handleSave가 한 번 더 한다
-  const canSave = !!formName.trim();
+  // 필수: 이름·난이도·재료 한 가지 이상·레시피 글 (운영자 지정). 비면 저장 버튼을 흐리게
+  const canSave = !!formName.trim() && !!createDifficulty && formIngredients.some((i) => i.name.trim()) && !!formInstructions.trim();
 
   const handleSave = () => {
     const name = formName.trim();
@@ -204,13 +204,13 @@ export default function RecipesScreen() {
                     <View style={s.sectionDivider} />
                     <View style={s.sectionHeader}>
                       <FontAwesome name="list-ul" size={13} color="#4A8C6F" />
-                      <Text style={s.sectionTitle}>필요 재료 {normalizeIngredients(selectedItem.ingredients).length}가지, 1인분 기준</Text>
+                      <Text style={s.sectionTitle}>필요 재료 (1인분 기준)</Text>
                     </View>
                     {normalizeIngredients(selectedItem.ingredients).map((ing, i) => (
                       <View key={i} style={s.ingRow}>
                         <View style={s.ingDot} />
                         <Text style={s.ingText}>{ing.name}</Text>
-                        {!!ing.amount && <Text style={s.ingAmount}>{ing.amount}</Text>}
+                        {!!amountLabel(ing) && <Text style={s.ingAmount}>{amountLabel(ing)}</Text>}
                       </View>
                     ))}
 
@@ -237,7 +237,7 @@ export default function RecipesScreen() {
               {selectedItem && (
                 <>
                   <EditRecordRow id={selectedItem.id} onPress={startEdit} />
-                  <DeleteRecordRow id={selectedItem.id} onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
+                  <DeleteRecordRow id={selectedItem.id} label="레시피 삭제하기" onPress={() => askDelete(selectedItem.id, { after: closeDetail })} />
                 </>
               )}
             </Animated.View>
@@ -253,14 +253,14 @@ export default function RecipesScreen() {
             </Animated.View>
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
-              <Text style={s.modalTitle}>{editingId ? '레시피 고치기' : '새 레시피'}</Text>
+              <Text style={s.modalTitle}>{editingId ? '레시피 수정하기' : '새 레시피'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }} keyboardShouldPersistTaps="handled">
-              <Text style={s.createLabel}>레시피 이름</Text>
+              <Text style={s.createLabel}>레시피 이름<Text style={s.req}> *</Text></Text>
               <TextInput style={s.createInput} placeholder="예) 할머니 장조림" placeholderTextColor="#A39682"
                 value={formName} onChangeText={setFormName} />
               <Text style={s.createLabel}>요리 사진</Text>
               <PhotoPickerRow draft={photoDraft} />
-              <Text style={s.createLabel}>난이도</Text>
+              <Text style={s.createLabel}>난이도<Text style={s.req}> *</Text></Text>
               <View style={s.pillRow}>
                 {(['쉬움', '보통', '어려움'] as const).map(label => (
                   <TouchableOpacity
@@ -276,9 +276,9 @@ export default function RecipesScreen() {
               <Text style={s.createLabel}>예상 소요 시간 (분)</Text>
               <TextInput style={s.createInput} placeholder="30" placeholderTextColor="#A39682" keyboardType="number-pad"
                 value={formMinutes} onChangeText={(v) => setFormMinutes(v.replace(/[^0-9]/g, ''))} />
-              <Text style={s.createLabel}>필요 재료 (1인분 기준)</Text>
+              <Text style={s.createLabel}>필요 재료 (1인분 기준)<Text style={s.req}> *</Text></Text>
               <IngredientEditor value={formIngredients} onChange={setFormIngredients} startOpen={!!editingId} />
-              <Text style={s.createLabel}>레시피</Text>
+              <Text style={s.createLabel}>레시피<Text style={s.req}> *</Text></Text>
               <TextInput
                 style={[s.createInput, { height: 160, textAlignVertical: 'top' }]}
                 placeholderTextColor="#A39682"
@@ -386,6 +386,7 @@ const s = StyleSheet.create({
   modalLabel: { fontSize: 13, color: '#7A6B55', width: 60, fontFamily: 'Pretendard' },
   modalValue: { fontSize: 15, color: '#1F1F1F', flex: 1, fontFamily: 'Pretendard' },
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
+  req: { color: '#D94040', fontSize: 12 },
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   pill: { flex: 1, minWidth: 0, paddingVertical: 10, paddingHorizontal: 6, borderRadius: 20, borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF', alignItems: 'center' as const },

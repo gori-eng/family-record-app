@@ -155,7 +155,7 @@ export default function SettingsScreen() {
           : []),
         // 서로의 기록 고치기 — 관리자만 켜고 끈다 (00015). 기본은 쓴 사람과 관리자만
         ...(family.isReal && isAdmin && currentFamilyId
-          ? [{ icon: 'pencil-square-o', label: '서로의 기록 고치기', subtitle: allowFamilyEdit ? '가족 누구나 고칠 수 있어요' : '쓴 사람과 관리자만',
+          ? [{ icon: 'pencil-square-o', label: '서로의 기록 수정하기', subtitle: allowFamilyEdit ? '가족 누구나 고칠 수 있어요' : '쓴 사람과 관리자만',
               action: () => {
                 const next = !allowFamilyEdit;
                 showAlert(next ? '가족 누구나 서로의 기록을 고치게 할까요?' : '쓴 사람과 관리자만 고치게 할까요?',

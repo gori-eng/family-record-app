@@ -318,7 +318,7 @@ export default function GoalsScreen() {
               {selected && (
                 <>
                   <EditRecordRow id={selected.id} onPress={() => startEdit(selected)} />
-                  <DeleteRecordRow id={selected.id} onPress={() => askDelete(selected.id, { after: closeDetail })} />
+                  <DeleteRecordRow id={selected.id} label="목표 삭제하기" onPress={() => askDelete(selected.id, { after: closeDetail })} />
                 </>
               )}
             </Animated.View>
@@ -334,7 +334,7 @@ export default function GoalsScreen() {
             </Animated.View>
             <Animated.View style={[s.modalSheet, { transform: [{ translateY: createSlide }] }]}>
               <View style={s.modalHandle} />
-              <Text style={s.modalTitle}>{editingId ? '목표 고치기' : '새 가족 목표'}</Text>
+              <Text style={s.modalTitle}>{editingId ? '목표 수정하기' : '새 가족 목표'}</Text>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 540 }} keyboardShouldPersistTaps="handled">
               <Text style={s.createLabel}>목표</Text>
               <TextInput style={s.createInput} placeholder="예) 올해 가족 여행 세 번 가기" placeholderTextColor="#A39682"
