@@ -13,6 +13,7 @@
  * - 저장값('완독')이 아니라 화면에서 보는 말('다 읽었어요')로 적는다 (§9 말투)
  */
 import { say, DIFFICULTY_LABEL, READING_LABEL, TRAVEL_LABEL, GOAL_LABEL } from '../constants/labels';
+import { normalizeIngredients, ingredientLabel, minutesOf, minutesLabel, instructionsOf } from './recipe';
 import { capsuleIsOpen } from './search';
 import { iga } from './korean';
 
@@ -145,15 +146,14 @@ function body(r: BookRecord, o: BookOptions): string {
     }
     case 'recipes':
       return [
-        row('유래', esc(d.origin)),
         row('난이도', esc(say(DIFFICULTY_LABEL, d.difficulty))),
-        row('시간', esc(d.time)),
+        row('예상 소요 시간', esc(minutesLabel(minutesOf(d.minutes ?? d.time)))),
         ph,
-        Array.isArray(d.ingredients) && d.ingredients.length
-          ? `<div class="sub">재료</div><ul>${d.ingredients.map((x: string) => `<li>${esc(x)}</li>`).join('')}</ul>` : '',
-        Array.isArray(d.steps) && d.steps.length
-          ? `<div class="sub">만드는 순서</div><ol>${d.steps.map((x: string) => `<li>${esc(x)}</li>`).join('')}</ol>` : '',
-        d.tip ? `<div class="sub">우리 집 비법</div><p class="text tip">${para(d.tip)}</p>` : '',
+        normalizeIngredients(d.ingredients).length
+          ? `<div class="sub">필요 재료 (1인분 기준)</div><ul>${normalizeIngredients(d.ingredients).map((x) => `<li>${esc(ingredientLabel(x))}</li>`).join('')}</ul>` : '',
+        instructionsOf(d)
+          ? `<div class="sub">레시피</div><p class="text">${para(instructionsOf(d))}</p>` : '',
+        d.tip ? `<div class="sub">메모</div><p class="text tip">${para(d.tip)}</p>` : '',
       ].join('');
     case 'goals': {
       const ms: { label: string; done: boolean }[] = Array.isArray(d.milestones) ? d.milestones : [];

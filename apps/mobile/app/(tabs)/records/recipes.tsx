@@ -2,7 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, 
 import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
 import { useOpenParam, useNewParam } from '../../../lib/useOpenParam';
 import { usePhotoDraft, PhotoPickerRow, PhotoGallery, PhotoThumb } from '../../../components/Photos';
@@ -12,14 +12,23 @@ import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
 import { say, DIFFICULTY_LABEL } from '../../../constants/labels';
 import { SummaryLine } from '../../../components/SummaryLine';
+import { IngredientEditor } from '../../../components/IngredientEditor';
+import { type Ingredient, normalizeIngredients, ingredientLabel, cleanIngredients, minutesOf, minutesLabel, instructionsOf } from '../../../lib/recipe';
 
 type Recipe = {
   /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
   photos?: string[];
-  name: string; origin: string; author: string; difficulty: string; time: string;
+  name: string; author: string; difficulty: string;
+  /** 예상 소요 시간. 새 기록은 minutes(분), 옛 기록은 time('30분') — 읽을 땐 lib/recipe의 minutesOf */
+  minutes?: number; time?: string;
+  /** 옛 기록에만 있던 칸 (배운 곳). 폼에서 뺐고 보여주지도 않는다 */
+  origin?: string;
   color: string; icon: string;
-  ingredients: string[];
-  steps: string[];
+  /** 새 기록은 { name, amount }[], 옛 기록은 string[] — 읽을 땐 normalizeIngredients */
+  ingredients: Array<Ingredient | string>;
+  /** 새 기록은 자유 글(instructions), 옛 기록은 줄 배열(steps) — 읽을 땐 instructionsOf */
+  instructions?: string; steps?: string[];
+  /** 메모 (옛 이름: 우리 집만의 비법) */
   tip?: string;
 };
 
@@ -29,11 +38,9 @@ const NEW_RECIPE_COLORS = ['#FF8A65', '#81C784', '#FFD54F', '#CE93D8'];
 const DIFF_COLOR: Record<string, string> = { '쉬움': '#4AA86B', '보통': '#E6A817', '어려움': '#4A8C6F' };
 
 /** 맨 위 한 문장 — 숫자판 대신 (검토 6번) */
-function summaryOf(total: number, inherited: number) {
+function summaryOf(total: number) {
   if (!total) return '';
-  const parts = [`레시피 ${total}개를 모아뒀어요.`];
-  if (inherited) parts.push(`그중 ${inherited}개는 물려받은 맛이에요.`);
-  return parts.join(' ');
+  return `레시피 ${total}개를 모아뒀어요.`;
 }
 
 export default function RecipesScreen() {
@@ -53,10 +60,10 @@ export default function RecipesScreen() {
 
   // 작성 폼 입력값
   const [formName, setFormName] = useState('');
-  const [formOrigin, setFormOrigin] = useState('');
-  const [formTime, setFormTime] = useState('');
-  const [formIngredients, setFormIngredients] = useState('');
-  const [formSteps, setFormSteps] = useState('');
+  /** 예상 소요 시간(분). 숫자만 받는다 */
+  const [formMinutes, setFormMinutes] = useState('');
+  const [formIngredients, setFormIngredients] = useState<Ingredient[]>([]);
+  const [formInstructions, setFormInstructions] = useState('');
   const [formTip, setFormTip] = useState('');
 
   const modalBg = useRef(new Animated.Value(0)).current;
@@ -73,10 +80,10 @@ export default function RecipesScreen() {
     const d = edit?.data;
     setEditingId(edit?.id ?? null);
     setFormName(d?.name ?? edit?.title ?? '');
-    setFormOrigin(d?.origin ?? '');
-    setFormTime(d?.time ?? '');
-    setFormIngredients((d?.ingredients ?? []).join(String.fromCharCode(10)));
-    setFormSteps((d?.steps ?? []).join(String.fromCharCode(10)));
+    const min = minutesOf(d?.minutes ?? d?.time);
+    setFormMinutes(min ? String(min) : '');
+    setFormIngredients(normalizeIngredients(d?.ingredients));
+    setFormInstructions(d ? instructionsOf(d) : '');
     setFormTip(d?.tip ?? '');
     setCreateDifficulty(d?.difficulty ?? '보통');
     setShowCreate(true);
@@ -99,20 +106,6 @@ export default function RecipesScreen() {
     setTimeout(() => openCreate(record), 260);
   };
 
-  // "세대 전수" — 윗세대에서 물려받은 레시피 수.
-  // 제목과 유래 양쪽에서 '할머니' 같은 단어를 찾는다 (예: 제목만 '할머니 갈비찜'인 경우).
-  const inheritedCount = useMemo(
-    () => recipes.filter((r) =>
-      /할머니|할아버지|외할머니|어머니|아버지|외가|친정|전수|물려/.test(
-        `${r.title} ${r.data.origin ?? ''}`
-      )
-    ).length,
-    [recipes]
-  );
-
-  /** 여러 줄로 적은 입력을 줄 단위 배열로 (빈 줄은 버린다) */
-  const toLines = (v: string) => v.split('\n').map((l) => l.trim()).filter(Boolean);
-
   // 요리 이름이 비면 저장 버튼을 흐리게. 검사는 handleSave가 한 번 더 한다
   const canSave = !!formName.trim();
 
@@ -122,13 +115,17 @@ export default function RecipesScreen() {
       showAlert('요리 이름을 적어주세요', '"할머니 장조림"처럼요.');
       return;
     }
+    const minutes = minutesOf(formMinutes);
     const fields = {
       name,
-      origin: formOrigin.trim(),
       difficulty: createDifficulty,
-      time: formTime.trim(),
-      ingredients: toLines(formIngredients),
-      steps: toLines(formSteps),
+      minutes: minutes ?? undefined,
+      // 옛 화면·검색이 time 글자를 보므로 같이 적어둔다
+      time: minutesLabel(minutes),
+      ingredients: cleanIngredients(formIngredients),
+      instructions: formInstructions.trim(),
+      // 자유 글로 바꿨으니 옛 줄 배열은 비운다 (instructionsOf가 instructions를 먼저 본다)
+      steps: [],
       tip: formTip.trim() || undefined,
       photos: photoDraft.photos,
     };
@@ -189,12 +186,6 @@ export default function RecipesScreen() {
                   <View style={s.modalContent}>
                     <Text style={s.modalTitle}>{selectedItem.name}</Text>
                     <PhotoGallery photos={photosOf(selectedItem)} />
-                    {selectedItem.origin ? (
-                      <View style={s.modalRow}>
-                        <Text style={s.modalLabel}>배운 곳</Text>
-                        <Text style={s.modalValue}>{selectedItem.origin}</Text>
-                      </View>
-                    ) : null}
                     <View style={s.modalRow}>
                       <Text style={s.modalLabel}>적은 사람</Text>
                       <Text style={s.modalValue}>{selectedItem.author}{selectedItem.author === CURRENT_USER ? ' (나)' : ''}</Text>
@@ -203,36 +194,36 @@ export default function RecipesScreen() {
                       <Text style={s.modalLabel}>난이도</Text>
                       <Text style={[s.modalValue, { color: DIFF_COLOR[selectedItem.difficulty], fontWeight: '600' }]}>{say(DIFFICULTY_LABEL, selectedItem.difficulty)}</Text>
                     </View>
-                    {selectedItem.time ? (
+                    {minutesOf(selectedItem.minutes ?? selectedItem.time) ? (
                       <View style={s.modalRow}>
-                        <Text style={s.modalLabel}>걸리는 시간</Text>
-                        <Text style={s.modalValue}>{selectedItem.time}</Text>
+                        <Text style={s.modalLabel}>소요 시간</Text>
+                        <Text style={s.modalValue}>{minutesLabel(minutesOf(selectedItem.minutes ?? selectedItem.time))}</Text>
                       </View>
                     ) : null}
 
                     <View style={s.sectionDivider} />
                     <View style={s.sectionHeader}>
                       <FontAwesome name="list-ul" size={13} color="#4A8C6F" />
-                      <Text style={s.sectionTitle}>재료 {selectedItem.ingredients?.length || 0}가지</Text>
+                      <Text style={s.sectionTitle}>필요 재료 {normalizeIngredients(selectedItem.ingredients).length}가지, 1인분 기준</Text>
                     </View>
-                    {(selectedItem.ingredients || []).map((ing: string, i: number) => (
+                    {normalizeIngredients(selectedItem.ingredients).map((ing, i) => (
                       <View key={i} style={s.ingRow}>
                         <View style={s.ingDot} />
-                        <Text style={s.ingText}>{ing}</Text>
+                        <Text style={s.ingText}>{ing.name}</Text>
+                        {!!ing.amount && <Text style={s.ingAmount}>{ing.amount}</Text>}
                       </View>
                     ))}
 
                     <View style={s.sectionDivider} />
                     <View style={s.sectionHeader}>
                       <FontAwesome name="cutlery" size={13} color="#4A8C6F" />
-                      <Text style={s.sectionTitle}>만드는 순서</Text>
+                      <Text style={s.sectionTitle}>레시피</Text>
                     </View>
-                    {(selectedItem.steps || []).map((step: string, i: number) => (
-                      <View key={i} style={s.stepRow}>
-                        <View style={s.stepNum}><Text style={s.stepNumText}>{i + 1}</Text></View>
-                        <Text style={s.stepText}>{step}</Text>
-                      </View>
-                    ))}
+                    {instructionsOf(selectedItem) ? (
+                      <Text style={s.instructions}>{instructionsOf(selectedItem)}</Text>
+                    ) : (
+                      <Text style={s.instructionsEmpty}>아직 적어둔 레시피가 없어요</Text>
+                    )}
 
                     {selectedItem.tip ? (
                       <View style={s.tipBox}>
@@ -267,11 +258,8 @@ export default function RecipesScreen() {
               <Text style={s.createLabel}>레시피 이름</Text>
               <TextInput style={s.createInput} placeholder="예) 할머니 장조림" placeholderTextColor="#A39682"
                 value={formName} onChangeText={setFormName} />
-              <Text style={s.createLabel}>완성 사진</Text>
+              <Text style={s.createLabel}>요리 사진</Text>
               <PhotoPickerRow draft={photoDraft} />
-              <Text style={s.createLabel}>배운 곳</Text>
-              <TextInput style={s.createInput} placeholder="예) 할머니" placeholderTextColor="#A39682"
-                value={formOrigin} onChangeText={setFormOrigin} />
               <Text style={s.createLabel}>난이도</Text>
               <View style={s.pillRow}>
                 {(['쉬움', '보통', '어려움'] as const).map(label => (
@@ -281,35 +269,26 @@ export default function RecipesScreen() {
                     activeOpacity={0.7}
                     onPress={() => setCreateDifficulty(label)}
                   >
-                    <Text style={[s.pillText, createDifficulty === label && s.pillTextActive]}>{say(DIFFICULTY_LABEL, label)}</Text>
+                    <Text style={[s.pillText, createDifficulty === label && s.pillTextActive]} numberOfLines={1}>{say(DIFFICULTY_LABEL, label)}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
-              <Text style={s.createLabel}>걸리는 시간</Text>
-              <TextInput style={s.createInput} placeholder="예) 30분" placeholderTextColor="#A39682"
-                value={formTime} onChangeText={setFormTime} />
-              <Text style={s.createLabel}>재료</Text>
+              <Text style={s.createLabel}>예상 소요 시간 (분)</Text>
+              <TextInput style={s.createInput} placeholder="30" placeholderTextColor="#A39682" keyboardType="number-pad"
+                value={formMinutes} onChangeText={(v) => setFormMinutes(v.replace(/[^0-9]/g, ''))} />
+              <Text style={s.createLabel}>필요 재료 (1인분 기준)</Text>
+              <IngredientEditor value={formIngredients} onChange={setFormIngredients} startOpen={!!editingId} />
+              <Text style={s.createLabel}>레시피</Text>
               <TextInput
-                style={[s.createInput, { height: 110, textAlignVertical: 'top' }]}
-                placeholder={'재료를 한 줄에 하나씩 적어주세요\n예) 묵은지 1/4포기\n돼지고기 200g'}
+                style={[s.createInput, { height: 160, textAlignVertical: 'top' }]}
                 placeholderTextColor="#A39682"
                 multiline
-                value={formIngredients}
-                onChangeText={setFormIngredients}
+                value={formInstructions}
+                onChangeText={setFormInstructions}
               />
-              <Text style={s.createLabel}>만드는 순서</Text>
-              <TextInput
-                style={[s.createInput, { height: 140, textAlignVertical: 'top' }]}
-                placeholder={'만드는 순서를 한 줄에 하나씩 적어주세요\n예) 들기름에 묵은지를 볶는다\n돼지고기를 넣고 함께 볶는다'}
-                placeholderTextColor="#A39682"
-                multiline
-                value={formSteps}
-                onChangeText={setFormSteps}
-              />
-              <Text style={s.createLabel}>우리 집만의 비법</Text>
+              <Text style={s.createLabel}>메모</Text>
               <TextInput
                 style={[s.createInput, { height: 70, textAlignVertical: 'top' }]}
-                placeholder="있다면 살짝 적어주세요"
                 placeholderTextColor="#A39682"
                 multiline
                 value={formTip}
@@ -326,7 +305,7 @@ export default function RecipesScreen() {
 
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={s.header}>
-            <SummaryLine icon="cutlery" text={summaryOf(recipes.length, inheritedCount)} />
+            <SummaryLine icon="cutlery" text={summaryOf(recipes.length)} />
           </View>
 
           <View style={s.list}>
@@ -343,13 +322,12 @@ export default function RecipesScreen() {
                 )}
                 <View style={s.info}>
                   <Text style={s.name}>{r.name}</Text>
-                  {r.origin ? <Text style={s.origin}>{r.origin}</Text> : null}
                   <View style={s.meta}>
                     <Text style={[s.difficulty, { color: DIFF_COLOR[r.difficulty] }]}>{say(DIFFICULTY_LABEL, r.difficulty)}</Text>
-                    {r.time ? (
+                    {minutesOf(r.minutes ?? r.time) ? (
                       <>
                         <FontAwesome name="clock-o" size={11} color="#7A6B55" style={s.metaIcon} />
-                        <Text style={s.time}>{r.time}</Text>
+                        <Text style={s.time}>{minutesLabel(minutesOf(r.minutes ?? r.time))}</Text>
                       </>
                     ) : null}
                     <FontAwesome name="user-o" size={11} color="#7A6B55" style={s.metaIcon} />
@@ -392,7 +370,6 @@ const s = StyleSheet.create({
   recipeIcon: { width: 56, height: 56, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   info: { flex: 1 },
   name: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', marginBottom: 2, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  origin: { fontSize: 12, color: '#7A6B55', marginBottom: 6, fontFamily: 'Pretendard' },
   meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 4 },
   difficulty: { fontSize: 12, fontWeight: '600' },
   metaIcon: { marginLeft: 8 },
@@ -411,7 +388,7 @@ const s = StyleSheet.create({
   createLabel: { fontSize: 13, fontWeight: '600', color: '#4A4A4A', marginBottom: 6, fontFamily: 'Pretendard' },
   createInput: { backgroundColor: '#F9F8F5', borderWidth: 1, borderColor: '#EDE8DF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1F1F1F', marginBottom: 16, fontFamily: 'Pretendard' },
   pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
-  pill: { flex: 1, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
+  pill: { flex: 1, minWidth: 0, paddingVertical: 10, paddingHorizontal: 6, borderRadius: 20, borderWidth: 1, borderColor: '#EDE8DF', backgroundColor: '#FFFFFF', alignItems: 'center' as const },
   pillActive: { backgroundColor: '#4A8C6F', borderColor: '#4A8C6F' },
   pillText: { fontSize: 13, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard' },
   pillTextActive: { color: '#FFFFFF' },
@@ -425,10 +402,9 @@ const s = StyleSheet.create({
   ingRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 4 },
   ingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#4A8C6F' },
   ingText: { fontSize: 14, color: '#1F1F1F', fontFamily: 'Pretendard', flex: 1, lineHeight: 20 },
-  stepRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingVertical: 6 },
-  stepNum: { width: 22, height: 22, borderRadius: 11, backgroundColor: '#EFF6F1', justifyContent: 'center', alignItems: 'center', marginTop: 1 },
-  stepNumText: { fontSize: 12, fontWeight: '700', color: '#4A8C6F', fontFamily: 'PretendardBold' },
-  stepText: { fontSize: 14, color: '#1F1F1F', flex: 1, lineHeight: 21, fontFamily: 'Pretendard' },
+  ingAmount: { fontSize: 14, color: '#7A6B55', fontFamily: 'Pretendard', lineHeight: 20 },
+  instructions: { fontSize: 14, color: '#1F1F1F', lineHeight: 22, fontFamily: 'Pretendard' },
+  instructionsEmpty: { fontSize: 13, color: '#A39682', fontFamily: 'Pretendard' },
   tipBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: '#FFF8E8', borderRadius: 12, padding: 12, marginTop: 16 },
   tipText: { flex: 1, fontSize: 13, color: '#7A5C10', lineHeight: 19, fontFamily: 'Pretendard' },
 });

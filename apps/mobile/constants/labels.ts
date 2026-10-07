@@ -18,10 +18,11 @@ export function say(map: Record<string, string>, value: string | undefined | nul
 }
 
 /** 레시피 난이도 — 운영자가 직접 정한 문구 */
+// 2026-10-07 운영자: 긴 라벨("어렵지만 할 수 있어!")이 칩 줄을 바꿔 흐트러져서 저장값 그대로 보여준다
 export const DIFFICULTY_LABEL: Record<string, string> = {
-  '쉬움': '금방 만들어요',
-  '보통': '해볼 만해요',
-  '어려움': '어렵지만 할 수 있어!',
+  '쉬움': '쉬움',
+  '보통': '보통',
+  '어려움': '어려움',
 };
 
 /** 독서 상태 */

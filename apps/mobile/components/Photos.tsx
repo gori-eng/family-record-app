@@ -156,8 +156,9 @@ export function PhotoPickerRow({ draft, max = MAX_PHOTOS }: { draft: PhotoDraft;
           </View>
         ) : left > 0 ? (
           <TouchableOpacity style={s.pickAdd} activeOpacity={0.7} onPress={add} accessibilityLabel="사진 넣기">
-            <FontAwesome name="camera" size={18} color="#4A8C6F" />
-            <Text style={s.pickAddText}>{draft.photos.length ? `${draft.photos.length}/${max}` : '사진'}</Text>
+            {/* 아이콘은 칸 정중앙, 장수는 아래 구석 (운영자 지적: 아이콘이 치우쳐 보였다) */}
+            <FontAwesome name="camera" size={22} color="#4A8C6F" />
+            {draft.photos.length ? <Text style={s.pickAddCount}>{`${draft.photos.length}/${max}`}</Text> : null}
           </TouchableOpacity>
         ) : null}
       </ScrollView>
@@ -244,6 +245,7 @@ const s = StyleSheet.create({
   },
   pickBusy: { borderStyle: 'solid' },
   pickAddText: { fontSize: 12, color: '#4A8C6F', fontFamily: 'Pretendard' },
+  pickAddCount: { position: 'absolute', right: 6, bottom: 4, fontSize: 10, color: '#4A8C6F', fontFamily: 'Pretendard' },
 
   gallery: { marginBottom: 14 },
   galleryRow: { gap: 8 },
