@@ -11,9 +11,9 @@ import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../compon
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
 import { say, DIFFICULTY_LABEL } from '../../../constants/labels';
-import { toISO } from '../../../store/finance';
+import { CATEGORY_UI } from '../../../constants/categoryUi';
 import { SummaryLine } from '../../../components/SummaryLine';
-import { groupByMonth, MonthHead, DayCell, IconCell, LabelCell, CoverCell, SideThumb, JournalRow, JournalPhoto, StarTag, journal } from '../../../components/Journal';
+import { GridTile, journal } from '../../../components/Journal';
 import { IngredientEditor } from '../../../components/IngredientEditor';
 import { type Ingredient, normalizeIngredients, amountLabel, cleanIngredients, minutesOf, minutesLabel, instructionsOf } from '../../../lib/recipe';
 
@@ -310,24 +310,19 @@ export default function RecipesScreen() {
             <SummaryLine icon="cutlery" text={summaryOf(recipes.length)} />
           </View>
 
-          <View style={s.list}>
-            {groupByMonth(recipes, (r) => toISO(new Date(r.createdAt))).map((g) => (
-              <View key={g.key}>
-                <MonthHead label={g.label} />
-                {g.items.map((record) => {
-                  const r = record.data;
-                  const min = minutesOf(r.minutes ?? r.time);
-                  return (
-                    <JournalRow key={record.id} onPress={() => openDetail({ ...r, id: record.id })}
-                      left={<DayCell iso={toISO(new Date(record.createdAt))} />}>
-                      <Text style={journal.title}>{r.name}</Text>
-                      <Text style={journal.meta}>{[say(DIFFICULTY_LABEL, r.difficulty), min ? minutesLabel(min) : '', r.author].filter(Boolean).join(', ')}</Text>
-                      <JournalPhoto photos={photosOf(r)} />
-                    </JournalRow>
-                  );
-                })}
-              </View>
-            ))}
+          <View>
+            {/* 요리책처럼 — 날짜가 아니라 요리가 먼저 (콘텐츠형). 사진이 없으면 레시피 색 칸 */}
+            <View style={journal.grid}>
+              {recipes.map((record) => {
+                const r = record.data;
+                const min = minutesOf(r.minutes ?? r.time);
+                return (
+                  <GridTile key={record.id} photos={photosOf(r)} color={CATEGORY_UI.recipes.bg} iconColor={CATEGORY_UI.recipes.deep} icon="cutlery"
+                    title={r.name} sub={[say(DIFFICULTY_LABEL, r.difficulty), min ? minutesLabel(min) : ''].filter(Boolean).join(', ')}
+                    onPress={() => openDetail({ ...r, id: record.id })} />
+                );
+              })}
+            </View>
             {recipes.length === 0 && !ready && <LoadingRows />}
             {recipes.length === 0 &&  ready && (
               <View style={s.empty}>

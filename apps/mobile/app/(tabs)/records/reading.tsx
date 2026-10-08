@@ -11,9 +11,8 @@ import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../compon
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { say, READING_LABEL } from '../../../constants/labels';
-import { toISO } from '../../../store/finance';
 import { SummaryLine } from '../../../components/SummaryLine';
-import { groupByMonth, MonthHead, DayCell, IconCell, LabelCell, CoverCell, SideThumb, JournalRow, JournalPhoto, StarTag, journal } from '../../../components/Journal';
+import { MonthHead, CoverCell, JournalRow, journal } from '../../../components/Journal';
 
 type Book = {
   /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
@@ -448,19 +447,21 @@ export default function ReadingScreen() {
 
           {/* Book List */}
           <View style={styles.bookList}>
-            {groupByMonth(filtered, (r) => toISO(new Date(r.createdAt))).map((g) => (
+            {/* 책은 "언제 담았나"보다 "지금 어떤 상태인가"가 먼저 (콘텐츠형) — 전체 보기에서는 상태별로 묶는다 */}
+            {(activeStatus === '전체' ? ['읽는 중', '읽고 싶은', '완독'] : [activeStatus])
+              .map((st) => ({ key: st, label: say(READING_LABEL, st), items: filtered.filter((b) => b.data.status === st) }))
+              .filter((g) => g.items.length)
+              .map((g) => (
               <View key={g.key}>
-                <MonthHead label={g.label} />
+                {activeStatus === '전체' && <MonthHead label={g.label} />}
                 {g.items.map((record) => {
                   const book = { ...record.data, title: record.title };
-                  const tone = book.status === '완독' ? { bg: '#E8F5E9', text: '#4AA86B' } : book.status === '읽는 중' ? { bg: '#FFF3E0', text: '#E6A817' } : { bg: '#F3E5F5', text: '#9C27B0' };
                   return (
                     <JournalRow key={record.id} onPress={() => openDetail(record)}
                       left={<CoverCell photos={photosOf(book)} color={book.color} />}>
                       <Text style={journal.title}>{book.title}</Text>
                       {book.author ? <Text style={journal.meta}>{book.author}{book.reader ? `, ${book.reader}` : ''}</Text> : null}
                       <View style={journal.tags}>
-                        <View style={[journal.chip, { backgroundColor: tone.bg }]}><Text style={[journal.chipText, { color: tone.text }]}>{say(READING_LABEL, book.status)}</Text></View>
                         {!!book.rating && <StarRating rating={book.rating} />}
                         {book.status === '읽는 중' && <Text style={[journal.meta, { marginTop: 0 }]}>{book.progress ?? 0}%</Text>}
                       </View>
