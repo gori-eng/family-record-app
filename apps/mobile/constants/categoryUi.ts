@@ -11,9 +11,9 @@ import type { RecordCategory } from '../store/records';
  * deep : 진한 색   — 기록 허브 타일처럼 **흰 글자**가 올라가는 자리. 전부 흰색과 4.6:1 이상 (조부모 기준)
  */
 export const CATEGORY_UI: Record<RecordCategory, { icon: string; bg: string; deep: string; screen: string }> = {
-  parenting:      { icon: 'child',     bg: '#EACED9', deep: '#B5527A', screen: 'parenting' },
+  parenting:      { icon: 'child',     bg: '#E9CFD5', deep: '#B3566A', screen: 'parenting' },
   reading:        { icon: 'book',      bg: '#C8D9D1', deep: '#3E7A5B', screen: 'reading' },
-  finance:        { icon: 'money',     bg: '#E1D6C2', deep: '#966E28', screen: 'finance' },
+  finance:        { icon: 'money',     bg: '#DFD5C6', deep: '#8F6B35', screen: 'finance' },
   movies:         { icon: 'film',      bg: '#CCD1E3', deep: '#4A5C9B', screen: 'movies' },
   travel:         { icon: 'plane',     bg: '#C4DBDD', deep: '#2E7F88', screen: 'travel' },
   recipes:        { icon: 'cutlery',   bg: '#EAD0C7', deep: '#B65A39', screen: 'recipes' },
