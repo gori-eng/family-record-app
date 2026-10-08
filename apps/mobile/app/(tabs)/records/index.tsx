@@ -59,7 +59,10 @@ export default function RecordsScreen() {
         <Text style={s.head}>{total ? '기록장' : '처음이에요'}</Text>
         {!total && <Text style={s.firstHint}>칸을 눌러 첫 기록을 남겨보세요</Text>}
         <View style={s.grid}>
-          {visible.map((t) => <Tile key={t.category} tile={t} onPress={() => go(t.category)} />)}
+          {visible.map((t, i) => (
+            <Tile key={t.category} tile={t} onPress={() => go(t.category)}
+              wide={visible.length % 2 === 1 && i === visible.length - 1} />
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -85,13 +88,16 @@ function RecentCard({ record, onPress }: { record: FamilyRecord; onPress: () => 
   );
 }
 
-/** 카테고리 타일 — 색 바탕, 이름, 큰 숫자, 작은 줄 */
-function Tile({ tile, onPress }: { tile: HubTile; onPress: () => void }) {
+/** 카테고리 타일 — 색 바탕, 이름 + 오른쪽 위 아이콘, 큰 숫자, 작은 줄. 홀수 개면 마지막 타일은 가로로 길게 (빈자리 방지) */
+function Tile({ tile, onPress, wide }: { tile: HubTile; onPress: () => void; wide?: boolean }) {
   const ui = CATEGORY_UI[tile.category];
   return (
-    <TouchableOpacity style={[s.tile, { backgroundColor: ui.deep }]} activeOpacity={0.7} onPress={onPress}
+    <TouchableOpacity style={[s.tile, wide && s.tileWide, { backgroundColor: ui.deep }]} activeOpacity={0.7} onPress={onPress}
       accessibilityLabel={CATEGORY_LABELS[tile.category]}>
-      <Text style={s.tileName}>{CATEGORY_LABELS[tile.category]}</Text>
+      <View style={s.tileTop}>
+        <Text style={s.tileName}>{CATEGORY_LABELS[tile.category]}</Text>
+        <View style={s.tileIcon}><FontAwesome name={ui.icon as any} size={14} color="#FFFFFF" /></View>
+      </View>
       {tile.count ? (
         <>
           <Text style={s.tileBig} numberOfLines={1} adjustsFontSizeToFit>
@@ -131,6 +137,9 @@ const s = StyleSheet.create({
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12 },
   tile: { width: '48%', height: 108, borderRadius: 20, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12 },
+  tileWide: { width: '100%' },
+  tileTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  tileIcon: { width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center', marginTop: -4, marginRight: -4 },
   tileName: { fontSize: 14, color: '#FFFFFF', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   tileBig: { fontSize: 32, color: '#FFFFFF', fontFamily: 'PretendardBold', letterSpacing: -1.2, marginTop: 'auto', lineHeight: 36 },
   tileUnit: { fontSize: 14, color: '#FFFFFF', fontFamily: 'Pretendard', letterSpacing: 0 },
