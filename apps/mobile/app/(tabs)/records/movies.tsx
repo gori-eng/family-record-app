@@ -13,8 +13,9 @@ import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { say, MOVIE_FILTER_LABEL } from '../../../constants/labels';
 import { parseLooseDate, formatKoreanDate } from '../../../lib/dates';
-import { todayISO } from '../../../store/finance';
+import { todayISO, toISO } from '../../../store/finance';
 import { SummaryLine } from '../../../components/SummaryLine';
+import { groupByMonth, MonthHead, DayCell, IconCell, LabelCell, CoverCell, SideThumb, JournalRow, JournalPhoto, StarTag, journal } from '../../../components/Journal';
 
 type Movie = {
   /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
@@ -406,43 +407,34 @@ export default function MoviesScreen() {
           </ScrollView>
 
           <View style={s.list}>
-            {visible.map((record) => {
-              const m = record.data;
-              return (
-              <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
-                onPress={() => openDetail(record.id)}>
-                <View style={[s.poster, { backgroundColor: m.color }]}>
-                  <FontAwesome name="film" size={24} color="#FFFFFF" />
-                </View>
-                <View style={s.info}>
-                  <Text style={s.title}>{m.title}</Text>
-                  {/* 안 적은 항목은 빈 줄을 남기지 않는다 */}
-                  {(m.genre || m.date) ? (
-                    <Text style={s.genre}>{[m.genre, m.date ? `${showDate(m.date)}에 봤어요` : ''].filter(Boolean).join(', ')}</Text>
-                  ) : null}
-                  <View style={s.meta}>
-                    {m.rating > 0 ? (
-                      <StarRating rating={m.rating} />
-                    ) : (
-                      <View style={s.wishBadge}>
-                        <FontAwesome name="bookmark-o" size={10} color="#9C27B0" />
-                        <Text style={s.wishBadgeText}>보고 싶어요</Text>
+            {groupByMonth(visible, (r) => parseLooseDate(r.data.date) ?? toISO(new Date(r.createdAt))).map((g) => (
+              <View key={g.key}>
+                <MonthHead label={g.label} />
+                {g.items.map((record) => {
+                  const m = record.data;
+                  const iso = parseLooseDate(m.date);
+                  return (
+                    <JournalRow key={record.id} onPress={() => openDetail(record.id)}
+                      left={m.rating > 0 || m.date ? <DayCell iso={iso} raw={iso ? undefined : m.date} /> : <IconCell icon="bookmark-o" color="#9C27B0" bg="#F3E5F5" />}>
+                      <View style={journal.split}>
+                        <View style={journal.splitText}>
+                          <Text style={journal.title}>{m.title}</Text>
+                          {m.genre ? <Text style={journal.meta}>{m.genre}</Text> : null}
+                          <View style={journal.tags}>
+                            {m.rating > 0 ? <StarRating rating={m.rating} /> : (
+                              <View style={[journal.chip, { backgroundColor: '#F3E5F5' }]}><Text style={[journal.chipText, { color: '#9C27B0' }]}>보고 싶어요</Text></View>
+                            )}
+                            {m.watchedWith?.length ? <Text style={[journal.meta, { marginTop: 0 }]}>{m.watchedWith.join(', ')}</Text> : null}
+                          </View>
+                          {m.review ? <Text style={journal.text} numberOfLines={2}>{m.review}</Text> : null}
+                        </View>
+                        <SideThumb photos={photosOf(m)} tall />
                       </View>
-                    )}
-                    {m.watchedWith?.length ? (
-                      <View style={s.watchedBadge}>
-                        <FontAwesome name="users" size={10} color="#7A6B55" />
-                        <Text style={s.watchedText}>{m.watchedWith.join(', ')}</Text>
-                      </View>
-                    ) : null}
-                  </View>
-                  {m.review ? (
-                    <Text style={s.review} numberOfLines={1}>{m.review}</Text>
-                  ) : null}
-                </View>
-              </TouchableOpacity>
-              );
-            })}
+                    </JournalRow>
+                  );
+                })}
+              </View>
+            ))}
             {visible.length === 0 && !ready && <LoadingRows />}
             {visible.length === 0 &&  ready && (
               <View style={s.empty}>

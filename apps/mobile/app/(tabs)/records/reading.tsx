@@ -11,7 +11,9 @@ import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../compon
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { say, READING_LABEL } from '../../../constants/labels';
+import { toISO } from '../../../store/finance';
 import { SummaryLine } from '../../../components/SummaryLine';
+import { groupByMonth, MonthHead, DayCell, IconCell, LabelCell, CoverCell, SideThumb, JournalRow, JournalPhoto, StarTag, journal } from '../../../components/Journal';
 
 type Book = {
   /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
@@ -446,51 +448,31 @@ export default function ReadingScreen() {
 
           {/* Book List */}
           <View style={styles.bookList}>
-            {filtered.map((record) => {
-              const book = { ...record.data, title: record.title };
-              return (
-              <TouchableOpacity
-                key={record.id}
-                style={styles.bookCard}
-                activeOpacity={0.7}
-                onPress={() => openDetail(record)}
-              >
-                {/* 사진이 있으면 첫 사진(표지), 없으면 색 표지 */}
-                {photosOf(book).length ? <PhotoThumb photos={photosOf(book)} size={56} height={76} /> : (
-                  <View style={[styles.bookCover, { backgroundColor: book.color }]}>
-                    <FontAwesome name="book" size={24} color="#5C4A32" />
-                  </View>
-                )}
-                <View style={styles.bookInfo}>
-                  <View style={styles.bookTopRow}>
-                    <Text style={styles.bookTitle}>{book.title}</Text>
-                    <View style={[styles.statusBadge, {
-                      backgroundColor: book.status === '완독' ? '#E8F5E9' : book.status === '읽는 중' ? '#FFF3E0' : '#F3E5F5'
-                    }]}>
-                      <Text style={[styles.statusText, {
-                        color: book.status === '완독' ? '#4AA86B' : book.status === '읽는 중' ? '#E6A817' : '#9C27B0'
-                      }]}>{say(READING_LABEL, book.status)}</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.bookAuthor}>{book.author}</Text>
-                  <View style={styles.bookMeta}>
-                    <View style={[styles.readerDot, { backgroundColor: book.color }]} />
-                    <Text style={styles.readerName}>{book.reader}</Text>
-                    {!!book.rating && <StarRating rating={book.rating} />}
-                    {book.status === '읽는 중' && (
-                      <View style={styles.progressRow}>
-                        <View style={styles.progressBarBg}>
-                          <View style={[styles.progressBar, { width: `${book.progress ?? 0}%` }]} />
-                        </View>
-                        <Text style={styles.progressText}>{book.progress ?? 0}%</Text>
+            {groupByMonth(filtered, (r) => toISO(new Date(r.createdAt))).map((g) => (
+              <View key={g.key}>
+                <MonthHead label={g.label} />
+                {g.items.map((record) => {
+                  const book = { ...record.data, title: record.title };
+                  const tone = book.status === '완독' ? { bg: '#E8F5E9', text: '#4AA86B' } : book.status === '읽는 중' ? { bg: '#FFF3E0', text: '#E6A817' } : { bg: '#F3E5F5', text: '#9C27B0' };
+                  return (
+                    <JournalRow key={record.id} onPress={() => openDetail(record)}
+                      left={<CoverCell photos={photosOf(book)} color={book.color} />}>
+                      <Text style={journal.title}>{book.title}</Text>
+                      {book.author ? <Text style={journal.meta}>{book.author}{book.reader ? `, ${book.reader}` : ''}</Text> : null}
+                      <View style={journal.tags}>
+                        <View style={[journal.chip, { backgroundColor: tone.bg }]}><Text style={[journal.chipText, { color: tone.text }]}>{say(READING_LABEL, book.status)}</Text></View>
+                        {!!book.rating && <StarRating rating={book.rating} />}
+                        {book.status === '읽는 중' && <Text style={[journal.meta, { marginTop: 0 }]}>{book.progress ?? 0}%</Text>}
                       </View>
-                    )}
-                  </View>
-                  {book.notes ? <Text style={styles.bookNotes} numberOfLines={1}>{book.notes}</Text> : null}
-                </View>
-              </TouchableOpacity>
-              );
-            })}
+                      {book.status === '읽는 중' && (
+                        <View style={journal.bar}><View style={[journal.barFill, { width: `${book.progress ?? 0}%`, backgroundColor: '#4A8C6F' }]} /></View>
+                      )}
+                      {book.notes ? <Text style={journal.text} numberOfLines={2}>{book.notes}</Text> : null}
+                    </JournalRow>
+                  );
+                })}
+              </View>
+            ))}
             {filtered.length === 0 && !ready && <LoadingRows />}
             {filtered.length === 0 &&  ready && (
               <View style={styles.empty}>

@@ -12,6 +12,7 @@ import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
 import { say, GOAL_LABEL } from '../../../constants/labels';
 import { SummaryLine } from '../../../components/SummaryLine';
+import { groupByMonth, MonthHead, DayCell, IconCell, LabelCell, CoverCell, SideThumb, JournalRow, JournalPhoto, StarTag, journal } from '../../../components/Journal';
 
 /** 해냈는지 — 상태를 '달성'으로 바꿨거나 진행률을 다 채웠으면. 요약·목록·상세가 같은 기준을 쓴다 */
 const isReached = (g: { status?: string; progress?: number }) => g.status === '달성' || (g.progress ?? 0) >= 100;
@@ -382,31 +383,17 @@ export default function GoalsScreen() {
               const g = record.data;
               const p = progressOf(g);
               const reached = isReached({ ...g, progress: p });
+              const done = (g.milestones ?? []).filter((m) => m.done).length;
               return (
-              <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
-                onPress={() => openDetail(record.id)}>
-                <View style={s.cardHeader}>
-                  <View style={[s.goalIcon, { backgroundColor: g.color }]}>
-                    <FontAwesome name={g.icon as any} size={18} color="#FFFFFF" />
-                  </View>
-                  <View style={s.cardInfo}>
-                    <Text style={s.goalTitle}>{g.title}</Text>
-                    {g.desc ? <Text style={s.goalDesc}>{g.desc}</Text> : null}
-                  </View>
-                  {reached && <FontAwesome name="check-circle" size={20} color="#4AA86B" />}
-                </View>
-                <View style={s.progressSection}>
-                  <View style={s.progressBarBg}>
-                    <View style={[s.progressBar, { width: `${p}%`, backgroundColor: reached ? '#4AA86B' : g.color }]} />
-                  </View>
-                  <View style={s.progressMeta}>
-                    <Text style={s.progressPct}>
-                      {p}%{(g.milestones ?? []).length ? `  작은 목표 ${g.milestones.filter((m) => m.done).length}/${g.milestones.length}` : ''}
-                    </Text>
-                    {g.target ? <Text style={s.targetDate}>{g.target}까지</Text> : null}
-                  </View>
-                </View>
-              </TouchableOpacity>
+                <JournalRow key={record.id} onPress={() => openDetail(record.id)}
+                  left={reached ? <IconCell icon="check" color="#FFFFFF" bg="#4AA86B" /> : <LabelCell big={String(p)} small="%" />}>
+                  <Text style={journal.title}>{g.title}</Text>
+                  {g.desc ? <Text style={journal.text} numberOfLines={2}>{g.desc}</Text> : null}
+                  <View style={journal.bar}><View style={[journal.barFill, { width: `${p}%`, backgroundColor: reached ? '#4AA86B' : g.color }]} /></View>
+                  <Text style={journal.meta}>
+                    {[reached ? '해냈어요!' : '', (g.milestones ?? []).length ? `작은 목표 ${done}/${g.milestones.length}` : '', g.target ? `${g.target}까지` : ''].filter(Boolean).join(', ')}
+                  </Text>
+                </JournalRow>
               );
             })}
             {goals.length === 0 && !ready && <LoadingRows />}

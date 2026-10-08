@@ -15,7 +15,7 @@
  */
 import { View, Text, TouchableOpacity, StyleSheet, type ViewStyle } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { PhotoImage } from './Photos';
+import { PhotoImage, PhotoThumb } from './Photos';
 
 /** 달 단위로 묶는다 — 올해면 '10월', 다른 해면 '2025년 12월'. isoOf가 null을 주면 '날짜 없음' 묶음으로 */
 export function groupByMonth<T>(items: T[], isoOf: (t: T) => string | null): Array<{ key: string; label: string; items: T[] }> {
@@ -53,6 +53,44 @@ export function DayCell({ iso, raw }: { iso: string | null; raw?: string }) {
       <Text style={s.dayWeek}>{WEEKDAY[d.getDay()]}</Text>
     </View>
   );
+}
+
+/** 왼쪽에 아이콘 하나 — 날짜가 의미 없는 기록(타임캡슐·다 이룬 목표·아직 안 본 영화) */
+export function IconCell({ icon, color, bg }: { icon: string; color: string; bg?: string }) {
+  return (
+    <View style={s.day}>
+      <View style={[s.iconBox, bg ? { backgroundColor: bg } : null]}>
+        <FontAwesome name={icon as any} size={18} color={color} />
+      </View>
+    </View>
+  );
+}
+
+/** 왼쪽에 큰 값 하나 — 목표 진행률 '50 %' */
+export function LabelCell({ big, small }: { big: string; small?: string }) {
+  return (
+    <View style={s.day}>
+      <Text style={s.dayNum} numberOfLines={1} adjustsFontSizeToFit>{big}</Text>
+      {!!small && <Text style={s.dayWeek}>{small}</Text>}
+    </View>
+  );
+}
+
+/** 왼쪽에 표지 — 책. 사진이 있으면 사진, 없으면 색 표지 */
+export function CoverCell({ photos, color, icon = 'book' }: { photos: string[]; color: string; icon?: string }) {
+  return (
+    <View style={s.day}>
+      {photos.length ? <PhotoThumb photos={photos} size={44} height={60} /> : (
+        <View style={[s.cover, { backgroundColor: color }]}><FontAwesome name={icon as any} size={18} color="#5C4A32" /></View>
+      )}
+    </View>
+  );
+}
+
+/** 본문 오른쪽에 붙는 작은 사진 — 포스터처럼 넓게 깔 필요가 없는 사진 */
+export function SideThumb({ photos, tall }: { photos: string[]; tall?: boolean }) {
+  if (!photos.length) return null;
+  return <View style={s.side}><PhotoThumb photos={photos} size={56} height={tall ? 76 : 56} /></View>;
 }
 
 /** 한 줄 — 왼쪽 날짜 칸 + 오른쪽 내용. 아래에 점선 */
@@ -97,6 +135,11 @@ export const journal = StyleSheet.create({
   chip: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 8 },
   chipText: { fontSize: 12, color: '#5C4A32', fontFamily: 'PretendardBold' },
   list: { paddingHorizontal: 20 },
+  /** 글 + 오른쪽 작은 사진을 나란히 */
+  split: { flexDirection: 'row', alignItems: 'flex-start' },
+  splitText: { flex: 1, minWidth: 0 },
+  bar: { height: 6, borderRadius: 3, backgroundColor: '#EDE8DF', overflow: 'hidden', marginTop: 8 },
+  barFill: { height: 6, borderRadius: 3 },
 });
 
 const s = StyleSheet.create({
@@ -107,6 +150,9 @@ const s = StyleSheet.create({
   day: { width: 44, alignItems: 'center', paddingTop: 1 },
   dayNum: { fontSize: 26, color: '#1F1F1F', fontFamily: 'PretendardBold', lineHeight: 30, letterSpacing: -0.8 },
   dayWeek: { fontSize: 11, color: '#7A6B55', fontFamily: 'Pretendard', marginTop: -1 },
+  iconBox: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F4F0E8', marginTop: 2 },
+  cover: { width: 44, height: 60, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  side: { marginLeft: 12 },
   dayRaw: { fontSize: 11, color: '#7A6B55', fontFamily: 'Pretendard', textAlign: 'center', lineHeight: 15 },
   photoWrap: { marginTop: 10, borderRadius: 14, overflow: 'hidden', backgroundColor: '#F4F0E8' },
   photo: { width: '100%', borderRadius: 14 },

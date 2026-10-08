@@ -1197,18 +1197,13 @@ const styles = StyleSheet.create({
   filterTextActive: { color: '#FFFFFF' },
   transGroup: { paddingHorizontal: 20, marginTop: 16 },
   transDateRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, marginTop: 4 },
-  transDate: { fontSize: 13, fontWeight: '700', color: '#4A4A4A', fontFamily: 'PretendardBold' },
+  transDate: { fontSize: 14, color: '#2D5A3F', fontFamily: 'PretendardBold' },
   transDaySum: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
-  transItem: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#FFFFFF', borderRadius: 12, padding: 14, marginBottom: 6,
-    borderWidth: 1, borderColor: '#EDE8DF',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
-  },
+  // 2026-10-08 기록장 모양 — 흰 상자 대신 점선으로 나눈다 (다른 기록 화면과 같은 틀)
+  transItem: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderStyle: 'dashed', borderColor: '#E3DCCD' },
   transIcon: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   transInfo: { flex: 1 },
-  transDesc: { fontSize: 14, fontWeight: '600', color: '#1F1F1F', fontFamily: 'Pretendard' },
+  transDesc: { fontSize: 15, color: '#1F1F1F', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   transCat: { fontSize: 12, color: '#7A6B55', marginTop: 3, fontFamily: 'Pretendard' },
   transAmount: { fontSize: 14, fontWeight: '700', fontFamily: 'PretendardBold' },
   aiHint: {

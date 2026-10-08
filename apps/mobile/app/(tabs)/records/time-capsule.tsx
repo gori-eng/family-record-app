@@ -1,5 +1,6 @@
 import { DateField } from '../../../components/DateField';
 import { iga } from '../../../lib/korean';
+import { groupByMonth, MonthHead, DayCell, IconCell, LabelCell, CoverCell, SideThumb, JournalRow, JournalPhoto, StarTag, journal } from '../../../components/Journal';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Pressable, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { showAlert } from '../../../components/AppAlert';
 import { FontAwesome } from '@expo/vector-icons';
@@ -337,21 +338,15 @@ export default function TimeCapsuleScreen() {
               const c = record.data;
               const open = isOpen(c);
               return (
-              <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
-                onPress={() => openDetail(record.id)}>
-                <View style={[s.capsuleIcon, { backgroundColor: c.color }]}>
-                  <FontAwesome name={open ? 'envelope-open' : 'envelope'} size={20} color="#FFFFFF" />
-                </View>
-                <View style={s.info}>
-                  <Text style={s.capsuleTitle}>{c.title}</Text>
-                  <Text style={s.capsuleType}>{c.author}{iga(c.author)} 남긴 {c.type} 편지</Text>
-                  <View style={s.dateRow}>
+                <JournalRow key={record.id} onPress={() => openDetail(record.id)}
+                  left={<IconCell icon={open ? 'envelope-open' : 'envelope'} color="#FFFFFF" bg={open ? '#4AA86B' : c.color} />}>
+                  <Text style={journal.title}>{c.title}</Text>
+                  <Text style={journal.meta}>{c.author}{iga(c.author)} 남긴 {c.type} 편지</Text>
+                  <View style={journal.tags}>
                     <FontAwesome name={open ? 'unlock' : 'lock'} size={11} color={open ? '#4AA86B' : '#4A8C6F'} />
-                    <Text style={[s.dateText, { color: open ? '#4AA86B' : '#4A8C6F' }]}>{whenLabel(c)}</Text>
+                    <Text style={[journal.meta, { marginTop: 0, color: open ? '#4AA86B' : '#4A8C6F' }]}>{whenLabel(c)}</Text>
                   </View>
-                </View>
-                <FontAwesome name="chevron-right" size={12} color="#D6CDBF" />
-              </TouchableOpacity>
+                </JournalRow>
               );
             })}
             {capsules.length === 0 && !ready && <LoadingRows />}
@@ -382,7 +377,7 @@ const s = StyleSheet.create({
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   emptySub: { fontSize: 13, color: '#7A6B55', fontFamily: 'Pretendard' },
-  intro: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, margin: 20, backgroundColor: '#FFF8F0', borderRadius: 16, padding: 18, borderWidth: 1, borderColor: '#F5E8D8' },
+  intro: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginHorizontal: 20, marginTop: 16, marginBottom: 6 },
   introContent: { flex: 1 },
   introTitle: { fontSize: 15, fontWeight: '700', color: '#1F1F1F', marginBottom: 4, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
   introDesc: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard', lineHeight: 17 },

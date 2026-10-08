@@ -11,7 +11,9 @@ import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../compon
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
 import { say, DIFFICULTY_LABEL } from '../../../constants/labels';
+import { toISO } from '../../../store/finance';
 import { SummaryLine } from '../../../components/SummaryLine';
+import { groupByMonth, MonthHead, DayCell, IconCell, LabelCell, CoverCell, SideThumb, JournalRow, JournalPhoto, StarTag, journal } from '../../../components/Journal';
 import { IngredientEditor } from '../../../components/IngredientEditor';
 import { type Ingredient, normalizeIngredients, amountLabel, cleanIngredients, minutesOf, minutesLabel, instructionsOf } from '../../../lib/recipe';
 
@@ -309,35 +311,23 @@ export default function RecipesScreen() {
           </View>
 
           <View style={s.list}>
-            {recipes.map((record) => {
-              const r = record.data;
-              return (
-              <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
-                onPress={() => openDetail({ ...r, id: record.id })}>
-                {/* 완성 사진이 있으면 그 사진, 없으면 색 동그라미 */}
-                {photosOf(r).length ? <PhotoThumb photos={photosOf(r)} size={56} /> : (
-                  <View style={[s.recipeIcon, { backgroundColor: r.color }]}>
-                    <FontAwesome name={r.icon as any} size={20} color="#FFFFFF" />
-                  </View>
-                )}
-                <View style={s.info}>
-                  <Text style={s.name}>{r.name}</Text>
-                  <View style={s.meta}>
-                    <Text style={[s.difficulty, { color: DIFF_COLOR[r.difficulty] }]}>{say(DIFFICULTY_LABEL, r.difficulty)}</Text>
-                    {minutesOf(r.minutes ?? r.time) ? (
-                      <>
-                        <FontAwesome name="clock-o" size={11} color="#7A6B55" style={s.metaIcon} />
-                        <Text style={s.time}>{minutesLabel(minutesOf(r.minutes ?? r.time))}</Text>
-                      </>
-                    ) : null}
-                    <FontAwesome name="user-o" size={11} color="#7A6B55" style={s.metaIcon} />
-                    <Text style={s.author}>{r.author}</Text>
-                  </View>
-                </View>
-                <FontAwesome name="chevron-right" size={12} color="#D6CDBF" />
-              </TouchableOpacity>
-              );
-            })}
+            {groupByMonth(recipes, (r) => toISO(new Date(r.createdAt))).map((g) => (
+              <View key={g.key}>
+                <MonthHead label={g.label} />
+                {g.items.map((record) => {
+                  const r = record.data;
+                  const min = minutesOf(r.minutes ?? r.time);
+                  return (
+                    <JournalRow key={record.id} onPress={() => openDetail({ ...r, id: record.id })}
+                      left={<DayCell iso={toISO(new Date(record.createdAt))} />}>
+                      <Text style={journal.title}>{r.name}</Text>
+                      <Text style={journal.meta}>{[say(DIFFICULTY_LABEL, r.difficulty), min ? minutesLabel(min) : '', r.author].filter(Boolean).join(', ')}</Text>
+                      <JournalPhoto photos={photosOf(r)} />
+                    </JournalRow>
+                  );
+                })}
+              </View>
+            ))}
             {recipes.length === 0 && !ready && <LoadingRows />}
             {recipes.length === 0 &&  ready && (
               <View style={s.empty}>

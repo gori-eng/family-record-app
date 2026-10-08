@@ -11,8 +11,9 @@ import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { withGrownupsOnly } from '../../../components/GrownupsOnly';
 import { nameColor } from '../../../lib/nameColor';
+import { groupByMonth, MonthHead, DayCell, IconCell, LabelCell, CoverCell, SideThumb, JournalRow, JournalPhoto, StarTag, journal } from '../../../components/Journal';
 import { parseLooseDate, formatKoreanDate, daysUntil } from '../../../lib/dates';
-import { todayISO } from '../../../store/finance';
+import { todayISO, toISO } from '../../../store/finance';
 
 type HealthRecord = {
   member: string; recordedBy: string; type: string;
@@ -299,36 +300,28 @@ function HealthScreen() {
           )}
 
           <View style={s.list}>
-            {records.map((record) => {
-              const r = record.data;
-              const rc = resultTone(r.result);
-              return (
-                <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
-                  onPress={() => openDetail({ ...r, id: record.id })}>
-                  <View style={[s.icon, { backgroundColor: nameColor(r.member) }]}>
-                    <FontAwesome name="medkit" size={18} color="#FFFFFF" />
-                  </View>
-                  <View style={s.info}>
-                    <View style={s.topRow}>
-                      <Text style={s.memberName}>{r.member}</Text>
-                      {r.result ? (
-                        <View style={[s.resultBadge, { backgroundColor: rc.bg }]}>
-                          <Text style={[s.resultText, { color: rc.text }]}>{r.result}</Text>
-                        </View>
-                      ) : null}
-                    </View>
-                    <Text style={s.type}>{r.date ? `${showDate(r.date)}에 받은 ${r.type}` : r.type}</Text>
-                    {r.notes ? <Text style={s.notes} numberOfLines={1}>{r.notes}</Text> : null}
-                    {r.nextDate ? (
-                      <View style={s.nextRow}>
-                        <FontAwesome name="calendar" size={10} color="#7A6B55" />
-                        <Text style={s.nextDate}>다음 검진 {showDate(r.nextDate)}</Text>
+            {groupByMonth(records, (r) => parseLooseDate(r.data.date) ?? toISO(new Date(r.createdAt))).map((g) => (
+              <View key={g.key}>
+                <MonthHead label={g.label} />
+                {g.items.map((record) => {
+                  const r = record.data;
+                  const rc = resultTone(r.result);
+                  const iso = parseLooseDate(r.date);
+                  return (
+                    <JournalRow key={record.id} onPress={() => openDetail({ ...r, id: record.id })}
+                      left={<DayCell iso={iso} raw={iso ? undefined : (r.date || '')} />}>
+                      <Text style={journal.title}>{r.member}{r.type ? ` ${r.type}` : ''}</Text>
+                      {r.notes ? <Text style={journal.text} numberOfLines={2}>{r.notes}</Text> : null}
+                      <View style={journal.tags}>
+                        <View style={[journal.chip, { backgroundColor: nameColor(r.member) }]}><Text style={journal.chipText}>{r.member}</Text></View>
+                        {r.result ? <View style={[journal.chip, { backgroundColor: rc.bg }]}><Text style={[journal.chipText, { color: rc.text }]}>{r.result}</Text></View> : null}
+                        {r.nextDate ? <Text style={[journal.meta, { marginTop: 0 }]}>다음 검진 {showDate(r.nextDate)}</Text> : null}
                       </View>
-                    ) : null}
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
+                    </JournalRow>
+                  );
+                })}
+              </View>
+            ))}
             {records.length === 0 && !ready && <LoadingRows />}
             {records.length === 0 &&  ready && (
               <View style={s.empty}>

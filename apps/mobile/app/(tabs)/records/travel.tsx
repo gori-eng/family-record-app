@@ -13,7 +13,9 @@ import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useFamilyMembers, useMe } from '../../../store/family';
 import { say, TRAVEL_LABEL } from '../../../constants/labels';
 import { parseLooseDate, formatKoreanDate } from '../../../lib/dates';
+import { toISO } from '../../../store/finance';
 import { SummaryLine } from '../../../components/SummaryLine';
+import { groupByMonth, MonthHead, DayCell, IconCell, LabelCell, CoverCell, SideThumb, JournalRow, JournalPhoto, StarTag, journal } from '../../../components/Journal';
 
 /** 필터를 골랐는데 비어 있을 때 — 재촉 대신 권유로 (§9) */
 const EMPTY_BY_FILTER: Record<string, string> = {
@@ -363,40 +365,29 @@ export default function TravelScreen() {
           </ScrollView>
 
           <View style={s.list}>
-            {filtered.map((record) => {
-              const t = record.data;
-              const statusColor = STATUS_COLORS[t.status] ?? { bg: '#F4F0E8', text: '#4A4A4A' };
-              return (
-              <TouchableOpacity key={record.id} style={s.card} activeOpacity={0.7}
-                onPress={() => openDetail({ ...t, id: record.id, recordedBy: record.recordedBy })}>
-                {/* 사진이 있으면 첫 사진, 없으면 색 동그라미 */}
-                {photosOf(t).length ? <PhotoThumb photos={photosOf(t)} size={56} /> : (
-                  <View style={[s.destIcon, { backgroundColor: t.color }]}>
-                    <FontAwesome name={(t.icon || 'map-marker') as any} size={22} color="#FFFFFF" />
-                  </View>
-                )}
-                <View style={s.info}>
-                  <View style={s.topRow}>
-                    <Text style={s.destName}>{t.dest}</Text>
-                    <View style={[s.statusBadge, { backgroundColor: statusColor.bg }]}>
-                      <Text style={[s.statusText, { color: statusColor.text }]}>{say(TRAVEL_LABEL, t.status)}</Text>
-                    </View>
-                  </View>
-                  {/* 안 적은 항목은 빈 줄을 남기지 않고 아예 숨긴다 */}
-                  {(t.country || t.date) ? (
-                    <Text style={s.country}>{[t.country, tripDates(t)].filter(Boolean).join(', ')}</Text>
-                  ) : null}
-                  {t.highlight ? (
-                    <Text style={s.highlight} numberOfLines={1}>{t.highlight}</Text>
-                  ) : null}
-                  <View style={s.bottomRow}>
-                    <FontAwesome name="users" size={10} color="#7A6B55" />
-                    <Text style={s.members}>{membersLabel(t.members)}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-              );
-            })}
+            {groupByMonth(filtered, (r) => parseLooseDate(r.data.date) ?? toISO(new Date(r.createdAt))).map((g) => (
+              <View key={g.key}>
+                <MonthHead label={g.label} />
+                {g.items.map((record) => {
+                  const t = record.data;
+                  const iso = parseLooseDate(t.date);
+                  const statusColor = STATUS_COLORS[t.status] ?? { bg: '#F4F0E8', text: '#4A4A4A' };
+                  return (
+                    <JournalRow key={record.id} onPress={() => openDetail({ ...t, id: record.id, recordedBy: record.recordedBy })}
+                      left={<DayCell iso={iso} raw={iso ? undefined : (t.date || '')} />}>
+                      <Text style={journal.title}>{t.dest}</Text>
+                      {(t.dateEnd || t.country) ? <Text style={journal.meta}>{[t.country, tripDates(t)].filter(Boolean).join(', ')}</Text> : null}
+                      {t.highlight ? <Text style={journal.text} numberOfLines={2}>{t.highlight}</Text> : null}
+                      <View style={journal.tags}>
+                        <View style={[journal.chip, { backgroundColor: statusColor.bg }]}><Text style={[journal.chipText, { color: statusColor.text }]}>{say(TRAVEL_LABEL, t.status)}</Text></View>
+                        <Text style={[journal.meta, { marginTop: 0 }]}>{membersLabel(t.members)}</Text>
+                      </View>
+                      <JournalPhoto photos={photosOf(t)} />
+                    </JournalRow>
+                  );
+                })}
+              </View>
+            ))}
             {filtered.length === 0 && !ready && <LoadingRows />}
             {filtered.length === 0 &&  ready && (
               <View style={s.empty}>
