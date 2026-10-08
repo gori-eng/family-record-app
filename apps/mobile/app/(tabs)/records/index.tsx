@@ -94,7 +94,7 @@ function Tile({ tile, onPress, wide }: { tile: HubTile; onPress: () => void; wid
   return (
     <TouchableOpacity style={[s.tile, wide && s.tileWide, { backgroundColor: ui.deep }]} activeOpacity={0.7} onPress={onPress}
       accessibilityLabel={CATEGORY_LABELS[tile.category]}>
-      <View style={s.tileIcon} pointerEvents="none"><FontAwesome name={ui.icon as any} size={40} color="#FFFFFF" /></View>
+      <View style={s.tileIcon} pointerEvents="none"><FontAwesome name={ui.icon as any} size={50} color="#FFFFFF" /></View>
       <Text style={s.tileName}>{CATEGORY_LABELS[tile.category]}</Text>
       {tile.count ? (
         <>
@@ -136,7 +136,7 @@ const s = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12 },
   tile: { width: '48%', height: 108, borderRadius: 20, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12, overflow: 'hidden' },
   tileWide: { width: '100%' },
-  tileIcon: { position: 'absolute', right: 12, top: 10, opacity: 0.3 },
+  tileIcon: { position: 'absolute', right: 8, top: 6, opacity: 0.26 },
   tileName: { fontSize: 14, color: '#FFFFFF', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   tileBig: { fontSize: 32, color: '#FFFFFF', fontFamily: 'PretendardBold', letterSpacing: -1.2, marginTop: 'auto', lineHeight: 36 },
   tileUnit: { fontSize: 14, color: '#FFFFFF', fontFamily: 'Pretendard', letterSpacing: 0 },
