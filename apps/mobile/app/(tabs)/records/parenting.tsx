@@ -6,15 +6,16 @@ import { Stack } from 'expo-router';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecordsByCategory, useRecordsStore, type FamilyRecord } from '../../../store/records';
 import { useOpenParam, useNewParam } from '../../../lib/useOpenParam';
-import { usePhotoDraft, PhotoPickerRow, PhotoGallery, PhotoThumb } from '../../../components/Photos';
+import { usePhotoDraft, PhotoPickerRow, PhotoGallery } from '../../../components/Photos';
 import { photosOf } from '../../../lib/photos';
 import { useRecordDelete, DeleteRecordRow, EditRecordRow } from '../../../components/RecordDelete';
 import { LoadingRows, useRecordsReady } from '../../../components/Loading';
 import { useMe } from '../../../store/family';
 import { nameColor } from '../../../lib/nameColor';
 import { parseLooseDate, formatKoreanDate } from '../../../lib/dates';
-import { todayISO, daysAgoISO } from '../../../store/finance';
+import { todayISO, daysAgoISO, toISO } from '../../../store/finance';
 import { SummaryLine } from '../../../components/SummaryLine';
+import { groupByMonth, MonthHead, DayCell, JournalRow, JournalPhoto, StarTag, journal } from '../../../components/Journal';
 
 type ParentingEntry = {
   /** 붙인 사진의 창고 경로 (components/Photos). 옛 기록엔 없다 */
@@ -240,12 +241,7 @@ export default function ParentingScreen() {
                     <View style={styles.modalRow}>
                       <Text style={styles.modalLabel}>처음 해낸 일</Text>
                       <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                        {sel.milestones.map((ms: string, mi: number) => (
-                          <View key={mi} style={styles.milestoneBadge}>
-                            <FontAwesome name="star" size={10} color="#E6A817" />
-                            <Text style={styles.milestoneText}>{ms}</Text>
-                          </View>
-                        ))}
+                        {sel.milestones.map((ms: string, mi: number) => <StarTag key={mi} text={ms} />)}
                       </View>
                     </View>
                   )}
@@ -363,46 +359,35 @@ export default function ParentingScreen() {
           </ScrollView>
           )}
 
-          {/* Timeline */}
-          <View style={styles.timeline}>
-            {filteredEntries.map((record, i) => {
-              const entry = record.data;
-              return (
-              <TouchableOpacity
-                key={record.id}
-                style={styles.entryCard}
-                activeOpacity={0.7}
-                onPress={() => openDetail(record.id)}>
-                <View style={styles.timelineLine}>
-                  <View style={[styles.timelineDot, { backgroundColor: nameColor(entry.child) }]} />
-                  {i < filteredEntries.length - 1 && <View style={styles.timelineConnector} />}
-                </View>
-                <View style={styles.entryContent}>
-                  <View style={styles.entryHeader}>
-                    <Text style={styles.entryDate}>{showDate(entry.date)}</Text>
-                    <View style={[styles.childBadge, { backgroundColor: nameColor(entry.child) }]}>
-                      <Text style={styles.childBadgeText}>{entry.child}</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.entryTitle}>{record.title}</Text>
-                  {entry.content ? <Text style={styles.entryText} numberOfLines={2}>{entry.content}</Text> : null}
-                  {photosOf(entry).length ? (
-                    <View style={styles.entryPhoto}><PhotoThumb photos={photosOf(entry)} size={56} /></View>
-                  ) : null}
-                  {(entry.milestones ?? []).length > 0 && (
-                    <View style={styles.entryFooter}>
-                      {(entry.milestones ?? []).map((ms, mi) => (
-                        <View key={mi} style={styles.milestoneBadge}>
-                          <FontAwesome name="star" size={10} color="#E6A817" />
-                          <Text style={styles.milestoneText}>{ms}</Text>
+          {/* 기록장 — 달마다 묶어서, 왼쪽에 날짜 크게 (components/Journal) */}
+          <View style={journal.list}>
+            {groupByMonth(filteredEntries, (r) => parseLooseDate(r.data.date) ?? toISO(new Date(r.createdAt))).map((g) => (
+              <View key={g.key}>
+                <MonthHead label={g.label} />
+                {g.items.map((record) => {
+                  const entry = record.data;
+                  const iso = parseLooseDate(entry.date);
+                  return (
+                    <JournalRow key={record.id} onPress={() => openDetail(record.id)}
+                      left={<DayCell iso={iso} raw={iso ? undefined : entry.date} />}>
+                      <Text style={journal.title}>{record.title}</Text>
+                      {entry.content ? <Text style={journal.text} numberOfLines={3}>{entry.content}</Text> : null}
+                      {(children.length > 1 || (entry.milestones ?? []).length > 0) && (
+                        <View style={journal.tags}>
+                          {children.length > 1 && (
+                            <View style={[journal.chip, { backgroundColor: nameColor(entry.child) }]}>
+                              <Text style={journal.chipText}>{entry.child}</Text>
+                            </View>
+                          )}
+                          {(entry.milestones ?? []).map((ms, mi) => <StarTag key={mi} text={ms} />)}
                         </View>
-                      ))}
-                    </View>
-                  )}
-                </View>
-              </TouchableOpacity>
-              );
-            })}
+                      )}
+                      <JournalPhoto photos={photosOf(entry)} />
+                    </JournalRow>
+                  );
+                })}
+              </View>
+            ))}
             {filteredEntries.length === 0 && !ready && <LoadingRows />}
             {filteredEntries.length === 0 && ready && (
               <View style={styles.empty}>
@@ -433,7 +418,6 @@ export default function ParentingScreen() {
 }
 
 const styles = StyleSheet.create({
-  entryPhoto: { marginTop: 8 },
   container: { flex: 1, backgroundColor: '#F9F8F5' },
   empty: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyText: { fontSize: 15, color: '#4A4A4A', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
@@ -445,21 +429,8 @@ const styles = StyleSheet.create({
   filterDot: { width: 8, height: 8, borderRadius: 4 },
   filterText: { fontSize: 13, fontWeight: '600', color: '#7A6B55', fontFamily: 'Pretendard' },
   filterTextActive: { color: '#FFFFFF' },
-  timeline: { paddingHorizontal: 20 },
-  entryCard: { flexDirection: 'row', gap: 12, marginBottom: 4 },
-  timelineLine: { alignItems: 'center', width: 20 },
-  timelineDot: { width: 12, height: 12, borderRadius: 6, marginTop: 18 },
-  timelineConnector: { width: 2, flex: 1, backgroundColor: '#EDE8DF', marginTop: 4 },
-  entryContent: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#EDE8DF', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
-  entryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  entryDate: { fontSize: 12, color: '#7A6B55', fontFamily: 'Pretendard' },
   childBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10 },
   childBadgeText: { fontSize: 12, fontWeight: '700', color: '#5C4A32', fontFamily: 'PretendardBold' },
-  entryTitle: { fontSize: 16, fontWeight: '700', color: '#1F1F1F', marginBottom: 6, fontFamily: 'PretendardBold', letterSpacing: -0.3 },
-  entryText: { fontSize: 14, color: '#4A4A4A', lineHeight: 20, marginBottom: 10, fontFamily: 'Pretendard' },
-  entryFooter: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
-  milestoneBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#FFF8E1', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
-  milestoneText: { fontSize: 12, fontWeight: '600', color: '#B8860B', fontFamily: 'Pretendard' },
   fab: { position: 'absolute', bottom: 16, right: 20, zIndex: 10, width: 56, height: 56, borderRadius: 28, backgroundColor: '#4A8C6F', justifyContent: 'center', alignItems: 'center', shadowColor: '#4A8C6F', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
   modalWrap: { flex: 1, justifyContent: 'flex-end' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },

@@ -24,7 +24,7 @@ export function SummaryLine({ text, icon = 'leaf', onPress }: Props) {
     <View style={s.card}>
       <FontAwesome name={icon as any} size={14} color="#4A8C6F" style={s.icon} />
       <Text style={s.text}>{text}</Text>
-      {onPress ? <FontAwesome name="chevron-right" size={11} color="#A39682" /> : null}
+      {onPress ? <FontAwesome name="chevron-right" size={11} color="#A39682" style={s.icon} /> : null}
     </View>
   );
   if (onPress) {
@@ -34,13 +34,8 @@ export function SummaryLine({ text, icon = 'leaf', onPress }: Props) {
 }
 
 const s = StyleSheet.create({
-  card: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    marginHorizontal: 20, marginTop: 16, marginBottom: 12,
-    backgroundColor: '#FFFFFF', borderRadius: 14, paddingVertical: 13, paddingHorizontal: 14,
-    borderWidth: 1, borderColor: '#EDE8DF',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.03, shadowRadius: 8, elevation: 1,
-  },
-  icon: { marginTop: 1 },
-  text: { flex: 1, fontSize: 14, lineHeight: 21, color: '#4A4A4A', fontFamily: 'Pretendard' },
+  // 2026-10-08: 흰 상자를 걷고 글만 — 목록이 "기록장" 모양(상자 없음)이 되면서 맨 위 상자 하나가 튀었다
+  card: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginHorizontal: 20, marginTop: 14, marginBottom: 6 },
+  icon: { marginTop: 4 },
+  text: { flex: 1, fontSize: 15, lineHeight: 23, color: '#4A4A4A', fontFamily: 'Pretendard' },
 });
