@@ -5,17 +5,19 @@
 import type { RecordCategory } from '../store/records';
 
 /**
- * bg   : 연한 파스텔 — 아이콘 칸·배지처럼 **검은 글자**가 올라가는 자리
- * deep : 진한 색     — 기록 허브 타일처럼 **흰 글자**가 올라가는 자리. 전부 흰색과 4.6:1 이상 (조부모 기준)
+ * 아홉 카테고리가 색상환을 고루 나눠 갖는다 (로즈·포레스트·앰버·인디고·틸·테라코타·바이올렛·크랜베리·올리브).
+ * 예전엔 전부 베이지 계열이라 허브에서 구분이 안 됐다 (운영자 지적 2026-10-08).
+ * bg   : 연한 틴트 — 아이콘 칸·배지처럼 **검은 글자**가 올라가는 자리 (deep을 72% 희게)
+ * deep : 진한 색   — 기록 허브 타일처럼 **흰 글자**가 올라가는 자리. 전부 흰색과 4.6:1 이상 (조부모 기준)
  */
 export const CATEGORY_UI: Record<RecordCategory, { icon: string; bg: string; deep: string; screen: string }> = {
-  parenting:      { icon: 'child',     bg: '#F0B8B8', deep: '#AC5C5C', screen: 'parenting' },
-  reading:        { icon: 'book',      bg: '#B8D8C0', deep: '#4D7E60', screen: 'reading' },
-  finance:        { icon: 'money',     bg: '#E8D8C0', deep: '#906E48', screen: 'finance' },
-  movies:         { icon: 'film',      bg: '#B0C8D8', deep: '#59768E', screen: 'movies' },
-  travel:         { icon: 'plane',     bg: '#E8D8C0', deep: '#817352', screen: 'travel' },
-  recipes:        { icon: 'cutlery',   bg: '#E8D0C0', deep: '#A2664B', screen: 'recipes' },
-  goals:          { icon: 'trophy',    bg: '#D8CDB8', deep: '#7F7446', screen: 'goals' },
-  health:         { icon: 'heartbeat', bg: '#E0B0B0', deep: '#AC5B6C', screen: 'health' },
-  'time-capsule': { icon: 'clock-o',   bg: '#D8D4B0', deep: '#7A7650', screen: 'time-capsule' },
+  parenting:      { icon: 'child',     bg: '#EACED9', deep: '#B5527A', screen: 'parenting' },
+  reading:        { icon: 'book',      bg: '#C8D9D1', deep: '#3E7A5B', screen: 'reading' },
+  finance:        { icon: 'money',     bg: '#E1D6C2', deep: '#966E28', screen: 'finance' },
+  movies:         { icon: 'film',      bg: '#CCD1E3', deep: '#4A5C9B', screen: 'movies' },
+  travel:         { icon: 'plane',     bg: '#C4DBDD', deep: '#2E7F88', screen: 'travel' },
+  recipes:        { icon: 'cutlery',   bg: '#EAD0C7', deep: '#B65A39', screen: 'recipes' },
+  goals:          { icon: 'trophy',    bg: '#DAD0E4', deep: '#7B5AA0', screen: 'goals' },
+  health:         { icon: 'heartbeat', bg: '#E6C8CC', deep: '#A83E4C', screen: 'health' },
+  'time-capsule': { icon: 'clock-o',   bg: '#D6D9C4', deep: '#6F7A2F', screen: 'time-capsule' },
 };

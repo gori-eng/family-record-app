@@ -88,16 +88,14 @@ function RecentCard({ record, onPress }: { record: FamilyRecord; onPress: () => 
   );
 }
 
-/** 카테고리 타일 — 색 바탕, 이름 + 오른쪽 위 아이콘, 큰 숫자, 작은 줄. 홀수 개면 마지막 타일은 가로로 길게 (빈자리 방지) */
+/** 카테고리 타일 — 색 바탕, 오른쪽 위 흐린 워터마크 아이콘, 이름, 큰 숫자, 작은 줄. 홀수 개면 마지막 타일은 가로로 길게 (빈자리 방지) */
 function Tile({ tile, onPress, wide }: { tile: HubTile; onPress: () => void; wide?: boolean }) {
   const ui = CATEGORY_UI[tile.category];
   return (
     <TouchableOpacity style={[s.tile, wide && s.tileWide, { backgroundColor: ui.deep }]} activeOpacity={0.7} onPress={onPress}
       accessibilityLabel={CATEGORY_LABELS[tile.category]}>
-      <View style={s.tileTop}>
-        <Text style={s.tileName}>{CATEGORY_LABELS[tile.category]}</Text>
-        <View style={s.tileIcon}><FontAwesome name={ui.icon as any} size={14} color="#FFFFFF" /></View>
-      </View>
+      <View style={s.tileIcon} pointerEvents="none"><FontAwesome name={ui.icon as any} size={40} color="#FFFFFF" /></View>
+      <Text style={s.tileName}>{CATEGORY_LABELS[tile.category]}</Text>
       {tile.count ? (
         <>
           <Text style={s.tileBig} numberOfLines={1} adjustsFontSizeToFit>
@@ -136,10 +134,9 @@ const s = StyleSheet.create({
   recentMeta: { fontSize: 11, color: '#7A6B55', fontFamily: 'Pretendard' },
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12 },
-  tile: { width: '48%', height: 108, borderRadius: 20, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12 },
+  tile: { width: '48%', height: 108, borderRadius: 20, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12, overflow: 'hidden' },
   tileWide: { width: '100%' },
-  tileTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  tileIcon: { width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center', marginTop: -4, marginRight: -4 },
+  tileIcon: { position: 'absolute', right: 12, top: 10, opacity: 0.3 },
   tileName: { fontSize: 14, color: '#FFFFFF', fontFamily: 'PretendardBold', letterSpacing: -0.2 },
   tileBig: { fontSize: 32, color: '#FFFFFF', fontFamily: 'PretendardBold', letterSpacing: -1.2, marginTop: 'auto', lineHeight: 36 },
   tileUnit: { fontSize: 14, color: '#FFFFFF', fontFamily: 'Pretendard', letterSpacing: 0 },
